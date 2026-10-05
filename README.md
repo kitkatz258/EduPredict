@@ -28,7 +28,7 @@ docker compose version
 docker run hello-world
 ```
 
-## 2. First-time setup (every teammate)
+## 2. First-time setup (every member)
 
 ```powershell
 git clone https://github.com/kitkatz258/EduPredict.git
