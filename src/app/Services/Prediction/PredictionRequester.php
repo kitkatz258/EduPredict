@@ -25,6 +25,7 @@ final class PredictionRequester
         private PredictorInterface $predictor,
         private ProfileCompleteness $completeness,
         private AcademicSummary $academic,
+        private ProgramShiftEvaluator $programShift,
     ) {}
 
     public function cooldownEndsAt(Student $student): ?CarbonInterface
@@ -83,8 +84,9 @@ final class PredictionRequester
         $featureSet = $this->features->build($student->fresh());
         $employability = $this->predictor->predictEmployability($featureSet);
         $dropout = $this->predictor->predictDropout($featureSet);
+        $programShift = $this->programShift->evaluate($featureSet, $dropout->factors);
 
-        return DB::transaction(function () use ($student, $actor, $featureSet, $employability, $dropout): Prediction {
+        return DB::transaction(function () use ($student, $actor, $featureSet, $employability, $dropout, $programShift): Prediction {
             $prediction = Prediction::query()->create([
                 'student_id' => $student->id,
                 'requested_by' => $actor->id,
@@ -93,7 +95,7 @@ final class PredictionRequester
                 'dropout_probability' => $dropout->probability,
                 'dropout_risk' => $dropout->riskLevel,
                 'confidence' => $dropout->confidence,
-                'program_shift_flag' => 'none',
+                'program_shift_flag' => $programShift->flag,
                 'factors' => [
                     'employability' => array_map(
                         fn (ContributingFactor $factor): array => $factor->toArray(),
@@ -103,6 +105,7 @@ final class PredictionRequester
                         fn (ContributingFactor $factor): array => $factor->toArray(),
                         $dropout->factors,
                     ),
+                    'program_shift' => $programShift->toArray(),
                 ],
                 'feature_snapshot' => $featureSet->toSnapshot(),
             ]);

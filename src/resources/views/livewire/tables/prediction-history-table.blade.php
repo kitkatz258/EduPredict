@@ -48,7 +48,12 @@
                         <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-brand-50' }}">
                             <td class="px-4 py-3 text-gray-700">{{ $row->created_at?->timezone(config('app.timezone'))->format('M j, Y g:i A') }}</td>
                             <td class="px-4 py-3 font-medium text-brand-900">{{ number_format((float) $row->employability_score, 1) }}</td>
-                            <td class="px-4 py-3"><x-risk-badge :level="$row->dropout_risk" /></td>
+                            <td class="px-4 py-3">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <x-risk-badge :level="$row->dropout_risk" />
+                                    <x-program-shift :prediction="$row" compact />
+                                </div>
+                            </td>
                             <td class="px-4 py-3 text-gray-700">{{ number_format((float) $row->dropout_probability * 100, 1) }}%</td>
                             <td class="px-4 py-3 text-gray-700">{{ $row->confidence === 'low' ? 'Lower confidence' : 'Normal' }}</td>
                             <td class="px-4 py-3 text-xs text-gray-500">{{ $row->model_version }}</td>

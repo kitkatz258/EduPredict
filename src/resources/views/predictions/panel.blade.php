@@ -31,10 +31,12 @@
                 <p id="wellness-heading" class="text-xs font-semibold uppercase tracking-wide text-gray-500">Academic wellness</p>
                 <div class="mt-3 flex flex-wrap items-center gap-2">
                     <x-risk-badge :level="$latest->dropout_risk" />
+                    <x-program-shift :prediction="$latest" compact />
                     @if ($latest->confidence === 'low')
                         <x-confidence-tag />
                     @endif
                 </div>
+                <x-program-shift :prediction="$latest" />
                 <p class="mt-4 text-sm leading-6 text-gray-700">{{ $summary['dropout'] }}</p>
                 <p class="mt-3 text-sm leading-6 text-gray-700">{{ $summary['employability'] }}</p>
 

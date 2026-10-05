@@ -72,6 +72,12 @@ Draft socioeconomic and skills rows are ignored. Only confirmed grade reports co
 | construct_scores.motivation | float or null | 0–100 | same | employability, dropout |
 | construct_scores.procrastination | float or null | 0–100; higher means more procrastination | same | employability, dropout |
 | construct_scores.engagement | float or null | 0–100 | same | employability, dropout |
+| major_gwa | float or null | 1.00–5.00, rounded to 2 decimals | confirmed rows with `is_major_subject` true, via `GwaCalculator` | program-shift indicator only |
+| other_gwa | float or null | 1.00–5.00, rounded to 2 decimals | confirmed rows with `is_major_subject` false | program-shift indicator only |
+| major_failed_subjects | int | ≥ 0 | failed rows among major subjects | program-shift indicator only |
+| other_failed_subjects | int | ≥ 0 | failed rows among other subjects | program-shift indicator only |
+| major_units | float | ≥ 0 | GPA units of major subjects | program-shift indicator only |
+| other_units | float | ≥ 0 | GPA units of other subjects | program-shift indicator only |
 
 Construct scores use a 1–5 Likert mean, with `reverse_scored` items transformed as `6 - value`, then `(mean - 1) / 4 * 100`.
 

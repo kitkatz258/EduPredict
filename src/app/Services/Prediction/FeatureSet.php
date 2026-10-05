@@ -33,6 +33,12 @@ final readonly class FeatureSet
         public ?float $motivation,
         public ?float $procrastination,
         public ?float $engagement,
+        public ?float $majorGwa = null,
+        public ?float $otherGwa = null,
+        public int $majorFailedSubjects = 0,
+        public int $otherFailedSubjects = 0,
+        public float $majorUnits = 0.0,
+        public float $otherUnits = 0.0,
     ) {}
 
     /**
@@ -76,6 +82,12 @@ final readonly class FeatureSet
             'project_count' => $this->projectCount,
             'work_experience_count' => $this->workExperienceCount,
             'construct_scores' => $this->constructScores(),
+            'major_gwa' => $this->majorGwa,
+            'other_gwa' => $this->otherGwa,
+            'major_failed_subjects' => $this->majorFailedSubjects,
+            'other_failed_subjects' => $this->otherFailedSubjects,
+            'major_units' => $this->majorUnits,
+            'other_units' => $this->otherUnits,
         ];
     }
 }

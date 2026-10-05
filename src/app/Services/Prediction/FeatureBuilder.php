@@ -51,6 +51,12 @@ final class FeatureBuilder
             motivation: $this->score($scores, 'motivation'),
             procrastination: $this->score($scores, 'procrastination'),
             engagement: $this->score($scores, 'engagement'),
+            majorGwa: $summary['major_gwa'],
+            otherGwa: $summary['other_gwa'],
+            majorFailedSubjects: $summary['major_failed_subjects'],
+            otherFailedSubjects: $summary['other_failed_subjects'],
+            majorUnits: $summary['major_units'],
+            otherUnits: $summary['other_units'],
         );
     }
 

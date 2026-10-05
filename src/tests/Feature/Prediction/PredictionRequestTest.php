@@ -274,6 +274,7 @@ class PredictionRequestTest extends TestCase
                 'final_grade' => '2.00',
                 'remarks' => 'PASSED',
                 'is_failed' => false,
+                'is_major_subject' => false,
             ]);
         }
 

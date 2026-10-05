@@ -53,6 +53,22 @@ return [
         'min_profile_completeness' => 80,
     ],
 
+    /*
+    | Qualitative program-shift reading. Philippine scale: a higher GWA is weaker.
+    | This is not a model score and must never be shown as a percentage.
+    */
+    'program_shift' => [
+        'healthy_construct_min' => 60,
+        'low_construct_max' => 40,
+        'high_procrastination_min' => 70,
+        'poor_gwa_min' => 2.75,
+        'healthy_other_gwa_max' => 2.25,
+        'min_major_units' => 6,
+        'min_other_units' => 3,
+        'major_gap' => 0.75,
+        'broad_failed_min' => 2,
+    ],
+
     'consent' => [
         'current_version' => 'v1',
     ],
