@@ -1,0 +1,19 @@
+<form wire:submit="save" class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
+    <h3 class="text-base font-semibold text-brand-900">{{ $collegeId ? 'Edit college' : 'Add college' }}</h3>
+    @if ($statusMessage !== '')
+        <p class="mt-3 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
+    @endif
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+            <label for="college-name" class="mb-1 block text-sm font-medium">Name</label>
+            <input id="college-name" type="text" wire:model="name" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+            @error('name') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+        </div>
+        <div>
+            <label for="college-code" class="mb-1 block text-sm font-medium">Code</label>
+            <input id="college-code" type="text" wire:model="code" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+            @error('code') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+        </div>
+    </div>
+    <button type="submit" wire:loading.attr="disabled" class="mt-4 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">Save college</button>
+</form>

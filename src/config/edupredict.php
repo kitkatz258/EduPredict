@@ -32,6 +32,7 @@ return [
         ))),
         'timeout' => (int) env('AI_TIMEOUT', 30),
         'daily_limit' => (int) env('AI_DAILY_LIMIT', 40),
+        'per_minute_limit' => (int) env('AI_PER_MINUTE_LIMIT', 20),
         'extraction_fallback_enabled' => true,
     ],
 
@@ -80,6 +81,17 @@ return [
 
     'consent' => [
         'current_version' => 'v1',
+        'versions' => [
+            'v1' => [
+                'effective_on' => '2026-10-05',
+                'paragraphs' => [
+                    'EduPredict collects academic records, socioeconomic information, skills and experience, and questionnaire answers to estimate employability and dropout risk and to suggest career matches and support options.',
+                    'Faculty see only their advisees. Department heads see their program. Deans see their college. Administrators see institution-wide data. Predictions are advisory and do not decide admission, academic standing, employment, or discipline.',
+                    'When an optional AI service is used, only de-identified features or cleaned grade-row text are sent. Your name, student number, email, and birthdate are not sent. Grade-report uploads should not include pages showing more than your grades.',
+                    'You may access and correct your data, download a copy, or request account deletion. An administrator processes a deletion request. Approval deactivates the login and keeps prediction history.',
+                ],
+            ],
+        ],
     ],
 
     'profile' => [

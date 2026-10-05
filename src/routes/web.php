@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\Admin\QuestionnairePageController;
 use App\Http\Controllers\DashboardRedirectController;
+use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleDashboardController;
 use App\Http\Controllers\Student\CareerMatchController;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 Route::view('/demo/table', 'pages.demo-table')->name('demo.table');
+Route::get('/privacy', [PrivacyController::class, 'show'])->name('privacy');
 
 Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
     Route::get('/dashboard', DashboardRedirectController::class)->name('dashboard');
@@ -65,6 +67,15 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         Route::get('/admin/advisers', [AdminPageController::class, 'advisers'])->name('admin.advisers');
         Route::get('/admin/questionnaire', [QuestionnairePageController::class, 'index'])->name('admin.questionnaire');
         Route::get('/admin/psoc', [AdminPageController::class, 'psoc'])->name('admin.psoc');
+        Route::get('/admin/colleges', [AdminPageController::class, 'colleges'])->name('admin.colleges');
+        Route::get('/admin/interventions', [AdminPageController::class, 'interventions'])->name('admin.interventions');
+        Route::get('/admin/audit', [AdminPageController::class, 'audit'])->name('admin.audit');
+        Route::get('/admin/deletion-requests', [AdminPageController::class, 'deletionRequests'])->name('admin.deletion-requests');
+    });
+
+    Route::middleware('role:student')->group(function () {
+        Route::get('/privacy/download.json', [PrivacyController::class, 'downloadJson'])->name('privacy.download.json');
+        Route::get('/privacy/download.pdf', [PrivacyController::class, 'downloadPdf'])->name('privacy.download.pdf');
     });
 
     Route::get('/students/{student}', [StudentRecordController::class, 'show'])

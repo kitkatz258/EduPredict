@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
+use App\Models\College;
+use App\Models\Intervention;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AdminPageController extends Controller
@@ -28,10 +32,45 @@ class AdminPageController extends Controller
         return view('admin.advisers');
     }
 
-    public function psoc(): View
+    public function psoc(Request $request): View
     {
         $this->authorize('viewAny', \App\Models\PsocOccupation::class);
 
-        return view('admin.psoc');
+        return view('admin.psoc', [
+            'occupationId' => $request->integer('occupation') ?: null,
+        ]);
+    }
+
+    public function colleges(Request $request): View
+    {
+        $this->authorize('viewAny', College::class);
+
+        return view('admin.colleges', [
+            'collegeId' => $request->integer('college') ?: null,
+            'programId' => $request->integer('program') ?: null,
+        ]);
+    }
+
+    public function interventions(Request $request): View
+    {
+        $this->authorize('viewAny', Intervention::class);
+
+        return view('admin.interventions', [
+            'interventionId' => $request->integer('intervention') ?: null,
+        ]);
+    }
+
+    public function audit(): View
+    {
+        $this->authorize('viewAny', AuditLog::class);
+
+        return view('admin.audit');
+    }
+
+    public function deletionRequests(): View
+    {
+        $this->authorize('viewAny', \App\Models\AccountDeletionRequest::class);
+
+        return view('admin.deletion-requests');
     }
 }

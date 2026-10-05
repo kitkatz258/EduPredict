@@ -10,6 +10,7 @@ use App\Models\Prediction;
 use App\Models\Student;
 use App\Models\User;
 use App\Notifications\AdviseePredictionReady;
+use App\Services\Audit\AuditLogger;
 use App\Services\Career\CareerMatchBuilder;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Interventions\RecommendedActionBuilder;
@@ -30,6 +31,7 @@ final class PredictionRequester
         private ProgramShiftEvaluator $programShift,
         private CareerMatchBuilder $careers,
         private RecommendedActionBuilder $actions,
+        private AuditLogger $audit,
     ) {}
 
     public function cooldownEndsAt(Student $student): ?CarbonInterface
@@ -119,6 +121,12 @@ final class PredictionRequester
             if ($adviser instanceof User) {
                 $adviser->notify(new AdviseePredictionReady($student, $prediction));
             }
+
+            $this->audit->record('prediction_requested', $prediction, [
+                'student_id' => $student->id,
+                'model_version' => $prediction->model_version,
+                'dropout_risk' => $prediction->dropout_risk,
+            ], $actor);
 
             return $prediction;
         });

@@ -6,6 +6,7 @@ namespace App\Livewire\Tables;
 
 use App\Models\PsocOccupation;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\View\View;
 
 class PsocOccupationsTable extends BaseTable
 {
@@ -40,5 +41,10 @@ class PsocOccupationsTable extends BaseTable
     protected function emptyMessage(): string
     {
         return 'No occupations match the current search.';
+    }
+
+    public function render(): View
+    {
+        return view('livewire.tables.psoc-occupations-table', $this->tableViewData());
     }
 }

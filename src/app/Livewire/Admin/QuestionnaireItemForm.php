@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Http\Requests\Admin\QuestionnaireItemRequest;
 use App\Models\QuestionnaireItem;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -33,7 +34,7 @@ class QuestionnaireItemForm extends Component
         }
     }
 
-    public function save(): void
+    public function save(AuditLogger $audit): void
     {
         $this->authorize('create', QuestionnaireItem::class);
         $validated = $this->validate(QuestionnaireItemRequest::fieldRules());
@@ -56,6 +57,11 @@ class QuestionnaireItemForm extends Component
             $this->itemId = $item->id;
             $this->statusMessage = 'Questionnaire item added.';
         }
+
+        $audit->record('questionnaire_item_saved', $item, [
+            'construct' => $item->construct,
+            'is_active' => $item->is_active,
+        ]);
     }
 
     public function render(): View

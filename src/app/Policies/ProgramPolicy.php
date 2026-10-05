@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Enums\UserRole;
-use App\Models\PsocOccupation;
+use App\Models\Program;
 use App\Models\User;
 
-class PsocOccupationPolicy
+class ProgramPolicy
 {
     public function viewAny(User $user): bool
     {
         return $user->isRole(UserRole::Administrator);
     }
 
-    public function view(User $user, PsocOccupation $occupation): bool
+    public function view(User $user, Program $program): bool
     {
         return $user->isRole(UserRole::Administrator);
     }
@@ -25,7 +25,7 @@ class PsocOccupationPolicy
         return $user->isRole(UserRole::Administrator);
     }
 
-    public function update(User $user, PsocOccupation $occupation): bool
+    public function update(User $user, Program $program): bool
     {
         return $user->isRole(UserRole::Administrator);
     }

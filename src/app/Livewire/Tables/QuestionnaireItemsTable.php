@@ -3,6 +3,7 @@
 namespace App\Livewire\Tables;
 
 use App\Models\QuestionnaireItem;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
 
@@ -15,18 +16,20 @@ class QuestionnaireItemsTable extends BaseTable
         $this->authorize('viewAny', QuestionnaireItem::class);
     }
 
-    public function toggleActive(int $itemId): void
+    public function toggleActive(int $itemId, AuditLogger $audit): void
     {
         $item = QuestionnaireItem::query()->findOrFail($itemId);
         $this->authorize('update', $item);
         $item->update(['is_active' => ! $item->is_active]);
+        $audit->record('questionnaire_item_saved', $item, ['is_active' => $item->is_active]);
     }
 
-    public function toggleDraft(int $itemId): void
+    public function toggleDraft(int $itemId, AuditLogger $audit): void
     {
         $item = QuestionnaireItem::query()->findOrFail($itemId);
         $this->authorize('update', $item);
         $item->update(['is_draft' => ! $item->is_draft]);
+        $audit->record('questionnaire_item_saved', $item, ['is_draft' => $item->is_draft]);
     }
 
     protected function baseQuery(): Builder

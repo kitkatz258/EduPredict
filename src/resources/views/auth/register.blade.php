@@ -48,10 +48,10 @@
         <fieldset class="rounded-lg border border-brand-200 p-3 text-sm text-gray-700">
             <legend class="px-1 font-medium text-brand-900">Informed consent (RA 10173)</legend>
             <div class="max-h-48 overflow-y-auto space-y-2 text-xs leading-relaxed">
-                <p>EduPredict collects academic records, socioeconomic information, skills/experience, and questionnaire answers to estimate employability and dropout risk and to suggest career matches and support options.</p>
-                <p>Faculty see only their advisees; department heads see their program; deans see their college; administrators see institution-wide data. Predictions are advisory and do not decide admission, academic standing, employment, or discipline.</p>
-                <p>When an optional AI service is used, only de-identified features or cleaned grade-row text are sent—never your name, student number, email, or birthdate. Grade-report uploads should not include pages showing more than your grades.</p>
-                <p>You may access and correct your data, download a copy, or request account deletion. Consent version: {{ $consentVersion }}.</p>
+                @foreach (config('edupredict.consent.versions.'.$consentVersion.'.paragraphs', []) as $paragraph)
+                    <p>{{ $paragraph }}</p>
+                @endforeach
+                <p>Consent version: {{ $consentVersion }}. <a href="{{ route('privacy') }}" class="text-brand-900 underline">Read the full notice</a>.</p>
             </div>
             <label class="mt-3 flex items-start gap-2">
                 <input type="checkbox" name="consent" value="1" required class="mt-1">

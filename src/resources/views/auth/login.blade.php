@@ -44,4 +44,5 @@
             </x-primary-button>
         </div>
     </form>
+    <p class="mt-4 text-center text-sm"><a href="{{ route('privacy') }}" class="text-brand-900 underline">Privacy notice</a></p>
 </x-guest-layout>

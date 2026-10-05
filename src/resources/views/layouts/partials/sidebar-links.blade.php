@@ -7,6 +7,7 @@
 
 @guest
     <a href="{{ route('login') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Sign in</a>
+    <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
 @else
     @if ($role === \App\Enums\UserRole::Student)
         <a href="{{ route('student.dashboard') }}" class="{{ $nav('student.dashboard') }}">Dashboard</a>
@@ -16,19 +17,28 @@
         <a href="{{ route('student.grades') }}" class="{{ $nav('student.grades') }}">My Grades</a>
         <a href="{{ route('student.questionnaire') }}" class="{{ $nav('student.questionnaire') }}">Questionnaire</a>
         <a href="{{ route('profile.edit') }}" class="{{ $nav('profile.edit') }}">Account</a>
+        <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
     @elseif ($role === \App\Enums\UserRole::Faculty)
         <a href="{{ route('faculty.dashboard') }}" class="{{ $nav('faculty.dashboard') }}">Advisees</a>
+        <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
     @elseif ($role === \App\Enums\UserRole::DepartmentHead)
         <a href="{{ route('department.dashboard') }}" class="{{ $nav('department.dashboard') }}">Program dashboard</a>
+        <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
     @elseif ($role === \App\Enums\UserRole::Dean)
         <a href="{{ route('dean.dashboard') }}" class="{{ $nav('dean.dashboard') }}">College dashboard</a>
+        <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
     @elseif ($role === \App\Enums\UserRole::Administrator)
         <a href="{{ route('admin.dashboard') }}" class="{{ $nav('admin.dashboard') }}">Institution dashboard</a>
         <a href="{{ route('admin.users') }}" class="{{ $nav('admin.users') }}">Users</a>
         <a href="{{ route('admin.institution-students') }}" class="{{ $nav('admin.institution-students') }}">Institution students</a>
         <a href="{{ route('admin.advisers') }}" class="{{ $nav('admin.advisers') }}">Adviser assignment</a>
+        <a href="{{ route('admin.colleges') }}" class="{{ $nav('admin.colleges') }}">Colleges and programs</a>
         <a href="{{ route('admin.questionnaire') }}" class="{{ $nav('admin.questionnaire') }}">Questionnaire</a>
         <a href="{{ route('admin.psoc') }}" class="{{ $nav('admin.psoc') }}">PSOC occupations</a>
+        <a href="{{ route('admin.interventions') }}" class="{{ $nav('admin.interventions') }}">Interventions</a>
+        <a href="{{ route('admin.audit') }}" class="{{ $nav('admin.audit') }}">Audit log</a>
+        <a href="{{ route('admin.deletion-requests') }}" class="{{ $nav('admin.deletion-requests') }}">Deletion requests</a>
+        <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
         <a href="{{ route('demo.table') }}" class="{{ $nav('demo.table') }}">Demo table</a>
     @endif
 @endguest

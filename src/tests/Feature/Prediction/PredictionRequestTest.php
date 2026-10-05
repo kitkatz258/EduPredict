@@ -9,6 +9,7 @@ use App\Livewire\NotificationBell;
 use App\Livewire\Student\RequestPrediction;
 use App\Livewire\Tables\PredictionHistoryTable;
 use App\Livewire\Tables\ScopedStudentsTable;
+use App\Models\AuditLog;
 use App\Models\College;
 use App\Models\GradeReport;
 use App\Models\Prediction;
@@ -66,6 +67,12 @@ class PredictionRequestTest extends TestCase
         $this->assertArrayNotHasKey('student_number', $first->feature_snapshot);
         $this->assertArrayNotHasKey('email', $first->feature_snapshot);
         $this->assertSame('below_10k', $first->feature_snapshot['income_bracket']);
+
+        $requested = AuditLog::query()->where('action', 'prediction_requested')->sole();
+        $this->assertSame($first->id, $requested->subject_id);
+        $this->assertSame('placeholder-heuristic-v0', $requested->meta['model_version']);
+        $this->assertArrayNotHasKey('income_bracket', $requested->meta);
+        $this->assertArrayNotHasKey('email', $requested->meta);
 
         $note = $student->adviser->notifications()->first();
         $this->assertNotNull($note);

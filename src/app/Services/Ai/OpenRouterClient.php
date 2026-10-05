@@ -5,6 +5,7 @@ namespace App\Services\Ai;
 use App\Contracts\AiClientInterface;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 
 class OpenRouterClient implements AiClientInterface
 {
@@ -19,6 +20,12 @@ class OpenRouterClient implements AiClientInterface
         $cacheKey = 'ai_daily_calls:'.$date;
         $limit = (int) config('edupredict.ai.daily_limit', 40);
         if ((int) Cache::get($cacheKey, 0) >= $limit) {
+            return null;
+        }
+
+        $minuteKey = 'ai_minute:'.now('Asia/Manila')->format('Y-m-d-H-i');
+        $perMinute = (int) config('edupredict.ai.per_minute_limit', 20);
+        if ($perMinute < 1 || RateLimiter::tooManyAttempts($minuteKey, $perMinute)) {
             return null;
         }
 
@@ -40,6 +47,8 @@ class OpenRouterClient implements AiClientInterface
         if ($json) {
             $payload['response_format'] = ['type' => 'json_object'];
         }
+
+        RateLimiter::hit($minuteKey, 60);
 
         foreach ($models as $model) {
             try {
