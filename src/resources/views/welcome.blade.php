@@ -27,6 +27,8 @@
             @else
                 <a href="{{ route('login') }}" class="mt-6 inline-flex w-full justify-center rounded-lg bg-brand-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-[#2E7D32]">Sign in</a>
                 <p class="mt-4 text-center text-sm text-gray-500">
+                    <a class="font-medium text-brand-900 underline" href="{{ route('register') }}">Student registration</a>
+                    ·
                     <a class="font-medium text-brand-900 underline" href="{{ route('password.request') }}">Forgot password?</a>
                 </p>
             @endauth

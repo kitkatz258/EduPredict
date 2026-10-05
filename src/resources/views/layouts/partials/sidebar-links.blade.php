@@ -16,6 +16,9 @@
         <a href="{{ route('dean.dashboard') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">College dashboard</a>
     @elseif ($role === \App\Enums\UserRole::Administrator)
         <a href="{{ route('admin.dashboard') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Institution dashboard</a>
+        <a href="{{ route('admin.users') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Users</a>
+        <a href="{{ route('admin.institution-students') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Institution students</a>
+        <a href="{{ route('admin.advisers') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Adviser assignment</a>
         <a href="{{ route('demo.table') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Demo table</a>
     @endif
 @endguest

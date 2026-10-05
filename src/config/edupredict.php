@@ -47,4 +47,8 @@ return [
         'min_profile_completeness' => 80,
     ],
 
+    'consent' => [
+        'current_version' => 'v1',
+    ],
+
 ];

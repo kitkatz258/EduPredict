@@ -11,4 +11,9 @@ One line per decision. Record choices made where the spec is silent.
 - M1: Added `users.must_change_password` in the role-fields migration so M2 staff accounts can force a password change without another schema edit.
 - M1: Seeded students use student numbers `SYN-####` and emails `syntheticN@edupredict.test`; they are synthetic demo data, never production records.
 - M1: Demo account password is `Password123!` (development only).
-- M1: Generic Breeze `/register` still creates a student-role user; M2 will replace it with institution-list validation.
+- M2: Student self-registration requires an exact match on student number and program, and a case-insensitive match on first and last name, against `institution_students`.
+- M2: Staff accounts are created with a generated temporary password and `must_change_password` until the first successful change.
+- M2: Dean creation requires `college_id`; department-head creation requires `program_id`; faculty program is optional.
+- M2: Adviser assignment uses one faculty picker plus a multi-select student list (one checked student is single assignment; several is bulk).
+- M2: CSV import keeps valid rows and reports invalid rows instead of aborting the whole file.
+- M2: Administrators cannot deactivate their own account.

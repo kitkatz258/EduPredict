@@ -114,6 +114,16 @@ class DemoUserSeeder extends Seeder
             );
         }
 
-        unset($student);
+        InstitutionStudent::query()->updateOrCreate(
+            ['student_number' => '2024-88888'],
+            [
+                'last_name' => 'Applicant',
+                'first_name' => 'Una',
+                'program_id' => $bsis->id,
+                'year_level' => 1,
+                'email' => 'una.applicant@edupredict.test',
+                'is_registered' => false,
+            ],
+        );
     }
 }

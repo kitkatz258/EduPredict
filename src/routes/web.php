@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleDashboardController;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'welcome')->name('home');
 Route::view('/demo/table', 'pages.demo-table')->name('demo.table');
 
-Route::middleware(['auth', 'active'])->group(function () {
+Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
     Route::get('/dashboard', DashboardRedirectController::class)->name('dashboard');
 
     Route::get('/student/dashboard', [RoleDashboardController::class, 'student'])
@@ -31,6 +32,12 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/admin/dashboard', [RoleDashboardController::class, 'admin'])
         ->middleware('role:administrator')
         ->name('admin.dashboard');
+
+    Route::middleware('role:administrator')->group(function () {
+        Route::get('/admin/users', [AdminPageController::class, 'users'])->name('admin.users');
+        Route::get('/admin/institution-students', [AdminPageController::class, 'institutionStudents'])->name('admin.institution-students');
+        Route::get('/admin/advisers', [AdminPageController::class, 'advisers'])->name('admin.advisers');
+    });
 
     Route::get('/students/{student}', [StudentRecordController::class, 'show'])
         ->name('students.show');

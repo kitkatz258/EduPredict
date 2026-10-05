@@ -22,4 +22,9 @@ class StudentPolicy
     {
         return Student::query()->visibleTo($user)->whereKey($student->id)->exists();
     }
+
+    public function assignAdviser(User $user): bool
+    {
+        return $user->isRole(UserRole::Administrator);
+    }
 }
