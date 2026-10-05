@@ -1,0 +1,16 @@
+---
+description: EduPredict environment and conventions
+alwaysApply: true
+---
+
+- The Laravel 12 project lives in `src/` (that is `/var/www/html` inside the container). Do not re-create it.
+- PHP, Composer, npm and artisan MUST be run through Docker: `docker compose exec app <command>`.
+  Run them from the repo root (the folder containing docker-compose.yml).
+- The database host is `db` (MariaDB 11.4, MySQL-compatible), never `localhost`. DB name/user/pass are in `src/.env`.
+- Stack: Laravel 12, PHP 8.3, MariaDB (use `DB_CONNECTION=mysql`), Blade + Tailwind CSS (Vite) + Livewire (class-based, no Volt), Chart.js.
+- Livewire already bundles Alpine: never install/import Alpine separately. Do not use Yajra DataTables or jQuery.
+- Every table/list reuses the shared Livewire `BaseTable` pattern. Enforce authorization inside each Livewire component and action.
+- The master spec is `src/cursor/01-initial-project.md`. Follow its milestones in order.
+  Adjustment requests live in later numbered files in `src/cursor/` (02-..., 03-...).
+- Never commit `.env` or API keys. Never send personally identifying student data to the AI API.
+- After each milestone: run migrations fresh with seeders, run tests, then `git commit`.
