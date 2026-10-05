@@ -10,6 +10,7 @@ use App\Models\Prediction;
 use App\Models\Student;
 use App\Models\User;
 use App\Notifications\AdviseePredictionReady;
+use App\Services\Career\CareerMatchBuilder;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Profile\ProfileCompleteness;
 use Carbon\CarbonInterface;
@@ -26,6 +27,7 @@ final class PredictionRequester
         private ProfileCompleteness $completeness,
         private AcademicSummary $academic,
         private ProgramShiftEvaluator $programShift,
+        private CareerMatchBuilder $careers,
     ) {}
 
     public function cooldownEndsAt(Student $student): ?CarbonInterface
@@ -86,7 +88,7 @@ final class PredictionRequester
         $dropout = $this->predictor->predictDropout($featureSet);
         $programShift = $this->programShift->evaluate($featureSet, $dropout->factors);
 
-        return DB::transaction(function () use ($student, $actor, $featureSet, $employability, $dropout, $programShift): Prediction {
+        $prediction = DB::transaction(function () use ($student, $actor, $featureSet, $employability, $dropout, $programShift): Prediction {
             $prediction = Prediction::query()->create([
                 'student_id' => $student->id,
                 'requested_by' => $actor->id,
@@ -118,5 +120,9 @@ final class PredictionRequester
 
             return $prediction;
         });
+
+        $this->careers->ensure($prediction);
+
+        return $prediction;
     }
 }

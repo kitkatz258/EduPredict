@@ -27,4 +27,11 @@ class AdminPageController extends Controller
 
         return view('admin.advisers');
     }
+
+    public function psoc(): View
+    {
+        $this->authorize('viewAny', \App\Models\PsocOccupation::class);
+
+        return view('admin.psoc');
+    }
 }

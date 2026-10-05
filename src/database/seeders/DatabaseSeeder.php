@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             DemoUserSeeder::class,
             SyntheticStudentSeeder::class,
             QuestionnaireItemSeeder::class,
+            PsocOccupationSeeder::class,
         ]);
     }
 }

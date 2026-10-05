@@ -11,6 +11,7 @@
     @if ($role === \App\Enums\UserRole::Student)
         <a href="{{ route('student.dashboard') }}" class="{{ $nav('student.dashboard') }}">Dashboard</a>
         <a href="{{ route('student.results') }}" class="{{ $nav('student.results') }}">Results</a>
+        <a href="{{ route('student.careers') }}" class="{{ $nav('student.careers') }}">Career Matches</a>
         <a href="{{ route('student.profile') }}" class="{{ $nav('student.profile') }}">My Profile</a>
         <a href="{{ route('student.grades') }}" class="{{ $nav('student.grades') }}">My Grades</a>
         <a href="{{ route('student.questionnaire') }}" class="{{ $nav('student.questionnaire') }}">Questionnaire</a>
@@ -27,6 +28,7 @@
         <a href="{{ route('admin.institution-students') }}" class="{{ $nav('admin.institution-students') }}">Institution students</a>
         <a href="{{ route('admin.advisers') }}" class="{{ $nav('admin.advisers') }}">Adviser assignment</a>
         <a href="{{ route('admin.questionnaire') }}" class="{{ $nav('admin.questionnaire') }}">Questionnaire</a>
+        <a href="{{ route('admin.psoc') }}" class="{{ $nav('admin.psoc') }}">PSOC occupations</a>
         <a href="{{ route('demo.table') }}" class="{{ $nav('demo.table') }}">Demo table</a>
     @endif
 @endguest
