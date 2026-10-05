@@ -5,7 +5,7 @@
 > (3) fix failures, (4) `git add -A && git commit -m "M<n>: <title>"`. Do not skip ahead. Do not stop to ask questions; where this spec is silent,
 > choose the simplest reasonable option and record it in `docs/DECISIONS.md` (one line per decision).
 >
-> Environment rules are in `.cursor/rules/edupredict.mdc`. Paths below are relative to the Laravel root (`src/`).
+> Environment rules are in `cursor/rules/edupredict.mdc`. Paths below are relative to the Laravel root (`src/`).
 > The Laravel 12 project and Docker (app + MariaDB 11.4 + phpMyAdmin) already exist and run. Do not re-create them.
 
 ---
