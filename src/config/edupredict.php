@@ -14,6 +14,10 @@ return [
     'predictor' => [
         'driver' => env('PREDICTOR_DRIVER', 'heuristic'),
         'placeholder_version' => 'placeholder-heuristic-v0',
+        'employability_base' => 50,
+        'dropout_base' => 0.20,
+        'dropout_moderate_at' => 0.30,
+        'dropout_high_at' => 0.60,
     ],
 
     'ai' => [

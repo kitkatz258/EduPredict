@@ -68,7 +68,7 @@ class QuestionnaireTest extends TestCase
         $this->assertSame(1, (int) $response->answers()->where('questionnaire_item_id', $reverse->id)->value('value'));
 
         $features = app(FeatureBuilder::class)->build($student->fresh());
-        $this->assertEquals(100, $features['construct_scores']['study_habits']);
+        $this->assertEquals(100, $features->constructScores()['study_habits']);
         $this->assertTrue(app(ProfileCompleteness::class)->for($student->fresh())['sections']['questionnaire']);
     }
 
@@ -107,7 +107,7 @@ class QuestionnaireTest extends TestCase
         $this->assertNotNull($responses[0]->submitted_at);
         $this->assertEquals(0, $responses[0]->construct_scores['motivation']);
         $this->assertEquals(100, $responses[1]->construct_scores['motivation']);
-        $this->assertEquals(100, app(FeatureBuilder::class)->build($student->fresh())['construct_scores']['motivation']);
+        $this->assertEquals(100, app(FeatureBuilder::class)->build($student->fresh())->constructScores()['motivation']);
     }
 
     public function test_other_roles_cannot_use_the_student_or_admin_questionnaire_actions(): void

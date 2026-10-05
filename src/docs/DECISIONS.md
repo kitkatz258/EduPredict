@@ -27,4 +27,7 @@ One line per decision. Record choices made where the spec is silent.
 - M4: Skills are entered one item per line; paired lists use `name | detail`. No new tables — the M1 socioeconomic and skills tables already match the spec, and socioeconomic columns stay encrypted.
 - M5: Seeded questionnaire items stay `is_draft=true` and `is_active=true`. Students answer every active item; the draft flag marks the research scale, and the non-clinical footer always shows.
 - M5: Procrastination scores rise with delaying behavior. The other four constructs rise with the positive behavior. Reverse items use `6 - value`. Construct score is `(mean - 1) / 4 * 100`.
-- M5: Retakes insert a new response. `FeatureBuilder::build()` currently returns only the latest submission's construct scores. The full feature set and heuristic predictor stay in M5.5.
+- M5: Retakes insert a new response. `FeatureBuilder::build()` uses the latest submission's construct scores.
+- M5.5: Draft socioeconomic and skills rows, and unconfirmed grade reports, are omitted from `FeatureSet`. Confirmed-term count from `AcademicSummary` decides `limited_history`, not the denormalized `students.semesters_completed` column.
+- M5.5: Placeholder weights live in `HeuristicPredictor`. Household size and living arrangement are snapshotted and not scored. Income and employment use small weights. `+` helps the student and `-` hurts, including on dropout where a higher probability is `-`.
+- M5.5: `http` and `onnx` predictor drivers throw until a later phase. The placeholder version string is the `HeuristicPredictor::MODEL_VERSION` constant.
