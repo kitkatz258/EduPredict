@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Enums;
+
+enum UserRole: string
+{
+    case Student = 'student';
+    case Faculty = 'faculty';
+    case DepartmentHead = 'department_head';
+    case Dean = 'dean';
+    case Administrator = 'administrator';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Student => 'Student',
+            self::Faculty => 'Faculty',
+            self::DepartmentHead => 'Department Head',
+            self::Dean => 'Dean',
+            self::Administrator => 'Administrator',
+        };
+    }
+
+    public function homeRoute(): string
+    {
+        return match ($this) {
+            self::Student => 'student.dashboard',
+            self::Faculty => 'faculty.dashboard',
+            self::DepartmentHead => 'department.dashboard',
+            self::Dean => 'dean.dashboard',
+            self::Administrator => 'admin.dashboard',
+        };
+    }
+}

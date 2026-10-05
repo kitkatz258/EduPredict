@@ -1,0 +1,119 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Enums\UserRole;
+use App\Models\College;
+use App\Models\Consent;
+use App\Models\InstitutionStudent;
+use App\Models\Program;
+use App\Models\Student;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+
+class DemoUserSeeder extends Seeder
+{
+    public const PASSWORD = 'Password123!';
+
+    public function run(): void
+    {
+        $ccs = College::query()->where('code', 'CCS')->firstOrFail();
+        $bsis = Program::query()->where('code', 'BSIS')->firstOrFail();
+
+        $admin = User::query()->updateOrCreate(
+            ['email' => 'admin@edupredict.test'],
+            [
+                'name' => 'Ada Admin',
+                'password' => Hash::make(self::PASSWORD),
+                'role' => UserRole::Administrator,
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ],
+        );
+
+        $dean = User::query()->updateOrCreate(
+            ['email' => 'dean@edupredict.test'],
+            [
+                'name' => 'Diego Dean',
+                'password' => Hash::make(self::PASSWORD),
+                'role' => UserRole::Dean,
+                'college_id' => $ccs->id,
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ],
+        );
+
+        $head = User::query()->updateOrCreate(
+            ['email' => 'depthead@edupredict.test'],
+            [
+                'name' => 'Hana Head',
+                'password' => Hash::make(self::PASSWORD),
+                'role' => UserRole::DepartmentHead,
+                'college_id' => $ccs->id,
+                'program_id' => $bsis->id,
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ],
+        );
+
+        $faculty = User::query()->updateOrCreate(
+            ['email' => 'faculty@edupredict.test'],
+            [
+                'name' => 'Faye Faculty',
+                'password' => Hash::make(self::PASSWORD),
+                'role' => UserRole::Faculty,
+                'college_id' => $ccs->id,
+                'program_id' => $bsis->id,
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ],
+        );
+
+        $studentUser = User::query()->updateOrCreate(
+            ['email' => 'student@edupredict.test'],
+            [
+                'name' => 'Sam Student',
+                'password' => Hash::make(self::PASSWORD),
+                'role' => UserRole::Student,
+                'is_active' => true,
+                'consented_at' => now(),
+                'email_verified_at' => now(),
+            ],
+        );
+
+        InstitutionStudent::query()->updateOrCreate(
+            ['student_number' => '2024-00001'],
+            [
+                'last_name' => 'Student',
+                'first_name' => 'Sam',
+                'program_id' => $bsis->id,
+                'year_level' => 3,
+                'email' => $studentUser->email,
+                'is_registered' => true,
+            ],
+        );
+
+        $student = Student::query()->updateOrCreate(
+            ['student_number' => '2024-00001'],
+            [
+                'user_id' => $studentUser->id,
+                'program_id' => $bsis->id,
+                'year_level' => 3,
+                'adviser_id' => $faculty->id,
+                'enrollment_year' => 2023,
+                'semesters_completed' => 4,
+                'consent_version' => 'v1',
+            ],
+        );
+
+        foreach ([$admin, $dean, $head, $faculty, $studentUser] as $user) {
+            Consent::query()->updateOrCreate(
+                ['user_id' => $user->id, 'version' => 'v1'],
+                ['accepted_at' => now(), 'ip_address' => '127.0.0.1'],
+            );
+        }
+
+        unset($student);
+    }
+}

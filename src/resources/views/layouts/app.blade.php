@@ -14,10 +14,10 @@
     <div class="flex min-h-screen" x-data="{ sidebarOpen: false }">
         <div
             x-show="sidebarOpen"
+            x-cloak
             x-transition.opacity
             class="fixed inset-0 z-30 bg-black/40 lg:hidden"
             @click="sidebarOpen = false"
-            style="display: none;"
         ></div>
 
         <aside
@@ -26,17 +26,16 @@
             aria-label="Sidebar"
         >
             <div class="flex h-16 items-center gap-2 border-b border-white/10 px-5">
-                <span class="text-lg font-semibold tracking-tight">EduPredict</span>
+                <a href="{{ url('/') }}" class="text-lg font-semibold tracking-tight text-white">EduPredict</a>
             </div>
             <nav class="flex-1 space-y-1 overflow-y-auto p-3 text-sm">
-                <a href="{{ url('/') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Home</a>
-                <a href="{{ url('/demo/table') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Demo table</a>
+                @include('layouts.partials.sidebar-links')
             </nav>
-            <p class="border-t border-white/10 p-4 text-xs text-white/70">Advisory estimates only. Not a diagnostic tool.</p>
+            <p class="border-t border-white/10 p-4 text-xs text-white/70">These results are estimates, not guarantees.</p>
         </aside>
 
         <div class="flex min-w-0 flex-1 flex-col">
-            <header class="flex h-16 items-center justify-between border-b border-brand-200 bg-white px-4">
+            <header class="flex h-16 items-center justify-between gap-3 border-b border-brand-200 bg-white px-4">
                 <button
                     type="button"
                     class="rounded-lg p-2 text-brand-900 hover:bg-brand-50 lg:hidden"
@@ -47,14 +46,26 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
-                <h1 class="text-base font-semibold text-brand-900">{{ $heading ?? ($title ?? 'EduPredict') }}</h1>
+                <div class="min-w-0 flex-1">
+                    @isset($header)
+                        {{ $header }}
+                    @else
+                        <h1 class="truncate text-base font-semibold text-brand-900">{{ $heading ?? config('app.name') }}</h1>
+                    @endisset
+                </div>
                 <div class="flex items-center gap-3">
                     <button type="button" class="rounded-lg p-2 text-brand-900 hover:bg-brand-50" aria-label="Notifications">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                     </button>
-                    <span class="hidden text-sm text-gray-600 sm:inline">{{ auth()->user()->name ?? 'Guest' }}</span>
+                    @auth
+                        <span class="hidden text-sm text-gray-600 sm:inline">{{ auth()->user()->name }}</span>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="text-sm font-medium text-brand-900 hover:underline">Log out</button>
+                        </form>
+                    @endauth
                 </div>
             </header>
 

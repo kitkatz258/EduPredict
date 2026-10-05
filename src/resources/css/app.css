@@ -15,3 +15,7 @@
     --color-brand-400: #66BB6A;
     --color-brand-900: #1B5E20;
 }
+
+[x-cloak] {
+    display: none !important;
+}

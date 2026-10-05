@@ -139,7 +139,17 @@ Free models are limited to roughly 20 requests/minute and about 50/day per accou
 
 ## 9. Demo accounts
 
-_To be filled in after seeders are built (one account per role: student, faculty, department head, dean, administrator). Dev-only passwords; never reuse real ones._
+Development only. Password for every demo account: `Password123!`
+
+| Role | Email |
+|---|---|
+| Student | student@edupredict.test |
+| Faculty | faculty@edupredict.test |
+| Department Head | depthead@edupredict.test |
+| Dean | dean@edupredict.test |
+| Administrator | admin@edupredict.test |
+
+Sixty additional students (`SYN-0001` … `SYN-0060`) are seeded as synthetic data.
 
 ## 10. Privacy and ethics
 

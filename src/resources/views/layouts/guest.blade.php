@@ -11,8 +11,13 @@
     @livewireStyles
 </head>
 <body class="min-h-screen bg-brand-50 font-sans text-gray-800 antialiased">
-    {{ $slot ?? '' }}
-    @yield('content')
+    <div class="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10">
+        <a href="{{ route('home') }}" class="mb-6 text-center text-2xl font-semibold text-brand-900">EduPredict</a>
+        <div class="rounded-2xl border border-brand-200 bg-white p-8 shadow-sm">
+            {{ $slot }}
+        </div>
+        @yield('content')
+    </div>
     @livewireScripts
 </body>
 </html>
