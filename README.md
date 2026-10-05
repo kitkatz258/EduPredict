@@ -1,4 +1,4 @@
-EduPredict
+# EduPredict
 
 **Machine Learning for Student Employability and Dropout Prediction**: a web-based predictive analytics system for the University of Caloocan City (UCC), designed to be adaptable to other institutions.
 
@@ -16,7 +16,11 @@ It analyzes academic, socioeconomic, behavioral, and skills/experience data to e
 
 ## 1. What to install (once)
 
-1. **Docker Desktop** (Windows: needs WSL 2, run `wsl --install` in an admin PowerShell, then restart): https://www.docker.com/products/docker-desktop/
+1. **Docker Desktop** and, on Windows, WSL 2:
+   - Check virtualization is on: Task Manager > Performance > CPU > "Virtualization: Enabled" (if disabled, enable it in BIOS).
+   - Open PowerShell **as Administrator**, run `wsl --install`, then **restart the PC**.
+   - Install Docker Desktop from https://www.docker.com/products/docker-desktop/ (keep "Use WSL 2" ticked), open it, and wait for **Engine running**.
+   - The full from-scratch walkthrough (including how the project was created) is in [`SETUP.md`](SETUP.md).
 2. **Git**: https://git-scm.com/download/win
 3. **Cursor** (our editor): https://cursor.com
 4. You do **not** need to install PHP, Composer, Node, MySQL, or XAMPP. They all live inside Docker. Close XAMPP while working.
@@ -28,7 +32,7 @@ docker compose version
 docker run hello-world
 ```
 
-## 2. First-time setup (every member)
+## 2. First-time setup (every teammate)
 
 ```powershell
 git clone https://github.com/kitkatz258/EduPredict.git
@@ -140,4 +144,3 @@ _To be filled in after seeders are built (one account per role: student, faculty
 ## 10. Privacy and ethics
 
 The system handles sensitive student data under RA 10173 (Data Privacy Act): informed consent, role-based access, encrypted sensitive fields, de-identified data sent to the AI API, audit logs. Predictions are estimates, not guarantees, and are not clinical or diagnostic.
-
