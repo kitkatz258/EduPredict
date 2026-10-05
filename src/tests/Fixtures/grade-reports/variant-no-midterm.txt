@@ -1,0 +1,8 @@
+Subject Code	Description	Units	Final Grade	Remarks
+CCS 106	Applications Development and Emerging Technologies	5	2.25	PASSED
+CCS 110	Computer Graphics 1	3	1.50	PASSED
+CCS 116	Web Development 2	5	1.25	PASSED
+GEE 002	Living in the IT Era	3	1.25	PASSED
+GEE 005	Reading Visual Art	3	1.00	PASSED
+PATHFIT 4	Sports and Fitness	2	1.00	PASSED
+PR 002	Quantitative Methods	3	1.25	PASSED

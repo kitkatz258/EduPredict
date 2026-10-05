@@ -1,0 +1,17 @@
+{
+  "school_year": "2025-2026",
+  "semester": "First",
+  "program": "BS Information Systems",
+  "portal_gpa": 2.33,
+  "computed_gpa": 2.33,
+  "rows": [
+    {"subject_code": "CCS 118", "subject_name": "Multimedia Systems", "units": "3", "midterm_grade": "1.00", "final_exam_grade": "1.75", "final_grade": "1.50", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "GEE 003", "subject_name": "Gender and Society", "units": "3", "midterm_grade": "1.50", "final_exam_grade": "1.00", "final_grade": "1.25", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "IS 102", "subject_name": "Enterprise Resource Planning", "units": "3", "midterm_grade": "1.50", "final_exam_grade": "1.25", "final_grade": "1.25", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "IS 103", "subject_name": "Database System Enterprise", "units": "5", "midterm_grade": "1.75", "final_exam_grade": "INC", "final_grade": "INC", "remarks": "INCOMPLETE", "is_failed": false},
+    {"subject_code": "IS 104", "subject_name": "IS Innovations & New Technologies", "units": "3", "midterm_grade": "1.75", "final_exam_grade": "1.75", "final_grade": "1.75", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "IS 105", "subject_name": "Enterprise Architecture", "units": "3", "midterm_grade": "1.25", "final_exam_grade": "1.25", "final_grade": "1.25", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "IS 106", "subject_name": "IS Major Elective 1", "units": "3", "midterm_grade": "2.00", "final_exam_grade": "5.00", "final_grade": "5.00", "remarks": "FAILED", "is_failed": true},
+    {"subject_code": "RES 001", "subject_name": "Methods of Research", "units": "3", "midterm_grade": "1.50", "final_exam_grade": "1.50", "final_grade": "1.50", "remarks": "PASSED", "is_failed": false}
+  ]
+}

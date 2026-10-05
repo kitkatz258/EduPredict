@@ -7,6 +7,7 @@
 @else
     @if ($role === \App\Enums\UserRole::Student)
         <a href="{{ route('student.dashboard') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Dashboard</a>
+        <a href="{{ route('student.grades') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Grades</a>
         <a href="{{ route('profile.edit') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Profile</a>
     @elseif ($role === \App\Enums\UserRole::Faculty)
         <a href="{{ route('faculty.dashboard') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Advisees</a>

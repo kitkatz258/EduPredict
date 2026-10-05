@@ -3,15 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
+use App\Services\Grades\AcademicSummary;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class RoleDashboardController extends Controller
 {
-    public function student(Request $request): View
+    public function student(Request $request, AcademicSummary $summary): View
     {
+        $student = $request->user()->student;
+
         return view('dashboards.student', [
-            'student' => $request->user()->student,
+            'student' => $student,
+            'academic' => $student ? $summary->for($student) : null,
         ]);
     }
 

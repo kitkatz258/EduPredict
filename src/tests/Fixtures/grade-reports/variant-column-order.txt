@@ -1,0 +1,8 @@
+Units	Subject Code	Remarks	Final Grade	Description	Midterm	Final
+5	CCS 106	PASSED	2.25	Applications Development and Emerging Technologies	2.50	2.25
+3	CCS 110	PASSED	1.50	Computer Graphics 1	2.25	1.00
+5	CCS 116	PASSED	1.25	Web Development 2	1.25	1.25
+3	GEE 002	PASSED	1.25	Living in the IT Era	1.50	1.00
+3	GEE 005	PASSED	1.00	Reading Visual Art	1.00	1.00
+2	PATHFIT 4	PASSED	1.00	Sports and Fitness	1.00	1.00
+3	PR 002	PASSED	1.25	Quantitative Methods	1.75	1.00

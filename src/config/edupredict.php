@@ -39,6 +39,8 @@ return [
         'dropped_tokens' => ['DRP', 'W', 'WITHDRAWN'],
         'inc_gpa_weight' => 4.00,
         'gpa_excluded_prefixes' => ['NSTP'],
+        'subject_code_pattern' => '/^[A-Z]{2,8}\s?\d{1,3}[A-Z]?$/',
+        'upload_max_kb' => 10240,
     ],
 
     'prediction' => [

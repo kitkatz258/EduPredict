@@ -1,0 +1,12 @@
+Program: BS Information Systems
+School Year and Semester: 2025-2026 | First
+Subject Code	Description	Units	Midterm	Final	Final Grade	Remarks
+CCS 118	Multimedia Systems	3	1.00	1.75	1.50	PASSED
+GEE 003	Gender and Society	3	1.50	1.00	1.25	PASSED
+IS 102	Enterprise Resource Planning	3	1.50	1.25	1.25	PASSED
+IS 103	Database System Enterprise	5	1.75	INC	INC	INCOMPLETE
+IS 104	IS Innovations & New Technologies	3	1.75	1.75	1.75	PASSED
+IS 105	Enterprise Architecture	3	1.25	1.25	1.25	PASSED
+IS 106	IS Major Elective 1	3	2.00	5.00	5.00	FAILED
+RES 001	Methods of Research	3	1.50	1.50	1.50	PASSED
+GPA 2.33

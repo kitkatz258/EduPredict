@@ -1,0 +1,17 @@
+{
+  "school_year": "2023-2024",
+  "semester": "Second",
+  "program": "BS Information Systems",
+  "portal_gpa": 1.31,
+  "computed_gpa": 1.31,
+  "rows": [
+    {"subject_code": "CC 103", "subject_name": "Computer Programming 2", "units": "5", "midterm_grade": "1.25", "final_exam_grade": "1.00", "final_grade": "1.00", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "CC 108", "subject_name": "Technical Computer Concepts", "units": "3", "midterm_grade": "1.25", "final_exam_grade": "1.25", "final_grade": "1.25", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "CCS 107", "subject_name": "Web Development 1", "units": "5", "midterm_grade": "1.50", "final_exam_grade": "1.50", "final_grade": "1.50", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "GEC 008", "subject_name": "Ethics", "units": "3", "midterm_grade": "1.25", "final_exam_grade": "1.25", "final_grade": "1.25", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "ISP 101", "subject_name": "Fundamentals of Information System", "units": "3", "midterm_grade": "1.50", "final_exam_grade": "1.25", "final_grade": "1.25", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "NSTP 122", "subject_name": "Civic Welfare Training Services 2", "units": "3", "midterm_grade": "1.25", "final_exam_grade": "1.00", "final_grade": "1.00", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "PATHFIT 2", "subject_name": "Exercise-Based Fitness Activities", "units": "2", "midterm_grade": "1.25", "final_exam_grade": "1.25", "final_grade": "1.25", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "PR 001", "subject_name": "College Algebra", "units": "3", "midterm_grade": "2.00", "final_exam_grade": "1.75", "final_grade": "1.75", "remarks": "PASSED", "is_failed": false}
+  ]
+}

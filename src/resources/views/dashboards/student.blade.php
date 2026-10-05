@@ -7,6 +7,15 @@
         <p class="text-sm text-gray-600">Completeness meter, latest scores, and “Request new prediction” will appear here in later milestones.</p>
         @if ($student)
             <p class="mt-4 text-sm text-gray-800">Student number: <span class="font-medium">{{ $student->student_number }}</span></p>
+            @if ($academic)
+                <p class="mt-2 text-sm text-gray-800">GWA: <span class="font-medium">{{ $academic['rounded_gwa'] !== null ? number_format($academic['rounded_gwa'], 2) : '—' }}</span>
+                    · Failed subjects: {{ $academic['failed_subjects'] }}
+                    · Semesters completed: {{ $academic['semesters_completed'] }}
+                    @if ($academic['limited_history'])
+                        · <span class="text-amber-800">Lower confidence (limited academic history)</span>
+                    @endif
+                </p>
+            @endif
         @endif
         <p class="mt-6 text-xs text-gray-500">These results are estimates, not guarantees. They do not decide admission, academic standing, employment, or discipline.</p>
     </div>

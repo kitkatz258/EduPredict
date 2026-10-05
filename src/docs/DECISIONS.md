@@ -17,3 +17,8 @@ One line per decision. Record choices made where the spec is silent.
 - M2: Adviser assignment uses one faculty picker plus a multi-select student list (one checked student is single assignment; several is bulk).
 - M2: CSV import keeps valid rows and reports invalid rows instead of aborting the whole file.
 - M2: Administrators cannot deactivate their own account.
+- M3: Grade-report `source` values are `manual`, `pasted`, `pdf_text`, `grid_ocr`, `generic_ocr`, or `ai_extracted` (spec listed only manual|ai_extracted).
+- M3: Dropped (DRP/W) rows are excluded from GPA; INC uses `grades.inc_gpa_weight` (default 4.00, confirm with registrar); NSTP prefixes are excluded; PATHFIT counts.
+- M3: Confirmed grade reports may be deleted by the student and re-entered; a second confirmed report for the same term is rejected.
+- M3: `is_major_subject` defaults to false until a program curriculum list exists.
+- M3: Sample portal images were not in `cursor/samples/` at build time; parser/GPA tests use JSON and paste fixtures, and OCR image tests skip when samples or tesseract/python are missing.

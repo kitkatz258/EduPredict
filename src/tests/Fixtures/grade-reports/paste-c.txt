@@ -1,0 +1,12 @@
+Program: BS Information Systems
+School Year and Semester: 2023-2024 | Second
+Subject Code	Description	Units	Midterm	Final	Final Grade	Remarks
+CC 103	Computer Programming 2	5	1.25	1.00	1.00	PASSED
+CC 108	Technical Computer Concepts	3	1.25	1.25	1.25	PASSED
+CCS 107	Web Development 1	5	1.50	1.50	1.50	PASSED
+GEC 008	Ethics	3	1.25	1.25	1.25	PASSED
+ISP 101	Fundamentals of Information System	3	1.50	1.25	1.25	PASSED
+NSTP 122	Civic Welfare Training Services 2	3	1.25	1.00	1.00	PASSED
+PATHFIT 2	Exercise-Based Fitness Activities	2	1.25	1.25	1.25	PASSED
+PR 001	College Algebra	3	2.00	1.75	1.75	PASSED
+GPA 1.31

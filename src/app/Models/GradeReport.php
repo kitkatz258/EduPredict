@@ -19,6 +19,8 @@ class GradeReport extends Model
         'source',
         'status',
         'original_file_path',
+        'detected_gpa',
+        'warnings',
         'confirmed_at',
     ];
 
@@ -26,7 +28,19 @@ class GradeReport extends Model
     {
         return [
             'confirmed_at' => 'datetime',
+            'detected_gpa' => 'float',
+            'warnings' => 'array',
         ];
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === 'draft';
+    }
+
+    public function isConfirmed(): bool
+    {
+        return $this->status === 'confirmed';
     }
 
     public function student(): BelongsTo

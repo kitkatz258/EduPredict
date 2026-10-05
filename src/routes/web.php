@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleDashboardController;
+use App\Http\Controllers\Student\GradePageController;
 use App\Http\Controllers\StudentRecordController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,10 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
     Route::get('/student/dashboard', [RoleDashboardController::class, 'student'])
         ->middleware('role:student')
         ->name('student.dashboard');
+
+    Route::get('/student/grades', [GradePageController::class, 'index'])
+        ->middleware('role:student')
+        ->name('student.grades');
 
     Route::get('/faculty/dashboard', [RoleDashboardController::class, 'faculty'])
         ->middleware('role:faculty')

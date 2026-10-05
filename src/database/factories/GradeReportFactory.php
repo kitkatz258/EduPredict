@@ -20,7 +20,17 @@ class GradeReportFactory extends Factory
             'source' => 'manual',
             'status' => 'confirmed',
             'original_file_path' => null,
+            'detected_gpa' => null,
+            'warnings' => [],
             'confirmed_at' => now(),
         ];
+    }
+
+    public function draft(): static
+    {
+        return $this->state(fn () => [
+            'status' => 'draft',
+            'confirmed_at' => null,
+        ]);
     }
 }

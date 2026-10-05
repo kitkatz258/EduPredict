@@ -64,6 +64,11 @@ class Student extends Model
         return $this->hasOne(Prediction::class)->latestOfMany();
     }
 
+    public function hasLimitedHistory(): bool
+    {
+        return $this->semesters_completed < (int) config('edupredict.prediction.limited_history_semesters', 2);
+    }
+
     public function socioeconomicProfile(): HasOne
     {
         return $this->hasOne(SocioeconomicProfile::class);

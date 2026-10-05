@@ -1,0 +1,16 @@
+{
+  "school_year": "2024-2025",
+  "semester": "Second",
+  "program": "BS Information Systems",
+  "portal_gpa": 1.44,
+  "computed_gpa": 1.44,
+  "rows": [
+    {"subject_code": "CCS 106", "subject_name": "Applications Development and Emerging Technologies", "units": "5", "midterm_grade": "2.50", "final_exam_grade": "2.25", "final_grade": "2.25", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "CCS 110", "subject_name": "Computer Graphics 1", "units": "3", "midterm_grade": "2.25", "final_exam_grade": "1.00", "final_grade": "1.50", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "CCS 116", "subject_name": "Web Development 2", "units": "5", "midterm_grade": "1.25", "final_exam_grade": "1.25", "final_grade": "1.25", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "GEE 002", "subject_name": "Living in the IT Era", "units": "3", "midterm_grade": "1.50", "final_exam_grade": "1.00", "final_grade": "1.25", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "GEE 005", "subject_name": "Reading Visual Art", "units": "3", "midterm_grade": "1.00", "final_exam_grade": "1.00", "final_grade": "1.00", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "PATHFIT 4", "subject_name": "Sports and Fitness", "units": "2", "midterm_grade": "1.00", "final_exam_grade": "1.00", "final_grade": "1.00", "remarks": "PASSED", "is_failed": false},
+    {"subject_code": "PR 002", "subject_name": "Quantitative Methods", "units": "3", "midterm_grade": "1.75", "final_exam_grade": "1.00", "final_grade": "1.25", "remarks": "PASSED", "is_failed": false}
+  ]
+}
