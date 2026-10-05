@@ -22,3 +22,6 @@ One line per decision. Record choices made where the spec is silent.
 - M3: Confirmed grade reports may be deleted by the student and re-entered; a second confirmed report for the same term is rejected.
 - M3: `is_major_subject` defaults to false until a program curriculum list exists.
 - M3: Real portal samples live in gitignored `cursor/samples/` as `grade_sample_a.png`, `grade_sample_b.png`, and `grade_sample_c.pdf` (the spec’s `Screenshot_2026-10-05_*` names are accepted as alternates). OCR descriptions stay uppercase as printed; program text stays the full “Bachelor of Science in Information Systems” heading. OCR tests skip only when those files or python/tesseract are missing.
+- M4: Socioeconomic and skills rows stay readable only by the owning student. Staff do not get the raw income or skills forms.
+- M4: Completeness is an equal split of academic (a confirmed grade report), socioeconomic (saved and not a draft), and skills (saved and not a draft). An empty skills list can still be marked complete.
+- M4: Skills are entered one item per line; paired lists use `name | detail`. No new tables — the M1 socioeconomic and skills tables already match the spec, and socioeconomic columns stay encrypted.

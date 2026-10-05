@@ -53,4 +53,50 @@ return [
         'current_version' => 'v1',
     ],
 
+    'profile' => [
+        'income_brackets' => [
+            'below_10k' => 'Below ₱10,000',
+            '10k_20k' => '₱10,000–₱20,000',
+            '20k_40k' => '₱20,001–₱40,000',
+            '40k_70k' => '₱40,001–₱70,000',
+            'above_70k' => 'Above ₱70,000',
+            'prefer_not_to_say' => 'Prefer not to say',
+        ],
+        'scholarship_statuses' => [
+            'none' => 'No scholarship',
+            'partial' => 'Partial scholarship',
+            'full' => 'Full scholarship',
+            'government' => 'Government scholarship',
+            'private' => 'Private scholarship',
+        ],
+        'employment_statuses' => [
+            'unemployed' => 'Not employed',
+            'part_time' => 'Part-time',
+            'working_student' => 'Working student',
+            'full_time' => 'Full-time',
+            'self_employed' => 'Self-employed',
+        ],
+        'living_arrangements' => [
+            'with_family' => 'With family',
+            'boarding' => 'Boarding house',
+            'dormitory' => 'Dormitory',
+            'relative' => 'With a relative',
+            'renting' => 'Renting',
+        ],
+        'internet_access' => [
+            'yes' => 'Reliable internet',
+            'unreliable' => 'Unreliable internet',
+            'no' => 'No internet',
+        ],
+        'device_access' => [
+            'yes' => 'Own device',
+            'shared' => 'Shared device',
+            'no' => 'No device',
+        ],
+        'study_space' => [
+            'yes' => 'Has a study space',
+            'no' => 'No study space',
+        ],
+    ],
+
 ];

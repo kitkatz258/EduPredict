@@ -4,18 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Services\Grades\AcademicSummary;
+use App\Services\Profile\ProfileCompleteness;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class RoleDashboardController extends Controller
 {
-    public function student(Request $request, AcademicSummary $summary): View
+    public function student(Request $request, AcademicSummary $summary, ProfileCompleteness $completeness): View
     {
         $student = $request->user()->student;
 
         return view('dashboards.student', [
             'student' => $student,
             'academic' => $student ? $summary->for($student) : null,
+            'completeness' => $student ? $completeness->for($student) : null,
         ]);
     }
 
