@@ -12,6 +12,7 @@ use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Models\SubjectGrade;
 use App\Models\User;
+use App\Services\Interventions\RecommendedActionBuilder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -160,7 +161,7 @@ class SyntheticStudentSeeder extends Seeder
                 ],
             );
 
-            Prediction::query()->updateOrCreate(
+            $prediction = Prediction::query()->updateOrCreate(
                 [
                     'student_id' => $student->id,
                     'model_version' => 'placeholder-heuristic-v0',
@@ -202,6 +203,8 @@ class SyntheticStudentSeeder extends Seeder
                     ],
                 ],
             );
+
+            app(RecommendedActionBuilder::class)->ensure($prediction, false);
         }
     }
 }

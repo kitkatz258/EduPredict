@@ -69,6 +69,15 @@ return [
         'broad_failed_min' => 2,
     ],
 
+    /*
+    | Recommended actions stay inside the seeded intervention list.
+    | shift_rank_bonus only orders the list. It is not a displayed score.
+    */
+    'interventions' => [
+        'max_actions' => 5,
+        'shift_rank_bonus' => 0.5,
+    ],
+
     'consent' => [
         'current_version' => 'v1',
     ],

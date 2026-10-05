@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Notifications\AdviseePredictionReady;
 use App\Services\Career\CareerMatchBuilder;
 use App\Services\Grades\AcademicSummary;
+use App\Services\Interventions\RecommendedActionBuilder;
 use App\Services\Profile\ProfileCompleteness;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,7 @@ final class PredictionRequester
         private AcademicSummary $academic,
         private ProgramShiftEvaluator $programShift,
         private CareerMatchBuilder $careers,
+        private RecommendedActionBuilder $actions,
     ) {}
 
     public function cooldownEndsAt(Student $student): ?CarbonInterface
@@ -122,6 +124,7 @@ final class PredictionRequester
         });
 
         $this->careers->ensure($prediction);
+        $this->actions->ensure($prediction);
 
         return $prediction;
     }

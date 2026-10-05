@@ -39,6 +39,9 @@
                 <x-program-shift :prediction="$latest" />
                 <p class="mt-4 text-sm leading-6 text-gray-700">{{ $summary['dropout'] }}</p>
                 <p class="mt-3 text-sm leading-6 text-gray-700">{{ $summary['employability'] }}</p>
+                @if (($forStudent ?? false) && in_array($latest->dropout_risk, ['moderate', 'high'], true))
+                    <p class="mt-3 text-sm leading-6 text-gray-700">{{ \App\Services\Interventions\RecommendedActionBuilder::STUDENT_MESSAGE }}</p>
+                @endif
 
                 <div class="mt-5">
                     <p class="text-xs font-medium text-gray-600">Estimated dropout probability {{ number_format((float) $latest->dropout_probability * 100, 0) }}%</p>

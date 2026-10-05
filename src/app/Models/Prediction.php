@@ -53,4 +53,9 @@ class Prediction extends Model
     {
         return $this->hasMany(CareerMatch::class);
     }
+
+    public function recommendedActions(): HasMany
+    {
+        return $this->hasMany(RecommendedAction::class);
+    }
 }

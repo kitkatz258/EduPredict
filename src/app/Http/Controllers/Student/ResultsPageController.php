@@ -24,6 +24,7 @@ class ResultsPageController extends Controller
             'latest' => $latest,
             'summary' => $presenter->summary($latest, true),
             'charts' => $presenter->charts($student, $latest),
+            'forStudent' => true,
         ]);
     }
 }

@@ -57,6 +57,9 @@
                     </div>
                     <x-program-shift :prediction="$latest" />
                     <p class="mt-4 text-sm leading-6 text-gray-700">{{ $summary['dropout'] }}</p>
+                    @if (in_array($latest->dropout_risk, ['moderate', 'high'], true))
+                        <p class="mt-3 text-sm leading-6 text-gray-700">{{ \App\Services\Interventions\RecommendedActionBuilder::STUDENT_MESSAGE }}</p>
+                    @endif
                     <div class="mt-4">
                         <livewire:student.request-prediction />
                     </div>

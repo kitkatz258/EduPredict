@@ -28,4 +28,10 @@
     </div>
 
     @include('predictions.panel', ['showRequest' => false])
+
+    @unless ($forStudent)
+        <div class="mt-6">
+            <livewire:staff.recommended-actions :student-id="$student->id" />
+        </div>
+    @endunless
 </x-app-layout>

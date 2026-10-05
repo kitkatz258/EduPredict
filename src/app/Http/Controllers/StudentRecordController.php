@@ -21,6 +21,7 @@ class StudentRecordController extends Controller
             'latest' => $latest,
             'summary' => $presenter->summary($latest, $forStudent),
             'charts' => $presenter->charts($student, $latest),
+            'forStudent' => $forStudent,
         ]);
     }
 }
