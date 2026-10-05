@@ -24,6 +24,7 @@
         </div>
     </div>
 
+    <p wire:loading class="mb-2 text-sm text-gray-500" role="status">Updating the table…</p>
     <div class="overflow-hidden rounded-xl border border-brand-200 bg-white shadow-sm" wire:loading.class="opacity-60">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-brand-200 text-sm">

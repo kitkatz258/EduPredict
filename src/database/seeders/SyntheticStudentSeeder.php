@@ -52,10 +52,22 @@ class SyntheticStudentSeeder extends Seeder
             $adviser = $isBsis ? $faculty : $otherFaculty;
             $number = sprintf('SYN-%04d', $i);
 
+            $storyNames = [
+                1 => ['Mara', 'Bautista'],
+                2 => ['Nico', 'Reyes'],
+                3 => ['Bea', 'Navarro'],
+                4 => ['Carlo', 'Lim'],
+                5 => ['Rico', 'Dela Cruz'],
+                6 => ['Paolo', 'Cruz'],
+                10 => ['Liza', 'Ramos'],
+            ];
+            $firstName = $storyNames[$i][0] ?? "Synthetic{$i}";
+            $lastName = $storyNames[$i][1] ?? 'Student';
+
             $user = User::query()->updateOrCreate(
                 ['email' => "synthetic{$i}@edupredict.test"],
                 [
-                    'name' => "Synthetic Student {$i}",
+                    'name' => trim($firstName.' '.$lastName),
                     'password' => Hash::make(DemoUserSeeder::PASSWORD),
                     'role' => UserRole::Student,
                     'is_active' => true,
@@ -67,8 +79,8 @@ class SyntheticStudentSeeder extends Seeder
             InstitutionStudent::query()->updateOrCreate(
                 ['student_number' => $number],
                 [
-                    'last_name' => 'Student',
-                    'first_name' => "Synthetic{$i}",
+                    'last_name' => $lastName,
+                    'first_name' => $firstName,
                     'program_id' => $program->id,
                     'year_level' => $year,
                     'email' => $user->email,
@@ -180,7 +192,12 @@ class SyntheticStudentSeeder extends Seeder
                     },
                     'dropout_risk' => $risk,
                     'confidence' => $limited ? 'low' : 'normal',
-                    'program_shift_flag' => $bucket === 0 ? 'disengagement' : ($bucket === 1 ? 'program_fit' : 'none'),
+                    'program_shift_flag' => match ($bucket) {
+                        0 => 'disengagement',
+                        1 => 'program_fit',
+                        2 => 'mixed',
+                        default => 'none',
+                    },
                     'factors' => [
                         [
                             'feature' => 'gwa',

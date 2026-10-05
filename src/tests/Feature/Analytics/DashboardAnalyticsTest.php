@@ -231,6 +231,10 @@ class DashboardAnalyticsTest extends TestCase
         $this->assertSame(12, $adminStats['high_risk']);
         $this->assertSame(12, $adminStats['risk']['moderate']);
         $this->assertSame(36, $adminStats['risk']['low']);
+        $this->assertSame(12, $adminStats['program_shift']['disengagement']);
+        $this->assertSame(12, $adminStats['program_shift']['program_fit']);
+        $this->assertSame(12, $adminStats['program_shift']['mixed']);
+        $this->assertSame(24, $adminStats['program_shift']['none']);
         $this->assertSame(
             $adminStats['risk']['low'] + $adminStats['risk']['moderate'] + $adminStats['risk']['high'],
             $adminStats['with_prediction'],

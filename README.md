@@ -42,8 +42,9 @@ docker compose up -d --build
 docker compose exec app composer install
 copy src\.env.example src\.env
 docker compose exec app php artisan key:generate
-docker compose exec app php artisan migrate --seed
+docker compose exec app php artisan migrate:fresh --seed
 docker compose exec app npm install
+docker compose exec app npm run build
 ```
 The first build takes several minutes. Then open:
 
@@ -53,7 +54,7 @@ The first build takes several minutes. Then open:
 | phpMyAdmin (DB viewer) | http://localhost:8080 (server `db`, user `edupredict`, password `secret`) |
 | Vite dev server (when running) | http://localhost:5173 |
 
-Demo accounts for each role are listed in the section **Demo accounts** below once the seeders exist.
+Demo accounts for each role are in [section 9](#9-demo-accounts). The same command loads colleges, programs, questionnaire items, the PSOC starter set, interventions, and the synthetic cohort.
 
 Start the frontend dev server when working on the UI:
 ```powershell
@@ -121,8 +122,9 @@ AI_MODEL=              # a ":free" text model
 AI_VISION_MODEL=       # optional
 AI_FALLBACK_MODELS=
 AI_DAILY_LIMIT=40
+AI_PER_MINUTE_LIMIT=20
 ```
-Free models are limited to roughly 20 requests/minute and about 50/day per account, so please don't spam it while testing. The app falls back to plain text when the AI is unavailable.
+Leave `AI_API_KEY` empty to run every AI feature on its rule-based or manual fallback. Free models are limited to roughly 20 requests/minute and about 50/day per account. The app stops calling the API at the daily and per-minute limits and shows the standard text instead. Automated tests force the key empty, so the suite cannot call OpenRouter.
 
 ## 8. Troubleshooting (problems we already hit)
 
@@ -149,7 +151,39 @@ Development only. Password for every demo account: `Password123!`
 | Dean | dean@edupredict.test |
 | Administrator | admin@edupredict.test |
 
-Sixty additional students (`SYN-0001` … `SYN-0060`) are seeded as synthetic data.
+Sixty synthetic students (`SYN-0001` … `SYN-0060`, emails `syntheticN@edupredict.test`) sit across the programs. Of those with a stored prediction, 12 are high risk with a disengagement flag, 12 are moderate with a program-fit flag, 12 are low with mixed signals, and 24 are low with no shift pattern. A few use story names (Mara Bautista, Nico Reyes, Rico Dela Cruz, Liza Ramos, and others). Sam Student (`2024-00001`, BSIS, adviser Faye Faculty) has a complete consent record and no prediction yet, so the student demo can request one. Una Applicant (`2024-88888`) is on the institution list and is not registered.
+
+`npm` is not required to boot the seeded app. Build the frontend when you change Blade, CSS, or JavaScript:
+
+```powershell
+docker compose exec app npm install
+docker compose exec app npm run build
+```
+
+## 11. Tests
+
+From the project root:
+
+```powershell
+docker compose exec app php artisan test
+```
+
+PHPUnit uses an in-memory SQLite database. It does not call OpenRouter. Grade OCR tests run when `src/cursor/samples/` contains the portal samples and the container has Python and Tesseract; otherwise those cases skip with a message.
+
+## 12. How to plug in the trained models
+
+Do not drop a model file into the app until that work is explicitly approved. The prediction path is already behind one interface.
+
+1. Implement `App\Contracts\PredictorInterface` in a new class. The placeholder is `App\Services\Prediction\HeuristicPredictor`. Its version string is `placeholder-heuristic-v0`. Keep that label on any output that still uses the placeholder. Do not describe heuristic scores as trained model results.
+2. Bind the new class in `App\Providers\AppServiceProvider`. The container currently maps `PredictorInterface` to `HeuristicPredictor`. The `http` and `onnx` driver names are reserved and throw until a real driver exists.
+3. Select the driver with `PREDICTOR_DRIVER` in `src/.env`. The values are read in `config/edupredict.php` under `predictor.driver`.
+4. Match the feature names and snapshot shape in `src/docs/ml-feature-contract.md`. `App\Services\Prediction\FeatureBuilder` is the only place that assembles a feature set. Predictions are insert-only, and each row stores `model_version`.
+
+Career scores, program-shift labels, and institutional-action selection stay deterministic. A future model does not choose those.
+
+## 13. Known gaps
+
+Intentionally unfinished work is listed in [`src/docs/KNOWN_GAPS.md`](src/docs/KNOWN_GAPS.md).
 
 ## 10. Privacy and ethics
 

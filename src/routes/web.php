@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'welcome')->name('home');
 Route::view('/demo/table', 'pages.demo-table')->name('demo.table');
 Route::get('/privacy', [PrivacyController::class, 'show'])->name('privacy');
+Route::view('/about', 'about')->name('about');
 
 Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
     Route::get('/dashboard', DashboardRedirectController::class)->name('dashboard');

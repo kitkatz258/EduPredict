@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name') }}</title>
+    <title>{{ \App\Support\PageTitle::forRequest() }}</title>
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -28,6 +29,10 @@
                 <a href="{{ route('login') }}" class="mt-6 inline-flex w-full justify-center rounded-lg bg-brand-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-[#2E7D32]">Sign in</a>
                 <p class="mt-4 text-center text-sm text-gray-500">
                     <a class="font-medium text-brand-900 underline" href="{{ route('register') }}">Student registration</a>
+                    ·
+                    <a class="font-medium text-brand-900 underline" href="{{ route('about') }}">About</a>
+                    ·
+                    <a class="font-medium text-brand-900 underline" href="{{ route('privacy') }}">Privacy</a>
                     ·
                     <a class="font-medium text-brand-900 underline" href="{{ route('password.request') }}">Forgot password?</a>
                 </p>
