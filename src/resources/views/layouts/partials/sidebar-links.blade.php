@@ -10,6 +10,7 @@
 @else
     @if ($role === \App\Enums\UserRole::Student)
         <a href="{{ route('student.dashboard') }}" class="{{ $nav('student.dashboard') }}">Dashboard</a>
+        <a href="{{ route('student.results') }}" class="{{ $nav('student.results') }}">Results</a>
         <a href="{{ route('student.profile') }}" class="{{ $nav('student.profile') }}">My Profile</a>
         <a href="{{ route('student.grades') }}" class="{{ $nav('student.grades') }}">My Grades</a>
         <a href="{{ route('student.questionnaire') }}" class="{{ $nav('student.questionnaire') }}">Questionnaire</a>

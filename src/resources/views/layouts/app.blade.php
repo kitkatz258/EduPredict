@@ -54,11 +54,9 @@
                     @endisset
                 </div>
                 <div class="flex items-center gap-3">
-                    <button type="button" class="rounded-lg p-2 text-brand-900 hover:bg-brand-50" aria-label="Notifications">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                    </button>
+                    @auth
+                        <livewire:notification-bell />
+                    @endauth
                     @auth
                         <span class="hidden text-sm text-gray-600 sm:inline">{{ auth()->user()->name }}</span>
                         <form method="POST" action="{{ route('logout') }}">

@@ -8,6 +8,7 @@ use App\Http\Controllers\RoleDashboardController;
 use App\Http\Controllers\Student\GradePageController;
 use App\Http\Controllers\Student\ProfilePageController;
 use App\Http\Controllers\Student\QuestionnairePageController as StudentQuestionnairePageController;
+use App\Http\Controllers\Student\ResultsPageController;
 use App\Http\Controllers\StudentRecordController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,10 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
     Route::get('/student/questionnaire', [StudentQuestionnairePageController::class, 'index'])
         ->middleware('role:student')
         ->name('student.questionnaire');
+
+    Route::get('/student/results', [ResultsPageController::class, 'index'])
+        ->middleware('role:student')
+        ->name('student.results');
 
     Route::get('/faculty/dashboard', [RoleDashboardController::class, 'faculty'])
         ->middleware('role:faculty')

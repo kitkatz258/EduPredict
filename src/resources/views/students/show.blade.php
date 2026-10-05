@@ -1,10 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-lg font-semibold text-brand-900">{{ $student->user->name }}</h2>
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ $student->program?->name }}</p>
+            <h2 class="text-lg font-semibold text-brand-900">{{ $student->user->name }}</h2>
+        </div>
     </x-slot>
 
-    <div class="rounded-2xl border border-brand-200 bg-white p-6 shadow-sm">
-        <dl class="grid gap-3 text-sm sm:grid-cols-2">
+    <div class="mb-6 rounded-2xl border border-brand-200 bg-white p-6 shadow-sm">
+        <dl class="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
             <div>
                 <dt class="text-gray-500">Student number</dt>
                 <dd class="font-medium text-gray-900">{{ $student->student_number }}</dd>
@@ -18,10 +21,11 @@
                 <dd class="font-medium text-gray-900">{{ $student->year_level }}</dd>
             </div>
             <div>
-                <dt class="text-gray-500">Latest risk</dt>
-                <dd class="font-medium text-gray-900">{{ $student->latestPrediction?->dropout_risk ?? 'No prediction yet' }}</dd>
+                <dt class="text-gray-500">Adviser</dt>
+                <dd class="font-medium text-gray-900">{{ $student->adviser?->name ?? 'Unassigned' }}</dd>
             </div>
         </dl>
-        <p class="mt-6 text-xs text-gray-500">These results are estimates, not guarantees. They do not decide admission, academic standing, employment, or discipline.</p>
     </div>
+
+    @include('predictions.panel', ['showRequest' => false])
 </x-app-layout>
