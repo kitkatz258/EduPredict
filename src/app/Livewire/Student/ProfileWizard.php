@@ -56,7 +56,7 @@ class ProfileWizard extends Component
     public function goTo(string $step): void
     {
         $this->authorizeStudent();
-        if (! in_array($step, ['academic', 'socioeconomic', 'skills'], true)) {
+        if (! in_array($step, ['academic', 'socioeconomic', 'skills', 'questionnaire'], true)) {
             return;
         }
 

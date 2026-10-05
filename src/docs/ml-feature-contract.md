@@ -13,11 +13,20 @@ column names until the adviser-approved training datasets are chosen.
 - Drivers reserved: `heuristic` (now), `http`, `onnx` (later).
 - Swap the trained model by implementing `PredictorInterface` and changing the driver binding.
 
-## Feature catalog (skeleton — filled in M5.5)
+## Feature catalog
+
+`FeatureBuilder::build()` currently returns questionnaire construct scores only.
+The rest of the `FeatureSet`, plus `HeuristicPredictor`, is added in M5.5. Do not train a model here.
 
 | name | type | allowed values | source | used by |
 |---|---|---|---|---|
-| *(rows added when FeatureBuilder is implemented)* | | | | |
+| construct_scores.study_habits | float | 0–100 | `questionnaire_responses.construct_scores` (latest submission) | employability, dropout (M5.5) |
+| construct_scores.time_management | float | 0–100 | same | employability, dropout (M5.5) |
+| construct_scores.motivation | float | 0–100 | same | employability, dropout (M5.5) |
+| construct_scores.procrastination | float | 0–100; higher means more procrastination | same | employability, dropout (M5.5) |
+| construct_scores.engagement | float | 0–100 | same | employability, dropout (M5.5) |
+
+Scores use a 1–5 Likert mean, with `reverse_scored` items transformed as `6 - value`, then `(mean - 1) / 4 * 100`.
 
 ## Notes
 

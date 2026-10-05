@@ -9,8 +9,7 @@ use App\Models\Student;
 final class ProfileCompleteness
 {
     /**
-     * Equal weight per section that exists in this milestone.
-     * Questionnaire is added when that section is implemented.
+     * Equal weight across academic, socioeconomic, skills, and questionnaire.
      *
      * @return array{percent: int, sections: array<string, bool>}
      */
@@ -23,6 +22,7 @@ final class ProfileCompleteness
             'academic' => $student->gradeReports()->where('status', 'confirmed')->exists(),
             'socioeconomic' => $socioeconomic !== null && ! $socioeconomic->is_draft,
             'skills' => $skills !== null && ! $skills->is_draft,
+            'questionnaire' => $student->questionnaireResponses()->whereNotNull('submitted_at')->exists(),
         ];
 
         $total = count($sections);

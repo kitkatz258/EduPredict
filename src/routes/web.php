@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminPageController;
+use App\Http\Controllers\Admin\QuestionnairePageController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleDashboardController;
 use App\Http\Controllers\Student\GradePageController;
 use App\Http\Controllers\Student\ProfilePageController;
+use App\Http\Controllers\Student\QuestionnairePageController as StudentQuestionnairePageController;
 use App\Http\Controllers\StudentRecordController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +29,10 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         ->middleware('role:student')
         ->name('student.profile');
 
+    Route::get('/student/questionnaire', [StudentQuestionnairePageController::class, 'index'])
+        ->middleware('role:student')
+        ->name('student.questionnaire');
+
     Route::get('/faculty/dashboard', [RoleDashboardController::class, 'faculty'])
         ->middleware('role:faculty')
         ->name('faculty.dashboard');
@@ -47,6 +53,7 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         Route::get('/admin/users', [AdminPageController::class, 'users'])->name('admin.users');
         Route::get('/admin/institution-students', [AdminPageController::class, 'institutionStudents'])->name('admin.institution-students');
         Route::get('/admin/advisers', [AdminPageController::class, 'advisers'])->name('admin.advisers');
+        Route::get('/admin/questionnaire', [QuestionnairePageController::class, 'index'])->name('admin.questionnaire');
     });
 
     Route::get('/students/{student}', [StudentRecordController::class, 'show'])

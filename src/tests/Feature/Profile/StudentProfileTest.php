@@ -103,13 +103,14 @@ class StudentProfileTest extends TestCase
         $this->assertTrue($done['sections']['socioeconomic']);
         $this->assertTrue($done['sections']['skills']);
         $this->assertFalse($done['sections']['academic']);
-        $this->assertSame(67, $done['percent']);
+        $this->assertFalse($done['sections']['questionnaire']);
+        $this->assertSame(50, $done['percent']);
 
         $this->actingAs($student->user)
             ->get(route('student.dashboard'))
             ->assertOk()
             ->assertSee('Profile completeness')
-            ->assertSee('67%');
+            ->assertSee('50%');
 
         $this->actingAs($student->user)
             ->get(route('student.profile'))

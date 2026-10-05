@@ -79,6 +79,11 @@ class Student extends Model
         return $this->hasOne(SkillsExperience::class);
     }
 
+    public function questionnaireResponses(): HasMany
+    {
+        return $this->hasMany(QuestionnaireResponse::class);
+    }
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         return match ($user->role) {

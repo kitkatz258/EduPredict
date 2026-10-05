@@ -15,7 +15,7 @@
             <div class="h-full rounded-full bg-brand-400" style="width: {{ $completeness['percent'] }}%"></div>
         </div>
         <ul class="mt-4 flex flex-wrap gap-2 text-xs">
-            @foreach (['academic' => 'Academic', 'socioeconomic' => 'Socioeconomic', 'skills' => 'Skills & experience'] as $key => $label)
+            @foreach (['academic' => 'Academic', 'socioeconomic' => 'Socioeconomic', 'skills' => 'Skills & experience', 'questionnaire' => 'Questionnaire'] as $key => $label)
                 <li class="rounded-full border px-3 py-1 {{ $completeness['sections'][$key] ? 'border-brand-200 bg-brand-50 text-brand-900' : 'border-gray-200 text-gray-600' }}">
                     {{ $label }}{{ $completeness['sections'][$key] ? ' · complete' : ' · still open' }}
                 </li>
@@ -23,8 +23,8 @@
         </ul>
     </section>
 
-    <nav class="grid gap-2 sm:grid-cols-3" aria-label="Profile steps">
-        @foreach (['academic' => '1. Academic', 'socioeconomic' => '2. Socioeconomic', 'skills' => '3. Skills & experience'] as $key => $label)
+    <nav class="grid gap-2 sm:grid-cols-2 lg:grid-cols-4" aria-label="Profile steps">
+        @foreach (['academic' => '1. Academic', 'socioeconomic' => '2. Socioeconomic', 'skills' => '3. Skills & experience', 'questionnaire' => '4. Questionnaire'] as $key => $label)
             <button
                 type="button"
                 wire:click="goTo('{{ $key }}')"
@@ -198,5 +198,9 @@
                 <span class="self-center text-sm text-gray-500" wire:loading>Saving…</span>
             </div>
         </form>
+    @endif
+
+    @if ($step === 'questionnaire')
+        <livewire:student.questionnaire-form />
     @endif
 </div>

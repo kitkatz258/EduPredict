@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             CollegeProgramSeeder::class,
             DemoUserSeeder::class,
             SyntheticStudentSeeder::class,
+            QuestionnaireItemSeeder::class,
         ]);
     }
 }
