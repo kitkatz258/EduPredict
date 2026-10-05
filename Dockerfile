@@ -2,7 +2,7 @@ FROM php:8.3-apache
 
 # System libs + PHP extensions Laravel needs
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        git unzip curl tesseract-ocr tesseract-ocr-eng poppler-utils libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libxml2-dev \
+        git unzip curl tesseract-ocr tesseract-ocr-eng poppler-utils python3 python3-pil python3-numpy libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libxml2-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql mbstring zip gd bcmath exif pcntl \
     && a2enmod rewrite \

@@ -6,7 +6,7 @@
 > choose the simplest reasonable option and record it in `docs/DECISIONS.md` (one line per decision).
 >
 > Environment rules are in `.cursor/rules/edupredict.mdc`. Paths below are relative to the Laravel root (`src/`).
-> The Laravel 12 project and Docker (app + MySQL + phpMyAdmin) already exist and run. Do not re-create them.
+> The Laravel 12 project and Docker (app + MariaDB 11.4 + phpMyAdmin) already exist and run. Do not re-create them.
 
 ---
 
@@ -50,7 +50,7 @@ Design it so swapping in the real model touches ONE place:
 
 ## 3. Tech stack and conventions
 
-- Laravel 12, PHP 8.3, MySQL (`DB_CONNECTION=mysql`), Blade + Tailwind CSS (Vite) + **Livewire** (latest stable release compatible with Laravel 12, `composer require livewire/livewire`), Chart.js for charts.
+- Laravel 12, PHP 8.3, MariaDB 11.4 via Docker (MySQL-compatible; keep `DB_CONNECTION=mysql`; do NOT use MySQL-8-only or MariaDB-only SQL features, keep migrations portable), Blade + Tailwind CSS (Vite) + **Livewire** (latest stable release compatible with Laravel 12, `composer require livewire/livewire`), Chart.js for charts.
 - **Livewire rules (follow strictly):**
   - Use **class-based Livewire components** (`app/Livewire/...` + Blade view). Do NOT use Volt / functional single-file components.
   - **Livewire bundles Alpine.js. Do NOT install or import Alpine separately.** If Breeze (or anything else) adds `import Alpine from 'alpinejs'` / `Alpine.start()` to `resources/js/app.js`, remove it, otherwise Livewire throws a "multiple instances of Alpine" error. Use Livewire's bundled Alpine (`x-data`, `x-show`, etc.) for small client-side behavior.
@@ -127,19 +127,28 @@ Adding another provider later must be a single new class.
 **The app must work fully with `AI_API_KEY` empty**: every AI feature has a rule-based/manual fallback and the UI shows a small note when the fallback was used.
 
 Three AI features:
-1. **Grade-report extraction (hybrid pipeline, accuracy-first).** Goal: turn whatever the student provides into clean rows (subject code, description, units, midterm, final exam, final grade, remarks) shown in an editable review table. The AI is NOT the primary extractor. Build these input paths, cheapest and most reliable first:
+1. **Grade-report extraction (hybrid pipeline, accuracy-first).** Goal: turn whatever the student provides into clean rows (subject code, description, units, midterm, final exam, final grade, remarks) shown in an editable review table. The AI is NOT the primary extractor. Input paths, most reliable first:
    1. **Paste from portal (primary, no AI, no OCR).** A textarea where the student pastes the grades table copied from the school portal (copying an HTML table yields tab-separated text with columns intact). Parse deterministically.
-   2. **PDF with a text layer:** extract with `pdftotext -layout` (poppler is installed in the Docker image), then parse the same way.
-   3. **Image or scanned PDF:** rasterize (`pdftoppm`) if needed, run **Tesseract** (installed in the Docker image) in TSV mode to get word boxes, **cluster words into rows by y-coordinate and columns by x-position**, normalize OCR noise (`1,25`→`1.25`, `l.25`/`I.25`→`1.25`, `O`→`0` inside numbers), then parse.
-   4. **AI fallback (only if parsing confidence is low):** if fewer than the expected rows validate, or >20% of rows fail validation, send the AI ONLY the cleaned OCR/pasted **text lines that look like subject rows** (header lines with names, student numbers, emails, and any line not matching a subject-row pattern are stripped first) and ask for JSON rows. Validate the JSON strictly. Never send the image or PDF to the AI. Count this call against `AI_DAILY_LIMIT`. If `AI_API_KEY` is empty or the call fails, skip to manual entry with whatever rows parsed.
-   - **Parser design:** `app/Services/Grades/GradeReportParser.php` with small adapter classes per input path and a shared `GradeRowNormalizer`. Detect columns **from header keywords** (Subject Code, Description/Subject, Units, Midterm, Final, Final Grade/Grade, Remarks), tolerating different orders and extra columns (Faculty, Section, #), and ignore those extra columns. If no header is found, fall back to anchoring on a subject-code pattern at the row start (`[A-Z]{2,8}\s?\d{1,3}[A-Z]?`) and the remarks/grade tokens at the row end. Also read the term from the header (e.g. "School Year and Semester: 2024-2025 | Second") and the program name when present.
-   - **Validation rules (flag, never silently drop):** subject-code pattern; units numeric 0–9; grades must belong to the configured scale (Philippine default: 1.00, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00, 5.00, plus INC/DRP/W etc.); remarks must agree with the grade (3.00 or better = PASSED, 5.00 = FAILED); duplicate subject codes in one term flagged; set `needs_review=true` on any row with a problem and highlight it.
-   - **Cross-check:** if the source shows a GPA/GWA (e.g. "GPA 1.44"), compare it with the unit-weighted average the system computes and show a visible warning on mismatch. (Example below matches: 34.5 weighted points / 24 units = 1.4375 ≈ 1.44.)
-   - **Review screen (Livewire):** an editable table (edit cells, add row, delete row, row-level warnings, "source: pasted / PDF / OCR / AI" label, computed GPA shown against detected GPA). Nothing is saved until the student clicks **Confirm** (`status=confirmed`). Manual entry is always available. Uploaded files are deleted after confirmation (record the choice in DECISIONS.md).
-   - **Fixtures and tests (required):** create `tests/Fixtures/grade-reports/` and write parser tests against it. Include the sample below as both a pasted-text fixture (tab-separated) and, if image files exist in `cursor/samples/`, as OCR fixtures. Add at least three layout variants of your own (different column order, missing Midterm/Final columns, a PDF-style space-aligned layout). Tests must NOT call the real AI (`Http::fake()`).
-   - **Expected result for the reference sample** (School Year 2024-2025, Second semester, BS Information Systems; faculty names and sections are ignored):
+   2. **PDF with a real text layer:** `pdftotext -layout`, then parse the same way. **IMPORTANT: a PDF made by "printing a screenshot" has NO text layer** (verified on a sample: `pdftotext` returns nothing and `pdfimages -list` shows one embedded image). If extracted text is empty or has no recognizable subject rows, extract the page image (`pdfimages -png`, or `pdftoppm -r 200 -png`) and use path 3.
+   3. **Image / screenshot / image-only PDF: GRID-AWARE CELL OCR (this is the key finding).** Plain whole-image Tesseract is NOT reliable on these tables (verified: `1.25`→`HE25)`, `1.75`→`75`, `3`→`3}`, `PR 002`→`PROO2`, `CCS 107`→`CCSHO7:`). What works (verified 23/23 rows correct on 3 samples, and GPA/semester/program read correctly): detect the table grid, crop **each cell**, upscale 3x, binarize (threshold ~150), pad, and OCR it with a **per-column character whitelist** (digits only for #/units; `0-9 . INCDRPW` for grade columns; letters+digits+space for subject code; letters+space for remarks). Ignore and never store the Faculty and Section columns. Read the header band (program, "School Year and Semester: 2024-2025 | Second") and the footer GPA; **the footer text is dark green on mid green, so it must be binarized or Tesseract returns nothing.**
+      - A tested reference implementation is in `cursor/reference/grade_table_ocr.py`. **Productionize it** at `tools/grade_table_ocr.py` (keep the contract: JSON on stdout, non-zero exit plus `{"error": ...}` on failure), call it from Laravel with `Symfony\Component\Process\Process` (python3, Pillow, numpy and the tesseract CLI are installed in the Docker image), add a timeout, and cover it with tests using the fixtures below. Make grid detection more tolerant (it currently expects 10 columns, an orange header band, light grid lines).
+      - **If grid detection fails** (different layout, phone photo, skewed): fall back to generic Tesseract TSV (word boxes clustered into rows by y and columns by x, with OCR-noise normalization such as `1,25`→`1.25`, `l.25`/`I.25`→`1.25`), then path 4. Never claim success silently; show the source and the warnings.
+   4. **AI fallback (only if parsing confidence is low):** if fewer rows validate than expected or >20% of rows fail validation, send the AI ONLY the cleaned **text lines that look like subject rows** (strip any line that is not a subject row, so names, student numbers and headers are never sent) and ask for JSON rows. Validate strictly. Never send the image or PDF. Count the call against `AI_DAILY_LIMIT`. If `AI_API_KEY` is empty or the call fails, go to manual entry with whatever rows parsed.
+   - **Parser design:** `app/Services/Grades/GradeReportParser.php` with small adapters per input path and a shared `GradeRowNormalizer`. For pasted/PDF text, detect columns **from header keywords** (Subject Code, Description/Subject, Units, Midterm, Final, Final Grade/Grade, Remarks), tolerate different orders and extra columns, and fall back to anchoring on the subject-code pattern (`[A-Z]{2,8}\s?\d{1,3}[A-Z]?`) at the row start and the remarks/grade tokens at the end.
+   - **Validation (flag, never silently drop):** subject-code pattern; units numeric 0-9; grades in the configured scale (Philippine default 1.00, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00, 5.00, plus INC/DRP/W etc.); remarks consistent with the grade (<=3.00 PASSED, 5.00 FAILED, INC -> INCOMPLETE); duplicate subject codes in a term flagged; `needs_review=true` and a highlight on any problem row.
+   - **GPA computation and cross-check (verified against 3 real portal sheets; implement exactly):**
+     - GPA = sum(units x final_grade) / sum(units) over rows that count toward GPA.
+     - **NSTP subjects (code starts with `NSTP`) are EXCLUDED from the GPA.** Evidence: the 2023-2024 sheet only matches the portal's 1.31 when NSTP 122 (3 units) is excluded (31.5/24 = 1.3125); including it gives 1.28.
+     - **INC counts as 4.00 in the portal's GPA** (inferred from the numbers: 2025-2026 sheet matches 2.33 only with INC=4.00: 60.5/26 = 2.327; skipping INC gives 1.93, INC=5.00 gives 2.52). Make this a config value `grades.inc_gpa_weight` (default 4.00) with a note in DECISIONS.md that it must be confirmed with the registrar. Failed (5.00) rows DO count. PATHFIT counts.
+     - Make "excluded code prefixes" configurable (`grades.gpa_excluded_prefixes`, default `["NSTP"]`).
+     - If the computed GPA differs from the GPA shown on the source by more than 0.01, show a visible warning on the review screen naming the likely cause (an OCR error in a row, or a rule difference), and highlight the rows.
+   - **Review screen (Livewire):** editable table (edit cells, add/delete row, row-level warnings, source label: pasted / PDF text / grid OCR / generic OCR / AI), computed GPA next to the detected GPA. Nothing is saved until the student clicks **Confirm** (`status=confirmed`). Manual entry always works. Uploaded files are deleted after confirmation (record the choice in DECISIONS.md).
+   - **Fixtures and tests (required):** `tests/Fixtures/grade-reports/`. The three reference sheets below as expected-JSON fixtures (parser and GPA tests run against the expected data even without the images). If the sample images exist in `cursor/samples/` (names below), also run the OCR script against them in an integration test (skip with a clear message if python/tesseract are unavailable). Add at least three layout variants of your own (different column order, no Midterm/Final columns, space-aligned PDF text). Tests must NOT call the real AI (`Http::fake()`).
+   - **Expected results for the reference sheets** (faculty names and sections are ignored). Program for all: BS Information Systems.
 
-     | code | description | units | midterm | final exam | final grade | remarks |
+     **A. `Screenshot_2026-10-05_143510.png` : 2024-2025, Second. Portal GPA 1.44.**
+
+     | code | description | units | midterm | final | final grade | remarks |
      |---|---|---|---|---|---|---|
      | CCS 106 | Applications Development and Emerging Technologies | 5 | 2.50 | 2.25 | 2.25 | PASSED |
      | CCS 110 | Computer Graphics 1 | 3 | 2.25 | 1.00 | 1.50 | PASSED |
@@ -149,7 +158,37 @@ Three AI features:
      | PATHFIT 4 | Sports and Fitness | 2 | 1.00 | 1.00 | 1.00 | PASSED |
      | PR 002 | Quantitative Methods | 3 | 1.75 | 1.00 | 1.25 | PASSED |
 
-     Detected GPA 1.44; computed 1.4375 (rounds to 1.44).
+     Computed 34.5/24 = 1.4375 -> 1.44.
+
+     **B. `Screenshot_2026-10-05_184653.png` : 2025-2026, First. Portal GPA 2.33. Contains INC and a FAILED row.**
+
+     | code | description | units | midterm | final | final grade | remarks |
+     |---|---|---|---|---|---|---|
+     | CCS 118 | Multimedia Systems | 3 | 1.00 | 1.75 | 1.50 | PASSED |
+     | GEE 003 | Gender and Society | 3 | 1.50 | 1.00 | 1.25 | PASSED |
+     | IS 102 | Enterprise Resource Planning | 3 | 1.50 | 1.25 | 1.25 | PASSED |
+     | IS 103 | Database System Enterprise | 5 | 1.75 | INC | INC | INCOMPLETE |
+     | IS 104 | IS Innovations & New Technologies | 3 | 1.75 | 1.75 | 1.75 | PASSED |
+     | IS 105 | Enterprise Architecture | 3 | 1.25 | 1.25 | 1.25 | PASSED |
+     | IS 106 | IS Major Elective 1 | 3 | 2.00 | 5.00 | 5.00 | FAILED |
+     | RES 001 | Methods of Research | 3 | 1.50 | 1.50 | 1.50 | PASSED |
+
+     Computed with INC=4.00: 60.5/26 = 2.327 -> 2.33. `IS 106` must be flagged `is_failed`; `IS 103` must be flagged incomplete (not failed).
+
+     **C. `Screenshot_2026-10-05_184732.pdf` (image-only PDF, NO text layer) : 2023-2024, Second. Portal GPA 1.31.**
+
+     | code | description | units | midterm | final | final grade | remarks |
+     |---|---|---|---|---|---|---|
+     | CC 103 | Computer Programming 2 | 5 | 1.25 | 1.00 | 1.00 | PASSED |
+     | CC 108 | Technical Computer Concepts | 3 | 1.25 | 1.25 | 1.25 | PASSED |
+     | CCS 107 | Web Development 1 | 5 | 1.50 | 1.50 | 1.50 | PASSED |
+     | GEC 008 | Ethics | 3 | 1.25 | 1.25 | 1.25 | PASSED |
+     | ISP 101 | Fundamentals of Information System | 3 | 1.50 | 1.25 | 1.25 | PASSED |
+     | NSTP 122 | Civic Welfare Training Services 2 | 3 | 1.25 | 1.00 | 1.00 | PASSED (excluded from GPA) |
+     | PATHFIT 2 | Exercise-Based Fitness Activities | 2 | 1.25 | 1.25 | 1.25 | PASSED |
+     | PR 001 | College Algebra | 3 | 2.00 | 1.75 | 1.75 | PASSED |
+
+     Computed excluding NSTP: 31.5/24 = 1.3125 -> 1.31.
 2. **Career-match explanations**: the system computes compatibility scores itself (see M8). The AI only phrases a short explanation (all five in one request). If the AI is unavailable, use a template string.
 3. **Recommended-action phrasing**: the system selects interventions from the predefined list based on the student's contributing risk factors. The AI may only **rephrase** the chosen
    interventions; it receives intervention codes and must return JSON referencing only those codes. Validate the response; discard anything not in the list. Rule-based fallback = the intervention's own stored description.
@@ -213,7 +252,7 @@ If a screenshot conflicts with this spec's roles, data, stack or palette rules, 
 - Grade report CRUD (term, subjects, units, grades, failed flag computed from the grading scale; make the scale configurable, default Philippine 1.00–5.00 where 3.00 is passing and 5.00 failing, with INC/DRP handling).
 - Computed GWA (unit-weighted), failed-subject count, semesters completed, `limited_history` flag (e.g. fewer than 2 completed semesters).
 - Implement the hybrid extraction pipeline from section 6 (paste → PDF text → OCR → AI fallback) with the editable review table and explicit **Confirm**. Use Livewire `WithFileUploads` for uploads. The paste path and manual entry must work with no API key and no internet.
-- **Done when:** manual entry works; the reference sample parses exactly to the expected table above (paste path, tests green); with the AI key empty, upload still works through OCR/parsing or degrades to manual; GWA is correct in tests.
+- **Done when:** manual entry works; the three reference sheets (A, B, C in section 6) parse exactly to the expected tables with the correct GPAs (INC and NSTP rules applied), including the image-only PDF; the paste path and tests are green; with the AI key empty, upload still works through OCR/parsing or degrades to manual; GWA is correct in tests.
 
 ### M4 – Socioeconomic profile + Skills & Experience
 - Multi-step forms with the fields in the data model; encrypted storage for sensitive socioeconomic fields; draft saving; completeness meter.
