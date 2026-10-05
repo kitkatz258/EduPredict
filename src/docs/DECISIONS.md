@@ -21,4 +21,4 @@ One line per decision. Record choices made where the spec is silent.
 - M3: Dropped (DRP/W) rows are excluded from GPA; INC uses `grades.inc_gpa_weight` (default 4.00, confirm with registrar); NSTP prefixes are excluded; PATHFIT counts.
 - M3: Confirmed grade reports may be deleted by the student and re-entered; a second confirmed report for the same term is rejected.
 - M3: `is_major_subject` defaults to false until a program curriculum list exists.
-- M3: Sample portal images were not in `cursor/samples/` at build time; parser/GPA tests use JSON and paste fixtures, and OCR image tests skip when samples or tesseract/python are missing.
+- M3: Real portal samples live in gitignored `cursor/samples/` as `grade_sample_a.png`, `grade_sample_b.png`, and `grade_sample_c.pdf` (the spec’s `Screenshot_2026-10-05_*` names are accepted as alternates). OCR descriptions stay uppercase as printed; program text stays the full “Bachelor of Science in Information Systems” heading. OCR tests skip only when those files or python/tesseract are missing.
