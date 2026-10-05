@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ $title ?? config('app.name') }}</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+</head>
+<body class="min-h-screen bg-brand-50 font-sans text-gray-800 antialiased">
+    <div class="flex min-h-screen" x-data="{ sidebarOpen: false }">
+        <div
+            x-show="sidebarOpen"
+            x-transition.opacity
+            class="fixed inset-0 z-30 bg-black/40 lg:hidden"
+            @click="sidebarOpen = false"
+            style="display: none;"
+        ></div>
+
+        <aside
+            class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-brand-900 text-white transition-transform lg:static lg:translate-x-0"
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+            aria-label="Sidebar"
+        >
+            <div class="flex h-16 items-center gap-2 border-b border-white/10 px-5">
+                <span class="text-lg font-semibold tracking-tight">EduPredict</span>
+            </div>
+            <nav class="flex-1 space-y-1 overflow-y-auto p-3 text-sm">
+                <a href="{{ url('/') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Home</a>
+                <a href="{{ url('/demo/table') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Demo table</a>
+            </nav>
+            <p class="border-t border-white/10 p-4 text-xs text-white/70">Advisory estimates only. Not a diagnostic tool.</p>
+        </aside>
+
+        <div class="flex min-w-0 flex-1 flex-col">
+            <header class="flex h-16 items-center justify-between border-b border-brand-200 bg-white px-4">
+                <button
+                    type="button"
+                    class="rounded-lg p-2 text-brand-900 hover:bg-brand-50 lg:hidden"
+                    @click="sidebarOpen = true"
+                    aria-label="Open navigation"
+                >
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <h1 class="text-base font-semibold text-brand-900">{{ $heading ?? ($title ?? 'EduPredict') }}</h1>
+                <div class="flex items-center gap-3">
+                    <button type="button" class="rounded-lg p-2 text-brand-900 hover:bg-brand-50" aria-label="Notifications">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                    </button>
+                    <span class="hidden text-sm text-gray-600 sm:inline">{{ auth()->user()->name ?? 'Guest' }}</span>
+                </div>
+            </header>
+
+            @if (session('status') || session('success') || session('error'))
+                <div class="px-4 pt-4" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)">
+                    @if (session('success') || session('status'))
+                        <div class="rounded-lg border border-brand-200 bg-white px-4 py-3 text-sm text-brand-900" role="status">
+                            {{ session('success') ?? session('status') }}
+                        </div>
+                    @endif
+                    @if (session('error'))
+                        <div class="rounded-lg border border-red-200 bg-white px-4 py-3 text-sm text-red-800" role="alert">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            <main class="flex-1 p-4 sm:p-6">
+                {{ $slot ?? '' }}
+                @yield('content')
+            </main>
+        </div>
+    </div>
+    @livewireScripts
+</body>
+</html>
