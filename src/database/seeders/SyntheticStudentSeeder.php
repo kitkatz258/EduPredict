@@ -195,6 +195,7 @@ class SyntheticStudentSeeder extends Seeder
                             'magnitude' => 0.25,
                         ],
                     ],
+                    'created_at' => now()->subMonths((($i - 1) % 6) * 4)->startOfMonth(),
                     'feature_snapshot' => [
                         'gwa_band' => $risk === 'high' ? '2.75-3.00' : '1.75-2.00',
                         'failed_subjects' => $failed ? 1 : 0,

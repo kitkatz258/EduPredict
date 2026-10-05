@@ -14,6 +14,17 @@
                     @endforeach
                 </select>
             </div>
+            @if ($programs->isNotEmpty())
+                <div>
+                    <label for="students-program-{{ $this->getId() }}" class="mr-2 text-sm text-gray-600">Program</label>
+                    <select id="students-program-{{ $this->getId() }}" wire:model.live="filters.program_id" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
+                        <option value="">All</option>
+                        @foreach ($programs as $program)
+                            <option value="{{ $program->id }}">{{ $program->code }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
             <div>
                 <label for="students-risk-{{ $this->getId() }}" class="mr-2 text-sm text-gray-600">Risk</label>
                 <select id="students-risk-{{ $this->getId() }}" wire:model.live="filters.dropout_risk" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
@@ -31,6 +42,9 @@
                     @endforeach
                 </select>
             </div>
+            <button type="button" wire:click="export" class="rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">
+                Export CSV
+            </button>
         </div>
     </div>
 
@@ -49,6 +63,7 @@
                         </th>
                         <th scope="col" class="px-4 py-3 text-left font-semibold text-brand-900">Latest risk</th>
                         <th scope="col" class="px-4 py-3 text-left font-semibold text-brand-900">Employability</th>
+                        <th scope="col" class="px-4 py-3 text-left font-semibold text-brand-900">Program shift</th>
                         <th scope="col" class="px-4 py-3 text-left font-semibold text-brand-900">History</th>
                     </tr>
                 </thead>
@@ -69,13 +84,16 @@
                             <td class="px-4 py-3 text-gray-800">
                                 {{ $row->latestPrediction ? number_format((float) $row->latestPrediction->employability_score, 0) : '—' }}
                             </td>
+                            <td class="px-4 py-3 text-gray-700">
+                                {{ $row->latestPrediction ? $shiftLabels->label((string) $row->latestPrediction->program_shift_flag) : '—' }}
+                            </td>
                             <td class="px-4 py-3">
                                 <a href="{{ route('students.show', $row) }}" class="font-medium text-brand-900 underline">View</a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-12 text-center text-gray-500">{{ $emptyMessage }}</td>
+                            <td colspan="8" class="px-4 py-12 text-center text-gray-500">{{ $emptyMessage }}</td>
                         </tr>
                     @endforelse
                 </tbody>

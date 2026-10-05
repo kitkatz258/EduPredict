@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Tables;
 
+use App\Models\AuditLog;
+use App\Models\Program;
 use App\Models\Student;
+use App\Services\Prediction\ProgramShiftEvaluator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ScopedStudentsTable extends BaseTable
 {
@@ -18,7 +22,57 @@ class ScopedStudentsTable extends BaseTable
         $this->filters = [
             'dropout_risk' => '',
             'year_level' => '',
+            'program_id' => '',
         ];
+    }
+
+    public function export(): StreamedResponse
+    {
+        $this->authorize('viewAny', Student::class);
+        $rows = $this->filteredQuery()->get();
+
+        AuditLog::query()->create([
+            'user_id' => auth()->id(),
+            'action' => 'students.export',
+            'subject_type' => Student::class,
+            'subject_id' => null,
+            'meta' => [
+                'rows' => $rows->count(),
+                'year_level' => (string) ($this->filters['year_level'] ?? ''),
+                'dropout_risk' => (string) ($this->filters['dropout_risk'] ?? ''),
+                'program_id' => (string) ($this->filters['program_id'] ?? ''),
+                'search' => trim($this->search) === '' ? '' : 'set',
+            ],
+            'ip' => request()->ip(),
+        ]);
+
+        return response()->streamDownload(function () use ($rows): void {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                'student_number',
+                'name',
+                'program',
+                'year_level',
+                'dropout_risk',
+                'employability_score',
+                'program_shift_flag',
+                'prediction_date',
+            ]);
+            foreach ($rows as $row) {
+                $latest = $row->latestPrediction;
+                fputcsv($handle, [
+                    $row->student_number,
+                    $row->user?->name,
+                    $row->program?->code,
+                    $row->year_level,
+                    $latest?->dropout_risk ?? '',
+                    $latest ? number_format((float) $latest->employability_score, 2, '.', '') : '',
+                    $latest?->program_shift_flag ?? '',
+                    $latest?->created_at?->timezone((string) config('app.timezone'))->toDateString() ?? '',
+                ]);
+            }
+            fclose($handle);
+        }, 'edupredict-students.csv', ['Content-Type' => 'text/csv']);
     }
 
     public function updating(string $name): void
@@ -64,6 +118,11 @@ class ScopedStudentsTable extends BaseTable
             $query->whereHas('latestPrediction', fn (Builder $predictions) => $predictions->where('dropout_risk', $risk));
         }
 
+        $programId = (string) ($this->filters['program_id'] ?? '');
+        if ($programId !== '' && ctype_digit($programId)) {
+            $query->where('program_id', (int) $programId);
+        }
+
         return $query;
     }
 
@@ -88,6 +147,12 @@ class ScopedStudentsTable extends BaseTable
 
     public function render(): View
     {
-        return view('livewire.tables.scoped-students-table', $this->tableViewData());
+        $programIds = (clone $this->baseQuery())->distinct()->pluck('program_id');
+
+        return view('livewire.tables.scoped-students-table', [
+            ...$this->tableViewData(),
+            'programs' => Program::query()->whereIn('id', $programIds)->orderBy('code')->get(),
+            'shiftLabels' => app(ProgramShiftEvaluator::class),
+        ]);
     }
 }
