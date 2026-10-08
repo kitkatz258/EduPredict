@@ -17,6 +17,7 @@ use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Models\SubjectGrade;
 use App\Models\User;
+use App\Livewire\Student\CareerMatches;
 use App\Livewire\Student\RequestPrediction;
 use Database\Seeders\PsocOccupationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -62,12 +63,12 @@ class CareerMatchTest extends TestCase
 
         $scores = CareerMatch::query()->orderByDesc('compatibility_score')->pluck('compatibility_score')->all();
         $this->actingAs($student->user)
-            ->get(route('student.careers'))
+            ->get(route('student.dashboard'))
             ->assertOk()
             ->assertSee('Software Developers')
             ->assertSee('87%')
             ->assertSee('programming')
-            ->assertSee('Missing: algorithms')
+            ->assertSee('View career details')
             ->assertSee('AI unavailable, using standard text')
             ->assertSee('broad occupational categories, not job offers')
             ->assertDontSee('Accountants');
@@ -75,15 +76,32 @@ class CareerMatchTest extends TestCase
         $this->assertSame($scores, CareerMatch::query()->orderByDesc('compatibility_score')->pluck('compatibility_score')->all());
         $this->assertSame(5, CareerMatch::query()->count());
 
+        $top = CareerMatch::query()->orderByDesc('compatibility_score')->first();
+        Livewire::actingAs($student->user)
+            ->test(CareerMatches::class)
+            ->assertDontSee('Missing: algorithms')
+            ->call('openDetails', $top->id)
+            ->assertSee('Skills to build')
+            ->assertSee('Missing: algorithms')
+            ->assertSee('Not a trained model')
+            ->call('closeDetails')
+            ->assertDontSee('Missing: algorithms');
+
         $other = $this->student('Other Person');
+        Livewire::actingAs($other->user)
+            ->test(CareerMatches::class)
+            ->call('openDetails', $top->id)
+            ->assertNotFound();
         $this->actingAs($other->user)
-            ->get(route('student.careers'))
+            ->get(route('student.dashboard'))
             ->assertOk()
             ->assertDontSee('Software Developers');
 
-        $this->actingAs(User::factory()->departmentHead()->create())
-            ->get(route('student.careers'))
+        $head = User::factory()->departmentHead()->create();
+        $this->actingAs($head)
+            ->get(route('student.dashboard'))
             ->assertForbidden();
+        Livewire::actingAs($head)->test(CareerMatches::class)->assertForbidden();
     }
 
     public function test_ai_explanations_are_deidentified_and_invalid_codes_are_ignored(): void
@@ -130,7 +148,7 @@ class CareerMatchTest extends TestCase
         $this->assertSame(0, CareerMatch::query()->where('explanation', 'like', '%9999%')->count());
 
         $this->actingAs($student->user)
-            ->get(route('student.careers'))
+            ->get(route('student.dashboard'))
             ->assertOk()
             ->assertSee('AI-assisted explanations')
             ->assertSee('broad category, not a job offer')

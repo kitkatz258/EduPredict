@@ -41,7 +41,7 @@ class PredictionRequestTest extends TestCase
 
         $this->assertSame(0, Prediction::query()->count());
         $this->actingAs($student->user)
-            ->get(route('student.results'))
+            ->get(route('student.dashboard'))
             ->assertOk()
             ->assertSee('Still needed')
             ->assertSee('These results are estimates, not guarantees');
@@ -65,7 +65,7 @@ class PredictionRequestTest extends TestCase
             ->test(RequestPrediction::class)
             ->call('request')
             ->assertHasNoErrors()
-            ->assertRedirect(route('student.results'));
+            ->assertRedirect(route('student.dashboard'));
 
         $first = Prediction::query()->sole();
         $this->assertSame('placeholder-heuristic-v0', $first->model_version);
@@ -95,7 +95,7 @@ class PredictionRequestTest extends TestCase
         }
 
         $this->actingAs($student->user)
-            ->get(route('student.results'))
+            ->get(route('student.dashboard'))
             ->assertOk()
             ->assertSee('placeholder-heuristic-v0')
             ->assertSee('These results are estimates, not guarantees')
@@ -140,7 +140,7 @@ class PredictionRequestTest extends TestCase
 
         $this->assertSame('low', Prediction::query()->sole()->confidence);
         $this->actingAs($student->user)
-            ->get(route('student.results'))
+            ->get(route('student.dashboard'))
             ->assertOk()
             ->assertSee('Lower confidence');
     }
@@ -198,7 +198,7 @@ class PredictionRequestTest extends TestCase
         Livewire::actingAs($head)->test(RequestPrediction::class)->assertForbidden();
         Livewire::actingAs($insider->user)->test(ScopedStudentsTable::class)->assertForbidden();
 
-        $this->actingAs($head)->get(route('student.results'))->assertForbidden();
+        $this->actingAs($head)->get(route('student.dashboard'))->assertForbidden();
         $this->actingAs($head)->get(route('department.dashboard'))->assertOk()->assertSee('HIST-10001')->assertDontSee('HIST-20002');
         $this->actingAs($head)->get(route('students.show', $insider))->assertOk()->assertSee($insiderScore)->assertSee('placeholder-heuristic-v0')->assertSee('History')->assertDontSee('above_70k');
         $this->actingAs($head)->get(route('students.show', $outsider))->assertForbidden();
@@ -215,7 +215,7 @@ class PredictionRequestTest extends TestCase
         $this->actingAs($admin)->get(route('students.show', $outsider))->assertOk()->assertDontSee('above_70k');
 
         $this->actingAs($outsider->user)
-            ->get(route('student.results'))
+            ->get(route('student.dashboard'))
             ->assertOk()
             ->assertDontSee($insiderScore);
 

@@ -3,7 +3,7 @@
     $student = $user->student?->loadMissing('program');
     $initials = collect(preg_split('/\s+/', trim($user->name)))->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('');
     $items = [
-        ['route' => 'student.dashboard', 'label' => 'Dashboard', 'icon' => 'ri-dashboard-line', 'active' => ['student.dashboard', 'student.results', 'student.careers']],
+        ['route' => 'student.dashboard', 'label' => 'Dashboard', 'icon' => 'ri-dashboard-line', 'active' => ['student.dashboard']],
         ['route' => 'student.assessment', 'label' => 'Assessment', 'icon' => 'ri-survey-line', 'active' => ['student.assessment', 'student.profile', 'student.questionnaire', 'student.grades']],
         ['route' => 'student.history', 'label' => 'History', 'icon' => 'ri-history-line', 'active' => ['student.history']],
     ];

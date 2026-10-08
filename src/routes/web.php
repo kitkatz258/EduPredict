@@ -8,9 +8,7 @@ use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleDashboardController;
 use App\Http\Controllers\Student\AssessmentPageController;
-use App\Http\Controllers\Student\CareerMatchController;
 use App\Http\Controllers\Student\HistoryPageController;
-use App\Http\Controllers\Student\ResultsPageController;
 use App\Http\Controllers\StudentRecordController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,11 +43,11 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         ->middleware('role:student')
         ->name('student.questionnaire');
 
-    Route::get('/student/results', [ResultsPageController::class, 'index'])
+    Route::redirect('/student/results', '/student/dashboard')
         ->middleware('role:student')
         ->name('student.results');
 
-    Route::get('/student/career-matches', [CareerMatchController::class, 'index'])
+    Route::redirect('/student/career-matches', '/student/dashboard#career-matches')
         ->middleware('role:student')
         ->name('student.careers');
 

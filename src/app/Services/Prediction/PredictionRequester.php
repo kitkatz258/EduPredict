@@ -17,6 +17,7 @@ use App\Services\Grades\GradeSnapshot;
 use App\Services\Interventions\RecommendedActionBuilder;
 use App\Services\Profile\AssessmentProgress;
 use App\Services\Profile\SkillsExperienceRecords;
+use App\Services\Questionnaire\QuestionnaireSnapshot;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -36,6 +37,7 @@ final class PredictionRequester
         private AuditLogger $audit,
         private SkillsExperienceRecords $skillRecords,
         private GradeSnapshot $grades,
+        private QuestionnaireSnapshot $questionnaire,
     ) {}
 
     public function cooldownEndsAt(Student $student): ?CarbonInterface
@@ -93,6 +95,7 @@ final class PredictionRequester
         $assessment = [
             'skills_experience' => $this->skillRecords->snapshot($current),
             'grades' => $this->grades->for($current),
+            'questionnaire' => $this->questionnaire->for($current),
         ];
         $employability = $this->predictor->predictEmployability($featureSet);
         $dropout = $this->predictor->predictDropout($featureSet);

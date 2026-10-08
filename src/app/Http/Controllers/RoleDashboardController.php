@@ -12,6 +12,9 @@ use Illuminate\Http\Request;
 
 class RoleDashboardController extends Controller
 {
+    /**
+     * The student Dashboard is also the results overview for the latest prediction.
+     */
     public function student(Request $request, AcademicSummary $summary, AssessmentProgress $progress, PredictionPresenter $presenter, SkillsExperienceRecords $records): View
     {
         $student = $request->user()->student;
@@ -24,7 +27,9 @@ class RoleDashboardController extends Controller
             'progress' => $student ? $progress->for($student) : null,
             'latest' => $latest,
             'summary' => $presenter->summary($latest, true),
+            'charts' => $student && $latest ? $presenter->charts($student, $latest) : null,
             'skillsLogged' => $this->skillsLogged($student, $records),
+            'gradesConfirmedAt' => $student?->gradeReports()->current()->max('confirmed_at'),
         ]);
     }
 

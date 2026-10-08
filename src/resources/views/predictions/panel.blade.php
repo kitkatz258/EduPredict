@@ -1,18 +1,13 @@
 <section class="space-y-6">
-    <div class="flex flex-col gap-4 rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <p class="text-sm text-gray-700">
-                {{ $student->program?->name }}
-                · Year {{ $student->year_level }}
-                @if ($latest)
-                    · Last updated {{ $latest->created_at?->timezone(config('app.timezone'))->format('M j, Y') }}
-                @endif
-            </p>
-            <p class="mt-1 text-xs text-gray-500">Model: {{ $latest->model_version ?? 'placeholder-heuristic-v0' }}</p>
-        </div>
-        @if ($showRequest)
-            <livewire:student.request-prediction />
-        @endif
+    <div class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
+        <p class="text-sm text-gray-700">
+            {{ $student->program?->name }}
+            · Year {{ $student->year_level }}
+            @if ($latest)
+                · Last updated {{ $latest->created_at?->timezone(config('app.timezone'))->format('M j, Y') }}
+            @endif
+        </p>
+        <p class="mt-1 text-xs text-gray-500">Model: {{ $latest->model_version ?? 'placeholder-heuristic-v0' }}</p>
     </div>
 
     @if ($latest === null)

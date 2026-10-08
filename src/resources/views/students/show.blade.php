@@ -27,7 +27,7 @@
         </dl>
     </div>
 
-    @include('predictions.panel', ['showRequest' => false])
+    @include('predictions.panel')
 
     @unless ($forStudent)
         <div class="mt-6">

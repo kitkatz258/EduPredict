@@ -141,7 +141,7 @@ class RecommendedActionTest extends TestCase
         Http::assertSentCount(1);
 
         $this->actingAs($student->user)
-            ->get(route('student.results'))
+            ->get(route('student.dashboard'))
             ->assertOk()
             ->assertSee(RecommendedActionBuilder::STUDENT_MESSAGE)
             ->assertDontSee('Academic tutoring')

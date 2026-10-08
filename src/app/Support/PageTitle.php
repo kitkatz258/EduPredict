@@ -28,8 +28,6 @@ class PageTitle
             'password.forced' => 'Change password',
             'privacy' => 'Privacy notice',
             'student.dashboard' => 'Student dashboard',
-            'student.results' => 'Results',
-            'student.careers' => 'Career matches',
             'student.assessment' => 'Assessment',
             'student.history' => 'History',
             'student.grades' => 'My grades',

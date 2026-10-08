@@ -55,7 +55,7 @@ class ProgramShiftTest extends TestCase
         $phrase = 'may be worth a conversation with an adviser about program fit';
 
         $this->actingAs($student->user)
-            ->get(route('student.results'))
+            ->get(route('student.dashboard'))
             ->assertOk()
             ->assertSee('Program-fit concern')
             ->assertSee($phrase)
@@ -133,7 +133,7 @@ class ProgramShiftTest extends TestCase
         $this->assertSame('disengagement', Prediction::query()->sole()->program_shift_flag);
 
         $this->actingAs($student->user)
-            ->get(route('student.results'))
+            ->get(route('student.dashboard'))
             ->assertOk()
             ->assertSee('Broader disengagement')
             ->assertSee('Engagement: Needs support')

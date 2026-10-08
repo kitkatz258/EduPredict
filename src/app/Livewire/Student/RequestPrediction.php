@@ -32,7 +32,7 @@ class RequestPrediction extends Component
         }
 
         session()->flash('success', 'A new prediction was saved. These results are estimates, not guarantees.');
-        $this->redirect(route('student.results'));
+        $this->redirect(route('student.dashboard'));
     }
 
     public function render(PredictionRequester $requester): View
