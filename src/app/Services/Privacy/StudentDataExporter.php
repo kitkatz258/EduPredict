@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Services\Privacy;
 
 use App\Models\Student;
+use App\Services\Grades\GradeRowNormalizer;
 
 /**
  * A student's own copy of stored data. Institutional action text stays with staff.
  */
 class StudentDataExporter
 {
+    public function __construct(private GradeRowNormalizer $normalizer) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -63,7 +66,7 @@ class StudentDataExporter
                 'superseded_at' => $report->superseded_at?->toIso8601String(),
                 'subjects' => $report->subjectGrades->map(fn ($grade): array => [
                     'subject_code' => $grade->subject_code,
-                    'subject_name' => $grade->subject_name,
+                    'subject_name' => $this->normalizer->stripInstructorName($grade->subject_name),
                     'units' => $grade->units,
                     'midterm_grade' => $grade->midterm_grade,
                     'final_exam_grade' => $grade->final_exam_grade,

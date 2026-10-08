@@ -14,12 +14,15 @@ WHITELIST = {
     "remarks": "ABCDEFGHIJKLMNOPQRSTUVWXYZ ",
 }
 COLS10 = ["no", "code", "description", "faculty", "units", "section", "midterm", "final", "final_grade", "remarks"]
-IGNORE = {"faculty", "section", "no"}
+# Detected so neighboring cells keep their bounds. Never read or stored.
+IGNORE = {"faculty", "instructor", "professor", "section", "year", "schedule", "room", "no"}
 HEADER_MAP = {
     "no": "no", "#": "no", "code": "code", "subject": "code",
     "description": "description", "descript": "description",
-    "faculty": "faculty", "units": "units", "unit": "units",
-    "section": "section", "midterm": "midterm", "final": "final",
+    "faculty": "faculty", "instructor": "instructor", "professor": "professor",
+    "units": "units", "unit": "units",
+    "section": "section", "year": "year", "schedule": "schedule", "room": "room",
+    "midterm": "midterm", "final": "final",
     "grade": "final_grade", "remarks": "remarks", "remark": "remarks",
 }
 

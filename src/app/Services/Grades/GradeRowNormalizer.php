@@ -82,8 +82,8 @@ final class GradeRowNormalizer
     /**
      * Portal copies can carry the instructor into the description cell. Removes a
      * merged "FACULTY, NAME SECTION" tail, a trailing honorific-led name
-     * ("Prof. Juan Cruz"), or a trailing all-caps "SURNAME, Given" name. Without a
-     * section tail the comma rule is skipped for all-caps descriptions, where a name
+     * ("Prof. Juan Cruz"), or a trailing "SURNAME, Given" name. A single all-caps
+     * word after a comma ("PURPOSIVE COMMUNICATION, ORAL") stays, because it
      * cannot be told apart from the subject title.
      */
     public function stripInstructorName(string $description): string
@@ -103,12 +103,25 @@ final class GradeRowNormalizer
         $honorific = '/\s*(?:[-–|\/(]\s*)?\b(?:Prof(?:essor)?|Dr|Engr|Atty|Mr|Mrs|Ms|Instructor|Inst)\.?\s+\p{Lu}[\p{L}.\'\-\s,]*\)?$/u';
         $clean = trim(preg_replace($honorific, '', $clean) ?? $clean);
 
-        if ($clean !== mb_strtoupper($clean)) {
+        if ($clean === mb_strtoupper($clean)) {
+            if ($this->hasPersonShapedCommaTail($clean)) {
+                $clean = $this->stripFacultySuffix($clean);
+            }
+        } else {
             $surnameFirst = '/\s*(?:[-–|\/(]\s*)?\b\p{Lu}{2,}(?:\s+\p{Lu}{2,})*,\s*\p{Lu}[\p{L}\'\-]*(?:\s+\p{Lu}[\p{L}\'\-]*\.?)*\)?$/u';
             $clean = trim(preg_replace($surnameFirst, '', $clean) ?? $clean);
         }
 
         return $clean;
+    }
+
+    /**
+     * True when the text ends in a person-shaped "SURNAME, Given …" tail.
+     * One trailing word is not enough: "COMMUNICATION, ORAL" is a subject title.
+     */
+    private function hasPersonShapedCommaTail(string $text): bool
+    {
+        return (bool) preg_match('/,\s*\p{L}[\p{L}\'\-.]*(?:(?:\s+\p{L}[\p{L}\'\-.]*)+|\s*\.)\s*$/u', $text);
     }
 
     /**

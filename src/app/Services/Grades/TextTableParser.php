@@ -147,7 +147,9 @@ final class TextTableParser
         if ($hay === '') {
             return null;
         }
-        foreach (['faculty', 'instructor', 'professor', 'teacher', 'adviser', 'section', 'schedule', 'room'] as $ignored) {
+        // These columns are read only so the next cell starts at the right place.
+        // Faculty/instructor values are dropped here. Year and section are not stored.
+        foreach (['faculty', 'instructor', 'professor', 'teacher', 'adviser', 'section', 'schedule', 'room', 'year'] as $ignored) {
             if (str_contains($hay, $ignored)) {
                 return null;
             }
@@ -201,7 +203,7 @@ final class TextTableParser
             return $this->fallbackRow($line);
         }
 
-        return $row;
+        return $this->keepGradeFields($row);
     }
 
     /**
@@ -301,7 +303,7 @@ final class TextTableParser
             $final = $grades[1];
         }
 
-        return [
+        return $this->keepGradeFields([
             'subject_code' => $code,
             'subject_name' => $name,
             'units' => $units ?? '',
@@ -310,13 +312,34 @@ final class TextTableParser
             'final_grade' => $final,
             'remarks' => $remarks,
             'instructor_removed' => $instructorRemoved,
-        ];
+        ]);
     }
 
     /**
-     * Portal rows end with Faculty and Section after the remarks. Anything after the
-     * last remarks token (or, without remarks, after the last grade) is dropped so
-     * instructor names never reach the description.
+     * Grade rows keep only the fields EduPredict stores. Instructor and other
+     * portal columns are not copied, even when they were used as boundaries.
+     *
+     * @param  array<string, mixed>  $row
+     * @return array<string, mixed>
+     */
+    private function keepGradeFields(array $row): array
+    {
+        $kept = [];
+        foreach (['subject_code', 'subject_name', 'units', 'midterm_grade', 'final_exam_grade', 'final_grade', 'remarks', 'instructor_removed'] as $field) {
+            if (array_key_exists($field, $row)) {
+                $kept[$field] = $row[$field];
+            }
+        }
+
+        return $kept;
+    }
+
+    /**
+     * Some copies place Faculty and Section after remarks. Anything after the last
+     * remarks token (or, without remarks, after the last grade) is dropped so those
+     * instructor names never reach the description. The UCC portal itself puts
+     * Faculty Name and Section between the description and the grades; that order
+     * is handled by the header map and by the units/section split below.
      *
      * @param  list<string>  $tokens
      * @return list<string>

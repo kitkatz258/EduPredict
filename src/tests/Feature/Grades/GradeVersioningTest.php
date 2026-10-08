@@ -13,10 +13,13 @@ use App\Models\SkillsExperience;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Models\StudentSkill;
+use App\Models\SubjectGrade;
 use App\Models\User;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Prediction\PredictionRequester;
+use App\Services\Privacy\StudentDataExporter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -187,6 +190,104 @@ class GradeVersioningTest extends TestCase
             ->call('deleteReport', $draft->id)
             ->assertHasNoErrors();
         $this->assertDatabaseMissing('grade_reports', ['id' => $draft->id]);
+    }
+
+    public function test_ucc_portal_import_saves_grades_without_instructor_names(): void
+    {
+        $this->assertFalse(Schema::hasColumn('subject_grades', 'instructor'));
+        $this->assertFalse(Schema::hasColumn('subject_grades', 'faculty'));
+
+        $student = $this->makeStudent();
+        $forbidden = ['YU, EDUARDO', 'CORPUZ', 'VARONA', 'MACARAEG', 'REYES, ARACELI', 'SALUDES', 'BSIS 2-A-SOUTH', 'Faculty Name'];
+
+        $review = Livewire::actingAs($student->user)
+            ->test(GradeReportForm::class)
+            ->call('setMode', 'paste')
+            ->set('pastedText', (string) file_get_contents(base_path('tests/Fixtures/grade-reports/paste-ucc-portal.txt')))
+            ->call('parsePaste')
+            ->assertSet('stage', 'review')
+            ->assertSee('APPLICATIONS DEVELOPMENT AND EMERGING TECHNOLOGIES')
+            ->assertSee('Subject name')
+            ->assertDontSee('Faculty');
+        foreach ($forbidden as $token) {
+            $review->assertDontSee($token);
+        }
+        $review->call('confirm')->assertHasNoErrors();
+
+        $report = GradeReport::query()->current()->where('student_id', $student->id)->sole();
+        $this->assertSame(
+            'APPLICATIONS DEVELOPMENT AND EMERGING TECHNOLOGIES',
+            $report->subjectGrades()->where('subject_code', 'CCS 106')->value('subject_name'),
+        );
+        $stored = $report->subjectGrades->pluck('subject_name')->implode(' ');
+        foreach ($forbidden as $token) {
+            $this->assertStringNotContainsString($token, $stored);
+        }
+
+        $this->completeOtherSections($student);
+        $prediction = app(PredictionRequester::class)->request($student->fresh(), $student->user);
+        $snapshot = json_encode($prediction->assessment_snapshot['grades']);
+        foreach ($forbidden as $token) {
+            $this->assertStringNotContainsString($token, (string) $snapshot);
+        }
+
+        $history = Livewire::actingAs($student->user)
+            ->test(GradeReportsTable::class)
+            ->call('openView', $report->id)
+            ->assertSee('APPLICATIONS DEVELOPMENT AND EMERGING TECHNOLOGIES');
+        foreach ($forbidden as $token) {
+            $history->assertDontSee($token);
+        }
+    }
+
+    public function test_old_confirmed_report_is_not_rewritten_when_instructor_names_are_hidden(): void
+    {
+        $student = $this->makeStudent();
+        $report = GradeReport::factory()->create([
+            'student_id' => $student->id,
+            'school_year' => '2023-2024',
+            'semester' => 'First',
+        ]);
+        $grade = SubjectGrade::factory()->create([
+            'grade_report_id' => $report->id,
+            'subject_code' => 'CCS 116',
+            'subject_name' => 'Web Development 2 Prof. Maria Santos',
+            'units' => 5,
+            'final_grade' => '1.25',
+            'remarks' => 'PASSED',
+            'is_failed' => false,
+        ]);
+
+        Livewire::actingAs($student->user)
+            ->test(GradeReportsTable::class)
+            ->call('openView', $report->id)
+            ->assertSee('Web Development 2')
+            ->assertDontSee('Maria Santos')
+            ->assertDontSee('Prof.');
+
+        $this->assertSame('Web Development 2 Prof. Maria Santos', $grade->fresh()->subject_name);
+
+        $export = app(StudentDataExporter::class)->forStudent($student->fresh());
+        $this->assertSame('Web Development 2', $export['grades'][0]['subjects'][0]['subject_name']);
+        $this->assertSame('Web Development 2 Prof. Maria Santos', $grade->fresh()->subject_name);
+
+        $this->completeOtherSections($student);
+        $prediction = app(PredictionRequester::class)->request($student->fresh(), $student->user);
+        $this->assertSame(
+            'Web Development 2',
+            $prediction->assessment_snapshot['grades']['reports'][0]['subjects'][0]['subject_name'],
+        );
+        $this->assertSame('Web Development 2 Prof. Maria Santos', $grade->fresh()->subject_name);
+
+        Livewire::actingAs($student->user)
+            ->test(GradeReportForm::class, ['replaceId' => $report->id])
+            ->assertSet('rows.0.subject_name', 'Web Development 2')
+            ->call('confirm')
+            ->assertHasNoErrors();
+
+        $this->assertSame('Web Development 2 Prof. Maria Santos', $grade->fresh()->subject_name);
+        $replacement = GradeReport::query()->current()->where('student_id', $student->id)->sole();
+        $this->assertSame('Web Development 2', $replacement->subjectGrades()->where('subject_code', 'CCS 116')->value('subject_name'));
     }
 
     public function test_view_modal_is_read_only_and_shows_replaced_versions(): void

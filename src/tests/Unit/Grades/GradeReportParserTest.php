@@ -140,9 +140,87 @@ class GradeReportParserTest extends TestCase
             'title with comma' => ['Science, Technology and Society', 'Science, Technology and Society'],
             'acronym title' => ['IS Innovations & New Technologies', 'IS Innovations & New Technologies'],
             'all caps title' => ['PURPOSIVE COMMUNICATION, ORAL', 'PURPOSIVE COMMUNICATION, ORAL'],
+            'all caps faculty tail' => ['LIVING IN THE IT ERA MACARAEG, TEODORO JR A', 'LIVING IN THE IT ERA'],
+            'all caps faculty period' => ['SPORTS AND FITNESS SALUDES, ALCIDOR .', 'SPORTS AND FITNESS'],
+            'all caps particle name' => ['GENDER AND SOCIETY STA. MARIA, MARIA LOURDES G', 'GENDER AND SOCIETY'],
             'merged portal cell' => ['GENDER AND SOCIETY STA. MARIA, ANA G BSIS 3-A-SOUTH', 'GENDER AND SOCIETY'],
             'section-like title' => ['CALCULUS 1-A', 'CALCULUS 1-A'],
         ];
+    }
+
+    public function test_actual_ucc_portal_layout_drops_faculty_name_and_section(): void
+    {
+        $expected = json_decode((string) file_get_contents($this->fixture('sheet-a.expected.json')), true);
+        $parsed = $this->parser()->parse((string) file_get_contents($this->fixture('paste-ucc-portal.txt')), 'pasted');
+
+        $this->assertSame('2024-2025', $parsed->schoolYear);
+        $this->assertSame('Second', $parsed->semester);
+        $this->assertCount(count($expected['rows']), $parsed->rows);
+
+        $encoded = json_encode(array_map(fn ($row) => $row->toArray(), $parsed->rows));
+        foreach (['YU', 'EDUARDO', 'CORPUZ', 'KAMIL', 'VARONA', 'MARCELO', 'MACARAEG', 'TEODORO', 'REYES', 'ARACELI', 'SALUDES', 'ALCIDOR', 'BSIS 2-A-SOUTH', 'faculty', 'instructor'] as $token) {
+            $this->assertStringNotContainsString($token, (string) $encoded);
+        }
+
+        foreach ($expected['rows'] as $index => $row) {
+            $actual = $parsed->rows[$index];
+            $this->assertSame($row['subject_code'], $actual->subjectCode);
+            $this->assertSame(strtoupper($row['subject_name']), $actual->subjectName);
+            $this->assertSame($row['units'], $actual->units);
+            $this->assertSame($row['final_grade'], $actual->finalGrade);
+            $this->assertSame($row['remarks'], $actual->remarks);
+            $this->assertFalse($actual->needsReview);
+            $this->assertArrayNotHasKey('instructor', $actual->toArray());
+            $this->assertArrayNotHasKey('faculty', $actual->toArray());
+        }
+
+        $gwa = (new GwaCalculator(new GradeScale))->compute($parsed->rows);
+        $this->assertSame(1.44, $gwa->roundedGpa);
+    }
+
+    public function test_headerless_ucc_rows_use_screenshot_faculty_names(): void
+    {
+        $paste = implode("\n", [
+            '1 CCS 118 MULTIMEDIA SYSTEMS CORPUZ, KAMIL JADE A 3 BSIS 3-A-SOUTH 1.00 1.75 1.50 PASSED',
+            '2 GEE 003 GENDER AND SOCIETY STA. MARIA, MARIA LOURDES G 3 BSIS 3-A-SOUTH 1.50 1.00 1.25 PASSED',
+            '3 IS 103 DATABASE SYSTEM ENTERPRISE LLENA, CATHERINE P 5 BSIS 3-A-SOUTH 1.75 INC INC INCOMPLETE',
+            '4 IS 106 IS MAJOR ELECTIVE 1 YU, EDUARDO II R. 3 BSIS 3-A-SOUTH 2.00 5.00 5.00 FAILED',
+            '5 PATHFIT 4 SPORTS AND FITNESS SALUDES, ALCIDOR . 2 BSIS 3-A-SOUTH 1.00 1.00 1.00 PASSED',
+        ]);
+
+        $parsed = $this->parser()->parse($paste, 'pasted');
+        $encoded = json_encode(array_map(fn ($row) => $row->toArray(), $parsed->rows));
+
+        $this->assertSame(
+            ['MULTIMEDIA SYSTEMS', 'GENDER AND SOCIETY', 'DATABASE SYSTEM ENTERPRISE', 'IS MAJOR ELECTIVE 1', 'SPORTS AND FITNESS'],
+            array_map(fn ($row) => $row->subjectName, $parsed->rows),
+        );
+        foreach (['CORPUZ', 'KAMIL', 'STA. MARIA', 'LOURDES', 'LLENA', 'CATHERINE', 'EDUARDO', 'SALUDES', 'ALCIDOR', 'BSIS 3-A-SOUTH'] as $token) {
+            $this->assertStringNotContainsString($token, (string) $encoded);
+        }
+    }
+
+    public function test_year_schedule_and_room_columns_do_not_keep_instructor_names(): void
+    {
+        $paste = implode("\n", [
+            'School Year and Semester: 2024-2025 | Second',
+            "#\tSubject Code\tDescription\tUnits\tYear\tSection\tSchedule\tRoom\tInstructor\tMidterm\tFinal\tFinal Grade\tRemarks",
+            "1\tCCS 106\tApplications Development and Emerging Technologies\t5\t2\tBSIS 2-A\tMWF 9-10\tRoom 201\tProf. Eduardo Yu\t2.50\t2.25\t2.25\tPASSED",
+            "2\tCCS 110\tComputer Graphics 1\t3\t2\tBSIS 2-A\tTTH 1-3\tLab 3\tCORPUZ, KAMIL\t2.25\t1.00\t1.50\tPASSED",
+        ]);
+
+        $parsed = $this->parser()->parse($paste, 'pasted');
+        $encoded = json_encode(array_map(fn ($row) => $row->toArray(), $parsed->rows));
+
+        $this->assertSame(
+            ['Applications Development and Emerging Technologies', 'Computer Graphics 1'],
+            array_map(fn ($row) => $row->subjectName, $parsed->rows),
+        );
+        $this->assertSame(['5', '3'], array_map(fn ($row) => $row->units, $parsed->rows));
+        $this->assertSame(['2.25', '1.50'], array_map(fn ($row) => $row->finalGrade, $parsed->rows));
+        foreach (['Eduardo', 'Yu', 'CORPUZ', 'KAMIL', 'Prof.', 'Room 201', 'MWF', 'BSIS 2-A'] as $token) {
+            $this->assertStringNotContainsString($token, (string) $encoded);
+        }
     }
 
     public function test_layout_variants_still_parse_sheet_a_codes_and_gpa(): void
