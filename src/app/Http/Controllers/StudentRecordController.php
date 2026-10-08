@@ -13,7 +13,7 @@ class StudentRecordController extends Controller
     {
         $this->authorize('view', $student);
 
-        $student->load(['user', 'program.college', 'adviser']);
+        $student->load(['user', 'program.college', 'program.department']);
         $latest = $student->predictions()->latest('created_at')->latest('id')->first();
         $forStudent = auth()->id() === $student->user_id;
 

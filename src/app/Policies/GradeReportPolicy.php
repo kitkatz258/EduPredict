@@ -10,7 +10,7 @@ class GradeReportPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isRole(UserRole::Student, UserRole::Faculty, UserRole::DepartmentHead, UserRole::Dean, UserRole::Administrator);
+        return $user->isRole(UserRole::Student, UserRole::DepartmentHead, UserRole::Administrator);
     }
 
     public function view(User $user, GradeReport $gradeReport): bool

@@ -21,7 +21,7 @@ class ProgramsTable extends BaseTable
     {
         $this->authorize('viewAny', Program::class);
 
-        return Program::query()->with('college');
+        return Program::query()->with(['college', 'department']);
     }
 
     protected function columns(): array

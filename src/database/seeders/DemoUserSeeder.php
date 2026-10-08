@@ -5,10 +5,12 @@ namespace Database\Seeders;
 use App\Enums\UserRole;
 use App\Models\College;
 use App\Models\Consent;
+use App\Models\Department;
 use App\Models\InstitutionStudent;
 use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\Academic\ClasStructureSynchronizer;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -18,8 +20,10 @@ class DemoUserSeeder extends Seeder
 
     public function run(): void
     {
-        $ccs = College::query()->where('code', 'CCS')->firstOrFail();
+        $clas = College::query()->where('code', ClasStructureSynchronizer::COLLEGE_CODE)->firstOrFail();
+        $computerStudies = Department::query()->where('code', 'CLAS-CS')->firstOrFail();
         $bsis = Program::query()->where('code', 'BSIS')->firstOrFail();
+        $consentVersion = (string) config('edupredict.consent.current_version');
 
         $admin = User::query()->updateOrCreate(
             ['email' => 'admin@edupredict.test'],
@@ -38,7 +42,9 @@ class DemoUserSeeder extends Seeder
                 'name' => 'Diego Dean',
                 'password' => Hash::make(self::PASSWORD),
                 'role' => UserRole::Dean,
-                'college_id' => $ccs->id,
+                'college_id' => $clas->id,
+                'department_id' => null,
+                'program_id' => null,
                 'is_active' => true,
                 'email_verified_at' => now(),
             ],
@@ -50,21 +56,9 @@ class DemoUserSeeder extends Seeder
                 'name' => 'Hana Head',
                 'password' => Hash::make(self::PASSWORD),
                 'role' => UserRole::DepartmentHead,
-                'college_id' => $ccs->id,
-                'program_id' => $bsis->id,
-                'is_active' => true,
-                'email_verified_at' => now(),
-            ],
-        );
-
-        $faculty = User::query()->updateOrCreate(
-            ['email' => 'faculty@edupredict.test'],
-            [
-                'name' => 'Faye Faculty',
-                'password' => Hash::make(self::PASSWORD),
-                'role' => UserRole::Faculty,
-                'college_id' => $ccs->id,
-                'program_id' => $bsis->id,
+                'college_id' => $clas->id,
+                'department_id' => $computerStudies->id,
+                'program_id' => null,
                 'is_active' => true,
                 'email_verified_at' => now(),
             ],
@@ -94,22 +88,21 @@ class DemoUserSeeder extends Seeder
             ],
         );
 
-        $student = Student::query()->updateOrCreate(
+        Student::query()->updateOrCreate(
             ['student_number' => '2024-00001'],
             [
                 'user_id' => $studentUser->id,
                 'program_id' => $bsis->id,
                 'year_level' => 3,
-                'adviser_id' => $faculty->id,
                 'enrollment_year' => 2023,
                 'semesters_completed' => 4,
-                'consent_version' => 'v1',
+                'consent_version' => $consentVersion,
             ],
         );
 
-        foreach ([$admin, $dean, $head, $faculty, $studentUser] as $user) {
+        foreach ([$admin, $dean, $head, $studentUser] as $user) {
             Consent::query()->updateOrCreate(
-                ['user_id' => $user->id, 'version' => 'v1'],
+                ['user_id' => $user->id, 'version' => $consentVersion],
                 ['accepted_at' => now(), 'ip_address' => '127.0.0.1'],
             );
         }

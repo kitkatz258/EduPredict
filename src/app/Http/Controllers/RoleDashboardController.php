@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
-use App\Services\Analytics\CohortAnalytics;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Prediction\PredictionPresenter;
 use App\Services\Profile\ProfileCompleteness;
@@ -28,17 +27,13 @@ class RoleDashboardController extends Controller
         ]);
     }
 
-    public function faculty(Request $request, CohortAnalytics $analytics): View
-    {
-        return view('dashboards.faculty', [
-            'stats' => $analytics->forUser($request->user()),
-        ]);
-    }
-
     public function department(Request $request): View
     {
+        $user = $request->user()->loadMissing(['department', 'program']);
+
         return view('dashboards.department', [
-            'program' => $request->user()->program,
+            'department' => $user->department,
+            'program' => $user->program,
         ]);
     }
 

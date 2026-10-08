@@ -21,8 +21,8 @@
                 <dd class="font-medium text-gray-900">{{ $student->year_level }}</dd>
             </div>
             <div>
-                <dt class="text-gray-500">Adviser</dt>
-                <dd class="font-medium text-gray-900">{{ $student->adviser?->name ?? 'Unassigned' }}</dd>
+                <dt class="text-gray-500">Department</dt>
+                <dd class="font-medium text-gray-900">{{ $student->program?->department?->name ?? 'Not assigned' }}</dd>
             </div>
         </dl>
     </div>

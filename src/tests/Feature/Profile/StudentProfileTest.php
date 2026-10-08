@@ -133,7 +133,7 @@ class StudentProfileTest extends TestCase
         $this->assertTrue(Gate::forUser($owner->user)->allows('view', $profile));
         $this->assertFalse(Gate::forUser($other->user)->allows('view', $profile));
 
-        foreach ([UserRole::Faculty, UserRole::DepartmentHead, UserRole::Dean, UserRole::Administrator] as $role) {
+        foreach ([UserRole::DepartmentHead, UserRole::Dean, UserRole::Administrator] as $role) {
             $staff = User::factory()->role($role)->create();
             $this->assertFalse(Gate::forUser($staff)->allows('view', $profile));
             $this->actingAs($staff)->get(route('student.profile'))->assertForbidden();

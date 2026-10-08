@@ -20,12 +20,8 @@
         <a href="{{ route('profile.edit') }}" class="{{ $nav('profile.edit') }}">Account</a>
         <a href="{{ route('about') }}" class="{{ $nav('about') }}">About</a>
         <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
-    @elseif ($role === \App\Enums\UserRole::Faculty)
-        <a href="{{ route('faculty.dashboard') }}" class="{{ $nav('faculty.dashboard') }}">Advisees</a>
-        <a href="{{ route('about') }}" class="{{ $nav('about') }}">About</a>
-        <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
     @elseif ($role === \App\Enums\UserRole::DepartmentHead)
-        <a href="{{ route('department.dashboard') }}" class="{{ $nav('department.dashboard') }}">Program dashboard</a>
+        <a href="{{ route('department.dashboard') }}" class="{{ $nav('department.dashboard') }}">Department dashboard</a>
         <a href="{{ route('about') }}" class="{{ $nav('about') }}">About</a>
         <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
     @elseif ($role === \App\Enums\UserRole::Dean)
@@ -36,8 +32,7 @@
         <a href="{{ route('admin.dashboard') }}" class="{{ $nav('admin.dashboard') }}">Institution dashboard</a>
         <a href="{{ route('admin.users') }}" class="{{ $nav('admin.users') }}">Users</a>
         <a href="{{ route('admin.institution-students') }}" class="{{ $nav('admin.institution-students') }}">Institution students</a>
-        <a href="{{ route('admin.advisers') }}" class="{{ $nav('admin.advisers') }}">Adviser assignment</a>
-        <a href="{{ route('admin.colleges') }}" class="{{ $nav('admin.colleges') }}">Colleges and programs</a>
+        <a href="{{ route('admin.colleges') }}" class="{{ $nav('admin.colleges') }}">Academic structure</a>
         <a href="{{ route('admin.questionnaire') }}" class="{{ $nav('admin.questionnaire') }}">Questionnaire</a>
         <a href="{{ route('admin.psoc') }}" class="{{ $nav('admin.psoc') }}">PSOC occupations</a>
         <a href="{{ route('admin.interventions') }}" class="{{ $nav('admin.interventions') }}">Interventions</a>

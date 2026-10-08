@@ -13,13 +13,15 @@ class EnsureUserIsActive
     {
         $user = $request->user();
 
-        if ($user !== null && ! $user->is_active) {
+        if ($user !== null && ! $user->canSignIn()) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             return redirect()->route('login')->withErrors([
-                'email' => 'This account is inactive. Contact an administrator.',
+                'email' => $user->role->isLegacy()
+                    ? 'This account type is no longer used. Contact an administrator.'
+                    : 'This account is inactive. Contact an administrator.',
             ]);
         }
 

@@ -1,21 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Program extends Model
+class Department extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProgramFactory> */
+    /** @use HasFactory<\Database\Factories\DepartmentFactory> */
     use HasFactory;
 
     protected $fillable = [
         'college_id',
-        'department_id',
         'name',
         'code',
         'is_active',
@@ -33,21 +33,8 @@ class Program extends Model
         return $this->belongsTo(College::class);
     }
 
-    public function department(): BelongsTo
+    public function programs(): HasMany
     {
-        return $this->belongsTo(Department::class);
-    }
-
-    public function students(): HasMany
-    {
-        return $this->hasMany(Student::class);
-    }
-
-    /**
-     * Programs inside the current pilot / data-gathering scope.
-     */
-    public function scopeInPilotScope(Builder $query): Builder
-    {
-        return $query->where('programs.is_active', true);
+        return $this->hasMany(Program::class);
     }
 }

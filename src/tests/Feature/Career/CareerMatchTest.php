@@ -80,7 +80,7 @@ class CareerMatchTest extends TestCase
             ->assertOk()
             ->assertDontSee('Software Developers');
 
-        $this->actingAs(User::factory()->faculty()->create())
+        $this->actingAs(User::factory()->departmentHead()->create())
             ->get(route('student.careers'))
             ->assertForbidden();
     }
@@ -142,7 +142,7 @@ class CareerMatchTest extends TestCase
     {
         $this->seed(PsocOccupationSeeder::class);
         $admin = User::factory()->administrator()->create();
-        $faculty = User::factory()->faculty()->create();
+        $head = User::factory()->departmentHead()->create();
 
         $this->actingAs($admin)
             ->get(route('admin.psoc'))
@@ -150,9 +150,9 @@ class CareerMatchTest extends TestCase
             ->assertSee('Starter set, verify against the official PSA PSOC 2012 before final submission.')
             ->assertSee('PSOC code');
 
-        $this->actingAs($faculty)->get(route('admin.psoc'))->assertForbidden();
+        $this->actingAs($head)->get(route('admin.psoc'))->assertForbidden();
 
-        Livewire::actingAs($faculty)->test(PsocOccupationsTable::class)->assertForbidden();
+        Livewire::actingAs($head)->test(PsocOccupationsTable::class)->assertForbidden();
         Livewire::actingAs($admin)
             ->test(PsocOccupationsTable::class)
             ->set('search', 'Software')

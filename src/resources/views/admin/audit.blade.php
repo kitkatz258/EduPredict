@@ -7,7 +7,7 @@
     </x-slot>
 
     <div class="space-y-4">
-        <p class="text-sm text-gray-600">Logins, account changes, adviser assignment, prediction requests, exports, and staff views of a student record are recorded here.</p>
+        <p class="text-sm text-gray-600">Logins, account changes, prediction requests, exports, and staff views of a student record are recorded here.</p>
         <livewire:tables.audit-logs-table />
     </div>
 </x-app-layout>

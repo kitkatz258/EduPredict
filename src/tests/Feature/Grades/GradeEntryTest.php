@@ -89,17 +89,17 @@ class GradeEntryTest extends TestCase
             ->assertSee('Confirm');
     }
 
-    public function test_faculty_cannot_open_or_mutate_student_grade_entry(): void
+    public function test_department_head_cannot_open_or_mutate_student_grade_entry(): void
     {
-        $faculty = User::factory()->faculty()->create();
+        $head = User::factory()->departmentHead()->create();
 
-        $this->actingAs($faculty)->get(route('student.grades'))->assertForbidden();
+        $this->actingAs($head)->get(route('student.grades'))->assertForbidden();
 
-        Livewire::actingAs($faculty)
+        Livewire::actingAs($head)
             ->test(GradeReportForm::class)
             ->assertForbidden();
 
-        Livewire::actingAs($faculty)
+        Livewire::actingAs($head)
             ->test(GradeReportsTable::class)
             ->assertForbidden();
     }

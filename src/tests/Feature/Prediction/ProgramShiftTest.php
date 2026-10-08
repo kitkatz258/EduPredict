@@ -23,16 +23,15 @@ class ProgramShiftTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_program_fit_is_stored_and_shown_beside_dropout_risk_for_student_faculty_and_department_head(): void
+    public function test_program_fit_is_stored_and_shown_beside_dropout_risk_for_student_and_department_heads(): void
     {
         $program = Program::factory()->create();
-        $faculty = User::factory()->faculty($program)->create();
         $head = User::factory()->departmentHead($program)->create();
-        $outsider = User::factory()->faculty(Program::factory()->create())->create();
+        $departmentHead = User::factory()->departmentHead($program->department)->create();
+        $outsider = User::factory()->departmentHead(Program::factory()->create())->create();
         $student = Student::factory()->create([
             'user_id' => User::factory()->create(['role' => UserRole::Student])->id,
             'program_id' => $program->id,
-            'adviser_id' => $faculty->id,
             'student_number' => 'SHIFT-10001',
             'year_level' => 3,
             'semesters_completed' => 2,
@@ -68,7 +67,7 @@ class ProgramShiftTest extends TestCase
             ->assertSee('Program-shift indicator')
             ->assertSee($phrase);
 
-        $this->actingAs($faculty)
+        $this->actingAs($departmentHead)
             ->get(route('students.show', $student))
             ->assertOk()
             ->assertSee('Program-fit concern')

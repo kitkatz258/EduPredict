@@ -70,7 +70,7 @@
         <form class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:p-6" wire:submit="saveSocioeconomic">
             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Private to you</p>
             <h2 class="mt-1 text-xl font-semibold text-brand-900">Socioeconomic profile</h2>
-            <p class="mt-2 text-sm text-gray-600">These answers are stored encrypted. Faculty and administrators cannot open this section.</p>
+            <p class="mt-2 text-sm text-gray-600">These answers are stored encrypted. Department heads, deans, and administrators cannot open this section.</p>
 
             <div class="mt-5 grid gap-4 sm:grid-cols-2">
                 <div>

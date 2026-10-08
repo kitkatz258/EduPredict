@@ -52,12 +52,14 @@ class LoginRequest extends FormRequest
 
         $user = Auth::user();
 
-        if ($user !== null && ! $user->is_active) {
+        if ($user !== null && ! $user->canSignIn()) {
             Auth::logout();
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => 'This account is inactive. Contact an administrator.',
+                'email' => $user->role->isLegacy()
+                    ? 'This account type is no longer used. Contact an administrator.'
+                    : 'This account is inactive. Contact an administrator.',
             ]);
         }
 

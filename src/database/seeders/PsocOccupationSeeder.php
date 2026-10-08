@@ -35,7 +35,7 @@ class PsocOccupationSeeder extends Seeder
         return [
             $this->row('2511', 'Systems Analysts', $ict, 'Study how an organization uses information systems and propose improvements.', ['analysis', 'requirements', 'programming'], ['BSIT', 'BSCS', 'BSIS']),
             $this->row('2512', 'Software Developers', $ict, 'Design, build, and test software applications.', ['programming', 'algorithms', 'sql'], ['BSIT', 'BSCS', 'BSIS']),
-            $this->row('2513', 'Web and Multimedia Developers', $ict, 'Build websites and multimedia applications.', ['html', 'programming', 'web'], ['BSIT', 'BSIS']),
+            $this->row('2513', 'Web and Multimedia Developers', $ict, 'Build websites and multimedia applications.', ['html', 'programming', 'web'], ['BSIT', 'BSIS', 'BSEMC']),
             $this->row('2514', 'Applications Programmers', $ict, 'Write and maintain application code from specifications.', ['programming', 'debugging'], ['BSIT', 'BSCS', 'BSIS']),
             $this->row('2519', 'Software and Applications Developers NEC', $ict, 'Software roles that do not fit a narrower developer title.', ['programming'], ['BSIT', 'BSCS', 'BSIS']),
             $this->row('2521', 'Database Designers and Administrators', $ict, 'Design and look after databases and stored data.', ['sql', 'database'], ['BSIT', 'BSCS', 'BSIS']),
@@ -80,7 +80,7 @@ class PsocOccupationSeeder extends Seeder
             $this->row('3256', 'Medical Assistants', $health, 'Support clinics with routine patient tasks.', ['clinical support', 'records'], ['BSN']),
             $this->row('5321', 'Health Care Assistants', $health, 'Help patients with daily care under supervision.', ['patient care', 'support'], ['BSN']),
 
-            $this->row('2166', 'Graphic and Multimedia Designers', $other, 'Create visual layouts and multimedia pieces.', ['design', 'multimedia'], ['ABCOMM', 'BSIS']),
+            $this->row('2166', 'Graphic and Multimedia Designers', $other, 'Create visual layouts and multimedia pieces.', ['design', 'multimedia'], ['ABCOMM', 'BSIS', 'BSEMC']),
             $this->row('2642', 'Journalists', $other, 'Research and present news and features.', ['writing', 'communication'], ['ABCOMM']),
             $this->row('2611', 'Lawyers', $other, 'Advise on legal rights and represent clients.', ['law', 'research'], ['LLB']),
             $this->row('2631', 'Economists', $other, 'Study how resources and markets are used.', ['economics', 'analysis'], ['BSBA']),

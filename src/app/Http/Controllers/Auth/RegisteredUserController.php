@@ -17,7 +17,7 @@ class RegisteredUserController extends Controller
     public function create(): View
     {
         return view('auth.register', [
-            'programs' => Program::query()->orderBy('name')->get(),
+            'programs' => Program::query()->inPilotScope()->orderBy('name')->get(),
             'consentVersion' => config('edupredict.consent.current_version'),
         ]);
     }

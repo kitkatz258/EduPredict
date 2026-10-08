@@ -6,13 +6,23 @@
     <div class="mt-4 grid gap-4 sm:grid-cols-2">
         <div class="sm:col-span-2">
             <label for="program-college" class="mb-1 block text-sm font-medium">College</label>
-            <select id="program-college" wire:model="collegeId" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+            <select id="program-college" wire:model.live="collegeId" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
                 <option value="">Select college</option>
                 @foreach ($colleges as $college)
-                    <option value="{{ $college->id }}">{{ $college->code }} — {{ $college->name }}</option>
+                    <option value="{{ $college->id }}">{{ $college->code }} — {{ $college->name }}{{ $college->is_active ? '' : ' (legacy)' }}</option>
                 @endforeach
             </select>
             @error('collegeId') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+        </div>
+        <div class="sm:col-span-2">
+            <label for="program-department" class="mb-1 block text-sm font-medium">Department</label>
+            <select id="program-department" wire:model="departmentId" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                <option value="">No department</option>
+                @foreach ($departments as $department)
+                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                @endforeach
+            </select>
+            @error('departmentId') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
         </div>
         <div>
             <label for="program-name" class="mb-1 block text-sm font-medium">Name</label>

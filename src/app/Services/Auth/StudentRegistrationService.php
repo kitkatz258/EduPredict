@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\AuditLog;
 use App\Models\Consent;
 use App\Models\InstitutionStudent;
+use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -46,6 +47,12 @@ class StudentRegistrationService
         if ((int) $record->program_id !== (int) $data['program_id']) {
             throw ValidationException::withMessages([
                 'program_id' => 'The program does not match the institution student list.',
+            ]);
+        }
+
+        if (! Program::query()->inPilotScope()->whereKey($record->program_id)->exists()) {
+            throw ValidationException::withMessages([
+                'program_id' => 'Registration is open only to programs in the current CLAS pilot.',
             ]);
         }
 

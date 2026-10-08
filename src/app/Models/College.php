@@ -14,7 +14,20 @@ class College extends Model
     protected $fillable = [
         'name',
         'code',
+        'is_active',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
+
+    public function departments(): HasMany
+    {
+        return $this->hasMany(Department::class);
+    }
 
     public function programs(): HasMany
     {

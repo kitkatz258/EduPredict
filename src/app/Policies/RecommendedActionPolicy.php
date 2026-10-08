@@ -24,7 +24,7 @@ class RecommendedActionPolicy
 
     public function review(User $user, RecommendedAction $action): bool
     {
-        if (! $user->isRole(UserRole::Faculty, UserRole::DepartmentHead)) {
+        if (! $user->isRole(UserRole::DepartmentHead)) {
             return false;
         }
 

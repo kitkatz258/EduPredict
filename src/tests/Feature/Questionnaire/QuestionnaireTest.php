@@ -114,15 +114,15 @@ class QuestionnaireTest extends TestCase
     {
         $student = $this->makeStudent();
         $item = QuestionnaireItem::factory()->create();
-        $faculty = User::factory()->faculty()->create();
+        $head = User::factory()->departmentHead()->create();
         $admin = User::factory()->role(UserRole::Administrator)->create();
 
         $this->actingAs($student->user)->get(route('student.questionnaire'))->assertOk()->assertSee('not a clinical or diagnostic assessment');
-        $this->actingAs($faculty)->get(route('student.questionnaire'))->assertForbidden();
+        $this->actingAs($head)->get(route('student.questionnaire'))->assertForbidden();
         $this->actingAs($student->user)->get(route('admin.questionnaire'))->assertForbidden();
         $this->actingAs($admin)->get(route('admin.questionnaire'))->assertOk()->assertSee('Questionnaire items');
 
-        Livewire::actingAs($faculty)->test(QuestionnaireForm::class)->assertForbidden();
+        Livewire::actingAs($head)->test(QuestionnaireForm::class)->assertForbidden();
         Livewire::actingAs($student->user)->test(QuestionnaireItemsTable::class)->assertForbidden();
         Livewire::actingAs($admin)
             ->test(QuestionnaireItemsTable::class)

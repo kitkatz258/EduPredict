@@ -7,11 +7,7 @@
     </x-slot>
 
     <div class="space-y-6">
-        <p class="text-sm text-gray-600">{{ $college?->name ?? 'Your college' }}. Comparison cards use each student's latest estimate and stay inside this college.</p>
+        <p class="text-sm text-gray-600">{{ $college?->name ?? 'Your college' }}. Aggregated figures only: no student names, numbers, or individual results are shown here.</p>
         <livewire:analytics.dashboard-analytics />
-        <section class="space-y-3" aria-labelledby="college-students-heading">
-            <h3 id="college-students-heading" class="text-sm font-semibold text-brand-900">Students</h3>
-            <livewire:tables.scoped-students-table />
-        </section>
     </div>
 </x-app-layout>

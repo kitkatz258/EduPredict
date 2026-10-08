@@ -146,12 +146,13 @@ Development only. Password for every demo account: `Password123!`
 | Role | Email |
 |---|---|
 | Student | student@edupredict.test |
-| Faculty | faculty@edupredict.test |
 | Department Head | depthead@edupredict.test |
 | Dean | dean@edupredict.test |
 | Administrator | admin@edupredict.test |
 
-Sixty synthetic students (`SYN-0001` … `SYN-0060`, emails `syntheticN@edupredict.test`) sit across the programs. Of those with a stored prediction, 12 are high risk with a disengagement flag, 12 are moderate with a program-fit flag, 12 are low with mixed signals, and 24 are low with no shift pattern. A few use story names (Mara Bautista, Nico Reyes, Rico Dela Cruz, Liza Ramos, and others). Sam Student (`2024-00001`, BSIS, adviser Faye Faculty) has a complete consent record and no prediction yet, so the student demo can request one. Una Applicant (`2024-88888`) is on the institution list and is not registered.
+The pilot scope is the UCC College of Liberal Arts and Sciences (CLAS) with eight programs: BA Communication, Bachelor of Public Administration, and BS Computer Science, Entertainment and Multimedia Computing, Information Systems, Information Technology, Mathematics, and Psychology. The Department Head reviews individual students in their department (or one program, when narrowed). The Dean sees aggregated CLAS figures only, never individual students. Faculty is a legacy role: existing faculty accounts are kept for history but cannot sign in.
+
+Sixty synthetic students (`SYN-0001` … `SYN-0060`, emails `syntheticN@edupredict.test`) sit across the CLAS programs. Of those with a stored prediction, 12 are high risk with a disengagement flag, 12 are moderate with a program-fit flag, 12 are low with mixed signals, and 24 are low with no shift pattern. A few use story names (Mara Bautista, Nico Reyes, Rico Dela Cruz, Liza Ramos, and others). Sam Student (`2024-00001`, BSIS) has a complete consent record and no prediction yet, so the student demo can request one. Una Applicant (`2024-88888`) is on the institution list and is not registered.
 
 `npm` is not required to boot the seeded app. Build the frontend when you change Blade, CSS, or JavaScript:
 

@@ -25,13 +25,6 @@ class AdminPageController extends Controller
         return view('admin.institution-students');
     }
 
-    public function advisers(): View
-    {
-        abort_unless(auth()->user()?->isRole(\App\Enums\UserRole::Administrator), 403);
-
-        return view('admin.advisers');
-    }
-
     public function psoc(Request $request): View
     {
         $this->authorize('viewAny', \App\Models\PsocOccupation::class);

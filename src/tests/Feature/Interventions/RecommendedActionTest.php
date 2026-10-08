@@ -177,17 +177,16 @@ class RecommendedActionTest extends TestCase
         $this->assertStringContainsString('schedule a check-in', $actions->first()->phrased_text);
     }
 
-    public function test_faculty_and_department_heads_review_actions_and_students_do_not_see_them(): void
+    public function test_department_heads_review_actions_and_deans_and_students_do_not_see_them(): void
     {
         $college = College::factory()->create();
         $program = Program::factory()->create(['college_id' => $college->id]);
         $otherProgram = Program::factory()->create();
-        $faculty = User::factory()->faculty($program)->create();
         $head = User::factory()->departmentHead($program)->create();
-        $otherFaculty = User::factory()->faculty($otherProgram)->create();
+        $departmentHead = User::factory()->departmentHead($program->department)->create();
         $otherHead = User::factory()->departmentHead($otherProgram)->create();
         $dean = User::factory()->dean($college)->create();
-        $student = $this->student('Sam Visible', 'SYN-5151', $program, $faculty);
+        $student = $this->student('Sam Visible', 'SYN-5151', $program);
         $prediction = $this->prediction('moderate', 'program_fit', $this->hurtingFactors(), $student);
 
         app(RecommendedActionBuilder::class)->ensure($prediction, false);
@@ -200,7 +199,7 @@ class RecommendedActionTest extends TestCase
             ->assertDontSee('scheduled subject tutoring')
             ->assertDontSee('Mark reviewed');
 
-        $this->actingAs($faculty)
+        $this->actingAs($head)
             ->get(route('students.show', $student))
             ->assertOk()
             ->assertSee('Academic tutoring')
@@ -215,7 +214,7 @@ class RecommendedActionTest extends TestCase
             ->whereHas('intervention', fn ($query) => $query->where('code', 'academic_tutoring'))
             ->firstOrFail();
 
-        Livewire::actingAs($faculty)
+        Livewire::actingAs($head)
             ->test(RecommendedActions::class, ['studentId' => $student->id])
             ->set('notes.'.$action->id, 'Talked on Monday.')
             ->call('markReviewed', $action->id)
@@ -223,7 +222,7 @@ class RecommendedActionTest extends TestCase
             ->assertSee('Talked on Monday.');
 
         $action->refresh();
-        $this->assertSame($faculty->id, $action->reviewed_by);
+        $this->assertSame($head->id, $action->reviewed_by);
         $this->assertSame('Talked on Monday.', $action->reviewer_note);
         $this->assertNotNull($action->reviewed_at);
 
@@ -232,7 +231,7 @@ class RecommendedActionTest extends TestCase
             ->whereHas('intervention', fn ($query) => $query->where('code', 'study_skills_workshop'))
             ->firstOrFail();
 
-        Livewire::actingAs($head)
+        Livewire::actingAs($departmentHead)
             ->test(RecommendedActions::class, ['studentId' => $student->id])
             ->set('notes.'.$workshop->id, 'Workshop invite sent.')
             ->call('markReviewed', $workshop->id)
@@ -240,16 +239,12 @@ class RecommendedActionTest extends TestCase
 
         Livewire::actingAs($dean)
             ->test(RecommendedActions::class, ['studentId' => $student->id])
-            ->assertSee('Academic tutoring')
-            ->assertDontSee('Mark reviewed')
-            ->call('markReviewed', $action->id)
             ->assertForbidden();
+        $this->assertFalse($dean->can('review', $action));
+        $this->assertFalse($dean->can('view', $action));
+        $this->actingAs($dean)->get(route('students.show', $student))->assertForbidden();
 
         Livewire::actingAs($student->user)
-            ->test(RecommendedActions::class, ['studentId' => $student->id])
-            ->assertForbidden();
-
-        Livewire::actingAs($otherFaculty)
             ->test(RecommendedActions::class, ['studentId' => $student->id])
             ->assertForbidden();
 
@@ -257,7 +252,7 @@ class RecommendedActionTest extends TestCase
             ->test(RecommendedActions::class, ['studentId' => $student->id])
             ->assertForbidden();
 
-        $this->actingAs($otherFaculty)->get(route('students.show', $student))->assertForbidden();
+        $this->actingAs($otherHead)->get(route('students.show', $student))->assertForbidden();
     }
 
     public function test_a_low_risk_student_does_not_see_the_support_note(): void
@@ -288,7 +283,7 @@ class RecommendedActionTest extends TestCase
         ]);
     }
 
-    private function student(string $name = 'Ada Advisee', ?string $number = null, ?Program $program = null, ?User $adviser = null): Student
+    private function student(string $name = 'Ada Student', ?string $number = null, ?Program $program = null): Student
     {
         $this->studentSequence++;
         $program ??= Program::factory()->create();
@@ -300,7 +295,6 @@ class RecommendedActionTest extends TestCase
         return Student::factory()->create([
             'user_id' => $user->id,
             'program_id' => $program->id,
-            'adviser_id' => $adviser?->id,
             'student_number' => $number ?? 'SYN-'.$this->studentSequence,
         ]);
     }

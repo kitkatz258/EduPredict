@@ -9,7 +9,7 @@ use App\Enums\UserRole;
 use App\Models\Prediction;
 use App\Models\Student;
 use App\Models\User;
-use App\Notifications\AdviseePredictionReady;
+use App\Notifications\StudentPredictionReady;
 use App\Services\Audit\AuditLogger;
 use App\Services\Career\CareerMatchBuilder;
 use App\Services\Grades\AcademicSummary;
@@ -116,11 +116,9 @@ final class PredictionRequester
                 'feature_snapshot' => $featureSet->toSnapshot(),
             ]);
 
-            $student->loadMissing('user', 'adviser');
-            $adviser = $student->adviser;
-            if ($adviser instanceof User) {
-                $adviser->notify(new AdviseePredictionReady($student, $prediction));
-            }
+            $student->loadMissing('user', 'program');
+            User::query()->reviewersOf($student)->get()
+                ->each(fn (User $reviewer) => $reviewer->notify(new StudentPredictionReady($student, $prediction)));
 
             $this->audit->record('prediction_requested', $prediction, [
                 'student_id' => $student->id,

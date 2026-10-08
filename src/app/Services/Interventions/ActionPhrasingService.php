@@ -67,7 +67,7 @@ final class ActionPhrasingService
             return $cached;
         }
 
-        $prompt = "Rephrase each intervention for a faculty adviser. Use only the supplied codes. Do not add interventions, names, student numbers, percentages, diagnoses, or decisions about admission, academic standing, employment, or discipline. program_shift_flag is a qualitative label, not a score. Return JSON {\"actions\":[{\"code\":\"code\",\"text\":\"one or two supportive sentences\"}]}.\n"
+        $prompt = "Rephrase each intervention for a department head. Use only the supplied codes. Do not add interventions, names, student numbers, percentages, diagnoses, or decisions about admission, academic standing, employment, or discipline. program_shift_flag is a qualitative label, not a score. Return JSON {\"actions\":[{\"code\":\"code\",\"text\":\"one or two supportive sentences\"}]}.\n"
             .json_encode($payload);
         $response = $this->ai->complete($prompt, true);
         if (! is_string($response) || trim($response) === '') {

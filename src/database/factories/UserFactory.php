@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\UserRole;
 use App\Models\College;
+use App\Models\Department;
 use App\Models\Program;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -49,7 +50,10 @@ class UserFactory extends Factory
         ]);
     }
 
-    public function faculty(?Program $program = null): static
+    /**
+     * A historical faculty account. The role grants no access.
+     */
+    public function legacyFaculty(?Program $program = null): static
     {
         return $this->state(function () use ($program) {
             $program ??= Program::factory()->create();
@@ -62,15 +66,29 @@ class UserFactory extends Factory
         });
     }
 
-    public function departmentHead(?Program $program = null): static
+    /**
+     * Passing a Department gives department-wide scope; passing a Program
+     * narrows the head to that one program inside its department.
+     */
+    public function departmentHead(Department|Program|null $scope = null): static
     {
-        return $this->state(function () use ($program) {
-            $program ??= Program::factory()->create();
+        return $this->state(function () use ($scope) {
+            $scope ??= Department::factory()->create();
+
+            if ($scope instanceof Program) {
+                return [
+                    'role' => UserRole::DepartmentHead,
+                    'college_id' => $scope->college_id,
+                    'department_id' => $scope->department_id,
+                    'program_id' => $scope->id,
+                ];
+            }
 
             return [
                 'role' => UserRole::DepartmentHead,
-                'program_id' => $program->id,
-                'college_id' => $program->college_id,
+                'college_id' => $scope->college_id,
+                'department_id' => $scope->id,
+                'program_id' => null,
             ];
         });
     }

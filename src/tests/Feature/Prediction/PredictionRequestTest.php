@@ -10,7 +10,6 @@ use App\Livewire\Student\RequestPrediction;
 use App\Livewire\Tables\PredictionHistoryTable;
 use App\Livewire\Tables\ScopedStudentsTable;
 use App\Models\AuditLog;
-use App\Models\College;
 use App\Models\GradeReport;
 use App\Models\Prediction;
 use App\Models\Program;
@@ -20,8 +19,9 @@ use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Models\SubjectGrade;
 use App\Models\User;
-use App\Notifications\AdviseePredictionReady;
+use App\Notifications\StudentPredictionReady;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -46,9 +46,17 @@ class PredictionRequestTest extends TestCase
             ->assertSee('These results are estimates, not guarantees');
     }
 
-    public function test_a_request_inserts_history_notifies_the_adviser_and_respects_cooldown(): void
+    public function test_a_request_inserts_history_notifies_in_scope_department_heads_and_respects_cooldown(): void
     {
         $student = $this->makeStudent(semesters: 2);
+        $program = $student->program;
+        $departmentHead = User::factory()->departmentHead($program->department)->create();
+        $programHead = User::factory()->departmentHead($program)->create();
+        $otherHead = User::factory()->departmentHead(Program::factory()->create())->create();
+        $inactiveHead = User::factory()->departmentHead($program->department)->inactive()->create();
+        $legacyFaculty = User::factory()->legacyFaculty($program)->create();
+        $student->forceFill(['adviser_id' => $legacyFaculty->id])->save();
+        $dean = User::factory()->dean($program->college)->create();
         $this->completeProfile($student, 'below_10k');
         $start = now()->copy();
 
@@ -74,13 +82,16 @@ class PredictionRequestTest extends TestCase
         $this->assertArrayNotHasKey('income_bracket', $requested->meta);
         $this->assertArrayNotHasKey('email', $requested->meta);
 
-        $note = $student->adviser->notifications()->first();
-        $this->assertNotNull($note);
-        $this->assertSame(AdviseePredictionReady::class, $note->type);
-        $this->assertStringContainsString('requested a new prediction', $note->data['message']);
-        $this->assertSame($student->id, $note->data['student_id']);
-        $this->assertArrayNotHasKey('income_bracket', $note->data);
-        $this->assertSame(0, User::query()->where('email', 'other-faculty@edupredict.test')->first()?->notifications()->count() ?? 0);
+        foreach ([$departmentHead, $programHead] as $reviewer) {
+            $note = $reviewer->notifications()->sole();
+            $this->assertSame(StudentPredictionReady::class, $note->type);
+            $this->assertStringContainsString('requested a new prediction', $note->data['message']);
+            $this->assertSame($student->id, $note->data['student_id']);
+            $this->assertArrayNotHasKey('income_bracket', $note->data);
+        }
+        foreach ([$otherHead, $inactiveHead, $legacyFaculty, $dean] as $notReviewer) {
+            $this->assertSame(0, $notReviewer->notifications()->count());
+        }
 
         $this->actingAs($student->user)
             ->get(route('student.results'))
@@ -113,7 +124,7 @@ class PredictionRequestTest extends TestCase
 
         $this->assertSame(2, Prediction::query()->count());
         $this->assertEquals($first->employability_score, $first->fresh()->employability_score);
-        $this->assertSame(2, $student->adviser->notifications()->count());
+        $this->assertSame(2, $departmentHead->notifications()->count());
     }
 
     public function test_limited_history_is_stored_as_lower_confidence(): void
@@ -133,9 +144,9 @@ class PredictionRequestTest extends TestCase
             ->assertSee('Lower confidence');
     }
 
-    public function test_a_student_without_an_adviser_still_gets_a_prediction(): void
+    public function test_a_student_with_no_department_head_still_gets_a_prediction(): void
     {
-        $student = $this->makeStudent(semesters: 2, withAdviser: false);
+        $student = $this->makeStudent(semesters: 2);
         $this->completeProfile($student, '20k_40k');
 
         Livewire::actingAs($student->user)
@@ -144,49 +155,43 @@ class PredictionRequestTest extends TestCase
             ->assertHasNoErrors();
 
         $this->assertSame(1, Prediction::query()->count());
-        $this->assertSame(0, $student->user->notifications()->count());
+        $this->assertSame(0, DB::table('notifications')->count());
     }
 
     public function test_prediction_history_stays_inside_each_role_scope(): void
     {
         $program = Program::factory()->create();
         $otherProgram = Program::factory()->create();
-        $faculty = User::factory()->faculty($program)->create();
-        $otherFaculty = User::factory()->faculty($program)->create();
-        $head = User::factory()->departmentHead($program)->create();
+        $head = User::factory()->departmentHead($program->department)->create();
+        $otherHead = User::factory()->departmentHead($otherProgram->department)->create();
         $dean = User::factory()->dean($program->college)->create();
-        $otherDean = User::factory()->dean(College::factory()->create())->create();
         $admin = User::factory()->administrator()->create();
 
-        $advisee = $this->makeStudent(program: $program, adviser: $faculty, number: 'HIST-10001');
-        $outsider = $this->makeStudent(program: $otherProgram, adviser: $otherFaculty, number: 'HIST-20002');
-        $this->completeProfile($advisee, '20k_40k');
+        $insider = $this->makeStudent(program: $program, number: 'HIST-10001');
+        $outsider = $this->makeStudent(program: $otherProgram, number: 'HIST-20002');
+        $this->completeProfile($insider, '20k_40k');
         $this->completeProfile($outsider, 'above_70k');
 
-        Livewire::actingAs($advisee->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
+        Livewire::actingAs($insider->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
         Livewire::actingAs($outsider->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
 
-        $adviseeScore = number_format((float) $advisee->predictions()->first()->employability_score, 1);
+        $insiderScore = number_format((float) $insider->predictions()->first()->employability_score, 1);
 
-        Livewire::actingAs($faculty)->test(RequestPrediction::class)->assertForbidden();
-        Livewire::actingAs($advisee->user)->test(ScopedStudentsTable::class)->assertForbidden();
+        Livewire::actingAs($head)->test(RequestPrediction::class)->assertForbidden();
+        Livewire::actingAs($insider->user)->test(ScopedStudentsTable::class)->assertForbidden();
 
-        $this->actingAs($faculty)->get(route('student.results'))->assertForbidden();
-        $this->actingAs($faculty)->get(route('faculty.dashboard'))->assertOk()->assertSee('HIST-10001')->assertDontSee('HIST-20002');
-        $this->actingAs($faculty)->get(route('students.show', $advisee))->assertOk()->assertSee($adviseeScore)->assertSee('placeholder-heuristic-v0')->assertDontSee('above_70k');
-        $this->actingAs($faculty)->get(route('students.show', $outsider))->assertForbidden();
-
-        Livewire::actingAs($faculty)->test(PredictionHistoryTable::class, ['studentId' => $outsider->id])->assertForbidden();
-        Livewire::actingAs($advisee->user)->test(PredictionHistoryTable::class, ['studentId' => $outsider->id])->assertForbidden();
-        Livewire::actingAs($faculty)->test(PredictionHistoryTable::class, ['studentId' => $advisee->id])->assertOk()->assertSee($adviseeScore);
-
+        $this->actingAs($head)->get(route('student.results'))->assertForbidden();
         $this->actingAs($head)->get(route('department.dashboard'))->assertOk()->assertSee('HIST-10001')->assertDontSee('HIST-20002');
-        $this->actingAs($head)->get(route('students.show', $advisee))->assertOk()->assertSee('History');
+        $this->actingAs($head)->get(route('students.show', $insider))->assertOk()->assertSee($insiderScore)->assertSee('placeholder-heuristic-v0')->assertSee('History')->assertDontSee('above_70k');
         $this->actingAs($head)->get(route('students.show', $outsider))->assertForbidden();
 
-        $this->actingAs($dean)->get(route('dean.dashboard'))->assertOk()->assertSee('HIST-10001')->assertDontSee('HIST-20002');
-        $this->actingAs($dean)->get(route('students.show', $advisee))->assertOk();
-        $this->actingAs($otherDean)->get(route('students.show', $advisee))->assertForbidden();
+        Livewire::actingAs($head)->test(PredictionHistoryTable::class, ['studentId' => $outsider->id])->assertForbidden();
+        Livewire::actingAs($insider->user)->test(PredictionHistoryTable::class, ['studentId' => $outsider->id])->assertForbidden();
+        Livewire::actingAs($head)->test(PredictionHistoryTable::class, ['studentId' => $insider->id])->assertOk()->assertSee($insiderScore);
+
+        $this->actingAs($dean)->get(route('dean.dashboard'))->assertOk()->assertDontSee('HIST-10001')->assertDontSee('HIST-20002');
+        $this->actingAs($dean)->get(route('students.show', $insider))->assertForbidden();
+        Livewire::actingAs($dean)->test(PredictionHistoryTable::class, ['studentId' => $insider->id])->assertForbidden();
 
         $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk()->assertSee('HIST-10001')->assertSee('HIST-20002');
         $this->actingAs($admin)->get(route('students.show', $outsider))->assertOk()->assertDontSee('above_70k');
@@ -194,28 +199,28 @@ class PredictionRequestTest extends TestCase
         $this->actingAs($outsider->user)
             ->get(route('student.results'))
             ->assertOk()
-            ->assertDontSee($adviseeScore);
+            ->assertDontSee($insiderScore);
 
-        Livewire::actingAs($faculty)
+        Livewire::actingAs($head)
             ->test(NotificationBell::class)
             ->assertSee('requested a new prediction')
-            ->call('openNotification', $faculty->notifications()->first()->id)
-            ->assertRedirect(route('students.show', $advisee));
+            ->call('openNotification', $head->notifications()->first()->id)
+            ->assertRedirect(route('students.show', $insider));
 
-        $this->assertNotNull($faculty->notifications()->first()->read_at);
+        $this->assertNotNull($head->notifications()->first()->read_at);
 
-        Livewire::actingAs($otherFaculty)
+        Livewire::actingAs($otherHead)
             ->test(NotificationBell::class)
-            ->call('openNotification', $faculty->notifications()->first()->id)
+            ->call('openNotification', $head->notifications()->first()->id)
             ->assertNotFound();
     }
 
     public function test_the_scoped_student_table_filters_by_the_latest_risk(): void
     {
         $program = Program::factory()->create();
-        $faculty = User::factory()->faculty($program)->create();
-        $high = $this->makeStudent(program: $program, adviser: $faculty, number: 'RISK-30001');
-        $low = $this->makeStudent(program: $program, adviser: $faculty, number: 'RISK-30002');
+        $head = User::factory()->departmentHead($program)->create();
+        $high = $this->makeStudent(program: $program, number: 'RISK-30001');
+        $low = $this->makeStudent(program: $program, number: 'RISK-30002');
 
         Prediction::factory()->create([
             'student_id' => $high->id,
@@ -230,7 +235,7 @@ class PredictionRequestTest extends TestCase
             'employability_score' => 88,
         ]);
 
-        Livewire::actingAs($faculty)
+        Livewire::actingAs($head)
             ->test(ScopedStudentsTable::class)
             ->set('filters.dropout_risk', 'high')
             ->assertSee('RISK-30001')
@@ -239,21 +244,15 @@ class PredictionRequestTest extends TestCase
 
     private function makeStudent(
         int $semesters = 0,
-        bool $withAdviser = true,
         ?Program $program = null,
-        ?User $adviser = null,
         ?string $number = null,
     ): Student {
         $program ??= Program::factory()->create();
         $user = User::factory()->create(['role' => UserRole::Student]);
-        $adviser ??= $withAdviser
-            ? User::factory()->faculty($program)->create(['email' => 'adviser-'.$user->id.'@edupredict.test'])
-            : null;
 
         return Student::factory()->create([
             'user_id' => $user->id,
             'program_id' => $program->id,
-            'adviser_id' => $adviser?->id,
             'student_number' => $number ?? 'REQ-'.$user->id,
             'year_level' => 3,
             'semesters_completed' => $semesters,

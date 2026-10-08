@@ -16,7 +16,7 @@
             <p class="text-sm font-medium text-brand-900">University of Caloocan City</p>
             <h1 class="mt-2 text-4xl font-semibold tracking-tight text-brand-900">EduPredict</h1>
             <p class="mt-4 max-w-xl text-gray-600">
-                Advisory estimates of employability and dropout risk for faculty and department review.
+                Advisory estimates of employability and dropout risk for department review.
                 Results never decide admission, academic standing, employment, or discipline.
             </p>
         </div>

@@ -66,6 +66,11 @@ class InstitutionStudentImporter
                     continue;
                 }
 
+                if (! $program->is_active) {
+                    $errors[] = ['row' => $rowNumber, 'message' => "Program {$code} is outside the CLAS pilot scope."];
+                    continue;
+                }
+
                 if ($year < 1 || $year > 6) {
                     $errors[] = ['row' => $rowNumber, 'message' => 'Year level must be between 1 and 6.'];
                     continue;

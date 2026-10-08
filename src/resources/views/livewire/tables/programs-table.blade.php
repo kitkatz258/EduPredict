@@ -11,6 +11,8 @@
                         <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('code')">Code</button></th>
                         <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('name')">Program</button></th>
                         <th class="px-4 py-3 text-left font-semibold text-brand-900">College</th>
+                        <th class="px-4 py-3 text-left font-semibold text-brand-900">Department</th>
+                        <th class="px-4 py-3 text-left font-semibold text-brand-900">Scope</th>
                         <th class="px-4 py-3 text-left font-semibold text-brand-900">Actions</th>
                     </tr>
                 </thead>
@@ -20,10 +22,12 @@
                             <td class="px-4 py-3">{{ $row->code }}</td>
                             <td class="px-4 py-3">{{ $row->name }}</td>
                             <td class="px-4 py-3">{{ $row->college?->code }}</td>
+                            <td class="px-4 py-3">{{ $row->department?->name ?? '—' }}</td>
+                            <td class="px-4 py-3">{{ $row->is_active ? 'Pilot (active)' : 'Legacy (outside pilot)' }}</td>
                             <td class="px-4 py-3"><a href="{{ route('admin.colleges', ['program' => $row->id]) }}" class="font-medium text-brand-900 underline">Edit</a></td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="px-4 py-12 text-center text-gray-500">{{ $emptyMessage }}</td></tr>
+                        <tr><td colspan="6" class="px-4 py-12 text-center text-gray-500">{{ $emptyMessage }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

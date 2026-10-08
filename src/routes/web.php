@@ -46,10 +46,6 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         ->middleware('role:student')
         ->name('student.careers');
 
-    Route::get('/faculty/dashboard', [RoleDashboardController::class, 'faculty'])
-        ->middleware('role:faculty')
-        ->name('faculty.dashboard');
-
     Route::get('/department/dashboard', [RoleDashboardController::class, 'department'])
         ->middleware('role:department_head')
         ->name('department.dashboard');
@@ -65,7 +61,6 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
     Route::middleware('role:administrator')->group(function () {
         Route::get('/admin/users', [AdminPageController::class, 'users'])->name('admin.users');
         Route::get('/admin/institution-students', [AdminPageController::class, 'institutionStudents'])->name('admin.institution-students');
-        Route::get('/admin/advisers', [AdminPageController::class, 'advisers'])->name('admin.advisers');
         Route::get('/admin/questionnaire', [QuestionnairePageController::class, 'index'])->name('admin.questionnaire');
         Route::get('/admin/psoc', [AdminPageController::class, 'psoc'])->name('admin.psoc');
         Route::get('/admin/colleges', [AdminPageController::class, 'colleges'])->name('admin.colleges');

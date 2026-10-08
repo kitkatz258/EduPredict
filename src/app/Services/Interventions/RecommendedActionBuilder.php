@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
  */
 final class RecommendedActionBuilder
 {
-    public const STUDENT_MESSAGE = 'Some areas suggest you may benefit from additional support. Your adviser can talk through the options with you. The specific suggestions stay with faculty.';
+    public const STUDENT_MESSAGE = 'Some areas suggest you may benefit from additional support. Your department can talk through the options with you. The specific suggestions stay with your department head.';
 
     public function __construct(
         private InterventionSelector $selector,

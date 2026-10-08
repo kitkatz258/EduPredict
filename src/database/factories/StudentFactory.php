@@ -22,7 +22,6 @@ class StudentFactory extends Factory
             'student_number' => fake()->unique()->numerify('202#-#####'),
             'program_id' => $program->id,
             'year_level' => fake()->numberBetween(1, 4),
-            'adviser_id' => null,
             'enrollment_year' => fake()->numberBetween(2021, 2026),
             'semesters_completed' => fake()->numberBetween(0, 8),
             'consent_version' => 'v1',

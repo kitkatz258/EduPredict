@@ -41,16 +41,14 @@ class DashboardAnalyticsTest extends TestCase
         $programB = Program::factory()->create(['college_id' => $college->id, 'code' => 'PROG-B', 'name' => 'Program B']);
         $programC = Program::factory()->create(['college_id' => $otherCollege->id, 'code' => 'PROG-C', 'name' => 'Program C']);
 
-        $faculty = User::factory()->faculty($programA)->create();
         $head = User::factory()->departmentHead($programA)->create();
         $dean = User::factory()->dean($college)->create();
         $admin = User::factory()->administrator()->create();
-        $outsiderFaculty = User::factory()->faculty($programC)->create();
 
-        $low = $this->student($programA, $faculty, 'S-LOW', 2);
-        $high = $this->student($programA, $faculty, 'S-HIGH', 3);
-        $moderate = $this->student($programB, null, 'S-MOD', 2);
-        $outside = $this->student($programC, $outsiderFaculty, 'S-OUT', 4);
+        $low = $this->student($programA, 'S-LOW', 2);
+        $high = $this->student($programA, 'S-HIGH', 3);
+        $moderate = $this->student($programB, 'S-MOD', 2);
+        $outside = $this->student($programC, 'S-OUT', 4);
 
         $this->prediction($low, '2024-01-15 09:00:00', 10, 'high', 'none');
         $this->prediction($low, '2026-01-15 09:00:00', 80, 'low', 'none');
@@ -77,6 +75,8 @@ class DashboardAnalyticsTest extends TestCase
         $this->assertSame(3, $programStats['assessments_this_year']);
         $this->assertSame(['2026-01', '2026-05'], array_column($programStats['trend'], 'label'));
         $this->assertSame(['PROG-A'], array_column($programStats['programs'], 'code'));
+        $this->assertSame(1, $programStats['unreviewed_high']);
+        $this->assertSame(1, $programStats['program_concern']);
 
         $collegeStats = $analytics->forUser($dean);
         $this->assertSame(3, $collegeStats['students']);
@@ -89,11 +89,6 @@ class DashboardAnalyticsTest extends TestCase
         $this->assertSame(72.3, $institution['average_employability']);
         $this->assertSame(5, $institution['assessments_this_year']);
         $this->assertSame(2, $institution['high_risk']);
-
-        $advisees = $analytics->forUser($faculty);
-        $this->assertSame(2, $advisees['students']);
-        $this->assertSame(1, $advisees['unreviewed_high']);
-        $this->assertSame(1, $advisees['program_concern']);
 
         $this->actingAs($head)
             ->get(route('department.dashboard'))
@@ -119,7 +114,11 @@ class DashboardAnalyticsTest extends TestCase
             ->assertSee('PROG-A')
             ->assertSee('PROG-B')
             ->assertDontSee('PROG-C')
-            ->assertDontSee('S-OUT');
+            ->assertDontSee('S-OUT')
+            ->assertDontSee('S-LOW')
+            ->assertDontSee('S-HIGH')
+            ->assertDontSee('S-MOD')
+            ->assertDontSee($high->user->name);
 
         $this->actingAs($admin)
             ->get(route('admin.dashboard'))
@@ -128,13 +127,10 @@ class DashboardAnalyticsTest extends TestCase
             ->assertSee('PROG-C')
             ->assertSee('S-OUT');
 
-        $this->actingAs($faculty)
-            ->get(route('faculty.dashboard'))
-            ->assertOk()
-            ->assertSee('1 advisee flagged as high risk without a completed review.')
+        $this->actingAs($head)
+            ->get(route('department.dashboard'))
             ->assertSee('S-HIGH')
             ->assertSee('S-LOW')
-            ->assertDontSee('S-OUT')
             ->assertDontSee('S-MOD');
 
         Livewire::actingAs($head)
@@ -162,15 +158,11 @@ class DashboardAnalyticsTest extends TestCase
             ->assertForbidden();
 
         $latestHigh->recommendedActions()->update([
-            'reviewed_by' => $faculty->id,
+            'reviewed_by' => $head->id,
             'reviewed_at' => now(),
         ]);
 
-        $this->actingAs($faculty)
-            ->get(route('faculty.dashboard'))
-            ->assertOk()
-            ->assertDontSee('flagged as high risk without a completed review');
-        $this->assertSame(0, $analytics->forUser($faculty->fresh())['unreviewed_high']);
+        $this->assertSame(0, $analytics->forUser($head->fresh())['unreviewed_high']);
     }
 
     public function test_csv_export_is_the_current_scoped_view_and_is_audited(): void
@@ -178,16 +170,16 @@ class DashboardAnalyticsTest extends TestCase
         $college = College::factory()->create();
         $program = Program::factory()->create(['college_id' => $college->id, 'code' => 'PROG-A']);
         $other = Program::factory()->create(['code' => 'PROG-C']);
-        $faculty = User::factory()->faculty($program)->create();
-        $otherFaculty = User::factory()->faculty($other)->create();
-        $low = $this->student($program, $faculty, 'S-LOW', 2);
-        $high = $this->student($program, $faculty, 'S-HIGH', 3);
-        $outside = $this->student($other, $otherFaculty, 'S-OUT', 4);
+        $head = User::factory()->departmentHead($program)->create();
+        $dean = User::factory()->dean($college)->create();
+        $low = $this->student($program, 'S-LOW', 2);
+        $high = $this->student($program, 'S-HIGH', 3);
+        $outside = $this->student($other, 'S-OUT', 4);
         $this->prediction($low, '2026-01-15 09:00:00', 80, 'low', 'none');
         $this->prediction($high, '2026-05-15 09:00:00', 40, 'high', 'program_fit');
         $this->prediction($outside, '2026-06-01 09:00:00', 99, 'high', 'none');
 
-        $exported = Livewire::actingAs($faculty)
+        $exported = Livewire::actingAs($head)
             ->test(ScopedStudentsTable::class)
             ->set('filters.dropout_risk', 'high')
             ->call('export')
@@ -202,7 +194,7 @@ class DashboardAnalyticsTest extends TestCase
 
         $log = AuditLog::query()->sole();
         $this->assertSame('students.export', $log->action);
-        $this->assertSame($faculty->id, $log->user_id);
+        $this->assertSame($head->id, $log->user_id);
         $this->assertSame(1, $log->meta['rows']);
         $this->assertSame('high', $log->meta['dropout_risk']);
         $this->assertArrayNotHasKey('name', $log->meta);
@@ -211,6 +203,11 @@ class DashboardAnalyticsTest extends TestCase
         Livewire::actingAs($low->user)
             ->test(ScopedStudentsTable::class)
             ->assertForbidden();
+
+        Livewire::actingAs($dean)
+            ->test(ScopedStudentsTable::class)
+            ->assertForbidden();
+        $this->assertSame(1, AuditLog::query()->count(), 'a dean cannot export student rows');
     }
 
     public function test_seeded_dashboards_match_the_latest_prediction_rows(): void
@@ -220,7 +217,6 @@ class DashboardAnalyticsTest extends TestCase
         $admin = User::query()->where('email', 'admin@edupredict.test')->firstOrFail();
         $dean = User::query()->where('email', 'dean@edupredict.test')->firstOrFail();
         $head = User::query()->where('email', 'depthead@edupredict.test')->firstOrFail();
-        $faculty = User::query()->where('email', 'faculty@edupredict.test')->firstOrFail();
         $analytics = app(CohortAnalytics::class);
 
         $adminStats = $analytics->forUser($admin);
@@ -240,19 +236,33 @@ class DashboardAnalyticsTest extends TestCase
             $adminStats['with_prediction'],
         );
 
-        $this->assertSame($this->counted($dean, 'high'), $analytics->forUser($dean)['high_risk']);
-        $this->assertSame(Student::query()->visibleTo($head)->count(), $analytics->forUser($head)['students']);
-        $this->assertSame($this->counted($faculty, 'high'), $analytics->forUser($faculty)['high_risk']);
+        $deanStats = $analytics->forUser($dean);
+        $this->assertSame(Student::query()->count(), $deanStats['students'], 'every seeded student is in CLAS');
+        $this->assertSame($this->counted($dean, 'high'), $deanStats['high_risk']);
+        $this->assertCount(8, $deanStats['programs']);
+
+        $headStudents = Student::query()->visibleTo($head)->count();
+        $this->assertGreaterThan(0, $headStudents);
+        $this->assertLessThan(Student::query()->count(), $headStudents);
+        $this->assertSame($headStudents, $analytics->forUser($head)['students']);
+        $this->assertSame($this->counted($head, 'high'), $analytics->forUser($head)['high_risk']);
 
         $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk()->assertSee('Total students: '.$adminStats['students']);
-        $this->actingAs($dean)->get(route('dean.dashboard'))->assertOk()->assertSee('BSIS')->assertDontSee('BSBA');
-        $this->actingAs($head)->get(route('department.dashboard'))->assertOk()->assertSee('BSIS')->assertDontSee('BSBA');
-        $this->actingAs($faculty)->get(route('faculty.dashboard'))->assertOk()->assertSee('Total advisees');
+        $this->actingAs($dean)->get(route('dean.dashboard'))->assertOk()
+            ->assertSee('BSIS')
+            ->assertSee('BSPSYCH')
+            ->assertDontSee('SYN-0001')
+            ->assertDontSee('2024-00001')
+            ->assertDontSee('Sam Student');
+        $this->actingAs($head)->get(route('department.dashboard'))->assertOk()
+            ->assertSee('Computer Studies')
+            ->assertSee('BSIS')
+            ->assertDontSee('BSPSYCH');
 
         $this->assertGreaterThan(1, count($adminStats['trend']));
     }
 
-    private function student(Program $program, ?User $adviser, string $number, int $year): Student
+    private function student(Program $program, string $number, int $year): Student
     {
         $user = User::factory()->create([
             'name' => 'Student '.$number,
@@ -262,7 +272,6 @@ class DashboardAnalyticsTest extends TestCase
         return Student::factory()->create([
             'user_id' => $user->id,
             'program_id' => $program->id,
-            'adviser_id' => $adviser?->id,
             'student_number' => $number,
             'year_level' => $year,
         ]);
@@ -288,7 +297,7 @@ class DashboardAnalyticsTest extends TestCase
     private function counted(User $user, string $risk): int
     {
         $count = 0;
-        $students = Student::query()->visibleTo($user)->with('predictions')->get();
+        $students = Student::query()->aggregatableBy($user)->with('predictions')->get();
         foreach ($students as $student) {
             $latest = $student->predictions
                 ->sortBy(fn (Prediction $prediction): string => sprintf('%010d-%010d', $prediction->created_at?->getTimestamp() ?? 0, $prediction->id))

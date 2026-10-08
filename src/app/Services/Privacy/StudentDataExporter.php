@@ -30,7 +30,7 @@ class StudentDataExporter
 
         return [
             'exported_at' => now('Asia/Manila')->toIso8601String(),
-            'notice' => 'This file is your copy of data EduPredict stores about you. Specific institutional support actions are held by faculty and are not included. Prediction figures are estimates from the recorded model version, not a final trained model unless that version says so.',
+            'notice' => 'This file is your copy of data EduPredict stores about you. Specific institutional support actions are held by your department head and are not included. Prediction figures are estimates from the recorded model version, not a final trained model unless that version says so.',
             'account' => [
                 'name' => $user?->name,
                 'email' => $user?->email,

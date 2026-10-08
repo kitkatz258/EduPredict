@@ -70,6 +70,6 @@ class DashboardAnalytics extends Component
 
     private function authorizeStaff(): void
     {
-        abort_unless(auth()->user()?->can('viewAny', Student::class) === true, 403);
+        abort_unless(auth()->user()?->can('viewAggregates', Student::class) === true, 403);
     }
 }

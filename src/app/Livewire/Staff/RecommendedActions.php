@@ -69,7 +69,7 @@ class RecommendedActions extends Component
 
         return view('livewire.staff.recommended-actions', [
             'actions' => $actions,
-            'canReview' => $user?->isRole(UserRole::Faculty, UserRole::DepartmentHead) === true,
+            'canReview' => $user?->isRole(UserRole::DepartmentHead) === true,
             'usesFallback' => $actions->contains(fn (RecommendedAction $action): bool => $action->phrasing_source === 'rule_based'),
             'hasPrediction' => $latest !== null,
             'risk' => $latest?->dropout_risk,

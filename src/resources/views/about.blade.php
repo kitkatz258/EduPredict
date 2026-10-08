@@ -21,7 +21,7 @@
         </section>
         <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
             <h3 class="text-base font-semibold text-brand-900">Institutional actions</h3>
-            <p class="mt-2">Recommended actions come only from the predefined intervention list. A rule engine selects them. AI may only rephrase an intervention that was already selected. Faculty and department judgment is required before anyone acts on a suggestion.</p>
+            <p class="mt-2">Recommended actions come only from the predefined intervention list. A rule engine selects them. AI may only rephrase an intervention that was already selected. Department judgment is required before anyone acts on a suggestion.</p>
         </section>
         <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
             <h3 class="text-base font-semibold text-brand-900">Questionnaire</h3>

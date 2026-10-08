@@ -20,22 +20,7 @@ class SyntheticStudentSeeder extends Seeder
 {
     public function run(): void
     {
-        $programs = Program::query()->with('college')->get();
-        $faculty = User::query()->where('email', 'faculty@edupredict.test')->firstOrFail();
-        $bsis = Program::query()->where('code', 'BSIS')->firstOrFail();
-
-        $otherFaculty = User::query()->updateOrCreate(
-            ['email' => 'faculty.other@edupredict.test'],
-            [
-                'name' => 'Omar Other (synthetic faculty)',
-                'password' => Hash::make(DemoUserSeeder::PASSWORD),
-                'role' => UserRole::Faculty,
-                'college_id' => $programs->firstWhere('code', 'BSBA')?->college_id,
-                'program_id' => $programs->firstWhere('code', 'BSBA')?->id,
-                'is_active' => true,
-                'email_verified_at' => now(),
-            ],
-        );
+        $programs = Program::query()->inPilotScope()->orderBy('id')->get();
 
         $subjects = [
             ['CCS 106', 'Applications Development', 5, true],
@@ -48,8 +33,6 @@ class SyntheticStudentSeeder extends Seeder
         for ($i = 1; $i <= 60; $i++) {
             $program = $programs[$i % $programs->count()];
             $year = ($i % 4) + 1;
-            $isBsis = $program->id === $bsis->id;
-            $adviser = $isBsis ? $faculty : $otherFaculty;
             $number = sprintf('SYN-%04d', $i);
 
             $storyNames = [
@@ -94,7 +77,6 @@ class SyntheticStudentSeeder extends Seeder
                     'user_id' => $user->id,
                     'program_id' => $program->id,
                     'year_level' => $year,
-                    'adviser_id' => $adviser->id,
                     'enrollment_year' => 2027 - $year,
                     'semesters_completed' => max(0, ($year - 1) * 2),
                     'consent_version' => 'synthetic-v1',
@@ -162,7 +144,7 @@ class SyntheticStudentSeeder extends Seeder
             SkillsExperience::query()->updateOrCreate(
                 ['student_id' => $student->id],
                 [
-                    'technical_skills' => $program->code === 'BSIS' || $program->code === 'BSIT' || $program->code === 'BSCS'
+                    'technical_skills' => in_array($program->code, ['BSIS', 'BSIT', 'BSCS', 'BSEMC'], true)
                         ? ['PHP', 'SQL', 'HTML']
                         : ['communication', 'research'],
                     'certifications' => [],

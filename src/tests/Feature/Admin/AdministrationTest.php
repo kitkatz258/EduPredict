@@ -102,16 +102,15 @@ class AdministrationTest extends TestCase
     public function test_staff_views_of_a_student_record_are_audited_and_self_views_are_not(): void
     {
         $program = Program::factory()->create();
-        $faculty = User::factory()->faculty($program)->create();
+        $head = User::factory()->departmentHead($program)->create();
         $student = Student::factory()->create([
             'program_id' => $program->id,
-            'adviser_id' => $faculty->id,
         ]);
 
-        $this->actingAs($faculty)->get(route('students.show', $student))->assertOk();
+        $this->actingAs($head)->get(route('students.show', $student))->assertOk();
         $log = AuditLog::query()->where('action', 'student_record_viewed')->sole();
         $this->assertSame($student->id, $log->subject_id);
-        $this->assertSame('faculty', $log->meta['role']);
+        $this->assertSame('department_head', $log->meta['role']);
         $this->assertArrayNotHasKey('household_income_bracket', $log->meta);
 
         $this->actingAs($student->user)->get(route('students.show', $student))->assertOk();
@@ -127,9 +126,9 @@ class AdministrationTest extends TestCase
             'requested_by' => $student->user_id,
             'model_version' => 'placeholder-heuristic-v0',
         ]);
-        $faculty = User::factory()->faculty()->create();
+        $head = User::factory()->departmentHead()->create();
 
-        $this->actingAs($faculty)->get(route('privacy.download.json'))->assertForbidden();
+        $this->actingAs($head)->get(route('privacy.download.json'))->assertForbidden();
 
         $json = $this->actingAs($student->user)->get(route('privacy.download.json'));
         $json->assertOk();
@@ -156,7 +155,7 @@ class AdministrationTest extends TestCase
         $request = AccountDeletionRequest::query()->where('user_id', $student->user_id)->sole();
         $admin = User::factory()->administrator()->create();
 
-        Livewire::actingAs($faculty)->test(DeletionRequestsTable::class)->assertForbidden();
+        Livewire::actingAs($head)->test(DeletionRequestsTable::class)->assertForbidden();
         Livewire::actingAs($admin)->test(DeletionRequestsTable::class)
             ->call('approve', $request->id);
 
@@ -263,11 +262,13 @@ class AdministrationTest extends TestCase
     {
         $this->get(route('privacy'))
             ->assertOk()
-            ->assertSee('Current consent (v1)')
-            ->assertSee('Your name, student number, email, and birthdate are not sent.');
+            ->assertSee('Current consent (v2)')
+            ->assertSee('Your name, student number, email, and birthdate are not sent.')
+            ->assertSee('The dean sees aggregated college figures only, never individual students.')
+            ->assertDontSee('Faculty see only their advisees.');
 
-        $faculty = User::factory()->faculty()->create();
-        $this->actingAs($faculty)->get(route('privacy'))
+        $head = User::factory()->departmentHead()->create();
+        $this->actingAs($head)->get(route('privacy'))
             ->assertOk()
             ->assertDontSee('Download JSON');
 

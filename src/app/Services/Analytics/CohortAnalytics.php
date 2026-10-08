@@ -72,7 +72,7 @@ final class CohortAnalytics
 
     private function students(User $user, ?int $yearLevel, ?int $programId): Builder
     {
-        $query = Student::query()->visibleTo($user);
+        $query = Student::query()->aggregatableBy($user);
 
         if (in_array($yearLevel, [1, 2, 3, 4], true)) {
             $query->where('year_level', $yearLevel);
@@ -86,19 +86,24 @@ final class CohortAnalytics
     }
 
     /**
+     * Mirrors Student::aggregatableBy so filters never widen the scope.
+     *
      * @return list<int>
      */
     private function allowedProgramIds(User $user): array
     {
-        $ids = match ($user->role) {
-            UserRole::DepartmentHead => [$user->program_id],
-            UserRole::Dean => Program::query()->where('college_id', $user->college_id)->pluck('id')->all(),
-            UserRole::Administrator => Program::query()->pluck('id')->all(),
-            UserRole::Faculty => Student::query()->visibleTo($user)->distinct()->pluck('program_id')->all(),
-            default => [],
+        $programs = Program::query();
+
+        match ($user->role) {
+            UserRole::DepartmentHead => $user->program_id !== null
+                ? $programs->whereKey($user->program_id)
+                : $programs->where('department_id', $user->department_id ?? 0),
+            UserRole::Dean => $programs->where('college_id', $user->college_id ?? 0)->where('is_active', true),
+            UserRole::Administrator => $programs->where('is_active', true),
+            UserRole::Student, UserRole::Faculty => $programs->whereRaw('1 = 0'),
         };
 
-        return array_values(array_map('intval', array_filter($ids, fn (mixed $id): bool => $id !== null)));
+        return array_values(array_map('intval', $programs->pluck('id')->all()));
     }
 
     /**

@@ -13,7 +13,7 @@ class InterventionSeeder extends Seeder
             [
                 'code' => 'academic_tutoring',
                 'title' => 'Academic tutoring',
-                'description' => 'A faculty adviser can refer the student to scheduled subject tutoring. This is an option to discuss, not a decision about academic standing.',
+                'description' => 'An adviser can refer the student to scheduled subject tutoring. This is an option to discuss, not a decision about academic standing.',
                 'targets_factor' => ['gwa', 'failed_subjects'],
                 'min_risk_level' => 'moderate',
             ],
@@ -41,7 +41,7 @@ class InterventionSeeder extends Seeder
             [
                 'code' => 'guidance_counselling',
                 'title' => 'Guidance counselling referral',
-                'description' => 'A faculty adviser can offer a referral to the guidance office for a supportive conversation. This is not a clinical or diagnostic assessment.',
+                'description' => 'An adviser can offer a referral to the guidance office for a supportive conversation. This is not a clinical or diagnostic assessment.',
                 'targets_factor' => ['motivation', 'engagement', 'procrastination', 'general'],
                 'min_risk_level' => 'moderate',
             ],

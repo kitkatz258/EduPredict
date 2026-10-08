@@ -8,14 +8,13 @@ use App\Models\User;
 
 class StudentPolicy
 {
+    /**
+     * Student-level lists (names, numbers, individual results).
+     * Deans are aggregate-only and are excluded on purpose.
+     */
     public function viewAny(User $user): bool
     {
-        return $user->isRole(
-            UserRole::Faculty,
-            UserRole::DepartmentHead,
-            UserRole::Dean,
-            UserRole::Administrator,
-        );
+        return $user->isRole(UserRole::DepartmentHead, UserRole::Administrator);
     }
 
     public function view(User $user, Student $student): bool
@@ -23,8 +22,11 @@ class StudentPolicy
         return Student::query()->visibleTo($user)->whereKey($student->id)->exists();
     }
 
-    public function assignAdviser(User $user): bool
+    /**
+     * Aggregate dashboards that never name an individual student.
+     */
+    public function viewAggregates(User $user): bool
     {
-        return $user->isRole(UserRole::Administrator);
+        return $user->isRole(UserRole::DepartmentHead, UserRole::Dean, UserRole::Administrator);
     }
 }

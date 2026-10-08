@@ -9,7 +9,10 @@ use App\Models\Student;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class AdviseePredictionReady extends Notification
+/**
+ * Sent to the department heads whose scope includes the student.
+ */
+class StudentPredictionReady extends Notification
 {
     use Queueable;
 
@@ -28,12 +31,12 @@ class AdviseePredictionReady extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        $name = $this->student->user?->name ?: 'An advisee';
+        $name = $this->student->user?->name ?: 'A student';
 
         return [
             'prediction_id' => $this->prediction->id,
             'student_id' => $this->student->id,
-            'title' => 'New advisee prediction',
+            'title' => 'New student prediction',
             'message' => $name.' requested a new prediction.',
             'url' => route('students.show', $this->student),
         ];

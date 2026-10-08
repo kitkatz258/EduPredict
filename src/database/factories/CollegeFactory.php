@@ -15,6 +15,7 @@ class CollegeFactory extends Factory
         return [
             'name' => fake()->unique()->company().' College',
             'code' => strtoupper(fake()->unique()->lexify('???')),
+            'is_active' => true,
         ];
     }
 }

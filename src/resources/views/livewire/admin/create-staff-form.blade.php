@@ -13,31 +13,47 @@
         </div>
         <div>
             <label for="staff-role" class="mb-1 block text-sm font-medium">Role</label>
-            <select id="staff-role" wire:model="role" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
-                <option value="faculty">Faculty</option>
-                <option value="department_head">Department Head</option>
-                <option value="dean">Dean</option>
-                <option value="administrator">Administrator</option>
-            </select>
-        </div>
-        <div>
-            <label for="staff-college" class="mb-1 block text-sm font-medium">College</label>
-            <select id="staff-college" wire:model="college_id" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
-                <option value="">None</option>
-                @foreach ($colleges as $college)
-                    <option value="{{ $college->id }}">{{ $college->name }}</option>
+            <select id="staff-role" wire:model.live="role" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                @foreach ($roles as $option)
+                    <option value="{{ $option->value }}">{{ $option->label() }}</option>
                 @endforeach
             </select>
+            @error('role') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
         </div>
-        <div>
-            <label for="staff-program" class="mb-1 block text-sm font-medium">Program</label>
-            <select id="staff-program" wire:model="program_id" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
-                <option value="">None</option>
-                @foreach ($programs as $program)
-                    <option value="{{ $program->id }}">{{ $program->code }} — {{ $program->name }}</option>
-                @endforeach
-            </select>
-        </div>
+        @if ($role === \App\Enums\UserRole::Dean->value)
+            <div>
+                <label for="staff-college" class="mb-1 block text-sm font-medium">College</label>
+                <select id="staff-college" wire:model="college_id" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                    <option value="">Select college</option>
+                    @foreach ($colleges as $college)
+                        <option value="{{ $college->id }}">{{ $college->name }}</option>
+                    @endforeach
+                </select>
+                <p class="mt-1 text-xs text-gray-500">Deans see aggregated college figures only.</p>
+                @error('college_id') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+            </div>
+        @elseif ($role === \App\Enums\UserRole::DepartmentHead->value)
+            <div>
+                <label for="staff-department" class="mb-1 block text-sm font-medium">Department</label>
+                <select id="staff-department" wire:model.live="department_id" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                    <option value="">Select department</option>
+                    @foreach ($departments as $department)
+                        <option value="{{ $department->id }}">{{ $department->name }} ({{ $department->college?->code }})</option>
+                    @endforeach
+                </select>
+                @error('department_id') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label for="staff-program" class="mb-1 block text-sm font-medium">Limit to one program (optional)</label>
+                <select id="staff-program" wire:model="program_id" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                    <option value="">Whole department</option>
+                    @foreach ($programs->where('department_id', $department_id) as $program)
+                        <option value="{{ $program->id }}">{{ $program->code }} — {{ $program->name }}</option>
+                    @endforeach
+                </select>
+                @error('program_id') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+            </div>
+        @endif
         <div class="sm:col-span-2">
             <button type="submit" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">Create account</button>
         </div>

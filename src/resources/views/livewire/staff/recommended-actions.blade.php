@@ -1,6 +1,6 @@
 <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="recommended-actions-heading">
     <h2 id="recommended-actions-heading" class="text-sm font-semibold text-brand-900">Recommended institutional actions</h2>
-    <p class="mt-1 text-sm leading-6 text-gray-700">These suggestions come from the predefined intervention list. They are advisory. Faculty or department judgment is required. They do not decide admission, academic standing, employment, or discipline.</p>
+    <p class="mt-1 text-sm leading-6 text-gray-700">These suggestions come from the predefined intervention list. They are advisory. Department judgment is required. They do not decide admission, academic standing, employment, or discipline.</p>
 
     @if ($usesFallback)
         <p class="mt-3 text-xs text-gray-500">AI unavailable, using standard text.</p>

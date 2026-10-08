@@ -44,8 +44,36 @@ class RegistrationTest extends TestCase
             'is_registered' => 1,
         ]);
         $this->assertDatabaseHas('consents', [
-            'version' => 'v1',
+            'version' => config('edupredict.consent.current_version'),
         ]);
+    }
+
+    public function test_listed_student_in_a_program_outside_the_clas_pilot_cannot_register(): void
+    {
+        $legacy = Program::factory()->legacy()->create();
+        InstitutionStudent::factory()->create([
+            'student_number' => '2019-12345',
+            'last_name' => 'Santos',
+            'first_name' => 'Leo',
+            'program_id' => $legacy->id,
+            'is_registered' => false,
+        ]);
+
+        $this->get('/register')->assertOk()->assertDontSee($legacy->name);
+
+        $this->post('/register', [
+            'student_number' => '2019-12345',
+            'last_name' => 'Santos',
+            'first_name' => 'Leo',
+            'program_id' => $legacy->id,
+            'email' => 'leo@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'consent' => '1',
+        ])->assertSessionHasErrors('program_id');
+
+        $this->assertGuest();
+        $this->assertDatabaseHas('institution_students', ['student_number' => '2019-12345', 'is_registered' => 0]);
     }
 
     public function test_unknown_student_number_cannot_register(): void

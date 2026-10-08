@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,6 +23,7 @@ class User extends Authenticatable
         'password',
         'role',
         'college_id',
+        'department_id',
         'program_id',
         'is_active',
         'consented_at',
@@ -52,6 +54,11 @@ class User extends Authenticatable
         return $this->belongsTo(College::class);
     }
 
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
     public function program(): BelongsTo
     {
         return $this->belongsTo(Program::class);
@@ -75,5 +82,30 @@ class User extends Authenticatable
     public function isRole(UserRole ...$roles): bool
     {
         return in_array($this->role, $roles, true);
+    }
+
+    public function canSignIn(): bool
+    {
+        return $this->is_active && ! $this->role->isLegacy();
+    }
+
+    /**
+     * Active department heads whose student-level scope includes the student.
+     */
+    public function scopeReviewersOf(Builder $query, Student $student): Builder
+    {
+        $student->loadMissing('program');
+
+        return $query
+            ->where('role', UserRole::DepartmentHead)
+            ->where('is_active', true)
+            ->where(function (Builder $scope) use ($student): void {
+                $scope->where('program_id', $student->program_id)
+                    ->orWhere(function (Builder $departmentWide) use ($student): void {
+                        $departmentWide->whereNull('program_id')
+                            ->whereNotNull('department_id')
+                            ->where('department_id', $student->program?->department_id);
+                    });
+            });
     }
 }

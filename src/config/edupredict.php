@@ -80,8 +80,17 @@ return [
     ],
 
     'consent' => [
-        'current_version' => 'v1',
+        'current_version' => 'v2',
         'versions' => [
+            'v2' => [
+                'effective_on' => '2026-10-09',
+                'paragraphs' => [
+                    'EduPredict collects academic records, socioeconomic information, skills and experience, and questionnaire answers to estimate employability and dropout risk and to suggest career matches and support options. The current pilot covers the College of Liberal Arts and Sciences (CLAS), University of Caloocan City.',
+                    'Department heads see student-level results only for students in their assigned department or program, and never your raw socioeconomic answers. The dean sees aggregated college figures only, never individual students. Administrators manage accounts and the eligible-student list. Predictions are advisory and do not decide admission, academic standing, employment, or discipline.',
+                    'When an optional AI service is used, only de-identified features or cleaned grade-row text are sent. Your name, student number, email, and birthdate are not sent. Grade-report uploads should not include pages showing more than your grades.',
+                    'You may access and correct your data, download a copy, or request account deletion. An administrator processes a deletion request. Approval deactivates the login and keeps prediction history.',
+                ],
+            ],
             'v1' => [
                 'effective_on' => '2026-10-05',
                 'paragraphs' => [

@@ -102,11 +102,11 @@ final class PredictionPresenter
         $support = $areas === []
             ? 'No major area stands out as needing extra support in this estimate.'
             : 'Areas where support could help: '.implode(', ', $areas).'.';
-        $adviser = $forStudent
-            ? ' A faculty adviser can talk through it with you.'
+        $contact = $forStudent
+            ? ' Your department can talk through it with you.'
             : ' Talk it through with the student before any action.';
 
-        return "This estimate sits in {$range}. {$support}{$adviser}";
+        return "This estimate sits in {$range}. {$support}{$contact}";
     }
 
     /**

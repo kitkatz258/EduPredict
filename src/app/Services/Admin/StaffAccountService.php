@@ -4,23 +4,27 @@ namespace App\Services\Admin;
 
 use App\Enums\UserRole;
 use App\Models\AuditLog;
+use App\Models\Department;
 use App\Models\User;
 use Illuminate\Support\Str;
 
 class StaffAccountService
 {
     /**
-     * @param  array{name: string, email: string, role: string, college_id?: int|null, program_id?: int|null}  $data
+     * @param  array{name: string, email: string, role: string, college_id?: int|null, department_id?: int|null, program_id?: int|null}  $data
      * @return array{user: User, temporary_password: string}
      */
     public function create(array $data, User $actor, ?string $ip = null): array
     {
         $role = UserRole::from($data['role']);
 
-        if ($role === UserRole::Student) {
-            abort(422, 'Student accounts are created through self-registration.');
+        if (! in_array($role, UserRole::staffAssignable(), true)) {
+            abort(422, $role === UserRole::Student
+                ? 'Student accounts are created through self-registration.'
+                : 'This role is no longer assignable.');
         }
 
+        $scope = $this->scopeFor($role, $data);
         $temporary = Str::password(12);
 
         $user = User::query()->create([
@@ -28,8 +32,7 @@ class StaffAccountService
             'email' => $data['email'],
             'password' => $temporary,
             'role' => $role,
-            'college_id' => $data['college_id'] ?? null,
-            'program_id' => $data['program_id'] ?? null,
+            ...$scope,
             'is_active' => true,
             'must_change_password' => true,
             'email_verified_at' => now(),
@@ -45,6 +48,42 @@ class StaffAccountService
         ]);
 
         return ['user' => $user, 'temporary_password' => $temporary];
+    }
+
+    /**
+     * Only the fields that define each role's scope are stored.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array{college_id: int|null, department_id: int|null, program_id: int|null}
+     */
+    private function scopeFor(UserRole $role, array $data): array
+    {
+        $none = ['college_id' => null, 'department_id' => null, 'program_id' => null];
+
+        if ($role === UserRole::Dean) {
+            abort_if(empty($data['college_id']), 422, 'A dean needs a college.');
+
+            return [...$none, 'college_id' => (int) $data['college_id']];
+        }
+
+        if ($role === UserRole::DepartmentHead) {
+            $department = Department::query()->findOrFail((int) ($data['department_id'] ?? 0));
+            $programId = empty($data['program_id']) ? null : (int) $data['program_id'];
+
+            abort_if(
+                $programId !== null && ! $department->programs()->whereKey($programId)->exists(),
+                422,
+                'The program must belong to the selected department.',
+            );
+
+            return [
+                'college_id' => $department->college_id,
+                'department_id' => $department->id,
+                'program_id' => $programId,
+            ];
+        }
+
+        return $none;
     }
 
     public function setActive(User $user, bool $active, User $actor, ?string $ip = null): void
