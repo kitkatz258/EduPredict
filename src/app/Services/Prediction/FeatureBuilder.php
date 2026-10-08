@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace App\Services\Prediction;
 
-use App\Models\SkillsExperience;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Services\Grades\AcademicSummary;
+use App\Services\Profile\SkillsExperienceRecords;
 
 /**
  * The only place student records become a FeatureSet.
- * Draft profiles and unconfirmed grade reports are ignored.
+ * Draft profiles, archived skill entries, and unconfirmed grade reports are ignored.
+ * Projects are no longer collected, so `projectCount` is always 0.
  */
 final class FeatureBuilder
 {
-    public function __construct(private AcademicSummary $academic) {}
+    public function __construct(
+        private AcademicSummary $academic,
+        private SkillsExperienceRecords $skillRecords,
+    ) {}
 
     public function build(Student $student): FeatureSet
     {
         $summary = $this->academic->for($student);
         $profile = $this->publishedProfile($student);
-        $skills = $this->publishedSkills($student);
+        $skills = $this->skillRecords->counts($student);
         $scores = $this->latestConstructScores($student);
 
         $scholarship = $profile?->scholarship_status;
@@ -41,11 +45,11 @@ final class FeatureBuilder
             internetAccess: $this->nullableString($profile?->has_internet),
             deviceAccess: $this->nullableString($profile?->has_device),
             studySpace: $this->nullableString($profile?->has_study_space),
-            technicalSkillCount: $this->countList($skills?->technical_skills),
-            certificationCount: $this->countList($skills?->certifications),
-            internshipCount: $this->countList($skills?->internships),
-            projectCount: $this->countList($skills?->projects),
-            workExperienceCount: $this->countList($skills?->work_experience),
+            technicalSkillCount: $skills['technical_skills'],
+            certificationCount: $skills['certifications'],
+            internshipCount: $skills['internships'],
+            projectCount: 0,
+            workExperienceCount: $skills['work_experience'],
             studyHabits: $this->score($scores, 'study_habits'),
             timeManagement: $this->score($scores, 'time_management'),
             motivation: $this->score($scores, 'motivation'),
@@ -65,13 +69,6 @@ final class FeatureBuilder
         $profile = $student->socioeconomicProfile()->first();
 
         return $profile !== null && ! $profile->is_draft ? $profile : null;
-    }
-
-    private function publishedSkills(Student $student): ?SkillsExperience
-    {
-        $skills = $student->skillsExperience()->first();
-
-        return $skills !== null && ! $skills->is_draft ? $skills : null;
     }
 
     /**
@@ -100,11 +97,6 @@ final class FeatureBuilder
         }
 
         return (float) $scores[$construct];
-    }
-
-    private function countList(mixed $value): int
-    {
-        return is_array($value) ? count($value) : 0;
     }
 
     private function nullableString(mixed $value): ?string

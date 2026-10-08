@@ -8,6 +8,9 @@ use App\Contracts\PredictorInterface;
 use App\Models\GradeReport;
 use App\Models\QuestionnaireResponse;
 use App\Models\SkillsExperience;
+use App\Models\StudentCertification;
+use App\Models\StudentSkill;
+use App\Models\StudentWorkExperience;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Models\SubjectGrade;
@@ -39,15 +42,13 @@ class FeatureBuilderTest extends TestCase
             'has_study_space' => 'yes',
             'is_draft' => false,
         ]);
-        SkillsExperience::factory()->create([
-            'student_id' => $student->id,
-            'technical_skills' => ['PHP', 'SQL'],
-            'certifications' => [['name' => 'IT Specialist']],
-            'internships' => [['title' => 'OJT']],
-            'projects' => [],
-            'work_experience' => [['title' => 'Tutor']],
-            'is_draft' => false,
-        ]);
+        SkillsExperience::factory()->create(['student_id' => $student->id, 'is_draft' => false]);
+        StudentSkill::factory()->create(['student_id' => $student->id, 'name' => 'PHP']);
+        StudentSkill::factory()->create(['student_id' => $student->id, 'name' => 'SQL']);
+        StudentSkill::factory()->create(['student_id' => $student->id, 'name' => 'Old skill', 'archived_at' => now()]);
+        StudentCertification::factory()->create(['student_id' => $student->id]);
+        StudentWorkExperience::factory()->internship()->create(['student_id' => $student->id]);
+        StudentWorkExperience::factory()->create(['student_id' => $student->id]);
         QuestionnaireResponse::query()->create([
             'student_id' => $student->id,
             'submitted_at' => now()->subDay(),
@@ -80,6 +81,7 @@ class FeatureBuilderTest extends TestCase
         $this->assertSame(1, $features->certificationCount);
         $this->assertSame(1, $features->internshipCount);
         $this->assertSame(1, $features->workExperienceCount);
+        $this->assertSame(0, $features->projectCount);
         $this->assertEquals(80, $features->studyHabits);
         $this->assertEquals(40, $features->procrastination);
 
@@ -107,11 +109,8 @@ class FeatureBuilderTest extends TestCase
             'scholarship_status' => 'full',
             'is_draft' => true,
         ]);
-        SkillsExperience::factory()->create([
-            'student_id' => $student->id,
-            'internships' => [['title' => 'Hidden']],
-            'is_draft' => true,
-        ]);
+        SkillsExperience::factory()->create(['student_id' => $student->id, 'is_draft' => true]);
+        StudentWorkExperience::factory()->internship()->create(['student_id' => $student->id]);
 
         $features = app(FeatureBuilder::class)->build($student);
 

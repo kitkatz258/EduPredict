@@ -2,16 +2,14 @@
 
 namespace App\Livewire\Student;
 
-use App\Http\Requests\Student\SkillsExperienceRequest;
 use App\Http\Requests\Student\SocioeconomicProfileRequest;
 use App\Livewire\Concerns\DispatchesToasts;
-use App\Models\SkillsExperience;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Profile\AssessmentProgress;
-use App\Services\Profile\SkillsListParser;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -44,16 +42,6 @@ class AssessmentWizard extends Component
 
     public ?string $has_study_space = null;
 
-    public string $technicalSkills = '';
-
-    public string $certifications = '';
-
-    public string $internships = '';
-
-    public string $projects = '';
-
-    public string $workExperience = '';
-
     public function mount(): void
     {
         $this->authorizeStudent();
@@ -62,7 +50,6 @@ class AssessmentWizard extends Component
         }
         $student = $this->student();
         $this->fillSocioeconomic($student->socioeconomicProfile);
-        $this->fillSkills($student->skillsExperience);
     }
 
     public function goTo(string $step): void
@@ -82,6 +69,14 @@ class AssessmentWizard extends Component
             $this->questionnaireSection = $section;
             $this->resetValidation();
         }
+    }
+
+    #[On('skills-section-saved')]
+    public function skillsSectionSaved(): void
+    {
+        $this->authorizeStudent();
+        $this->step = 'grades';
+        $this->statusMessage = 'Skills and experience section saved.';
     }
 
     public function toggleGradeEditor(): void
@@ -131,56 +126,6 @@ class AssessmentWizard extends Component
         }
     }
 
-    public function saveSkills(bool $asDraft = false, ?SkillsListParser $parser = null): void
-    {
-        $student = $this->authorizeStudent();
-        $existing = $student->skillsExperience;
-        $existing
-            ? $this->authorize('update', $existing)
-            : $this->authorize('create', SkillsExperience::class);
-
-        $validated = $this->validate(SkillsExperienceRequest::fieldRules());
-        $parser ??= app(SkillsListParser::class);
-        $certifications = array_map(
-            fn (array $pair): array => ['name' => $pair['name'], 'year' => $pair['detail']],
-            $parser->pairs($validated['certifications'] ?? ''),
-        );
-        $internships = array_map(
-            fn (array $pair): array => ['organization' => $pair['name'], 'role' => $pair['detail']],
-            $parser->pairs($validated['internships'] ?? ''),
-        );
-        $projects = array_map(
-            fn (array $pair): array => ['title' => $pair['name'], 'description' => $pair['detail']],
-            $parser->pairs($validated['projects'] ?? ''),
-        );
-        $work = array_map(
-            fn (array $pair): array => ['employer' => $pair['name'], 'role' => $pair['detail']],
-            $parser->pairs($validated['workExperience'] ?? ''),
-        );
-
-        $skills = $student->skillsExperience()->updateOrCreate(
-            ['student_id' => $student->id],
-            [
-                'technical_skills' => $parser->strings($validated['technicalSkills'] ?? ''),
-                'certifications' => $certifications,
-                'internships' => $internships,
-                'projects' => $projects,
-                'work_experience' => $work,
-                'is_draft' => $asDraft,
-            ],
-        );
-
-        $this->authorize('update', $skills);
-        $this->statusMessage = $asDraft
-            ? 'Skills draft saved.'
-            : 'Skills and experience section saved.';
-        $this->toast($this->statusMessage);
-
-        if (! $asDraft) {
-            $this->step = 'grades';
-        }
-    }
-
     public function render(AcademicSummary $academic, AssessmentProgress $progress): View
     {
         $student = $this->authorizeStudent();
@@ -214,7 +159,7 @@ class AssessmentWizard extends Component
         $student = auth()->user()?->student;
         abort_unless($student instanceof Student, 403);
 
-        return $student->load(['socioeconomicProfile', 'skillsExperience', 'program']);
+        return $student->load(['socioeconomicProfile', 'program']);
     }
 
     private function fillSocioeconomic(?SocioeconomicProfile $profile): void
@@ -250,21 +195,6 @@ class AssessmentWizard extends Component
                 $this->{$field} = null;
             }
         }
-    }
-
-    private function fillSkills(?SkillsExperience $skills): void
-    {
-        if ($skills === null) {
-            return;
-        }
-
-        $this->authorize('view', $skills);
-        $parser = app(SkillsListParser::class);
-        $this->technicalSkills = $parser->stringsToText($skills->technical_skills ?? []);
-        $this->certifications = $parser->pairsToText($skills->certifications ?? [], ['name'], ['year']);
-        $this->internships = $parser->pairsToText($skills->internships ?? [], ['organization', 'title'], ['role', 'hours']);
-        $this->projects = $parser->pairsToText($skills->projects ?? [], ['title', 'name'], ['description', 'detail']);
-        $this->workExperience = $parser->pairsToText($skills->work_experience ?? [], ['employer', 'organization'], ['role', 'description']);
     }
 
     private function blankToNull(mixed $value): ?string

@@ -7,6 +7,9 @@ use App\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
+ * Section status row. Entries live in student_skills, student_certifications,
+ * and student_work_experiences; the JSON columns hold legacy data only.
+ *
  * @extends Factory<SkillsExperience>
  */
 class SkillsExperienceFactory extends Factory
@@ -15,11 +18,6 @@ class SkillsExperienceFactory extends Factory
     {
         return [
             'student_id' => Student::factory(),
-            'technical_skills' => ['PHP', 'SQL'],
-            'certifications' => [],
-            'internships' => [],
-            'projects' => [],
-            'work_experience' => [],
             'is_draft' => false,
         ];
     }

@@ -15,6 +15,7 @@ use App\Models\Prediction;
 use App\Models\Program;
 use App\Models\QuestionnaireResponse;
 use App\Models\SkillsExperience;
+use App\Models\StudentSkill;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Models\SubjectGrade;
@@ -313,15 +314,8 @@ class PredictionRequestTest extends TestCase
             'has_study_space' => 'yes',
             'is_draft' => false,
         ]);
-        SkillsExperience::factory()->create([
-            'student_id' => $student->id,
-            'technical_skills' => ['SQL'],
-            'certifications' => [],
-            'internships' => [],
-            'projects' => [],
-            'work_experience' => [],
-            'is_draft' => false,
-        ]);
+        SkillsExperience::factory()->create(['student_id' => $student->id, 'is_draft' => false]);
+        StudentSkill::factory()->create(['student_id' => $student->id, 'name' => 'SQL']);
         QuestionnaireResponse::query()->create([
             'student_id' => $student->id,
             'submitted_at' => now(),

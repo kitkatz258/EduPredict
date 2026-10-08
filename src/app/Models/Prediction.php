@@ -25,6 +25,7 @@ class Prediction extends Model
         'program_shift_flag',
         'factors',
         'feature_snapshot',
+        'assessment_snapshot',
         'created_at',
     ];
 
@@ -35,6 +36,7 @@ class Prediction extends Model
             'dropout_probability' => 'float',
             'factors' => 'array',
             'feature_snapshot' => 'array',
+            'assessment_snapshot' => 'array',
             'created_at' => 'datetime',
         ];
     }

@@ -146,6 +146,16 @@ return [
             'yes' => 'Has a study space',
             'no' => 'No study space',
         ],
+        // `ojt_internship` feeds the internship count; every other type is work experience.
+        'experience_types' => [
+            'ojt_internship' => 'OJT / Internship',
+            'part_time' => 'Part-time job',
+            'full_time' => 'Full-time job',
+            'freelance' => 'Freelance or contract work',
+            'student_assistant' => 'Student assistantship',
+            'volunteer' => 'Volunteer or organization work',
+            'other' => 'Other work experience',
+        ],
     ],
 
     'questionnaire' => [

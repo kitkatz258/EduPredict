@@ -6,15 +6,16 @@ use App\Models\Student;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Prediction\PredictionPresenter;
 use App\Services\Profile\AssessmentProgress;
+use App\Services\Profile\SkillsExperienceRecords;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class RoleDashboardController extends Controller
 {
-    public function student(Request $request, AcademicSummary $summary, AssessmentProgress $progress, PredictionPresenter $presenter): View
+    public function student(Request $request, AcademicSummary $summary, AssessmentProgress $progress, PredictionPresenter $presenter, SkillsExperienceRecords $records): View
     {
         $student = $request->user()->student;
-        $student?->load(['program', 'skillsExperience']);
+        $student?->load('program');
         $latest = $student?->predictions()->latest('created_at')->latest('id')->first();
 
         return view('dashboards.student', [
@@ -23,7 +24,7 @@ class RoleDashboardController extends Controller
             'progress' => $student ? $progress->for($student) : null,
             'latest' => $latest,
             'summary' => $presenter->summary($latest, true),
-            'skillsLogged' => $this->skillsLogged($student),
+            'skillsLogged' => $this->skillsLogged($student, $records),
         ]);
     }
 
@@ -49,17 +50,8 @@ class RoleDashboardController extends Controller
         return view('dashboards.admin');
     }
 
-    private function skillsLogged(?Student $student): int
+    private function skillsLogged(?Student $student, SkillsExperienceRecords $records): int
     {
-        $skills = $student?->skillsExperience;
-        if ($skills === null || $skills->is_draft) {
-            return 0;
-        }
-
-        return count($skills->technical_skills ?? [])
-            + count($skills->certifications ?? [])
-            + count($skills->internships ?? [])
-            + count($skills->projects ?? [])
-            + count($skills->work_experience ?? []);
+        return $student === null ? 0 : array_sum($records->counts($student));
     }
 }

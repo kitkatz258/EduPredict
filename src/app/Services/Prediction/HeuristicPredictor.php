@@ -28,7 +28,6 @@ final class HeuristicPredictor implements PredictorInterface
         $this->add($factors, $points, 'internships', 'Internships or OJT', $this->cappedCount($features->internshipCount, 2, 6));
         $this->add($factors, $points, 'certifications', 'Certifications', $this->cappedCount($features->certificationCount, 2, 4));
         $this->add($factors, $points, 'technical_skills', 'Technical skills', $this->cappedCount($features->technicalSkillCount, 4, 1.5));
-        $this->add($factors, $points, 'projects', 'Projects', $this->cappedCount($features->projectCount, 2, 3));
         $this->add($factors, $points, 'work_experience', 'Work experience', $this->cappedCount($features->workExperienceCount, 2, 3));
         $this->add($factors, $points, 'study_habits', 'Study habits', $this->positiveConstruct($features->studyHabits, 8));
         $this->add($factors, $points, 'time_management', 'Time management', $this->positiveConstruct($features->timeManagement, 8));

@@ -35,7 +35,7 @@ Other non-zero weights: scholarship +8 employability / −0.05 dropout (none is 
 internships up to 2 × +6 employability and −0.03 dropout;
 certifications up to 2 × +4 / −0.02;
 technical skills up to 4 × +1.5 employability;
-projects and work experience up to 2 × +3 employability;
+work experience up to 2 × +3 employability (projects are no longer collected and have no weight);
 each positive construct `((score - 50) / 50) * 8` employability and `((100 - score) / 100) * 0.08` dropout;
 procrastination is reversed, `((50 - score) / 50) * 8` employability and `(score / 100) * 0.12` dropout;
 reliable internet, device, or study space is +2 employability (missing is −3);
@@ -45,7 +45,7 @@ Household size and living arrangement are stored in the snapshot and are not sco
 
 ## Feature catalog
 
-Draft socioeconomic and skills rows are ignored. Only confirmed grade reports count. Questionnaire features come from the latest submitted response.
+Draft socioeconomic rows are ignored. Skills, certification, and work-experience entries count only while the Skills & Experience section is saved (`skills_experiences.is_draft` false) and the entry is not archived. Only confirmed grade reports count. Questionnaire features come from the latest submitted response.
 
 | name | type | allowed values | source | used by |
 |---|---|---|---|---|
@@ -62,11 +62,11 @@ Draft socioeconomic and skills rows are ignored. Only confirmed grade reports co
 | internet_access | string or null | `yes`, `unreliable`, `no` | `socioeconomic_profiles.has_internet` | employability, dropout |
 | device_access | string or null | `yes`, `shared`, `no` | `socioeconomic_profiles.has_device` | employability, dropout |
 | study_space | string or null | `yes`, `no` | `socioeconomic_profiles.has_study_space` | employability, dropout |
-| technical_skill_count | int | ≥ 0 | count of `skills_experiences.technical_skills` when not a draft | employability |
-| certification_count | int | ≥ 0 | count of `skills_experiences.certifications` | employability, dropout |
-| internship_count | int | ≥ 0 | count of `skills_experiences.internships` | employability, dropout |
-| project_count | int | ≥ 0 | count of `skills_experiences.projects` | employability |
-| work_experience_count | int | ≥ 0 | count of `skills_experiences.work_experience` | employability |
+| technical_skill_count | int | ≥ 0 | count of active `student_skills` | employability |
+| certification_count | int | ≥ 0 | count of active `student_certifications` | employability, dropout |
+| internship_count | int | ≥ 0 | count of active `student_work_experiences` with type `ojt_internship` | employability, dropout |
+| project_count | int | always 0 | projects are no longer collected; kept so snapshot shape stays stable | none |
+| work_experience_count | int | ≥ 0 | count of active `student_work_experiences` of every other type | employability |
 | construct_scores.study_habits | float or null | 0–100 | latest submitted `questionnaire_responses.construct_scores` | employability, dropout |
 | construct_scores.time_management | float or null | 0–100 | same | employability, dropout |
 | construct_scores.motivation | float or null | 0–100 | same | employability, dropout |

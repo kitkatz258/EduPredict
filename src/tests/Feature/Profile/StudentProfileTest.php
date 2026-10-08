@@ -4,6 +4,7 @@ namespace Tests\Feature\Profile;
 
 use App\Enums\UserRole;
 use App\Livewire\Student\AssessmentWizard;
+use App\Livewire\Student\SkillsExperienceSection;
 use App\Models\Program;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
@@ -28,28 +29,27 @@ class StudentProfileTest extends TestCase
             ->set($this->socioPayload())
             ->call('saveSocioeconomic')
             ->assertHasNoErrors()
-            ->assertSet('questionnaireSection', 'employability')
-            ->set('technicalSkills', "SQL\nPHP")
-            ->set('certifications', 'AWS Cloud Practitioner | 2025')
-            ->set('internships', 'City Hall | IT intern')
-            ->set('projects', 'Portal capstone | Grade viewer')
-            ->set('workExperience', 'Campus library | Student assistant')
-            ->call('saveSkills')
+            ->assertSet('questionnaireSection', 'employability');
+
+        Livewire::actingAs($student->user)
+            ->test(SkillsExperienceSection::class)
+            ->call('openCreate', 'skill')
+            ->set('skill.name', 'SQL')
+            ->call('save')
             ->assertHasNoErrors()
-            ->assertSee('Skills and experience section saved.');
+            ->call('completeSection')
+            ->assertDispatched('skills-section-saved');
 
         $student->refresh();
         $this->assertFalse($student->socioeconomicProfile->is_draft);
         $this->assertSame('20k_40k', $student->socioeconomicProfile->household_income_bracket);
         $this->assertSame('4', $student->socioeconomicProfile->household_size);
-        $this->assertSame(['SQL', 'PHP'], $student->skillsExperience->technical_skills);
-        $this->assertSame('City Hall', $student->skillsExperience->internships[0]['organization']);
+        $this->assertSame(['SQL'], $student->skills()->pluck('name')->all());
         $this->assertFalse($student->skillsExperience->is_draft);
 
         Livewire::actingAs($student->user)
             ->test(AssessmentWizard::class)
             ->assertSet('household_income_bracket', '20k_40k')
-            ->assertSet('technicalSkills', "SQL\nPHP")
             ->set('employment_status', 'part_time')
             ->call('saveSocioeconomic', true)
             ->assertHasNoErrors();
@@ -96,8 +96,10 @@ class StudentProfileTest extends TestCase
         Livewire::actingAs($student->user)
             ->test(AssessmentWizard::class)
             ->set($this->socioPayload())
-            ->call('saveSocioeconomic')
-            ->call('saveSkills');
+            ->call('saveSocioeconomic');
+        Livewire::actingAs($student->user)
+            ->test(SkillsExperienceSection::class)
+            ->call('completeSection');
 
         $done = $progress->for($student->fresh());
         $this->assertTrue($done['sections']['socioeconomic']);

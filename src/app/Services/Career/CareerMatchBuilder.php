@@ -7,7 +7,8 @@ namespace App\Services\Career;
 use App\Models\CareerMatch;
 use App\Models\Prediction;
 use App\Models\PsocOccupation;
-use App\Models\SkillsExperience;
+use App\Models\Student;
+use App\Services\Profile\SkillsExperienceRecords;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -19,6 +20,7 @@ final class CareerMatchBuilder
     public function __construct(
         private CareerCompatibilityScorer $scorer,
         private CareerExplanationService $explanations,
+        private SkillsExperienceRecords $skillRecords,
     ) {}
 
     /**
@@ -34,7 +36,7 @@ final class CareerMatchBuilder
             return $existing;
         }
 
-        $prediction->loadMissing('student.program', 'student.skillsExperience');
+        $prediction->loadMissing('student.program');
         $student = $prediction->student;
         if ($student === null) {
             return collect();
@@ -49,7 +51,7 @@ final class CareerMatchBuilder
         $gwa = isset($prediction->feature_snapshot['gwa']) && is_numeric($prediction->feature_snapshot['gwa'])
             ? (float) $prediction->feature_snapshot['gwa']
             : null;
-        $tags = $this->studentTags($student->skillsExperience);
+        $tags = $this->studentTags($prediction, $student);
 
         $ranked = [];
         foreach ($occupations as $occupation) {
@@ -103,56 +105,15 @@ final class CareerMatchBuilder
     }
 
     /**
+     * Predictions with a stored assessment snapshot use the entries they were built
+     * from; older rows fall back to the current saved entries.
+     *
      * @return list<string>
      */
-    private function studentTags(?SkillsExperience $skills): array
+    private function studentTags(Prediction $prediction, Student $student): array
     {
-        if ($skills === null || $skills->is_draft) {
-            return [];
-        }
+        $snapshot = $prediction->assessment_snapshot['skills_experience'] ?? null;
 
-        $tags = [];
-        foreach (['technical_skills', 'certifications', 'projects'] as $field) {
-            $this->collect($skills->{$field} ?? [], $tags);
-        }
-
-        return array_values(array_unique($tags));
-    }
-
-    /**
-     * @param  list<string>  $tags
-     */
-    private function collect(mixed $value, array &$tags): void
-    {
-        if (is_string($value)) {
-            $tags[] = $value;
-
-            return;
-        }
-
-        if (! is_array($value)) {
-            return;
-        }
-
-        $labelKeys = ['name', 'title', 'skill', 'tag'];
-        $isList = array_is_list($value);
-        if (! $isList) {
-            foreach ($labelKeys as $key) {
-                if (isset($value[$key]) && is_string($value[$key])) {
-                    $tags[] = $value[$key];
-                }
-            }
-            foreach (['skills', 'tags', 'skill_tags'] as $key) {
-                if (isset($value[$key])) {
-                    $this->collect($value[$key], $tags);
-                }
-            }
-
-            return;
-        }
-
-        foreach ($value as $item) {
-            $this->collect($item, $tags);
-        }
+        return $this->skillRecords->tags(is_array($snapshot) ? $snapshot : $this->skillRecords->snapshot($student));
     }
 }

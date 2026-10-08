@@ -174,47 +174,7 @@
             </section>
         @endif
     @elseif ($step === 'skills')
-        <form class="relative rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:p-6" wire:submit="saveSkills">
-            <x-loading-overlay target="saveSkills" label="Saving skills and experience…" />
-            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Step 2 of 4</p>
-            <h2 class="mt-1 text-xl font-semibold text-brand-900">Skills and experience</h2>
-            <p class="mt-2 text-sm text-gray-600">Update only what changed. One entry per line; use a vertical bar between a name and its detail. Existing legacy entries remain safe.</p>
-
-            <div class="mt-5 grid gap-4">
-                <div>
-                    <label for="technicalSkills" class="mb-1 block text-sm font-medium">Technical skills</label>
-                    <textarea id="technicalSkills" wire:model="technicalSkills" rows="4" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="SQL&#10;PHP"></textarea>
-                    @error('technicalSkills') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                </div>
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <div>
-                        <label for="certifications" class="mb-1 block text-sm font-medium">Certifications</label>
-                        <textarea id="certifications" wire:model="certifications" rows="3" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="Name | year"></textarea>
-                        @error('certifications') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="internships" class="mb-1 block text-sm font-medium">Internships or OJT</label>
-                        <textarea id="internships" wire:model="internships" rows="3" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="Organization | role"></textarea>
-                        @error('internships') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="projects" class="mb-1 block text-sm font-medium">Projects</label>
-                        <textarea id="projects" wire:model="projects" rows="3" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="Title | short description"></textarea>
-                        @error('projects') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="workExperience" class="mb-1 block text-sm font-medium">Work experience</label>
-                        <textarea id="workExperience" wire:model="workExperience" rows="3" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" placeholder="Employer | role"></textarea>
-                        @error('workExperience') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-6 flex flex-wrap gap-3">
-                <button type="button" wire:click="saveSkills(true)" wire:loading.attr="disabled" wire:target="saveSkills" class="rounded-lg border border-brand-900 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 disabled:opacity-60">Save draft</button>
-                <button type="submit" wire:loading.attr="disabled" wire:target="saveSkills" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">Save &amp; continue</button>
-            </div>
-        </form>
+        <livewire:student.skills-experience-section />
     @elseif ($step === 'grades')
         <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:p-6">
             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Step 3 of 4 · Optional update</p>

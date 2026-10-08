@@ -74,6 +74,21 @@ class Student extends Model
         return $this->hasOne(SkillsExperience::class);
     }
 
+    public function skills(): HasMany
+    {
+        return $this->hasMany(StudentSkill::class);
+    }
+
+    public function certifications(): HasMany
+    {
+        return $this->hasMany(StudentCertification::class);
+    }
+
+    public function workExperiences(): HasMany
+    {
+        return $this->hasMany(StudentWorkExperience::class);
+    }
+
     public function questionnaireResponses(): HasMany
     {
         return $this->hasMany(QuestionnaireResponse::class);

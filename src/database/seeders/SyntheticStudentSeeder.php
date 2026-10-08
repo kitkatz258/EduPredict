@@ -10,6 +10,8 @@ use App\Models\Program;
 use App\Models\SkillsExperience;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
+use App\Models\StudentSkill;
+use App\Models\StudentWorkExperience;
 use App\Models\SubjectGrade;
 use App\Models\User;
 use App\Services\Interventions\RecommendedActionBuilder;
@@ -143,17 +145,29 @@ class SyntheticStudentSeeder extends Seeder
 
             SkillsExperience::query()->updateOrCreate(
                 ['student_id' => $student->id],
-                [
-                    'technical_skills' => in_array($program->code, ['BSIS', 'BSIT', 'BSCS', 'BSEMC'], true)
-                        ? ['PHP', 'SQL', 'HTML']
-                        : ['communication', 'research'],
-                    'certifications' => [],
-                    'internships' => $year >= 3 ? [['title' => 'OJT', 'hours' => 200]] : [],
-                    'projects' => [],
-                    'work_experience' => [],
-                    'is_draft' => false,
-                ],
+                ['is_draft' => false],
             );
+            $skillNames = in_array($program->code, ['BSIS', 'BSIT', 'BSCS', 'BSEMC'], true)
+                ? ['PHP', 'SQL', 'HTML']
+                : ['communication', 'research'];
+            foreach ($skillNames as $skillName) {
+                StudentSkill::query()->firstOrCreate(['student_id' => $student->id, 'name' => $skillName]);
+            }
+            if ($year >= 3) {
+                StudentWorkExperience::query()->firstOrCreate(
+                    [
+                        'student_id' => $student->id,
+                        'experience_type' => StudentWorkExperience::TYPE_OJT_INTERNSHIP,
+                    ],
+                    [
+                        'organization' => 'Synthetic partner office',
+                        'role_title' => 'OJT trainee',
+                        'start_date' => '2025-06-02',
+                        'end_date' => '2025-07-31',
+                        'description' => '200 hours (synthetic)',
+                    ],
+                );
+            }
 
             $prediction = Prediction::query()->updateOrCreate(
                 [

@@ -15,6 +15,7 @@ use App\Services\Career\CareerMatchBuilder;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Interventions\RecommendedActionBuilder;
 use App\Services\Profile\AssessmentProgress;
+use App\Services\Profile\SkillsExperienceRecords;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -32,6 +33,7 @@ final class PredictionRequester
         private CareerMatchBuilder $careers,
         private RecommendedActionBuilder $actions,
         private AuditLogger $audit,
+        private SkillsExperienceRecords $skillRecords,
     ) {}
 
     public function cooldownEndsAt(Student $student): ?CarbonInterface
@@ -84,12 +86,16 @@ final class PredictionRequester
         }
 
         $this->academic->syncStudent($student);
-        $featureSet = $this->features->build($student->fresh());
+        $current = $student->fresh();
+        $featureSet = $this->features->build($current);
+        $assessment = [
+            'skills_experience' => $this->skillRecords->snapshot($current),
+        ];
         $employability = $this->predictor->predictEmployability($featureSet);
         $dropout = $this->predictor->predictDropout($featureSet);
         $programShift = $this->programShift->evaluate($featureSet, $dropout->factors);
 
-        $prediction = DB::transaction(function () use ($student, $actor, $featureSet, $employability, $dropout, $programShift): Prediction {
+        $prediction = DB::transaction(function () use ($student, $actor, $featureSet, $assessment, $employability, $dropout, $programShift): Prediction {
             $prediction = Prediction::query()->create([
                 'student_id' => $student->id,
                 'requested_by' => $actor->id,
@@ -111,6 +117,7 @@ final class PredictionRequester
                     'program_shift' => $programShift->toArray(),
                 ],
                 'feature_snapshot' => $featureSet->toSnapshot(),
+                'assessment_snapshot' => $assessment,
             ]);
 
             $student->loadMissing('user', 'program');
