@@ -7,6 +7,9 @@ namespace App\Livewire\Tables;
 use App\Models\AuditLog;
 use App\Models\Program;
 use App\Models\Student;
+use App\Services\Analytics\CohortAnalytics;
+use App\Services\Audit\AuditLogger;
+use App\Services\Prediction\PredictionPresenter;
 use App\Services\Prediction\ProgramShiftEvaluator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
@@ -16,7 +19,14 @@ class ScopedStudentsTable extends BaseTable
 {
     public string $sortField = 'student_number';
 
-    public function mount(): void
+    /**
+     * Department Head review opens in a modal. Other callers keep the record link.
+     */
+    public bool $statusModal = false;
+
+    public ?int $viewingId = null;
+
+    public function mount(?int $initialStudentId = null): void
     {
         $this->authorize('viewAny', Student::class);
         $this->filters = [
@@ -24,6 +34,38 @@ class ScopedStudentsTable extends BaseTable
             'year_level' => '',
             'program_id' => '',
         ];
+
+        if ($this->statusModal && $initialStudentId !== null && $initialStudentId > 0) {
+            $this->openView($initialStudentId);
+        }
+    }
+
+    public function openView(int $studentId): void
+    {
+        abort_unless($this->statusModal, 404);
+
+        $student = $this->visibleStudent($studentId);
+        $this->viewingId = $student->id;
+
+        app(AuditLogger::class)->record('student_record_viewed', $student, [
+            'role' => auth()->user()?->role?->value,
+            'surface' => 'department_students_modal',
+        ]);
+    }
+
+    public function closeView(): void
+    {
+        $this->authorize('viewAny', Student::class);
+        $this->viewingId = null;
+    }
+
+    public function showHighRisk(): void
+    {
+        $this->authorize('viewAny', Student::class);
+        abort_unless($this->statusModal, 404);
+
+        $this->filters['dropout_risk'] = 'high';
+        $this->resetPage();
     }
 
     public function export(): StreamedResponse
@@ -147,12 +189,55 @@ class ScopedStudentsTable extends BaseTable
 
     public function render(): View
     {
+        $this->authorize('viewAny', Student::class);
         $programIds = (clone $this->baseQuery())->distinct()->pluck('program_id');
+        $viewing = $this->viewingStudent();
+        $presenter = app(PredictionPresenter::class);
+        $latest = $viewing?->latestPrediction;
 
         return view('livewire.tables.scoped-students-table', [
             ...$this->tableViewData(),
             'programs' => Program::query()->whereIn('id', $programIds)->orderBy('code')->get(),
             'shiftLabels' => app(ProgramShiftEvaluator::class),
+            'yearOptions' => [
+                1 => '1st Year',
+                2 => '2nd Year',
+                3 => '3rd Year',
+                4 => '4th Year',
+            ],
+            'summary' => $this->statusModal ? app(CohortAnalytics::class)->forUser(auth()->user()) : null,
+            'viewing' => $viewing,
+            'latest' => $latest,
+            'factorGroups' => $presenter->groups($latest),
+            'summaryText' => $presenter->summary($latest, false),
         ]);
+    }
+
+    private function viewingStudent(): ?Student
+    {
+        if (! $this->statusModal || $this->viewingId === null) {
+            return null;
+        }
+
+        $student = Student::query()
+            ->visibleTo(auth()->user())
+            ->with(['user', 'program.department', 'latestPrediction'])
+            ->find($this->viewingId);
+
+        abort_unless($student !== null, 403);
+        $this->authorize('view', $student);
+
+        return $student;
+    }
+
+    private function visibleStudent(int $studentId): Student
+    {
+        $this->authorize('viewAny', Student::class);
+
+        $student = Student::query()->visibleTo(auth()->user())->find($studentId);
+        abort_unless($student !== null, 403);
+        $this->authorize('view', $student);
+
+        return $student;
     }
 }

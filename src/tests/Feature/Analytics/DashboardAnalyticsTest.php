@@ -105,6 +105,9 @@ class DashboardAnalyticsTest extends TestCase
             ->assertDontSee('2026-02')
             ->assertDontSee('PROG-C')
             ->assertDontSee('S-OUT')
+            ->assertDontSee('S-HIGH')
+            ->assertDontSee('S-LOW')
+            ->assertDontSee('S-MOD')
             ->assertDontSee('99.0');
 
         $this->actingAs($dean)
@@ -128,10 +131,13 @@ class DashboardAnalyticsTest extends TestCase
             ->assertSee('S-OUT');
 
         $this->actingAs($head)
-            ->get(route('department.dashboard'))
+            ->get(route('department.students'))
+            ->assertOk()
             ->assertSee('S-HIGH')
             ->assertSee('S-LOW')
-            ->assertDontSee('S-MOD');
+            ->assertDontSee('S-MOD')
+            ->assertSee('1st Year')
+            ->assertDontSee('Faculty Adviser');
 
         Livewire::actingAs($head)
             ->test(DashboardAnalytics::class)

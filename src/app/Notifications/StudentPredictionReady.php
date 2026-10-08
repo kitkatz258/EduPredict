@@ -38,7 +38,7 @@ class StudentPredictionReady extends Notification
             'student_id' => $this->student->id,
             'title' => 'New student prediction',
             'message' => $name.' requested a new prediction.',
-            'url' => route('students.show', $this->student),
+            'url' => route('department.students', ['student' => $this->student->id]),
         ];
     }
 }

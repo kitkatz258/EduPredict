@@ -33,6 +33,7 @@ class PageTitle
             'student.grades' => 'My grades',
             'student.questionnaire' => 'Questionnaire',
             'department.dashboard' => 'Department dashboard',
+            'department.students' => 'Department students',
             'dean.dashboard' => 'College dashboard',
             'admin.dashboard' => 'Institution dashboard',
             'admin.users' => 'Users',

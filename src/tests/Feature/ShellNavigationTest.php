@@ -91,11 +91,18 @@ class ShellNavigationTest extends TestCase
         $this->assertStringNotContainsString('Faculty', $sidebar);
 
         $head = User::factory()->role(UserRole::DepartmentHead)->create();
-        $this->actingAs($head)
+        $headHtml = $this->actingAs($head)
             ->get(route('department.dashboard'))
             ->assertOk()
             ->assertSee('id="staff-sidebar"', false)
-            ->assertDontSee('aria-label="Student"', false);
+            ->assertDontSee('aria-label="Student"', false)
+            ->getContent();
+
+        $headSidebar = $this->between($headHtml, 'id="staff-sidebar"', '</aside>');
+        $this->assertStringContainsString('href="'.route('department.dashboard').'"', $headSidebar);
+        $this->assertStringContainsString('href="'.route('department.students').'"', $headSidebar);
+        $this->assertStringNotContainsString('Faculty', $headSidebar);
+        $this->assertStringNotContainsString('Adviser', $headSidebar);
     }
 
     public function test_guests_on_the_privacy_page_get_a_sign_in_link_instead_of_a_sidebar(): void

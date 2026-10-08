@@ -2,7 +2,8 @@
     $role = auth()->user()?->role;
     $links = match ($role) {
         \App\Enums\UserRole::DepartmentHead => [
-            ['department.dashboard', 'Department dashboard', 'ri-dashboard-line'],
+            ['department.dashboard', 'Dashboard', 'ri-dashboard-line'],
+            ['department.students', 'Students', 'ri-team-line'],
         ],
         \App\Enums\UserRole::Dean => [
             ['dean.dashboard', 'College dashboard', 'ri-dashboard-line'],

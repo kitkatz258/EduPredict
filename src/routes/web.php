@@ -55,6 +55,10 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         ->middleware('role:department_head')
         ->name('department.dashboard');
 
+    Route::get('/department/students', [RoleDashboardController::class, 'departmentStudents'])
+        ->middleware('role:department_head')
+        ->name('department.students');
+
     Route::get('/dean/dashboard', [RoleDashboardController::class, 'dean'])
         ->middleware('role:dean')
         ->name('dean.dashboard');

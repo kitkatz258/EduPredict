@@ -199,7 +199,8 @@ class PredictionRequestTest extends TestCase
         Livewire::actingAs($insider->user)->test(ScopedStudentsTable::class)->assertForbidden();
 
         $this->actingAs($head)->get(route('student.dashboard'))->assertForbidden();
-        $this->actingAs($head)->get(route('department.dashboard'))->assertOk()->assertSee('HIST-10001')->assertDontSee('HIST-20002');
+        $this->actingAs($head)->get(route('department.dashboard'))->assertOk()->assertDontSee('HIST-10001')->assertDontSee('HIST-20002');
+        $this->actingAs($head)->get(route('department.students'))->assertOk()->assertSee('HIST-10001')->assertDontSee('HIST-20002');
         $this->actingAs($head)->get(route('students.show', $insider))->assertOk()->assertSee($insiderScore)->assertSee('placeholder-heuristic-v0')->assertSee('History')->assertDontSee('above_70k');
         $this->actingAs($head)->get(route('students.show', $outsider))->assertForbidden();
 
@@ -223,7 +224,7 @@ class PredictionRequestTest extends TestCase
             ->test(NotificationBell::class)
             ->assertSee('requested a new prediction')
             ->call('openNotification', $head->notifications()->first()->id)
-            ->assertRedirect(route('students.show', $insider));
+            ->assertRedirect(route('department.students', ['student' => $insider->id]));
 
         $this->assertNotNull($head->notifications()->first()->read_at);
 
