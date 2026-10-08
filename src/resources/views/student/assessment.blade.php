@@ -6,5 +6,5 @@
         </div>
     </x-slot>
 
-    <livewire:student.profile-wizard />
+    <livewire:student.assessment-wizard />
 </x-app-layout>

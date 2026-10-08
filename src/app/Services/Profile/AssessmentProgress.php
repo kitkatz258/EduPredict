@@ -6,10 +6,10 @@ namespace App\Services\Profile;
 
 use App\Models\Student;
 
-final class ProfileCompleteness
+final class AssessmentProgress
 {
     /**
-     * Equal weight across academic, socioeconomic, skills, and questionnaire.
+     * Percentage of workflow sections saved; not a model-quality measure.
      *
      * @return array{percent: int, sections: array<string, bool>}
      */

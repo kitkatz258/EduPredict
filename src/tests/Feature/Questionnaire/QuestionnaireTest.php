@@ -4,6 +4,7 @@ namespace Tests\Feature\Questionnaire;
 
 use App\Enums\UserRole;
 use App\Livewire\Admin\QuestionnaireItemForm;
+use App\Livewire\Student\AssessmentWizard;
 use App\Livewire\Student\QuestionnaireForm;
 use App\Livewire\Tables\QuestionnaireItemsTable;
 use App\Models\Program;
@@ -12,7 +13,7 @@ use App\Models\QuestionnaireResponse;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\Prediction\FeatureBuilder;
-use App\Services\Profile\ProfileCompleteness;
+use App\Services\Profile\AssessmentProgress;
 use Database\Seeders\QuestionnaireItemSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -28,6 +29,7 @@ class QuestionnaireTest extends TestCase
 
         $this->assertSame(20, QuestionnaireItem::query()->count());
         $this->assertSame(0, QuestionnaireItem::query()->where('is_draft', false)->count());
+        $this->assertSame(20, QuestionnaireItem::query()->where('definition_version', 'draft-v1')->where('section', 'academic_behavior')->count());
         foreach (array_keys(config('edupredict.questionnaire.constructs')) as $construct) {
             $this->assertSame(4, QuestionnaireItem::query()->where('construct', $construct)->count(), $construct);
             $this->assertTrue(
@@ -64,12 +66,13 @@ class QuestionnaireTest extends TestCase
 
         $response = QuestionnaireResponse::query()->where('student_id', $student->id)->first();
         $this->assertNotNull($response->submitted_at);
+        $this->assertSame('draft-v1', $response->definition_version);
         $this->assertEquals(100, $response->construct_scores['study_habits']);
         $this->assertSame(1, (int) $response->answers()->where('questionnaire_item_id', $reverse->id)->value('value'));
 
         $features = app(FeatureBuilder::class)->build($student->fresh());
         $this->assertEquals(100, $features->constructScores()['study_habits']);
-        $this->assertTrue(app(ProfileCompleteness::class)->for($student->fresh())['sections']['questionnaire']);
+        $this->assertTrue(app(AssessmentProgress::class)->for($student->fresh())['sections']['questionnaire']);
     }
 
     public function test_a_single_reverse_item_answered_low_scores_high(): void
@@ -110,6 +113,65 @@ class QuestionnaireTest extends TestCase
         $this->assertEquals(100, app(FeatureBuilder::class)->build($student->fresh())->constructScores()['motivation']);
     }
 
+    public function test_questionnaire_is_step_based_and_a_versioned_draft_resumes(): void
+    {
+        $this->seed(QuestionnaireItemSeeder::class);
+        $student = $this->makeStudent();
+        $studyItems = QuestionnaireItem::query()->where('construct', 'study_habits')->orderBy('sort_order')->get();
+
+        $component = Livewire::actingAs($student->user)
+            ->test(QuestionnaireForm::class)
+            ->assertSet('definitionVersion', 'draft-v1')
+            ->assertSet('construct', 'study_habits')
+            ->assertSee('0 / 20 answered')
+            ->assertSee('Step 1 of 5');
+
+        foreach ($studyItems as $item) {
+            $component->set('answers.'.$item->id, 4);
+        }
+
+        $component->call('saveAndContinue')
+            ->assertHasNoErrors()
+            ->assertSet('construct', 'time_management');
+
+        $response = QuestionnaireResponse::query()->where('student_id', $student->id)->firstOrFail();
+        $this->assertNull($response->submitted_at);
+        $this->assertSame('draft-v1', $response->definition_version);
+        $this->assertCount(4, $response->answers);
+
+        Livewire::actingAs($student->user)
+            ->test(QuestionnaireForm::class)
+            ->assertSet('answers.'.$studyItems->first()->id, 4)
+            ->assertSee('4 / 20 answered');
+    }
+
+    public function test_definitions_with_student_answers_are_locked_instead_of_rewritten(): void
+    {
+        $student = $this->makeStudent();
+        $item = QuestionnaireItem::factory()->create(['text' => 'Original wording.']);
+        $response = $student->questionnaireResponses()->create([
+            'definition_version' => 'draft-v1',
+            'submitted_at' => null,
+        ]);
+        $response->answers()->create(['questionnaire_item_id' => $item->id, 'value' => 3]);
+        $admin = User::factory()->role(UserRole::Administrator)->create();
+
+        Livewire::actingAs($admin)
+            ->test(QuestionnaireItemForm::class, ['itemId' => $item->id])
+            ->set('text', 'Rewritten wording.')
+            ->call('save')
+            ->assertHasErrors('item');
+
+        $this->assertSame('Original wording.', $item->fresh()->text);
+
+        Livewire::actingAs($admin)
+            ->test(QuestionnaireItemsTable::class)
+            ->call('toggleActive', $item->id)
+            ->assertDispatched('toast', type: 'error');
+
+        $this->assertTrue($item->fresh()->is_active);
+    }
+
     public function test_other_roles_cannot_use_the_student_or_admin_questionnaire_actions(): void
     {
         $student = $this->makeStudent();
@@ -117,7 +179,18 @@ class QuestionnaireTest extends TestCase
         $head = User::factory()->departmentHead()->create();
         $admin = User::factory()->role(UserRole::Administrator)->create();
 
-        $this->actingAs($student->user)->get(route('student.questionnaire'))->assertOk()->assertSee('not a clinical or diagnostic assessment');
+        $this->actingAs($student->user)
+            ->get(route('student.questionnaire'))
+            ->assertRedirect('/student/assessment?step=questionnaire');
+        $this->actingAs($student->user)
+            ->get('/student/assessment?step=questionnaire')
+            ->assertOk()
+            ->assertSee('not a clinical or diagnostic assessment');
+        Livewire::actingAs($student->user)
+            ->test(AssessmentWizard::class)
+            ->call('selectQuestionnaireSection', 'employability')
+            ->assertSee('Mental alertness')
+            ->assertSee('planning categories only');
         $this->actingAs($head)->get(route('student.questionnaire'))->assertForbidden();
         $this->actingAs($student->user)->get(route('admin.questionnaire'))->assertForbidden();
         $this->actingAs($admin)->get(route('admin.questionnaire'))->assertOk()->assertSee('Questionnaire items');

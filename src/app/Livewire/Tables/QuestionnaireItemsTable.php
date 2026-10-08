@@ -20,6 +20,9 @@ class QuestionnaireItemsTable extends BaseTable
     {
         $item = QuestionnaireItem::query()->findOrFail($itemId);
         $this->authorize('update', $item);
+        if ($this->locked($item)) {
+            return;
+        }
         $item->update(['is_active' => ! $item->is_active]);
         $audit->record('questionnaire_item_saved', $item, ['is_active' => $item->is_active]);
     }
@@ -28,6 +31,9 @@ class QuestionnaireItemsTable extends BaseTable
     {
         $item = QuestionnaireItem::query()->findOrFail($itemId);
         $this->authorize('update', $item);
+        if ($this->locked($item)) {
+            return;
+        }
         $item->update(['is_draft' => ! $item->is_draft]);
         $audit->record('questionnaire_item_saved', $item, ['is_draft' => $item->is_draft]);
     }
@@ -42,6 +48,8 @@ class QuestionnaireItemsTable extends BaseTable
     protected function columns(): array
     {
         return [
+            ['key' => 'definition_version', 'label' => 'Version', 'sortable' => true],
+            ['key' => 'section', 'label' => 'Section', 'sortable' => true],
             ['key' => 'sort_order', 'label' => 'Order', 'sortable' => true],
             ['key' => 'construct', 'label' => 'Construct', 'sortable' => true],
             ['key' => 'text', 'label' => 'Item', 'sortable' => true],
@@ -64,5 +72,16 @@ class QuestionnaireItemsTable extends BaseTable
     public function render(): View
     {
         return view('livewire.tables.questionnaire-items-table', $this->tableViewData());
+    }
+
+    private function locked(QuestionnaireItem $item): bool
+    {
+        if (! $item->answers()->exists()) {
+            return false;
+        }
+
+        $this->toast('This used definition is locked. Create a new version instead.', 'error');
+
+        return true;
     }
 }

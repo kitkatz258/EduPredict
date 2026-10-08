@@ -78,15 +78,19 @@ class GradeEntryTest extends TestCase
         $this->assertSame(1, $summary['failed_subjects']);
     }
 
-    public function test_student_can_open_grades_page(): void
+    public function test_grades_live_inside_the_unified_assessment(): void
     {
         $student = $this->makeStudent();
 
         $this->actingAs($student->user)
             ->get(route('student.grades'))
+            ->assertRedirect('/student/assessment?step=grades');
+
+        $this->actingAs($student->user)
+            ->get('/student/assessment?step=grades')
             ->assertOk()
-            ->assertSee('Paste from portal')
-            ->assertSee('Confirm');
+            ->assertSee('Optional update')
+            ->assertSee('Update grades');
     }
 
     public function test_department_head_cannot_open_or_mutate_student_grade_entry(): void

@@ -19,24 +19,24 @@
             <a href="{{ route('student.results') }}" class="text-sm font-medium text-brand-900 hover:underline">View full results</a>
         </div>
 
-        @if ($completeness)
-            <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="dashboard-completeness">
+        @if ($progress)
+            <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="dashboard-progress">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                    <p id="dashboard-completeness" class="text-sm text-gray-700">Profile completeness — more complete data improves prediction accuracy</p>
+                    <p id="dashboard-progress" class="text-sm text-gray-700">Assessment workflow progress — saved sections, not a prediction-accuracy score</p>
                     <div class="flex items-center gap-3">
-                        <p class="text-sm font-semibold text-brand-900">{{ $completeness['percent'] }}%</p>
+                        <p class="text-sm font-semibold text-brand-900">{{ $progress['percent'] }}%</p>
                         <a href="{{ route('student.assessment') }}" class="text-sm font-medium text-brand-900 hover:underline">Update assessment</a>
                     </div>
                 </div>
                 <div
                     class="mt-3 h-2 overflow-hidden rounded-full bg-brand-50"
                     role="progressbar"
-                    aria-valuenow="{{ $completeness['percent'] }}"
+                    aria-valuenow="{{ $progress['percent'] }}"
                     aria-valuemin="0"
                     aria-valuemax="100"
-                    aria-labelledby="dashboard-completeness"
+                    aria-labelledby="dashboard-progress"
                 >
-                    <div class="h-full rounded-full bg-brand-400" style="width: {{ $completeness['percent'] }}%"></div>
+                    <div class="h-full rounded-full bg-brand-400" style="width: {{ $progress['percent'] }}%"></div>
                 </div>
             </section>
         @endif
@@ -105,7 +105,7 @@
                 <p class="text-sm text-gray-600">Skills logged</p>
             </div>
             <div class="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm">
-                <p class="text-2xl font-semibold text-brand-900">{{ ($completeness['sections']['questionnaire'] ?? false) ? 'Done' : 'Not yet' }}</p>
+                <p class="text-2xl font-semibold text-brand-900">{{ ($progress['sections']['questionnaire'] ?? false) ? 'Done' : 'Not yet' }}</p>
                 <p class="text-sm text-gray-600">Questionnaire</p>
             </div>
             <div class="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm">

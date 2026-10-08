@@ -49,7 +49,7 @@ class ShellNavigationTest extends TestCase
 
         $this->actingAs($student->user)
             ->get('/student/profile')
-            ->assertRedirect('/student/assessment');
+            ->assertRedirect('/student/assessment?step=questionnaire');
     }
 
     public function test_history_page_lists_only_the_signed_in_students_attempts(): void

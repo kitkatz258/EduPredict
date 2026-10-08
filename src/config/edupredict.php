@@ -51,7 +51,6 @@ return [
     'prediction' => [
         'cooldown_hours' => 24,
         'limited_history_semesters' => 2,
-        'min_profile_completeness' => 80,
     ],
 
     /*
@@ -150,6 +149,39 @@ return [
     ],
 
     'questionnaire' => [
+        'current_version' => 'draft-v1',
+        'versions' => [
+            'draft-v1' => [
+                'label' => 'Draft research instrument v1',
+                'status' => 'draft',
+                'source_note' => 'Items remain draft until their research source and adaptation are approved.',
+            ],
+        ],
+        'sections' => [
+            'academic_behavior' => [
+                'label' => 'Academic behavior',
+                'description' => 'Study habits, time management, motivation, procrastination, and class engagement.',
+                'constructs' => ['study_habits', 'time_management', 'motivation', 'procrastination', 'engagement'],
+            ],
+            'socioeconomic' => [
+                'label' => 'Socioeconomic factors',
+                'description' => 'Private context stored encrypted and visible only to you.',
+                'constructs' => [],
+            ],
+            'employability' => [
+                'label' => 'Employability self-assessment',
+                'description' => 'Reserved for research-approved items. No draft answer is collected yet.',
+                'constructs' => [],
+                'planning_themes' => [
+                    'Mental alertness',
+                    'Self-confidence',
+                    'Ability to present ideas',
+                    'Communication skills',
+                    'Manner of speaking',
+                    'Student performance rating',
+                ],
+            ],
+        ],
         'constructs' => [
             'study_habits' => 'Study habits',
             'time_management' => 'Time management',

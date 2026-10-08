@@ -13,6 +13,8 @@ class QuestionnaireItemFactory extends Factory
     public function definition(): array
     {
         return [
+            'section' => 'academic_behavior',
+            'definition_version' => config('edupredict.questionnaire.current_version', 'draft-v1'),
             'construct' => 'study_habits',
             'text' => fake()->sentence(),
             'reverse_scored' => false,

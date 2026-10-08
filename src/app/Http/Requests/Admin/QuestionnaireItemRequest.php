@@ -27,6 +27,8 @@ class QuestionnaireItemRequest extends FormRequest
     public static function fieldRules(): array
     {
         return [
+            'section' => ['required', 'string', Rule::in(array_keys(config('edupredict.questionnaire.sections', [])))],
+            'definition_version' => ['required', 'string', Rule::in(array_keys(config('edupredict.questionnaire.versions', [])))],
             'construct' => ['required', 'string', Rule::in(array_keys(config('edupredict.questionnaire.constructs', [])))],
             'text' => ['required', 'string', 'max:500'],
             'reverse_scored' => ['boolean'],

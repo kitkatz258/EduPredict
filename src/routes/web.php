@@ -9,9 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleDashboardController;
 use App\Http\Controllers\Student\AssessmentPageController;
 use App\Http\Controllers\Student\CareerMatchController;
-use App\Http\Controllers\Student\GradePageController;
 use App\Http\Controllers\Student\HistoryPageController;
-use App\Http\Controllers\Student\QuestionnairePageController as StudentQuestionnairePageController;
 use App\Http\Controllers\Student\ResultsPageController;
 use App\Http\Controllers\StudentRecordController;
 use Illuminate\Support\Facades\Route;
@@ -27,7 +25,7 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         ->middleware('role:student')
         ->name('student.dashboard');
 
-    Route::get('/student/grades', [GradePageController::class, 'index'])
+    Route::redirect('/student/grades', '/student/assessment?step=grades')
         ->middleware('role:student')
         ->name('student.grades');
 
@@ -35,7 +33,7 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         ->middleware('role:student')
         ->name('student.assessment');
 
-    Route::redirect('/student/profile', '/student/assessment')
+    Route::redirect('/student/profile', '/student/assessment?step=questionnaire')
         ->middleware('role:student')
         ->name('student.profile');
 
@@ -43,7 +41,7 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         ->middleware('role:student')
         ->name('student.history');
 
-    Route::get('/student/questionnaire', [StudentQuestionnairePageController::class, 'index'])
+    Route::redirect('/student/questionnaire', '/student/assessment?step=questionnaire')
         ->middleware('role:student')
         ->name('student.questionnaire');
 

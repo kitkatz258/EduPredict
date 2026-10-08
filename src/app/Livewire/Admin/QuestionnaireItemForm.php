@@ -12,6 +12,10 @@ class QuestionnaireItemForm extends Component
 {
     public ?int $itemId = null;
 
+    public string $section = 'academic_behavior';
+
+    public string $definition_version = 'draft-v1';
+
     public string $construct = 'study_habits';
 
     public string $text = '';
@@ -29,6 +33,7 @@ class QuestionnaireItemForm extends Component
     public function mount(?int $itemId = null): void
     {
         $this->authorize('create', QuestionnaireItem::class);
+        $this->definition_version = (string) config('edupredict.questionnaire.current_version', 'draft-v1');
         if ($itemId) {
             $this->loadItem($itemId);
         }
@@ -38,7 +43,15 @@ class QuestionnaireItemForm extends Component
     {
         $this->authorize('create', QuestionnaireItem::class);
         $validated = $this->validate(QuestionnaireItemRequest::fieldRules());
+        $sectionConstructs = config('edupredict.questionnaire.sections.'.$validated['section'].'.constructs', []);
+        if (! in_array($validated['construct'], $sectionConstructs, true)) {
+            $this->addError('construct', 'Choose a construct configured for this questionnaire section.');
+
+            return;
+        }
         $payload = [
+            'section' => $validated['section'],
+            'definition_version' => $validated['definition_version'],
             'construct' => $validated['construct'],
             'text' => $validated['text'],
             'reverse_scored' => (bool) $this->reverse_scored,
@@ -50,6 +63,11 @@ class QuestionnaireItemForm extends Component
         if ($this->itemId) {
             $item = QuestionnaireItem::query()->findOrFail($this->itemId);
             $this->authorize('update', $item);
+            if ($item->answers()->exists()) {
+                $this->addError('item', 'This definition has student answers and is locked. Create a new version instead.');
+
+                return;
+            }
             $item->update($payload);
             $this->statusMessage = 'Questionnaire item updated.';
         } else {
@@ -70,6 +88,8 @@ class QuestionnaireItemForm extends Component
 
         return view('livewire.admin.questionnaire-item-form', [
             'constructs' => config('edupredict.questionnaire.constructs', []),
+            'sections' => config('edupredict.questionnaire.sections', []),
+            'versions' => config('edupredict.questionnaire.versions', []),
         ]);
     }
 
@@ -78,6 +98,8 @@ class QuestionnaireItemForm extends Component
         $item = QuestionnaireItem::query()->findOrFail($itemId);
         $this->authorize('update', $item);
         $this->itemId = $item->id;
+        $this->section = $item->section;
+        $this->definition_version = $item->definition_version;
         $this->construct = $item->construct;
         $this->text = $item->text;
         $this->reverse_scored = $item->reverse_scored;

@@ -3,12 +3,12 @@
 namespace Tests\Feature\Profile;
 
 use App\Enums\UserRole;
-use App\Livewire\Student\ProfileWizard;
+use App\Livewire\Student\AssessmentWizard;
 use App\Models\Program;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Models\User;
-use App\Services\Profile\ProfileCompleteness;
+use App\Services\Profile\AssessmentProgress;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -24,11 +24,11 @@ class StudentProfileTest extends TestCase
         $student = $this->makeStudent();
 
         Livewire::actingAs($student->user)
-            ->test(ProfileWizard::class)
+            ->test(AssessmentWizard::class)
             ->set($this->socioPayload())
             ->call('saveSocioeconomic')
             ->assertHasNoErrors()
-            ->assertSet('step', 'skills')
+            ->assertSet('questionnaireSection', 'employability')
             ->set('technicalSkills', "SQL\nPHP")
             ->set('certifications', 'AWS Cloud Practitioner | 2025')
             ->set('internships', 'City Hall | IT intern')
@@ -47,7 +47,7 @@ class StudentProfileTest extends TestCase
         $this->assertFalse($student->skillsExperience->is_draft);
 
         Livewire::actingAs($student->user)
-            ->test(ProfileWizard::class)
+            ->test(AssessmentWizard::class)
             ->assertSet('household_income_bracket', '20k_40k')
             ->assertSet('technicalSkills', "SQL\nPHP")
             ->set('employment_status', 'part_time')
@@ -63,7 +63,7 @@ class StudentProfileTest extends TestCase
         $student = $this->makeStudent();
 
         Livewire::actingAs($student->user)
-            ->test(ProfileWizard::class)
+            ->test(AssessmentWizard::class)
             ->set($this->socioPayload())
             ->call('saveSocioeconomic')
             ->assertHasNoErrors();
@@ -78,28 +78,28 @@ class StudentProfileTest extends TestCase
     public function test_incomplete_section_does_not_count_and_dashboard_shows_the_meter(): void
     {
         $student = $this->makeStudent();
-        $completeness = app(ProfileCompleteness::class);
+        $progress = app(AssessmentProgress::class);
 
-        $this->assertSame(0, $completeness->for($student)['percent']);
-        $this->assertFalse($completeness->for($student)['sections']['socioeconomic']);
+        $this->assertSame(0, $progress->for($student)['percent']);
+        $this->assertFalse($progress->for($student)['sections']['socioeconomic']);
 
         Livewire::actingAs($student->user)
-            ->test(ProfileWizard::class)
+            ->test(AssessmentWizard::class)
             ->set('household_income_bracket', 'below_10k')
             ->call('saveSocioeconomic', true)
             ->assertHasNoErrors();
 
-        $afterDraft = $completeness->for($student->fresh());
+        $afterDraft = $progress->for($student->fresh());
         $this->assertFalse($afterDraft['sections']['socioeconomic']);
         $this->assertSame(0, $afterDraft['percent']);
 
         Livewire::actingAs($student->user)
-            ->test(ProfileWizard::class)
+            ->test(AssessmentWizard::class)
             ->set($this->socioPayload())
             ->call('saveSocioeconomic')
             ->call('saveSkills');
 
-        $done = $completeness->for($student->fresh());
+        $done = $progress->for($student->fresh());
         $this->assertTrue($done['sections']['socioeconomic']);
         $this->assertTrue($done['sections']['skills']);
         $this->assertFalse($done['sections']['academic']);
@@ -109,13 +109,13 @@ class StudentProfileTest extends TestCase
         $this->actingAs($student->user)
             ->get(route('student.dashboard'))
             ->assertOk()
-            ->assertSee('Profile completeness')
+            ->assertSee('Assessment workflow progress')
             ->assertSee('50%');
 
         $this->actingAs($student->user)
             ->get(route('student.assessment'))
             ->assertOk()
-            ->assertSee('Academic record')
+            ->assertSee('Questionnaire and context')
             ->assertSee('Assessment');
     }
 
@@ -137,11 +137,11 @@ class StudentProfileTest extends TestCase
             $staff = User::factory()->role($role)->create();
             $this->assertFalse(Gate::forUser($staff)->allows('view', $profile));
             $this->actingAs($staff)->get(route('student.assessment'))->assertForbidden();
-            Livewire::actingAs($staff)->test(ProfileWizard::class)->assertForbidden();
+            Livewire::actingAs($staff)->test(AssessmentWizard::class)->assertForbidden();
         }
 
         Livewire::actingAs($other->user)
-            ->test(ProfileWizard::class)
+            ->test(AssessmentWizard::class)
             ->set($this->socioPayload(['household_income_bracket' => 'above_70k']))
             ->call('saveSocioeconomic')
             ->assertHasNoErrors();
@@ -155,7 +155,7 @@ class StudentProfileTest extends TestCase
         $student = $this->makeStudent();
 
         Livewire::actingAs($student->user)
-            ->test(ProfileWizard::class)
+            ->test(AssessmentWizard::class)
             ->set('household_income_bracket', 'below_10k')
             ->call('saveSocioeconomic')
             ->assertHasErrors(['household_size', 'scholarship_status']);

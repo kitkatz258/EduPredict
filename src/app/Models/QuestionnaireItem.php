@@ -12,6 +12,8 @@ class QuestionnaireItem extends Model
     use HasFactory;
 
     protected $fillable = [
+        'section',
+        'definition_version',
         'construct',
         'text',
         'reverse_scored',

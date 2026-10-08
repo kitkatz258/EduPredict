@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Prediction\PredictionPresenter;
-use App\Services\Profile\ProfileCompleteness;
+use App\Services\Profile\AssessmentProgress;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class RoleDashboardController extends Controller
 {
-    public function student(Request $request, AcademicSummary $summary, ProfileCompleteness $completeness, PredictionPresenter $presenter): View
+    public function student(Request $request, AcademicSummary $summary, AssessmentProgress $progress, PredictionPresenter $presenter): View
     {
         $student = $request->user()->student;
         $student?->load(['program', 'skillsExperience']);
@@ -20,7 +20,7 @@ class RoleDashboardController extends Controller
         return view('dashboards.student', [
             'student' => $student,
             'academic' => $student ? $summary->for($student) : null,
-            'completeness' => $student ? $completeness->for($student) : null,
+            'progress' => $student ? $progress->for($student) : null,
             'latest' => $latest,
             'summary' => $presenter->summary($latest, true),
             'skillsLogged' => $this->skillsLogged($student),

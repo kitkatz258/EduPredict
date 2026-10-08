@@ -34,6 +34,8 @@
                 <tbody class="divide-y divide-brand-200">
                     @forelse ($rows as $index => $row)
                         <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-brand-50' }}">
+                            <td class="px-4 py-3">{{ $row->definition_version }}</td>
+                            <td class="px-4 py-3">{{ config('edupredict.questionnaire.sections.'.$row->section.'.label', $row->section) }}</td>
                             <td class="px-4 py-3">{{ $row->sort_order }}</td>
                             <td class="px-4 py-3">{{ config('edupredict.questionnaire.constructs.'.$row->construct, $row->construct) }}</td>
                             <td class="px-4 py-3">{{ $row->text }}</td>

@@ -4,7 +4,26 @@
     @if ($statusMessage !== '')
         <p class="mt-3 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
     @endif
+    @error('item') <p class="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">{{ $message }}</p> @enderror
     <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+            <label for="definition_version" class="mb-1 block text-sm font-medium">Definition version</label>
+            <select id="definition_version" wire:model="definition_version" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                @foreach ($versions as $value => $definition)
+                    <option value="{{ $value }}">{{ $definition['label'] ?? $value }}</option>
+                @endforeach
+            </select>
+            @error('definition_version') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+        </div>
+        <div>
+            <label for="section" class="mb-1 block text-sm font-medium">Questionnaire section</label>
+            <select id="section" wire:model="section" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                @foreach ($sections as $value => $definition)
+                    <option value="{{ $value }}">{{ $definition['label'] ?? $value }}</option>
+                @endforeach
+            </select>
+            @error('section') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+        </div>
         <div>
             <label for="construct" class="mb-1 block text-sm font-medium">Construct</label>
             <select id="construct" wire:model="construct" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">

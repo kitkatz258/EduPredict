@@ -144,6 +144,23 @@ class PredictionRequestTest extends TestCase
             ->assertSee('Lower confidence');
     }
 
+    public function test_student_can_request_with_no_grades_and_gets_lower_confidence(): void
+    {
+        $student = $this->makeStudent(semesters: 0);
+        $this->completeProfile($student, 'prefer_not_to_say');
+        $student->gradeReports()->delete();
+
+        Livewire::actingAs($student->user)
+            ->test(RequestPrediction::class)
+            ->call('request')
+            ->assertHasNoErrors();
+
+        $prediction = Prediction::query()->sole();
+        $this->assertSame('low', $prediction->confidence);
+        $this->assertNull($prediction->feature_snapshot['gwa']);
+        $this->assertSame(0, $student->fresh()->semesters_completed);
+    }
+
     public function test_a_student_with_no_department_head_still_gets_a_prediction(): void
     {
         $student = $this->makeStudent(semesters: 2);

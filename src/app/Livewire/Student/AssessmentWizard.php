@@ -4,18 +4,27 @@ namespace App\Livewire\Student;
 
 use App\Http\Requests\Student\SkillsExperienceRequest;
 use App\Http\Requests\Student\SocioeconomicProfileRequest;
+use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\SkillsExperience;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Services\Grades\AcademicSummary;
-use App\Services\Profile\ProfileCompleteness;
+use App\Services\Profile\AssessmentProgress;
 use App\Services\Profile\SkillsListParser;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
-class ProfileWizard extends Component
+class AssessmentWizard extends Component
 {
-    public string $step = 'academic';
+    use DispatchesToasts;
+
+    #[Url(except: 'questionnaire', history: true)]
+    public string $step = 'questionnaire';
+
+    public string $questionnaireSection = 'academic_behavior';
+
+    public bool $showGradeEditor = false;
 
     public string $statusMessage = '';
 
@@ -48,6 +57,9 @@ class ProfileWizard extends Component
     public function mount(): void
     {
         $this->authorizeStudent();
+        if (! in_array($this->step, $this->steps(), true)) {
+            $this->step = 'questionnaire';
+        }
         $student = $this->student();
         $this->fillSocioeconomic($student->socioeconomicProfile);
         $this->fillSkills($student->skillsExperience);
@@ -56,12 +68,25 @@ class ProfileWizard extends Component
     public function goTo(string $step): void
     {
         $this->authorizeStudent();
-        if (! in_array($step, ['academic', 'socioeconomic', 'skills', 'questionnaire'], true)) {
+        if (! in_array($step, $this->steps(), true)) {
             return;
         }
 
         $this->step = $step;
         $this->statusMessage = '';
+    }
+
+    public function selectQuestionnaireSection(string $section): void
+    {
+        if (array_key_exists($section, config('edupredict.questionnaire.sections', []))) {
+            $this->questionnaireSection = $section;
+            $this->resetValidation();
+        }
+    }
+
+    public function toggleGradeEditor(): void
+    {
+        $this->showGradeEditor = ! $this->showGradeEditor;
     }
 
     public function saveSocioeconomic(bool $asDraft = false): void
@@ -99,9 +124,10 @@ class ProfileWizard extends Component
         $this->statusMessage = $asDraft
             ? 'Socioeconomic draft saved. It stays private to you.'
             : 'Socioeconomic section saved.';
+        $this->toast($this->statusMessage);
 
         if (! $asDraft) {
-            $this->step = 'skills';
+            $this->questionnaireSection = 'employability';
         }
     }
 
@@ -148,15 +174,21 @@ class ProfileWizard extends Component
         $this->statusMessage = $asDraft
             ? 'Skills draft saved.'
             : 'Skills and experience section saved.';
+        $this->toast($this->statusMessage);
+
+        if (! $asDraft) {
+            $this->step = 'grades';
+        }
     }
 
-    public function render(AcademicSummary $academic, ProfileCompleteness $completeness): View
+    public function render(AcademicSummary $academic, AssessmentProgress $progress): View
     {
         $student = $this->authorizeStudent();
 
-        return view('livewire.student.profile-wizard', [
+        return view('livewire.student.assessment-wizard', [
             'academic' => $academic->for($student),
-            'completeness' => $completeness->for($student),
+            'progress' => $progress->for($student),
+            'questionnaireSections' => config('edupredict.questionnaire.sections', []),
             'incomeOptions' => config('edupredict.profile.income_brackets', []),
             'scholarshipOptions' => config('edupredict.profile.scholarship_statuses', []),
             'employmentOptions' => config('edupredict.profile.employment_statuses', []),
@@ -164,6 +196,7 @@ class ProfileWizard extends Component
             'internetOptions' => config('edupredict.profile.internet_access', []),
             'deviceOptions' => config('edupredict.profile.device_access', []),
             'studySpaceOptions' => config('edupredict.profile.study_space', []),
+            'confirmedGradeReports' => $student->gradeReports()->where('status', 'confirmed')->latest('created_at')->get(),
         ]);
     }
 
@@ -243,5 +276,13 @@ class ProfileWizard extends Component
         $value = trim((string) $value);
 
         return $value === '' ? null : $value;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function steps(): array
+    {
+        return ['questionnaire', 'skills', 'grades', 'review'];
     }
 }

@@ -45,8 +45,13 @@ class QuestionnaireItemSeeder extends Seeder
         foreach ($items as $construct => $rows) {
             foreach ($rows as $index => [$text, $reverse]) {
                 QuestionnaireItem::query()->updateOrCreate(
-                    ['construct' => $construct, 'text' => $text],
                     [
+                        'definition_version' => config('edupredict.questionnaire.current_version', 'draft-v1'),
+                        'construct' => $construct,
+                        'text' => $text,
+                    ],
+                    [
+                        'section' => 'academic_behavior',
                         'reverse_scored' => $reverse,
                         'is_active' => true,
                         'is_draft' => true,

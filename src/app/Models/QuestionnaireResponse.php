@@ -14,6 +14,7 @@ class QuestionnaireResponse extends Model
 
     protected $fillable = [
         'student_id',
+        'definition_version',
         'submitted_at',
         'construct_scores',
     ];

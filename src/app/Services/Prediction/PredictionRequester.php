@@ -14,7 +14,7 @@ use App\Services\Audit\AuditLogger;
 use App\Services\Career\CareerMatchBuilder;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Interventions\RecommendedActionBuilder;
-use App\Services\Profile\ProfileCompleteness;
+use App\Services\Profile\AssessmentProgress;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -26,7 +26,7 @@ final class PredictionRequester
     public function __construct(
         private FeatureBuilder $features,
         private PredictorInterface $predictor,
-        private ProfileCompleteness $completeness,
+        private AssessmentProgress $progress,
         private AcademicSummary $academic,
         private ProgramShiftEvaluator $programShift,
         private CareerMatchBuilder $careers,
@@ -46,24 +46,21 @@ final class PredictionRequester
 
     public function blockMessage(Student $student): ?string
     {
-        $profile = $this->completeness->for($student);
-        $minimum = (int) config('edupredict.prediction.min_profile_completeness', 80);
-
-        if ($profile['percent'] < $minimum) {
-            $labels = [
-                'academic' => 'a confirmed grade report',
-                'socioeconomic' => 'a saved socioeconomic profile',
-                'skills' => 'saved skills and experience',
-                'questionnaire' => 'a submitted questionnaire',
-            ];
-            $missing = [];
-            foreach ($profile['sections'] as $section => $done) {
-                if (! $done) {
-                    $missing[] = $labels[$section] ?? $section;
-                }
+        $progress = $this->progress->for($student);
+        $labels = [
+            'socioeconomic' => 'a saved socioeconomic profile',
+            'skills' => 'saved skills and experience',
+            'questionnaire' => 'a submitted questionnaire',
+        ];
+        $missing = [];
+        foreach ($labels as $section => $label) {
+            if (! $progress['sections'][$section]) {
+                $missing[] = $label;
             }
+        }
 
-            return 'Complete your profile before requesting a prediction. Still needed: '.implode(', ', $missing).'.';
+        if ($missing !== []) {
+            return 'Complete the required Assessment sections before requesting a prediction. Still needed: '.implode(', ', $missing).'.';
         }
 
         $ends = $this->cooldownEndsAt($student);
