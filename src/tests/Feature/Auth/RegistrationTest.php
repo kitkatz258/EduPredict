@@ -13,7 +13,11 @@ class RegistrationTest extends TestCase
 
     public function test_registration_screen_can_be_rendered(): void
     {
-        $this->get('/register')->assertOk()->assertSee('Informed consent');
+        $this->get('/register')
+            ->assertOk()
+            ->assertSee('Informed consent')
+            ->assertSee('eligible-student list')
+            ->assertSee('Used only for password resets');
     }
 
     public function test_listed_student_can_register_with_consent(): void
@@ -46,6 +50,11 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('consents', [
             'version' => config('edupredict.consent.current_version'),
         ]);
+
+        $this->post('/logout');
+        $this->post('/login', ['login' => '2024-77777', 'password' => 'password'])
+            ->assertRedirect(route('student.dashboard', absolute: false));
+        $this->assertAuthenticated();
     }
 
     public function test_listed_student_in_a_program_outside_the_clas_pilot_cannot_register(): void

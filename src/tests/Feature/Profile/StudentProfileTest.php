@@ -113,10 +113,10 @@ class StudentProfileTest extends TestCase
             ->assertSee('50%');
 
         $this->actingAs($student->user)
-            ->get(route('student.profile'))
+            ->get(route('student.assessment'))
             ->assertOk()
             ->assertSee('Academic record')
-            ->assertSee('My profile');
+            ->assertSee('Assessment');
     }
 
     public function test_other_roles_and_other_students_cannot_read_the_profile(): void
@@ -136,7 +136,7 @@ class StudentProfileTest extends TestCase
         foreach ([UserRole::DepartmentHead, UserRole::Dean, UserRole::Administrator] as $role) {
             $staff = User::factory()->role($role)->create();
             $this->assertFalse(Gate::forUser($staff)->allows('view', $profile));
-            $this->actingAs($staff)->get(route('student.profile'))->assertForbidden();
+            $this->actingAs($staff)->get(route('student.assessment'))->assertForbidden();
             Livewire::actingAs($staff)->test(ProfileWizard::class)->assertForbidden();
         }
 

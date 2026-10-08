@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tables;
 
+use App\Livewire\Concerns\DispatchesToasts;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
@@ -11,6 +12,7 @@ use Livewire\WithPagination;
 
 abstract class BaseTable extends Component
 {
+    use DispatchesToasts;
     use WithPagination;
 
     #[Url(as: 'q', except: '')]

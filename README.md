@@ -143,12 +143,14 @@ Leave `AI_API_KEY` empty to run every AI feature on its rule-based or manual fal
 
 Development only. Password for every demo account: `Password123!`
 
-| Role | Email |
+| Role | Sign-in identifier |
 |---|---|
-| Student | student@edupredict.test |
+| Student | 2024-00001 |
 | Department Head | depthead@edupredict.test |
 | Dean | dean@edupredict.test |
 | Administrator | admin@edupredict.test |
+
+Students sign in with their student number. Staff sign in with their work email.
 
 The pilot scope is the UCC College of Liberal Arts and Sciences (CLAS) with eight programs: BA Communication, Bachelor of Public Administration, and BS Computer Science, Entertainment and Multimedia Computing, Information Systems, Information Technology, Mathematics, and Psychology. The Department Head reviews individual students in their department (or one program, when narrowed). The Dean sees aggregated CLAS figures only, never individual students. Faculty is a legacy role: existing faculty accounts are kept for history but cannot sign in.
 

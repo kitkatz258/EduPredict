@@ -23,7 +23,7 @@ class GradeReportsTable extends BaseTable
         $this->authorize('delete', $report);
         $report->subjectGrades()->delete();
         $report->delete();
-        session()->flash('success', 'Grade report deleted.');
+        $this->toast('Grade report deleted.');
     }
 
     protected function baseQuery(): Builder

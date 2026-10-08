@@ -25,7 +25,7 @@
                     <p id="dashboard-completeness" class="text-sm text-gray-700">Profile completeness — more complete data improves prediction accuracy</p>
                     <div class="flex items-center gap-3">
                         <p class="text-sm font-semibold text-brand-900">{{ $completeness['percent'] }}%</p>
-                        <a href="{{ route('student.profile') }}" class="text-sm font-medium text-brand-900 hover:underline">Complete profile</a>
+                        <a href="{{ route('student.assessment') }}" class="text-sm font-medium text-brand-900 hover:underline">Update assessment</a>
                     </div>
                 </div>
                 <div

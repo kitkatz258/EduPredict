@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Admin;
 
 use App\Contracts\AiClientInterface;
+use App\Enums\UserRole;
 use App\Livewire\Admin\CollegeForm;
 use App\Livewire\Admin\InterventionForm;
 use App\Livewire\Admin\ProgramForm;
@@ -181,22 +182,22 @@ class AdministrationTest extends TestCase
 
     public function test_login_is_rate_limited_after_five_failures(): void
     {
-        $user = User::factory()->create([
+        $user = User::factory()->role(UserRole::Administrator)->create([
             'email' => 'limit@edupredict.test',
             'password' => 'Password123!',
         ]);
 
         for ($attempt = 0; $attempt < 5; $attempt++) {
             $this->post('/login', [
-                'email' => $user->email,
+                'login' => $user->email,
                 'password' => 'wrong-password',
-            ])->assertSessionHasErrors('email');
+            ])->assertSessionHasErrors('login');
         }
 
         $this->post('/login', [
-            'email' => $user->email,
+            'login' => $user->email,
             'password' => 'Password123!',
-        ])->assertSessionHasErrors('email');
+        ])->assertSessionHasErrors('login');
 
         $this->assertGuest();
     }

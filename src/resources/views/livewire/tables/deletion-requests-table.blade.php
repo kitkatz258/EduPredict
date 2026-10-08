@@ -43,8 +43,8 @@
                             <td class="px-4 py-3">
                                 @if ($row->status === 'pending')
                                     <div class="flex flex-wrap gap-2">
-                                        <button type="button" wire:click="approve({{ $row->id }})" wire:confirm="Deactivate this account? Prediction history is kept." class="rounded-lg bg-brand-900 px-3 py-1.5 text-xs font-medium text-white">Approve</button>
-                                        <button type="button" wire:click="reject({{ $row->id }})" wire:confirm="Reject this deletion request? The account stays active." class="rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-900">Reject</button>
+                                        <button type="button" wire:click="approve({{ $row->id }})" data-confirm="The account can no longer sign in. Prediction history is kept." data-confirm-title="Deactivate this account?" data-confirm-button="Approve" class="rounded-lg bg-brand-900 px-3 py-1.5 text-xs font-medium text-white">Approve</button>
+                                        <button type="button" wire:click="reject({{ $row->id }})" data-confirm="The account stays active." data-confirm-title="Reject this deletion request?" data-confirm-button="Reject" data-confirm-tone="neutral" class="rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-900">Reject</button>
                                     </div>
                                 @else
                                     <span class="text-gray-600">{{ $row->admin_note }}</span>

@@ -125,7 +125,7 @@ class DeletionRequestsTable extends BaseTable
         ]);
 
         $this->adminNote = '';
-        session()->flash('success', $status === 'approved'
+        $this->toast($status === 'approved'
             ? 'Account deactivated. Stored predictions were kept.'
             : 'Deletion request rejected. The account stays active.');
     }

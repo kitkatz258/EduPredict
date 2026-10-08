@@ -19,7 +19,7 @@ class EnsureUserIsActive
             $request->session()->regenerateToken();
 
             return redirect()->route('login')->withErrors([
-                'email' => $user->role->isLegacy()
+                'login' => $user->role->isLegacy()
                     ? 'This account type is no longer used. Contact an administrator.'
                     : 'This account is inactive. Contact an administrator.',
             ]);

@@ -19,3 +19,26 @@
 [x-cloak] {
     display: none !important;
 }
+
+#page-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    height: 3px;
+    width: 0;
+    opacity: 0;
+    background: var(--color-brand-400);
+    box-shadow: 0 0 6px var(--color-brand-400);
+    pointer-events: none;
+}
+
+.swal2-popup {
+    font-family: var(--font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #page-progress {
+        transition: none !important;
+    }
+}

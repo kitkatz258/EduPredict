@@ -34,7 +34,14 @@
                             <td class="px-4 py-3">{{ $row->role->label() }}</td>
                             <td class="px-4 py-3">{{ $row->is_active ? 'Yes' : 'No' }}</td>
                             <td class="px-4 py-3">
-                                <button type="button" wire:click="toggleActive({{ $row->id }})" class="text-sm font-medium text-brand-900 underline">
+                                <button
+                                    type="button"
+                                    wire:click="toggleActive({{ $row->id }})"
+                                    @if ($row->is_active) data-confirm="{{ $row->name }} will not be able to sign in until the account is activated again." data-confirm-title="Deactivate this account?" data-confirm-button="Deactivate" @endif
+                                    wire:loading.attr="disabled"
+                                    wire:target="toggleActive({{ $row->id }})"
+                                    class="text-sm font-medium text-brand-900 underline disabled:opacity-50"
+                                >
                                     {{ $row->is_active ? 'Deactivate' : 'Activate' }}
                                 </button>
                             </td>

@@ -17,6 +17,18 @@
             </div>
         </section>
 
+        <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="estimates-heading">
+            <h3 id="estimates-heading" class="text-base font-semibold text-brand-900">How estimates work and their limits</h3>
+            <ul class="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-gray-700">
+                <li>These results are estimates, not guarantees. They do not decide admission, academic standing, employment, or discipline. The current predictor is the deterministic placeholder <span class="font-medium">placeholder-heuristic-v0</span>. It is not a final trained machine-learning model.</li>
+                <li>Program-shift is a rule-based qualitative indicator. It is not a trained model and it has no percentage. A program-fit label means a conversation with your department may be useful. It does not say a student should leave a program.</li>
+                <li>Career matches are broad PSOC categories, not job offers. Compatibility scores and ranking are calculated by the system from program relevance, skill overlap, and academic strength. AI may only phrase an explanation of a score that was already computed.</li>
+                <li>Recommended actions come only from the predefined intervention list. A rule engine selects them. AI may only rephrase an intervention that was already selected.</li>
+                <li>The questionnaire is a structured self-report scale developed from supporting research. It is not a clinical or diagnostic assessment.</li>
+                <li>Predictions for students with fewer than two completed semesters are marked lower confidence.</li>
+            </ul>
+        </section>
+
         <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
             <h3 class="text-base font-semibold text-brand-900">Version history</h3>
             <ul class="mt-3 space-y-3 text-sm text-gray-700">

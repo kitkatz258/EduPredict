@@ -41,8 +41,8 @@ class RoleScopeTest extends TestCase
         $formerAdvisee = $this->makeStudent($program, '2024-20001');
         $formerAdvisee->forceFill(['adviser_id' => $faculty->id])->save();
 
-        $this->post('/login', ['email' => 'old.faculty@edupredict.test', 'password' => 'password'])
-            ->assertSessionHasErrors('email');
+        $this->post('/login', ['login' => 'old.faculty@edupredict.test', 'password' => 'password'])
+            ->assertSessionHasErrors('login');
         $this->assertGuest();
 
         $this->actingAs($faculty)
@@ -184,15 +184,15 @@ class RoleScopeTest extends TestCase
         $this->seed();
 
         $expected = [
-            'student@edupredict.test' => route('student.dashboard', absolute: false),
+            '2024-00001' => route('student.dashboard', absolute: false),
             'depthead@edupredict.test' => route('department.dashboard', absolute: false),
             'dean@edupredict.test' => route('dean.dashboard', absolute: false),
             'admin@edupredict.test' => route('admin.dashboard', absolute: false),
         ];
 
-        foreach ($expected as $email => $path) {
+        foreach ($expected as $login => $path) {
             $this->post('/login', [
-                'email' => $email,
+                'login' => $login,
                 'password' => 'Password123!',
             ])->assertRedirect($path);
 

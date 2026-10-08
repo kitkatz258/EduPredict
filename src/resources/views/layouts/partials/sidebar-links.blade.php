@@ -1,45 +1,34 @@
 @php
     $role = auth()->user()?->role;
-    $nav = fn (string $route) => request()->routeIs($route)
-        ? 'block rounded-lg bg-white/15 px-3 py-2 font-medium text-white'
-        : 'block rounded-lg px-3 py-2 text-white/90 hover:bg-white/10';
+    $links = match ($role) {
+        \App\Enums\UserRole::DepartmentHead => [
+            ['department.dashboard', 'Department dashboard', 'ri-dashboard-line'],
+        ],
+        \App\Enums\UserRole::Dean => [
+            ['dean.dashboard', 'College dashboard', 'ri-dashboard-line'],
+        ],
+        \App\Enums\UserRole::Administrator => [
+            ['admin.dashboard', 'Dashboard', 'ri-dashboard-line'],
+            ['admin.users', 'Users', 'ri-group-line'],
+            ['admin.institution-students', 'Institution students', 'ri-file-list-3-line'],
+            ['admin.colleges', 'Academic structure', 'ri-building-2-line'],
+            ['admin.questionnaire', 'Questionnaire', 'ri-questionnaire-line'],
+            ['admin.psoc', 'PSOC occupations', 'ri-briefcase-4-line'],
+            ['admin.interventions', 'Interventions', 'ri-hand-heart-line'],
+            ['admin.audit', 'Audit log', 'ri-file-history-line'],
+            ['admin.deletion-requests', 'Deletion requests', 'ri-user-unfollow-line'],
+        ],
+        default => [],
+    };
 @endphp
 
-@guest
-    <a href="{{ route('login') }}" class="block rounded-lg px-3 py-2 hover:bg-white/10">Sign in</a>
-    <a href="{{ route('about') }}" class="{{ $nav('about') }}">About</a>
-    <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
-@else
-    @if ($role === \App\Enums\UserRole::Student)
-        <a href="{{ route('student.dashboard') }}" class="{{ $nav('student.dashboard') }}">Dashboard</a>
-        <a href="{{ route('student.results') }}" class="{{ $nav('student.results') }}">Results</a>
-        <a href="{{ route('student.careers') }}" class="{{ $nav('student.careers') }}">Career Matches</a>
-        <a href="{{ route('student.profile') }}" class="{{ $nav('student.profile') }}">My Profile</a>
-        <a href="{{ route('student.grades') }}" class="{{ $nav('student.grades') }}">My Grades</a>
-        <a href="{{ route('student.questionnaire') }}" class="{{ $nav('student.questionnaire') }}">Questionnaire</a>
-        <a href="{{ route('profile.edit') }}" class="{{ $nav('profile.edit') }}">Account</a>
-        <a href="{{ route('about') }}" class="{{ $nav('about') }}">About</a>
-        <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
-    @elseif ($role === \App\Enums\UserRole::DepartmentHead)
-        <a href="{{ route('department.dashboard') }}" class="{{ $nav('department.dashboard') }}">Department dashboard</a>
-        <a href="{{ route('about') }}" class="{{ $nav('about') }}">About</a>
-        <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
-    @elseif ($role === \App\Enums\UserRole::Dean)
-        <a href="{{ route('dean.dashboard') }}" class="{{ $nav('dean.dashboard') }}">College dashboard</a>
-        <a href="{{ route('about') }}" class="{{ $nav('about') }}">About</a>
-        <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
-    @elseif ($role === \App\Enums\UserRole::Administrator)
-        <a href="{{ route('admin.dashboard') }}" class="{{ $nav('admin.dashboard') }}">Institution dashboard</a>
-        <a href="{{ route('admin.users') }}" class="{{ $nav('admin.users') }}">Users</a>
-        <a href="{{ route('admin.institution-students') }}" class="{{ $nav('admin.institution-students') }}">Institution students</a>
-        <a href="{{ route('admin.colleges') }}" class="{{ $nav('admin.colleges') }}">Academic structure</a>
-        <a href="{{ route('admin.questionnaire') }}" class="{{ $nav('admin.questionnaire') }}">Questionnaire</a>
-        <a href="{{ route('admin.psoc') }}" class="{{ $nav('admin.psoc') }}">PSOC occupations</a>
-        <a href="{{ route('admin.interventions') }}" class="{{ $nav('admin.interventions') }}">Interventions</a>
-        <a href="{{ route('admin.audit') }}" class="{{ $nav('admin.audit') }}">Audit log</a>
-        <a href="{{ route('admin.deletion-requests') }}" class="{{ $nav('admin.deletion-requests') }}">Deletion requests</a>
-        <a href="{{ route('about') }}" class="{{ $nav('about') }}">About</a>
-        <a href="{{ route('privacy') }}" class="{{ $nav('privacy') }}">Privacy</a>
-        <a href="{{ route('demo.table') }}" class="{{ $nav('demo.table') }}">Demo table</a>
-    @endif
-@endguest
+@foreach ($links as [$route, $label, $icon])
+    @php $isActive = request()->routeIs($route); @endphp
+    <a
+        href="{{ route($route) }}"
+        class="{{ $isActive ? 'bg-white/15 font-medium text-white' : 'text-white/85 hover:bg-white/10' }} flex items-center gap-3 rounded-lg px-3 py-2"
+        @if ($isActive) aria-current="page" @endif
+    >
+        <i class="{{ $icon }} text-lg" aria-hidden="true"></i>{{ $label }}
+    </a>
+@endforeach

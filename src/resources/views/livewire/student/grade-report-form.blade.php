@@ -109,7 +109,7 @@
 
         <div class="mt-4 flex flex-wrap gap-3">
             <button type="button" wire:click="saveDraft" class="rounded-lg border border-brand-900 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Save draft</button>
-            <button type="button" wire:click="confirm" wire:confirm="Confirm this term? It will count toward your GWA." class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">Confirm</button>
+            <button type="button" wire:click="confirm" data-confirm="It will count toward your GWA." data-confirm-title="Confirm this term?" data-confirm-button="Confirm" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="confirm" />Confirm</button>
             <button type="button" wire:click="startManual" class="text-sm text-brand-900 underline">Reset to empty manual entry</button>
         </div>
         <p class="mt-4 text-xs text-gray-500">These results are estimates, not guarantees. They do not decide admission, academic standing, employment, or discipline.</p>

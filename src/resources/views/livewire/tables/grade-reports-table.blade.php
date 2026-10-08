@@ -35,7 +35,7 @@
                             <td class="px-4 py-3">{{ $row->status }}</td>
                             <td class="px-4 py-3">
                                 <a href="{{ route('student.grades', ['report' => $row->id]) }}" class="text-sm font-medium text-brand-900 underline">Open</a>
-                                <button type="button" wire:click="deleteReport({{ $row->id }})" wire:confirm="Delete this grade report?" class="ml-3 text-sm text-red-800 underline">Delete</button>
+                                <button type="button" wire:click="deleteReport({{ $row->id }})" data-confirm="This removes the report from your grades on file." data-confirm-title="Delete this grade report?" data-confirm-button="Delete" class="ml-3 text-sm text-red-800 underline">Delete</button>
                             </td>
                         </tr>
                     @empty

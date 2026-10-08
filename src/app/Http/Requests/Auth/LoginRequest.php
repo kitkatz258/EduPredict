@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Enums\UserRole;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,8 +31,18 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'login' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'login.required' => 'Enter your student number.',
         ];
     }
 
@@ -42,28 +55,51 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $user = $this->resolveUser(trim((string) $this->input('login')));
+
+        if ($user === null || ! Auth::attempt(['id' => $user->id, 'password' => (string) $this->input('password')], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'login' => trans('auth.failed'),
             ]);
         }
 
-        $user = Auth::user();
-
-        if ($user !== null && ! $user->canSignIn()) {
+        if (! $user->canSignIn()) {
             Auth::logout();
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => $user->role->isLegacy()
+                'login' => $user->role->isLegacy()
                     ? 'This account type is no longer used. Contact an administrator.'
                     : 'This account is inactive. Contact an administrator.',
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * Students sign in with their student number only. Staff accounts have no
+     * student number and sign in with their email address.
+     */
+    private function resolveUser(string $identifier): ?User
+    {
+        if ($identifier === '') {
+            return null;
+        }
+
+        if (str_contains($identifier, '@')) {
+            return User::query()
+                ->whereRaw('LOWER(email) = ?', [Str::lower($identifier)])
+                ->where('role', '!=', UserRole::Student->value)
+                ->first();
+        }
+
+        return Student::query()
+            ->where('student_number', $identifier)
+            ->first()
+            ?->user;
     }
 
     /**
@@ -82,7 +118,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'login' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -94,6 +130,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('login')).'|'.$this->ip());
     }
 }

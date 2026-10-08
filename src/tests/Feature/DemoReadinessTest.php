@@ -6,15 +6,19 @@ namespace Tests\Feature;
 
 use App\Models\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 class DemoReadinessTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_about_page_states_the_placeholder_and_qualitative_limits(): void
+    public function test_privacy_page_states_the_placeholder_and_qualitative_limits_and_about_is_gone(): void
     {
-        $this->get(route('about'))
+        $this->assertFalse(Route::has('about'));
+        $this->get('/about')->assertNotFound();
+
+        $this->get(route('privacy'))
             ->assertOk()
             ->assertSee('placeholder-heuristic-v0')
             ->assertSee('not a final trained machine-learning model')

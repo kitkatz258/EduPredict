@@ -20,7 +20,6 @@ class PageTitle
     private static function labels(): array
     {
         return [
-            'home' => 'Welcome',
             'login' => 'Sign in',
             'register' => 'Student registration',
             'password.request' => 'Forgot password',
@@ -28,11 +27,11 @@ class PageTitle
             'password.confirm' => 'Confirm password',
             'password.forced' => 'Change password',
             'privacy' => 'Privacy notice',
-            'about' => 'About and limitations',
             'student.dashboard' => 'Student dashboard',
             'student.results' => 'Results',
             'student.careers' => 'Career matches',
-            'student.profile' => 'My profile',
+            'student.assessment' => 'Assessment',
+            'student.history' => 'History',
             'student.grades' => 'My grades',
             'student.questionnaire' => 'Questionnaire',
             'department.dashboard' => 'Department dashboard',

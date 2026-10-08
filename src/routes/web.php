@@ -3,21 +3,22 @@
 use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\Admin\QuestionnairePageController;
 use App\Http\Controllers\DashboardRedirectController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleDashboardController;
+use App\Http\Controllers\Student\AssessmentPageController;
 use App\Http\Controllers\Student\CareerMatchController;
 use App\Http\Controllers\Student\GradePageController;
-use App\Http\Controllers\Student\ProfilePageController;
+use App\Http\Controllers\Student\HistoryPageController;
 use App\Http\Controllers\Student\QuestionnairePageController as StudentQuestionnairePageController;
 use App\Http\Controllers\Student\ResultsPageController;
 use App\Http\Controllers\StudentRecordController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', HomeController::class)->name('home');
 Route::view('/demo/table', 'pages.demo-table')->name('demo.table');
 Route::get('/privacy', [PrivacyController::class, 'show'])->name('privacy');
-Route::view('/about', 'about')->name('about');
 
 Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
     Route::get('/dashboard', DashboardRedirectController::class)->name('dashboard');
@@ -30,9 +31,17 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         ->middleware('role:student')
         ->name('student.grades');
 
-    Route::get('/student/profile', [ProfilePageController::class, 'index'])
+    Route::get('/student/assessment', [AssessmentPageController::class, 'index'])
+        ->middleware('role:student')
+        ->name('student.assessment');
+
+    Route::redirect('/student/profile', '/student/assessment')
         ->middleware('role:student')
         ->name('student.profile');
+
+    Route::get('/student/history', [HistoryPageController::class, 'index'])
+        ->middleware('role:student')
+        ->name('student.history');
 
     Route::get('/student/questionnaire', [StudentQuestionnairePageController::class, 'index'])
         ->middleware('role:student')

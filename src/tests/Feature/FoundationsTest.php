@@ -12,12 +12,14 @@ class FoundationsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_welcome_page_renders_branded_layout(): void
+    public function test_sign_in_page_renders_branded_layout(): void
     {
-        $this->get('/')
+        $this->followingRedirects()
+            ->get('/')
             ->assertOk()
             ->assertSee('EduPredict')
-            ->assertSee('Sign in');
+            ->assertSee('University of Caloocan City')
+            ->assertSee('Sign In');
     }
 
     public function test_demo_table_page_renders(): void

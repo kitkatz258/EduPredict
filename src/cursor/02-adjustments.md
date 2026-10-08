@@ -7,7 +7,7 @@
 > Do ONLY what is listed here.
 > Run commands through Docker, e.g. `docker compose exec app ...`.
 > Use additive migrations only. Do not run destructive database resets against preserved development data.
-> After every milestone: run the relevant tests/build checks, review `git diff`, then commit that milestone before starting the next one.
+> After every milestone: run relevant tests/build checks, review `git diff`, then commit that milestone before starting the next one.
 
 ---
 
@@ -15,29 +15,15 @@
 
 ### A. Roles, scope, access, and academic structure
 
-1. **Faculty role is no longer needed** – Faculty currently overlaps with Department Head responsibilities. – Remove Faculty from the active operational flow and keep only:
-   - Student
-   - Department Head
-   - Dean
-   - Administrator
+1. **Faculty must be fully removed from the active product** – Keep only Student, Department Head, Dean, and Administrator as active roles. Remove Faculty from active selectors, navigation, filters, account creation, dashboards, demo accounts, and role-specific UI. Preserve legacy faculty-linked history safely if old rows exist.
 
-   Preserve legacy data safely if Faculty records already exist. Do not blindly delete historical users, reviews, or references.
+2. **Department Head becomes the student-level reviewer** – Department Head may view individual student prediction results only within the authorized department/program scope.
 
-2. **Department Head becomes the student-level reviewer** – Department Head should handle student-level monitoring previously duplicated under Faculty. – Department Head may view student-level prediction information only within their authorized department/program scope.
+3. **Dean is aggregate-only** – Dean must see college-level summaries/graphs only and must not access individual student names, IDs, rows, prediction details, exports, or drill-downs.
 
-3. **Dean access is too broad if individual students are visible** – Dean should not inspect specific students. – Dean must see aggregated college-level analytics only:
-   - department/program summaries
-   - year-level summaries
-   - employability distribution
-   - dropout-risk distribution
-   - cohort trends
-   - other aggregate graphs/tables
+4. **Pilot/data-gathering scope is UCC CLAS only** – College of Liberal Arts and Sciences (CLAS), University of Caloocan City.
 
-   Do not expose student names, IDs, individual predictions, raw questionnaire answers, or per-student drill-down to the Dean.
-
-4. **Scope is now CLAS only** – Current structure may still imply institution-wide pilot scope. – Limit testing/data-gathering scope to the **College of Liberal Arts and Sciences (CLAS), University of Caloocan City**.
-
-5. **CLAS program list** – Update academic reference/demo data to the following programs:
+5. **CLAS programs** – Use:
    - BA Communication
    - Bachelor of Public Administration
    - Bachelor of Science in Computer Science
@@ -47,637 +33,417 @@
    - Bachelor of Science in Mathematics
    - Bachelor of Science in Psychology
 
-6. **Academic hierarchy** – Keep the schema capable of:
-   - College
-   - Department
-   - Program
+6. **Academic hierarchy** – Preserve normalized College → Department → Program → Student relations. Do not hardcode department/program as strictly 1:1 if the schema supports one-to-many.
+
+---
+
+### B. Login, registration, shell, and navigation
+
+7. **No extra guest landing page** – `/` should lead directly to the real sign-in experience for guests.
+
+8. **Student login identifier** – Students sign in with Student Number + password, not school email.
+
+9. **Controlled registration** – Student self-registration succeeds only if the student number exists in the admin-managed eligible/institution student list and has not already been claimed.
+
+10. **Login redesign** – Use the supplied login reference as visual direction. Ignore the Figma role tabs. Include UCC/EduPredict identity, Student Number, Password, show/hide password, Remember me if already supported, Forgot password, Sign In, Create Account/Registration, concise privacy note, validation, responsive layout.
+
+11. **About page** – Remove About from primary navigation and user-facing routes if it has no unique purpose. Keep Privacy.
+
+12. **Student navigation must be simplified** – Student top navigation should contain only:
+   - Dashboard
+   - Assessment
+   - History
+   - Profile/Settings access
+   - Logout
+
+   Do not keep separate student top-level navigation items for My Grades, Questionnaire, Skills & Experience, or Career Matches.
+
+13. **Student shell** – Use a clean sticky/fixed top navigation based on the references.
+
+14. **Department Head / Dean / Admin shell** – Use a fixed left sidebar that stays visible while main content scrolls. Support responsive/mobile collapse.
+
+15. **Icons** – Use a consistent icon set such as Remix Icons where compatible. Keep accessible labels for ambiguous/destructive actions.
+
+16. **Global feedback foundation** – Add reusable loading and interaction feedback:
+   - top progress or subtle navigation indicator
+   - `wire:loading` / `wire:target`
+   - busy/disabled submit buttons
+   - reusable spinner/overlay for slower actions
+   - prevent duplicate submits
+
+17. **SweetAlert2 or equivalent** – Add reusable toast/confirmation behavior for success, errors, and destructive actions. Keep validation errors inline near fields.
+
+---
+
+### C. Unified Student Assessment flow
+
+18. **Dashboard and Results are redundant** – Merge them into one student Dashboard / Results Overview.
+
+19. **Questionnaire, Skills & Experience, and Grades are too fragmented** – Replace them as separate top-level pages with one unified **Assessment** page.
+
+20. **Assessment steps** – One Assessment page should contain:
+   1. Academic behavior + socioeconomic + employability questionnaire
+   2. Technical skills + certifications + work experience
+   3. Grades (optional update)
+   4. Review / Run prediction
+
+21. **Assessment is resumable** – Save/Resume progress and allow the student to update only the section they want without restarting everything.
+
+22. **Grades are optional on later attempts** – If the student updates only questionnaire or experience data, allow using the latest confirmed grades on file.
+
+23. **Grades step choice when grades exist** – Show:
+   - Use latest confirmed grades
+   - Update grades
+
+24. **No grades ever submitted** – Do not fabricate academic data. Use existing missing-data/lower-confidence behavior and explain the limitation.
+
+25. **Immutable prediction snapshot** – Each prediction must retain the exact questionnaire version/answers snapshot, skills/experience snapshot, grade report/version used, and model version.
+
+26. **Assessment progress indicator** – Replace misleading “profile completeness improves prediction accuracy” wording with a workflow/progress concept.
+
+---
+
+### D. Questionnaire section inside Assessment
+
+27. **Questionnaire UI is cluttered** – Redesign using the reference: clear title/instructions, one logical section at a time, progress, answered count, category chips/tabs, clear Likert/radio cards, selected state, Save/Continue, Back, responsive layout.
+
+28. **Questionnaire groups** – Prepare for:
+   - Academic behavior
+   - Socioeconomic factors
+   - Employability-related self-assessment
+
+29. **Employability themes are not final questions** – Prepare configurable support for mental alertness, self-confidence, ability to present ideas, communication skills, manner of speaking, and student performance rating. Do not invent final questionnaire items or validated scoring yet.
+
+30. **Research basis required** – Final items must be adopted/adapted from cited research or approved sources. Keep questionnaire definitions versionable.
+
+31. **No arbitrary weighting** – Do not hardcode equal or invented percentages for constructs. Final contribution belongs to approved methodology/trained models later.
+
+32. **Socioeconomic privacy** – Preserve encrypted storage and do not expose raw private socioeconomic answers to Department Heads, Dean, or Admin.
+
+---
+
+### E. Skills, certifications, and experience inside Assessment
+
+33. **Freeform multiline storage is too weak** – Replace active UI with structured records and Add/View/Edit/Delete or Archive actions.
+
+34. **Technical Skills** – Structured entries with skill name and optional category/proficiency/evidence only if retained by requirements.
+
+35. **Certifications** – Modal/form fields: certificate/title, issuer/provider, issue date/year, optional expiry, optional credential/reference, optional description.
+
+36. **Work Experience** – Modal/form fields: organization/employer, role/title, experience type, start date, end date or ongoing, optional responsibilities/description.
+
+37. **OJT/Internship** – Treat as a Work Experience type, not a separate top-level category.
+
+38. **Projects** – Remove Projects from the active Assessment flow. Preserve legacy data safely rather than blindly deleting it.
+
+39. **Modal UX** – Labeled fields, validation, cancel/close, save, keyboard support, loading feedback.
+
+---
+
+### F. Grades section inside Assessment
+
+40. **Current Grades UI is cluttered** – Rebuild visually using the supplied grade references.
+
+41. **Do not copy AI extraction wording** – Current extraction uses portal parsing, PDF text extraction, OCR/image extraction, and manual review. Do not claim AI extracts grades.
+
+42. **Grade modes** – Present:
+   - Upload Document
+   - Paste from UCC Portal
+   - Manual Entry
+
+43. **Upload Document mode** – Large drag/drop area, click-to-browse, accepted types, chosen filename, parsing state, errors, review-before-save copy.
+
+44. **Parsed review table** – Show AY/semester, subject code, subject name, units, final grade, remarks, edit-row action, low-confidence/needs-review marker if available, Confirm & Save Grades.
+
+45. **Manual Entry mode** – AY selector, semester selector, subject rows, code, name, units, final grade, add/remove row, Save Grades.
+
+46. **Paste from Portal mode** – Large paste area, instructions, Parse button, same review table, Confirm & Save.
+
+47. **Professor names in portal paste** – Exclude instructor/professor names from saved subject descriptions and student-facing records.
+
+48. **Preserve OCR** – Keep the current OCR/PDF extraction pipeline and mandatory student review/confirmation.
+
+49. **INC correction** – Preserve `INC`, numeric grade null/blank, exclude from GWA numerator/denominator, do not automatically count as failed, flag provisional GWA when incomplete subjects exist, allow later replacement/recalculation.
+
+50. **Historical grade reports** – Keep View action with read-only modal/detail. Previous prediction snapshots must not change when a grade report is later updated.
+
+---
+
+### G. Student Dashboard / Results
+
+51. **One Dashboard / Results Overview** – Use the supplied student dashboard references. Include greeting, program/year, employability, dropout risk, confidence, program-fit/disengagement, top factors, latest assessment date, and clear next actions.
+
+52. **Career Matches belong inside Dashboard** – Remove Career Matches as a separate top-level student page. Show ranked career cards/summary inside Dashboard and use a modal for details if needed.
+
+53. **Career visual direction** – Use prominent compatibility score, PSOC code/category, Why this match, matched/missing skill chips, optional detail modal, and compatibility legend where useful.
+
+54. **Career ranking remains deterministic/rule-based** – AI may phrase explanations only; do not claim AI decides the career match.
+
+55. **Clear student actions** – Prefer Update Assessment, Update Grades, Run/Request New Prediction, View Career Details. Avoid confusing “Retake” wording where the action is simply editing data.
+
+56. **Placeholder disclosure** – Do not present heuristic output as validated trained ML probability.
+
+---
+
+### H. Dedicated Student History
+
+57. **History is its own page** – Do not place long prediction history below Dashboard/Grades.
+
+58. **History list** – Include date/time, employability, dropout risk, confidence, model version, status, View.
+
+59. **View History** – Open read-only modal/detail showing the saved attempt snapshot: questionnaire version/answers where appropriate to the owning student, skills/experience snapshot, grade version used, results, factors, shift indicator, and stored references.
+
+60. **Old attempts without complete snapshot** – Show “Not available for this attempt” instead of substituting current mutable data.
+
+61. **Avoid destructive history deletion** – Prefer immutable retention/archive unless an approved policy says otherwise.
+
+---
+
+### I. Department Head
+
+62. **Dashboard should stay analytics-focused** – Do not put the full student list inside the Department Head Dashboard.
+
+63. **Dedicated Students page** – Create/keep a separate Department Head Students page with:
+   - high-risk banner
+   - totals for high/moderate/low/program concern
+   - search
+   - risk filters
+   - program filter
+   - year filters: 1st, 2nd, 3rd, 4th Year
+   - student rows
+   - risk label
+   - shift/engagement indicators
+   - employability score
+   - View action
+
+64. **Student View should be a modal** – Do not redirect to a separate student detail page. Modal shows authorized status/report details.
+
+65. **Remove Faculty-related columns/filters** – No Faculty Adviser column or Faculty filter.
+
+66. **Department Head detail modal** – Show employability, dropout classification, confidence, contributing factors, program-fit/disengagement context, approved institutional interventions, review/note/status. Do not expose raw private questionnaire or encrypted socioeconomic answers.
+
+67. **Institutional interventions** – Select only from approved predefined interventions. AI may rephrase/explain selected items but cannot invent actions.
+
+68. **AI unavailable** – Use deterministic stored fallback text.
+
+---
+
+### J. Dean
+
+69. **Dean is aggregate-only** – CLAS dashboard with department/program/year/period filters and aggregate charts/tables only.
+
+70. **Dean must not have** student search, student names/IDs, individual rows, individual prediction detail, per-student export, or student drill-down.
+
+71. **Enforce backend restrictions** – Do not rely only on hidden links.
+
+---
+
+### K. Admin
+
+72. **Admin Dashboard is analytics-focused** – Remove the visible demo/student table from the Dashboard. It may remain in code/layout for reference but must not render in the active view.
+
+73. **Users page is the main user-management list** – Support role filters:
+   - All
    - Student
+   - Department Head
+   - Dean
+   - Administrator
 
-   A department may have one program, but do not hardcode a strict 1:1 relationship if the existing schema already supports one-to-many.
+   Keep search/status filters as useful.
 
----
+74. **User Add/Edit uses modals** – Replace always-visible create/edit forms with Add User/Edit User modals.
 
-### B. Login, registration, navigation, and general shell
+75. **Eligible student list** – Keep the admin-managed institutional/eligible-student list that controls student-number registration. Present it as a dedicated list/tab/view, not a Dashboard table.
 
-7. **Guest landing page is unnecessary** – The app currently has an extra landing-style step before login. – Make the guest entry route go directly to the real sign-in page.
+76. **Academic Structure page** – Use list/table + filters/search. Add/Edit College/Department/Program through modals instead of always-visible forms.
 
-8. **Student sign-in should not depend on school email** – UCC students in this system do not require school email login. – Students should sign in using **student number** plus password.
+77. **Questionnaire admin page** – Use list + filters/search. Add/Edit questionnaire/version/question records through modals. Preserve versioning for historical attempts.
 
-9. **Student self-registration must remain controlled** – A student should not be able to create an arbitrary account. – Registration succeeds only when the entered student number exists in the admin-maintained institutional/eligible-student list and is not already claimed.
+78. **PSOC Occupations page** – Use list + search/filter. Add/Edit/View through modals instead of always-visible forms.
 
-10. **Login page is too plain** – Redesign it using the supplied login reference:
-    - centered UCC/EduPredict identity
-    - polished card
-    - student number field
-    - password field
-    - show/hide password
-    - forgot password
-    - sign in
-    - create account/student registration
-    - concise privacy/data-protection note
-    - responsive layout
+79. **Interventions page** – Use list + search/filter. Add/Edit/View approved interventions through modals instead of always-visible forms.
 
-    Ignore the Figma-only role tabs shown above the reference login card; do not add role-switch tabs.
+80. **Rename Audit Log** – Visible navigation/page label should become **Activity Log** (or **System Activity** if the contents fit better). Keep the audit backend/data intact.
 
-11. **About page is not needed** – Remove About from primary navigation and routes if it has no unique function. – Keep **Privacy** as the dedicated privacy/data-protection page and keep consent where registration/data collection requires it.
+81. **Deletion Requests are account deletion requests** – Keep a separate **Deletion Requests** page. The current feature refers to account deletion requests; approval currently deactivates login while preserving prediction history unless policy changes later.
 
-12. **Navigation shell is inconsistent** – Student references use a clean top navigation while staff/admin references use a fixed sidebar. – Follow the provided references:
-    - Student: clean sticky/fixed top navigation
-    - Department Head/Admin/Dean: fixed left sidebar
-    - content area scrolls independently
-    - mobile layout must collapse accessibly
+82. **Deletion Requests UI** – Dedicated list with segmented/toggle-style status control inspired by the Grades mode switch, e.g. Pending / Approved / Rejected / All. Review opens a modal.
 
-13. **Sidebar currently scrolls away** – Staff/Admin sidebar must remain visible while long pages scroll. – Use a viewport-height fixed/sticky sidebar with its own overflow behavior where needed.
-
-14. **Icons are inconsistent / missing** – Add a consistent icon set such as Remix Icons for navigation and actions, but keep text labels or accessible labels for clarity.
+83. **Admin navigation** – Keep useful pages such as Dashboard, Users, Academic Structure, Questionnaire, PSOC Occupations, Interventions, Activity Log, Deletion Requests, Settings/Profile, Logout.
 
 ---
 
-### C. Student workflow and page structure
+### L. Loading, feedback, accessibility, responsiveness
 
-15. **Dashboard and Results are redundant** – They currently show overlapping student prediction information. – Merge into one main **Dashboard / Results Overview** page based on the supplied student dashboard references.
+84. **Loading feedback** – Add to sign in/register, Assessment saves, modal saves, grade upload/OCR/parser, Confirm & Save, prediction request, filters, and admin/staff actions.
 
-16. **History is buried inside other pages** – Move historical attempts into a dedicated **History** page.
+85. **SweetAlert2** – Reusable toast/confirm layer for success, errors, archive/delete/deactivate confirmations. Keep inline validation.
 
-17. **Profile completeness is being used like a prediction-quality claim** – Replace this with a clearer workflow/progress concept. – Use a proper assessment progress indicator rather than wording that implies completeness itself guarantees prediction accuracy.
+86. **Accessibility** – Modal focus management, keyboard support, Escape where appropriate, accessible labels/tooltips, mobile-safe scrolling.
 
-18. **Student workflow should be resumable and not force re-entry** – Use this flow:
-    1. Questionnaire
-    2. Skills & Experience
-    3. Grades (optional update)
-    4. Results
-
-19. **Grades should not be mandatory for every new assessment attempt** – If the student only updates questionnaire and/or skills/experience, allow them to continue using the **latest confirmed grades on file**.
-
-20. **When grades already exist** – The Grades step should clearly offer:
-    - **Use latest confirmed grades**
-    - **Update grades**
-
-21. **Prediction snapshot integrity** – Every generated prediction must record the exact versions/snapshots used:
-    - questionnaire response/version
-    - skills/experience state
-    - confirmed grade report/version
-    - model version
-
-    Historical attempts must not silently change when current profile data changes.
-
-22. **If no confirmed grades exist at all** – Do not fabricate grades. Use existing missing-data / lower-confidence behavior and make the limitation visible.
+87. **Responsive UI** – Tables/cards/charts must have usable small-screen behavior and clear empty states.
 
 ---
 
-### D. Questionnaire redesign
+### M. Deployment-readiness boundaries
 
-23. **Questionnaire is visually cluttered** – Redesign it to match the questionnaire UI reference:
-    - clear page title and instructions
-    - one logical section at a time
-    - progress indicator
-    - answered count
-    - clear section tabs/chips
-    - consistent Likert/radio cards
-    - obvious selected state
-    - Save/Continue
-    - Back where appropriate
-    - responsive layout
+88. **Do not add FastAPI/fourth container yet** – Final questionnaire/features are not stable enough.
 
-24. **Questionnaire structure is changing** – Prepare the questionnaire to support:
-    - Academic behavior
-    - Socioeconomic factors
-    - Employability-related self-assessment
+89. **Preserve predictor abstraction** – Keep `PredictorInterface`, FeatureBuilder, placeholder heuristic, and later HTTP/FastAPI integration path.
 
-25. **Employability constructs are not final questions yet** – Prepare configurable support for themes such as:
-    - mental alertness
-    - self-confidence
-    - ability to present ideas
-    - communication skills
-    - manner of speaking
-    - student performance rating
+90. **Keep PostgreSQL/Render compatibility in mind** – Avoid new MySQL/MariaDB-specific SQL/schema assumptions. Actual DB migration is a later dedicated milestone.
 
-    Do not invent final survey items, scoring weights, or validated claims yet.
-
-26. **Research basis is required** – The final questions must come from credited/adopted/adapted references or an approved research basis. Keep questionnaire definitions versionable so final questions can be inserted later without redesigning the UI.
-
-27. **Questionnaire constructs must not automatically have equal weight** – Do not hardcode arbitrary percentages. Leave feature weighting to the approved methodology/trained model later.
-
-28. **Socioeconomic privacy** – Preserve encrypted storage and ownership rules. Department Heads may use resulting prediction factors, but must not see the student’s raw encrypted socioeconomic answers.
-
----
-
-### E. Skills & Experience redesign
-
-29. **Current multiline textareas are too unstructured** – Replace the freeform list style with structured cards/tables and Add/View/Edit/Delete or Archive actions.
-
-30. **Technical Skills** – Use structured entries with fields such as:
-    - skill name
-    - optional category
-    - optional proficiency/evidence only if retained by project requirements
-
-31. **Certifications** – Use a modal or structured form with fields such as:
-    - certificate/title
-    - issuing organization/provider
-    - issue date or year
-    - optional expiry
-    - optional credential/reference
-    - optional description
-
-32. **Work Experience** – Use a modal or structured form with:
-    - employer/organization
-    - role/title
-    - experience type
-    - start date
-    - end date or ongoing
-    - optional description/responsibilities
-
-33. **OJT is not separate anymore** – Include OJT/Internship as one Work Experience type.
-
-34. **Projects are not part of the revised Skills & Experience flow** – Remove Projects from this section/UI. Preserve legacy data safely if it already exists rather than destroying it.
-
-35. **Modal behavior** – Add/Edit forms should open as accessible modals or equivalent structured overlays:
-    - labeled fields
-    - validation
-    - cancel/close
-    - save
-    - keyboard accessibility
-    - loading feedback
-
----
-
-### F. Grades workflow redesign
-
-36. **Current Grades page is cluttered and upload controls are unclear** – Rebuild the page visually using the new grade-upload references.
-
-37. **Do not copy the AI wording in the reference** – The reference says grades are extracted “using AI,” but EduPredict currently uses:
-    - portal/table parsing
-    - PDF text extraction where available
-    - OCR/image extraction
-    - manual review
-
-    Do **not** add AI extraction claims to the UI.
-
-38. **Grade entry modes** – Present clearly:
-    - Upload Document
-    - Paste from UCC Portal
-    - Manual Entry
-
-    The reference screenshots show Upload Document and Manual Entry; keep Paste from Portal as an additional clearly designed mode because it already exists and is required.
-
-39. **Upload Document mode** – Match the visual direction:
-    - large drag-and-drop area
-    - click-to-browse
-    - accepted types shown
-    - selected filename
-    - upload/parsing state
-    - clear errors
-    - review-before-save explanation
-
-40. **Parsed document review** – After parsing:
-    - show AY / semester
-    - subject code
-    - subject name
-    - units
-    - final grade
-    - remarks
-    - row edit action
-    - low-confidence/needs-review indicators if available from OCR/parser
-    - Confirm & Save Grades button
-
-41. **Manual Entry mode** – Match the reference:
-    - AY selector
-    - Semester selector
-    - subject rows
-    - subject code
-    - subject name
-    - units
-    - final grade
-    - add/remove row
-    - Save Grades
-
-42. **Paste from UCC Portal mode** – Keep it but redesign it with the same visual quality as Upload/Manual:
-    - large paste area
-    - clear instructions
-    - Parse button
-    - parsed review table identical to the document-review table
-    - explicit Confirm & Save
-
-43. **Portal parser currently includes professor names** – Update parsing so instructor/professor names are excluded from the saved subject description and do not appear in student-facing records.
-
-44. **Do not remove existing OCR capability** – Preserve the existing extraction pipeline and student review/confirmation requirement.
-
-45. **INC handling is wrong if treated numerically** – Change INC rules:
-    - preserve literal `INC`
-    - numeric grade remains null/blank
-    - exclude INC from GWA numerator and denominator
-    - do not count INC as failed automatically
-    - mark GWA as provisional when incomplete subjects exist
-    - allow later actual-grade replacement/recalculation
-
-46. **Grade history list** – Historical grade reports should remain accessible from History or the Grades page using a clear View action.
-
-47. **View action** – Use `View` rather than `Open`; an eye icon may accompany it. Show a read-only modal/detail view with the saved term and subject rows.
-
-48. **Do not make successful existing grade reports mutable in a way that changes old predictions** – Previous predictions must retain the original grade snapshot they used.
-
----
-
-### G. Student Dashboard / Results redesign
-
-49. **Results presentation is too dense and repetitive** – Redesign using the supplied student dashboard references:
-    - greeting / latest snapshot
-    - program/year metadata
-    - employability score card
-    - dropout-risk classification
-    - confidence indicator where applicable
-    - program-shift / engagement indicator
-    - top contributing factors
-    - concise recommended next steps
-    - career-matches link/summary
-    - latest assessment date
-
-50. **Do not imply heuristic percentages are validated ML probabilities** – While placeholder mode is active, keep clear model disclosure and avoid pseudo-precision.
-
-51. **Confusing buttons** – Replace unclear wording like “Retake Questionnaire” when the real action is simply updating part of an assessment. Use clearer actions such as:
-    - Update Questionnaire
-    - Update Skills & Experience
-    - Update Grades
-    - Run New Prediction / Request New Prediction
-    - View Career Matches
-
-52. **Recommended institutional actions** – Students should not receive internally sensitive institutional intervention workflow details unless explicitly intended. Department Head is the main reviewer of approved interventions.
-
----
-
-### H. Career Matches redesign
-
-53. **Current Career Matches page is functional but visually weak** – Restyle using the supplied career-matches reference:
-    - ranked cards
-    - prominent compatibility score
-    - PSOC code/category
-    - clearer “Why this match?” explanation area
-    - matched/missing skill chips
-    - pathway link/detail action
-    - compatibility-scale legend
-
-54. **Do not claim AI decides career matches** – Career ranking remains deterministic/rule-based unless the approved architecture changes later. AI may only phrase explanations.
-
-55. **Do not use Projects as a career-match input after Projects are removed from the profile flow unless legacy handling is explicitly preserved** – Update FeatureBuilder/matching logic carefully.
-
----
-
-### I. Department Head redesign
-
-56. **Department Head dashboard needs better hierarchy** – Restyle using the supplied Department Risk Monitoring reference:
-    - total students
-    - average employability
-    - high-risk count
-    - program-fit concerns
-    - dropout-risk distribution
-    - employability distribution
-    - cohort trend
-    - risk trend by semester
-    - program/year filters
-
-57. **Department student list** – Redesign using the reference:
-    - high-risk alert banner
-    - total/high/moderate/low/program-concern summary
-    - search
-    - risk filters
-    - program filter
-    - year filter
-    - student rows
-    - risk label
-    - shift/engagement indicators
-    - employability score
-    - View action
-
-58. **Remove Faculty Adviser column/filter references** – Faculty is no longer an active role.
-
-59. **Department Head student detail** – Show only authorized student-level outputs:
-    - employability
-    - dropout classification
-    - confidence
-    - contributing factors
-    - program-fit/disengagement context
-    - approved institutional intervention suggestions
-    - review/note/status
-
-    Do not show raw private questionnaire answers or encrypted socioeconomic responses.
-
-60. **Institutional intervention catalog** – Use only a predefined institution-approved set of interventions. AI may explain/rephrase selected approved interventions but may not invent new actions.
-
-61. **AI unavailability** – Use deterministic stored **fallback** text for the selected intervention when the AI API is unavailable.
-
----
-
-### J. Dean redesign
-
-62. **Dean should be aggregate-only** – Build/retain a dashboard similar to the analytics references but scoped to CLAS.
-
-63. **Dean filters may include**:
-    - department
-    - program
-    - year level
-    - date/academic period
-
-64. **Dean must not have**:
-    - student search
-    - student names/IDs
-    - individual student rows
-    - individual prediction detail
-    - per-student export
-    - student drill-down
-
-65. **Apply access restriction in backend queries/policies too** – Do not rely only on hiding links.
-
----
-
-### K. Admin redesign
-
-66. **Admin dashboard/user management should follow the supplied visual direction** – Restyle the analytics and user-management pages consistently with the references.
-
-67. **Admin user management must show only active revised roles**:
-    - Student
-    - Department Head
-    - Dean
-    - Administrator
-
-68. **Admin manages eligible student list** – Maintain the list that controls student self-registration by student number.
-
-69. **Academic Structure page** – Admin manages CLAS departments/programs and assignments using the existing normalized models where possible.
-
-70. **Questionnaire administration** – Keep configuration/versioning support for later insertion of finalized approved questions. Do not let Admin silently alter questions tied to historical prediction snapshots without versioning.
-
----
-
-### L. Dedicated History page
-
-71. **History is scattered across pages** – Create one dedicated History page for the student.
-
-72. **History list should include**:
-    - requested/generated date
-    - employability result
-    - dropout-risk label
-    - confidence
-    - model version
-    - status
-    - View action
-
-73. **View History modal/detail** – Show the saved historical snapshot used for that attempt:
-    - questionnaire snapshot/version
-    - skills/experience snapshot
-    - grade report/version used
-    - employability result
-    - dropout result
-    - contributing factors
-    - program-shift indicator
-    - career/intervention result references where stored
-
-74. **If old attempts lack complete snapshots** – Display “Not available for this attempt” rather than showing current mutable data.
-
-75. **Avoid destructive prediction-history deletion** unless an approved retention rule explicitly requires it. Prefer immutable history / archival.
-
----
-
-### M. Loading, feedback, accessibility, responsiveness
-
-76. **Slow or silent actions are confusing** – Add loading feedback to:
-    - sign in
-    - register
-    - questionnaire save/continue
-    - skills modal saves
-    - grade upload
-    - OCR/parser processing
-    - portal parse
-    - Confirm & Save Grades
-    - prediction request
-    - history filtering
-    - admin/staff filters
-
-77. **Livewire actions** – Use targeted `wire:loading` / disabled state to prevent duplicate submissions.
-
-78. **Forms and modals** – Add visible validation, focus management, keyboard support, Escape-to-close where appropriate, and mobile-safe scrolling.
-
-79. **Tables/cards/charts** – Ensure responsive behavior and readable empty states.
-
----
-
-### N. Deployment-readiness boundaries
-
-80. **Do not create the final ML/FastAPI container yet in this adjustment pass** – The final questionnaire/features are not yet stable.
-
-81. **Keep current predictor abstraction intact** – Preserve `PredictorInterface`, FeatureBuilder, placeholder heuristic, and the ability to add an HTTP/FastAPI predictor later.
-
-82. **Keep implementation compatible with later PostgreSQL migration and Render deployment** – Avoid introducing new MySQL-specific SQL or schema assumptions during these changes.
-
-83. **Do not train the final model in this milestone set** – Dataset comparison/training (e.g. Random Forest, Logistic Regression, Gradient Boosting, etc.) will be handled separately after inputs/features are finalized.
+91. **Do not train final models yet** – Model comparison/training happens after inputs/features are finalized.
 
 ---
 
 ## Milestones / commit plan
 
 ### M13 – Roles, CLAS scope, and authorization
-Implement:
-- remove Faculty from active role flow
-- Department Head student-level reviewer
-- Dean aggregate-only
-- CLAS scope
-- CLAS program list
-- academic hierarchy scoping
-- authorization/policy tests
-
-Checks:
-- migrations succeed
-- role/policy tests pass
-- Dean cannot access individual student endpoints
-- Department Head cannot access out-of-scope students
-
-Commit:
-`M13: Align roles, CLAS scope, and access control`
+Already completed. Do not redo it. Apply only the follow-up Faculty cleanup required in M14 where it affects active shell/navigation/auth/product role presentation.
 
 ---
 
-### M14 – Login, registration, and app shell
+### M14 – Login, registration, shell, Faculty cleanup, and global feedback
 Implement:
+- fully remove Faculty from active product UI/code paths while preserving legacy data safely
 - direct sign-in landing
 - student-number login
 - controlled student registration
 - improved login UI
-- student top nav
+- Student nav: Dashboard / Assessment / History / Profile-Settings / Logout only
 - staff/admin fixed sidebar
-- remove About from navigation
-- retain Privacy
+- remove About, retain Privacy
 - icon system
+- reusable loading/progress states
+- reusable SweetAlert2/equivalent toast/confirmation system
 
 Checks:
-- student login/registration tests
-- staff/admin login unchanged except role cleanup
-- responsive navigation smoke test
-- no broken guest routes
+- auth/registration tests
+- Faculty cannot appear or be created as active role
+- legacy Faculty-linked history remains readable
+- student-number login works
+- guest `/` reaches sign-in
+- Department Head/Dean authorization regression tests
+- frontend build
 
 Commit:
 `M14: Redesign authentication and navigation shell`
 
 ---
 
-### M15 – Questionnaire workflow
+### M15 – Unified Assessment shell and questionnaire
 Implement:
-- grouped/step-based questionnaire
-- progress indicator
-- save/resume
-- configurable/versioned questionnaire structure
-- prepare academic/socioeconomic/employability sections
-- no invented final questionnaire items/weights
-
-Checks:
-- questionnaire drafts save
-- resume works
-- versioning tests
-- existing responses remain readable
-- privacy/encryption behavior preserved
+- one Assessment page replacing separate Questionnaire / Skills & Experience / Grades student nav pages
+- Assessment stepper/progress/save-resume
+- questionnaire grouped/step-based UI
+- academic/socioeconomic/employability sections
+- configurable/versioned question definitions
+- no invented final items/weights
 
 Commit:
-`M15: Restructure questionnaire workflow and versioning`
+`M15: Build unified assessment workflow`
 
 ---
 
-### M16 – Skills and Experience
+### M16 – Structured Assessment records
 Implement:
-- structured Technical Skills
-- structured Certifications
-- structured Work Experience
+- Technical Skills records/modals
+- Certifications records/modals
+- Work Experience records/modals
 - OJT/Internship as experience type
-- remove Projects from active UI
-- Add/Edit/View/Delete or Archive modals
-- data migration/compatibility for legacy fields where necessary
-
-Checks:
-- ownership tests
-- validation tests
-- modal CRUD works
-- legacy data is not silently lost
-- FeatureBuilder remains functional
+- remove Projects from active Assessment UI
+- legacy data compatibility/migration where necessary
 
 Commit:
 `M16: Structure skills, certifications, and work experience`
 
 ---
 
-### M17 – Grades UX and INC correction
+### M17 – Grades section and INC correction
 Implement:
-- Upload Document UI
-- Paste from Portal UI
-- Manual Entry UI
-- parsed review table
-- edit/confirm flow
-- remove professor names from portal parsing
-- preserve OCR
-- no AI-extraction wording
-- INC null/excluded/provisional behavior
-- “Use latest confirmed grades” path
-- immutable grade snapshot behavior
-
-Checks:
-- parser tests
-- OCR sample tests
-- manual entry tests
-- INC/GWA tests
-- update-questionnaire-without-new-grades test
-- latest confirmed grade reuse test
-- frontend build
+- Upload / Paste / Manual modes inside Assessment
+- reference-inspired upload/review/manual UI
+- professor-name removal from portal parsing
+- preserve OCR, no AI extraction wording
+- INC correction
+- Use latest confirmed grades path
+- immutable grade-version snapshot behavior
 
 Commit:
 `M17: Redesign grades workflow and correct INC handling`
 
 ---
 
-### M18 – Student Results, History, and Career Matches
+### M18 – Student Dashboard and History
 Implement:
 - merge redundant Dashboard/Results
-- redesigned result overview
+- integrate Career Matches inside Dashboard
+- Career Match detail modal if useful
 - dedicated History page
-- historical snapshot View modal/detail
-- career-match visual redesign
-- clearer actions
-- preserve placeholder-model disclosure
-
-Checks:
-- history uses historical snapshot, not current profile
-- old incomplete history handled honestly
-- cooldown behavior preserved
-- career matching tests remain valid
-- student end-to-end assessment flow works
+- historical snapshot modal/detail
+- clear actions and model disclosure
 
 Commit:
-`M18: Consolidate student results, history, and career views`
+`M18: Consolidate student dashboard and history`
 
 ---
 
 ### M19 – Department Head monitoring and interventions
 Implement:
-- redesigned Department Head dashboard
-- redesigned scoped student list
-- remove faculty-related columns/filters
-- student result detail
-- approved intervention catalog integration
-- AI explanation/rephrase only
-- deterministic fallback if AI unavailable
-
-Checks:
-- department scoping tests
-- raw private questionnaire answers not exposed
-- intervention selection stays within approved catalog
-- AI failure uses fallback
-- audit/history fields preserved
+- analytics-focused dashboard
+- separate Students page
+- year/risk/program filters
+- View student status in modal, no detail-page redirect
+- remove Faculty adviser references
+- approved intervention catalog + AI rephrase only + deterministic fallback
 
 Commit:
 `M19: Refine department monitoring and intervention review`
 
 ---
 
-### M20 – Dean and Admin dashboards
+### M20 – Dean and Admin management redesign
 Implement:
 - Dean aggregate-only CLAS dashboard
-- no student drill-down
-- Admin dashboard visual redesign
-- Admin user management revised to four roles
+- Admin dashboard without visible demo/student table
+- Users role filters + Add/Edit modals
 - eligible-student list
-- academic structure consistency
-- questionnaire configuration/version support
-
-Checks:
-- Dean leakage tests
-- Admin CRUD/role tests
-- CLAS filters work
-- user counts/role filters updated
-- exports do not leak student-level Dean data
+- Academic Structure filters + Add/Edit modals
+- Questionnaire filters + Add/Edit modals
+- PSOC Occupations filters + Add/Edit/View modals
+- Interventions filters + Add/Edit/View modals
+- rename visible Audit Log to Activity Log/System Activity
+- separate Deletion Requests page with segmented status filter and review modal
 
 Commit:
 `M20: Update dean analytics and admin management`
 
 ---
 
-### M21 – UI polish, loading states, accessibility, regression
+### M21 – UI polish, loading, accessibility, regression
 Implement:
-- loading states
-- disabled duplicate-submit states
-- mobile/responsive fixes
+- final loading-state coverage
+- duplicate-submit protection
+- SweetAlert consistency
+- responsive fixes
 - modal accessibility
 - empty/error/success states
-- spacing/typography consistency
-- final icon pass
-- remove stale Faculty/About links/text
-- documentation updates
+- spacing/typography/icon consistency
+- remove stale Faculty/About/old student-nav references
+- docs updates
 
 Checks:
 - full Laravel test suite
-- `npm run build`
-- route smoke test
+- frontend build
+- route smoke tests
 - role-by-role manual walkthrough
-- student full flow
-- uploads/OCR
-- history
-- Department Head review
+- Assessment flow
+- grade upload/OCR
+- History
+- Department Head Students modal
 - Dean aggregate-only
-- Admin management
-- no broken navigation
+- Admin management pages
 
 Commit:
 `M21: Polish UX, accessibility, and regression coverage`
@@ -686,53 +452,50 @@ Commit:
 
 ## Do not touch
 
-- Do not train the final machine-learning models yet.
-- Do not create the FastAPI/fourth Docker container yet.
-- Do not remove or bypass `PredictorInterface`.
+- Do not train final ML models yet.
+- Do not create the FastAPI/fourth container yet.
+- Do not remove/bypass `PredictorInterface`.
 - Do not present `placeholder-heuristic-v0` as trained ML.
-- Do not remove OCR/PDF extraction that already works.
-- Do not add AI grade extraction simply because the UI reference mentions AI.
+- Do not remove OCR/PDF extraction that works.
+- Do not add AI grade extraction because the UI reference mentions AI.
 - Do not remove student confirmation before parsed grades are saved.
-- Do not regenerate or change `APP_KEY`.
-- Do not expose raw encrypted socioeconomic responses to Department Heads, Deans, or Admin without an explicitly approved reason.
+- Do not regenerate/change `APP_KEY`.
+- Do not expose raw encrypted socioeconomic responses to Department Heads, Deans, or Admin.
 - Do not let Dean access individual student information.
 - Do not reintroduce Faculty as an active role.
 - Do not expand pilot/data-gathering scope outside CLAS.
 - Do not hardcode final questionnaire items or arbitrary weights.
-- Do not delete legacy records merely because a feature/role is removed from the active UI.
+- Do not delete legacy records merely because a role/feature is removed from active UI.
 - Do not run `migrate:fresh` on preserved project data.
 - Do not replace historical prediction snapshots with current mutable profile data.
 - Do not remove Privacy.
 - Do not re-add About to primary navigation.
-- Do not add new MySQL/MariaDB-specific implementation that would make later PostgreSQL migration harder.
+- Do not restore separate student top-level pages for Grades, Questionnaire, Skills & Experience, or Career Matches after consolidation into Assessment/Dashboard.
+- Do not add new MySQL/MariaDB-specific implementation that makes later PostgreSQL migration harder.
 
 ---
 
 ## Done when
 
-- The active role set is Student, Department Head, Dean, and Administrator.
-- Faculty is removed from active navigation/workflows without destroying historical data.
-- CLAS and the eight approved programs are reflected in academic structure and scope.
-- Dean is aggregate-only at backend and UI levels.
-- Department Head can review only authorized department/program students.
-- Guest users land directly on a polished login page.
-- Students authenticate using student number and gated registration.
-- Student navigation is clean and non-redundant.
-- Questionnaire is structured, resumable, and ready for finalized research-backed questions.
-- Skills/Experience uses structured entries and OJT is treated as Work Experience.
-- Projects are removed from the active profile flow.
-- Grades use a clear Upload / Paste / Manual workflow.
-- UI does not falsely claim AI performs grade extraction.
+- Active roles are Student, Department Head, Dean, Administrator only.
+- Faculty is absent from active UI/flows while legacy history remains safe.
+- CLAS + eight approved programs are reflected in scope.
+- Dean is aggregate-only in backend and UI.
+- Department Head Students is a separate page; student status opens in a modal.
+- Guest users land directly on polished sign-in.
+- Students sign in by student number with gated registration.
+- Student nav contains only Dashboard, Assessment, History, Profile/Settings, Logout.
+- Assessment is one resumable page containing questionnaire, structured skills/certifications/work experience, and optional grade update.
+- Career Matches is inside Dashboard, not a separate top-level student page.
+- Grades support Upload / Paste / Manual, with no false AI extraction claim.
 - Professor names are removed from portal-pasted grade descriptions.
-- INC is nonnumeric, excluded from GWA, and treated as incomplete rather than failed.
-- Students can run an updated assessment without re-uploading grades and the latest confirmed grade version is snapshotted.
-- Dashboard/Results are consolidated.
-- History is its own page and shows immutable historical snapshots.
-- Career Matches follows the supplied visual direction.
-- Department Head monitoring and institutional interventions are revised.
-- AI intervention wording has deterministic fallback behavior.
-- Dean/Admin dashboards follow the supplied design direction.
-- Loading states and accessibility improvements are present.
-- Full test suite passes.
-- Frontend build passes.
+- INC is nonnumeric, excluded from GWA, and incomplete rather than failed.
+- Students can update Assessment without re-uploading grades and the latest confirmed grade version is snapshotted.
+- History is its own page with immutable historical snapshots.
+- Department Head has scoped student filtering including year level and modal status review.
+- Admin Dashboard has no rendered demo/student table.
+- Users, Academic Structure, Questionnaire, PSOC Occupations, Interventions, Activity Log, and Deletion Requests are separate management pages with filters/modals as specified.
+- Deletion Requests are clearly presented as account deletion requests.
+- Loading states, SweetAlert/confirmation feedback, accessibility, and responsive behavior are present.
+- Full test suite and frontend build pass.
 - Each milestone has its own clean commit.

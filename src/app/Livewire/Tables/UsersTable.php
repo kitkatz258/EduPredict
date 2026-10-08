@@ -26,6 +26,8 @@ class UsersTable extends BaseTable
             auth()->user(),
             request()->ip(),
         );
+
+        $this->toast($target->is_active ? "{$target->name} can sign in again." : "{$target->name} was deactivated.");
     }
 
     protected function baseQuery(): Builder

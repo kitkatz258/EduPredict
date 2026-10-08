@@ -13,9 +13,10 @@
         wire:loading.attr="disabled"
         wire:target="request"
         @disabled($blocked)
-        class="inline-flex items-center rounded-lg bg-brand-900 px-4 py-2 text-sm font-semibold text-white hover:bg-[#2E7D32] focus:outline-none focus:ring-2 focus:ring-brand-200 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-semibold text-white hover:bg-[#2E7D32] focus:outline-none focus:ring-2 focus:ring-brand-200 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
     >
         <span wire:loading.remove wire:target="request">Request new prediction</span>
+        <x-spinner wire:loading wire:target="request" />
         <span wire:loading wire:target="request">Preparing your estimate…</span>
     </button>
 </div>
