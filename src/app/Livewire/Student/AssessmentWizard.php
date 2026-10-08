@@ -22,7 +22,14 @@ class AssessmentWizard extends Component
 
     public string $questionnaireSection = 'academic_behavior';
 
-    public bool $showGradeEditor = false;
+    /** `latest` keeps the confirmed grades on file; `update` opens the grade editor. */
+    public string $gradeChoice = 'latest';
+
+    public ?int $gradeDraftId = null;
+
+    public ?int $gradeReplaceId = null;
+
+    public int $gradeFormKey = 0;
 
     public string $statusMessage = '';
 
@@ -79,9 +86,44 @@ class AssessmentWizard extends Component
         $this->statusMessage = 'Skills and experience section saved.';
     }
 
-    public function toggleGradeEditor(): void
+    public function chooseGrades(string $choice): void
     {
-        $this->showGradeEditor = ! $this->showGradeEditor;
+        $this->authorizeStudent();
+        if (in_array($choice, ['latest', 'update'], true)) {
+            $this->gradeChoice = $choice;
+        }
+    }
+
+    #[On('grade-report-continue')]
+    public function continueGradeDraft(int $id): void
+    {
+        $this->openGradeEditor(draftId: $id);
+    }
+
+    #[On('grade-report-replace')]
+    public function replaceGradeReport(int $id): void
+    {
+        $this->openGradeEditor(replaceId: $id);
+    }
+
+    #[On('grades-updated')]
+    public function gradesUpdated(): void
+    {
+        $this->authorizeStudent();
+        $this->gradeDraftId = null;
+        $this->gradeReplaceId = null;
+    }
+
+    /**
+     * The form re-checks ownership on mount; these ids only pick what it loads.
+     */
+    private function openGradeEditor(?int $draftId = null, ?int $replaceId = null): void
+    {
+        $this->authorizeStudent();
+        $this->gradeChoice = 'update';
+        $this->gradeDraftId = $draftId;
+        $this->gradeReplaceId = $replaceId;
+        $this->gradeFormKey++;
     }
 
     public function saveSocioeconomic(bool $asDraft = false): void
@@ -141,7 +183,7 @@ class AssessmentWizard extends Component
             'internetOptions' => config('edupredict.profile.internet_access', []),
             'deviceOptions' => config('edupredict.profile.device_access', []),
             'studySpaceOptions' => config('edupredict.profile.study_space', []),
-            'confirmedGradeReports' => $student->gradeReports()->where('status', 'confirmed')->latest('created_at')->get(),
+            'currentGradeReports' => $student->gradeReports()->current()->latest('confirmed_at')->latest('id')->get(),
         ]);
     }
 

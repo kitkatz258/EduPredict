@@ -19,7 +19,7 @@ final class AssessmentProgress
         $skills = $student->skillsExperience()->first();
 
         $sections = [
-            'academic' => $student->gradeReports()->where('status', 'confirmed')->exists(),
+            'academic' => $student->gradeReports()->current()->exists(),
             'socioeconomic' => $socioeconomic !== null && ! $socioeconomic->is_draft,
             'skills' => $skills !== null && ! $skills->is_draft,
             'questionnaire' => $student->questionnaireResponses()->whereNotNull('submitted_at')->exists(),

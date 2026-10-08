@@ -2,7 +2,9 @@
 
 namespace App\Services\Grades;
 
+use App\Models\GradeReport;
 use App\Models\Student;
+use Illuminate\Database\Eloquent\Collection;
 
 final class AcademicSummary
 {
@@ -20,17 +22,14 @@ final class AcademicSummary
      *     major_failed_subjects: int,
      *     other_failed_subjects: int,
      *     major_units: float,
-     *     other_units: float
+     *     other_units: float,
+     *     incomplete_subjects: int,
+     *     gwa_provisional: bool
      * }
      */
     public function for(Student $student): array
     {
-        $reports = $student->gradeReports()
-            ->where('status', 'confirmed')
-            ->with('subjectGrades')
-            ->orderBy('school_year')
-            ->orderBy('semester')
-            ->get();
+        $reports = $this->currentReports($student);
 
         $rows = $reports->flatMap(fn ($report) => $report->subjectGrades);
         $gwa = $this->calculator->compute($rows);
@@ -51,7 +50,25 @@ final class AcademicSummary
             'other_failed_subjects' => $other->failedCount,
             'major_units' => $major->gpaUnits,
             'other_units' => $other->gpaUnits,
+            'incomplete_subjects' => $gwa->incompleteCount,
+            'gwa_provisional' => $gwa->isProvisional(),
         ];
+    }
+
+    /**
+     * Confirmed reports that have not been replaced by a newer version.
+     *
+     * @return Collection<int, GradeReport>
+     */
+    public function currentReports(Student $student): Collection
+    {
+        return $student->gradeReports()
+            ->current()
+            ->with('subjectGrades')
+            ->orderBy('school_year')
+            ->orderBy('semester')
+            ->orderBy('id')
+            ->get();
     }
 
     public function syncStudent(Student $student): array

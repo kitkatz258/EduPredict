@@ -26,10 +26,12 @@ class GradeReportPolicy
         return $user->isRole(UserRole::Student) && $user->student !== null;
     }
 
+    /**
+     * Only drafts are edited in place; confirmed reports are replaced by a new version.
+     */
     public function update(User $user, GradeReport $gradeReport): bool
     {
-        return $user->isRole(UserRole::Student)
-            && $gradeReport->student?->user_id === $user->id;
+        return $this->owns($user, $gradeReport) && $gradeReport->isDraft();
     }
 
     public function delete(User $user, GradeReport $gradeReport): bool
@@ -40,5 +42,16 @@ class GradeReportPolicy
     public function confirm(User $user, GradeReport $gradeReport): bool
     {
         return $this->update($user, $gradeReport);
+    }
+
+    public function replace(User $user, GradeReport $gradeReport): bool
+    {
+        return $this->owns($user, $gradeReport) && $gradeReport->isCurrent();
+    }
+
+    private function owns(User $user, GradeReport $gradeReport): bool
+    {
+        return $user->isRole(UserRole::Student)
+            && $gradeReport->student?->user_id === $user->id;
     }
 }

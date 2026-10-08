@@ -4,7 +4,8 @@ These items are unfinished on purpose or are limits of this build. They are not 
 
 - The employability and dropout models are still the deterministic placeholder `HeuristicPredictor` (`placeholder-heuristic-v0`). `http` and `onnx` drivers throw until a trained model is approved. Do not describe placeholder output as a trained result.
 - The PSOC table is a starter set. Verify it against the official PSA PSOC 2012 before a final submission.
-- `grades.inc_gpa_weight` defaults to 4.00 and must be confirmed with the registrar. NSTP codes are excluded from GPA.
+- INC is left out of the GWA, which is then marked provisional. The UCC portal appears to count INC as 4.00, so its GPA can differ; confirm the official rule with the registrar. NSTP codes are excluded from GPA.
+- Predictions made before grade snapshots existed have no stored grade version; history should show "Not available for this attempt" for them.
 - `is_major_subject` defaults to false on newly entered grades, so a live program-fit result appears only when major subjects are marked. The seeded cohort stores shift labels for the demo story; those stored labels are not recomputed from the grade rows on each page load.
 - Account deletion approval deactivates the login and keeps prediction history. It does not hard-delete academic records.
 - Dashboard charts have no date-range filter and no career-match trend. Risk and program-shift figures are counts.

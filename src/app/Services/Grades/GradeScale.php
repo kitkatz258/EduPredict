@@ -22,11 +22,6 @@ final class GradeScale
         return (float) config('edupredict.grades.failing', 5.00);
     }
 
-    public function incGpaWeight(): float
-    {
-        return (float) config('edupredict.grades.inc_gpa_weight', 4.00);
-    }
-
     /**
      * @return list<string>
      */
@@ -164,16 +159,13 @@ final class GradeScale
         return false;
     }
 
+    /**
+     * INC and dropped grades have no numeric value and stay out of the GWA.
+     */
     public function gpaNumericValue(string $finalGrade): ?float
     {
         $token = $this->normalizeGradeToken($finalGrade);
-        if ($token === null) {
-            return null;
-        }
-        if ($this->isIncomplete($token)) {
-            return $this->incGpaWeight();
-        }
-        if ($this->isDropped($token)) {
+        if ($token === null || $this->isIncomplete($token) || $this->isDropped($token)) {
             return null;
         }
         if (is_numeric($token)) {

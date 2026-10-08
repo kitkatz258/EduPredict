@@ -45,11 +45,11 @@ Household size and living arrangement are stored in the snapshot and are not sco
 
 ## Feature catalog
 
-Draft socioeconomic rows are ignored. Skills, certification, and work-experience entries count only while the Skills & Experience section is saved (`skills_experiences.is_draft` false) and the entry is not archived. Only confirmed grade reports count. Questionnaire features come from the latest submitted response.
+Draft socioeconomic rows are ignored. Skills, certification, and work-experience entries count only while the Skills & Experience section is saved (`skills_experiences.is_draft` false) and the entry is not archived. Only current grade report versions count (confirmed and not superseded). Questionnaire features come from the latest submitted response.
 
 | name | type | allowed values | source | used by |
 |---|---|---|---|---|
-| gwa | float or null | 1.00–5.00, rounded to 2 decimals | confirmed `subject_grades` via `GwaCalculator` (NSTP excluded, INC weight from config) | employability, dropout |
+| gwa | float or null | 1.00–5.00, rounded to 2 decimals | current confirmed `subject_grades` via `GwaCalculator` (NSTP, INC, and dropped rows excluded; provisional when any INC exists) | employability, dropout |
 | failed_subjects | int | ≥ 0 | same confirmed rows; INC and dropped are not failures | employability, dropout |
 | semesters_completed | int | ≥ 0 | distinct confirmed `grade_reports` school year + semester | confidence |
 | limited_history | bool | true, false | `semesters_completed` < `prediction.limited_history_semesters` | confidence |

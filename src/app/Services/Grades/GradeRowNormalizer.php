@@ -13,16 +13,25 @@ final class GradeRowNormalizer
     public function normalize(array $raw, array $allCodes = []): ParsedGradeRow
     {
         $code = $this->normalizeCode((string) ($raw['subject_code'] ?? $raw['code'] ?? ''));
-        $name = trim((string) ($raw['subject_name'] ?? $raw['description'] ?? ''));
+        $rawName = trim((string) ($raw['subject_name'] ?? $raw['description'] ?? ''));
+        $name = $this->stripInstructorName($rawName);
         $units = trim((string) ($raw['units'] ?? ''));
         $midterm = $this->scale->normalizeGradeToken($raw['midterm_grade'] ?? $raw['midterm'] ?? null);
         $finalExam = $this->scale->normalizeGradeToken($raw['final_exam_grade'] ?? $raw['final'] ?? null);
         $finalGrade = $this->scale->normalizeGradeToken($raw['final_grade'] ?? $raw['final_grade'] ?? null) ?? '';
         $remarks = $this->scale->remarksFor($finalGrade, (string) ($raw['remarks'] ?? ''));
+        $gradeIsStatus = $this->scale->isIncomplete($finalGrade) || $this->scale->isDropped($finalGrade);
+        $remarksIsStatus = $this->scale->isIncomplete($remarks) || in_array($remarks, ['DROPPED', 'WITHDRAWN'], true);
+        if ($gradeIsStatus || ($this->scale->isNumericGrade($finalGrade) && $remarksIsStatus)) {
+            $remarks = $this->scale->remarksFor($finalGrade);
+        }
         $warnings = [];
 
         if ($code === '' || ! preg_match($this->scale->subjectCodePattern(), $code)) {
             $warnings[] = 'Subject code does not match the expected pattern.';
+        }
+        if ($name !== $rawName) {
+            $warnings[] = 'An instructor name was removed from the description. Check the subject name.';
         }
         if ($name === '') {
             $warnings[] = 'Subject description is missing.';
@@ -52,6 +61,7 @@ final class GradeRowNormalizer
         }
 
         $isFailed = $this->scale->isFailed($finalGrade, $remarks);
+        $isIncomplete = $this->scale->isIncomplete($finalGrade) || $this->scale->isIncomplete($remarks);
 
         return new ParsedGradeRow(
             subjectCode: $code,
@@ -65,7 +75,71 @@ final class GradeRowNormalizer
             needsReview: $warnings !== [],
             warnings: $warnings,
             isMajorSubject: (bool) ($raw['is_major_subject'] ?? false),
+            isIncomplete: $isIncomplete,
         );
+    }
+
+    /**
+     * Portal copies can carry the instructor into the description cell. Removes a
+     * merged "FACULTY, NAME SECTION" tail, a trailing honorific-led name
+     * ("Prof. Juan Cruz"), or a trailing all-caps "SURNAME, Given" name. Without a
+     * section tail the comma rule is skipped for all-caps descriptions, where a name
+     * cannot be told apart from the subject title.
+     */
+    public function stripInstructorName(string $description): string
+    {
+        $clean = trim(preg_replace('/\s+/u', ' ', $description) ?? $description);
+
+        // A trailing UCC section ("BSIS 3-A-SOUTH") means Faculty and Section were merged into the cell.
+        $section = '/(?:\s+\p{Lu}{2,8})?\s+\d[\p{Lu}\d]*(?:-[\p{Lu}\d]+)+$/u';
+        if (preg_match($section, $clean)) {
+            $withoutSection = trim(preg_replace($section, '', $clean) ?? $clean);
+            $withoutFaculty = $this->stripFacultySuffix($withoutSection);
+            if ($withoutFaculty !== $withoutSection) {
+                $clean = $withoutFaculty;
+            }
+        }
+
+        $honorific = '/\s*(?:[-–|\/(]\s*)?\b(?:Prof(?:essor)?|Dr|Engr|Atty|Mr|Mrs|Ms|Instructor|Inst)\.?\s+\p{Lu}[\p{L}.\'\-\s,]*\)?$/u';
+        $clean = trim(preg_replace($honorific, '', $clean) ?? $clean);
+
+        if ($clean !== mb_strtoupper($clean)) {
+            $surnameFirst = '/\s*(?:[-–|\/(]\s*)?\b\p{Lu}{2,}(?:\s+\p{Lu}{2,})*,\s*\p{Lu}[\p{L}\'\-]*(?:\s+\p{Lu}[\p{L}\'\-]*\.?)*\)?$/u';
+            $clean = trim(preg_replace($surnameFirst, '', $clean) ?? $clean);
+        }
+
+        return $clean;
+    }
+
+    /**
+     * Removes a trailing "SURNAME, Given M." (or TBA) from text known to end with the
+     * Faculty column. The surname is the word before the last comma plus any
+     * leading particles such as DELA, DE LOS, or STA.
+     */
+    public function stripFacultySuffix(string $text): string
+    {
+        $text = trim($text);
+        if (preg_match('/\s+TBA\.?$/i', $text)) {
+            return trim(preg_replace('/\s+TBA\.?$/i', '', $text) ?? $text);
+        }
+
+        $comma = mb_strrpos($text, ',');
+        if ($comma === false) {
+            return $text;
+        }
+
+        $before = preg_split('/\s+/u', trim(mb_substr($text, 0, $comma))) ?: [];
+        if (count($before) < 2) {
+            return $text;
+        }
+
+        $particles = ['DE', 'DEL', 'DELA', 'DELOS', 'DELAS', 'LOS', 'LAS', 'LA', 'DI', 'SAN', 'STA', 'STA.', 'STO', 'STO.', 'VDA', 'VDA.', 'VAN', 'VON', 'MC', 'MAC'];
+        $start = count($before) - 1;
+        while ($start > 1 && in_array(mb_strtoupper($before[$start - 1]), $particles, true)) {
+            $start--;
+        }
+
+        return trim(implode(' ', array_slice($before, 0, $start)));
     }
 
     public function normalizeCode(string $code): string

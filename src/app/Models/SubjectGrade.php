@@ -21,6 +21,7 @@ class SubjectGrade extends Model
         'final_grade',
         'remarks',
         'is_failed',
+        'is_incomplete',
         'is_major_subject',
         'needs_review',
     ];
@@ -30,6 +31,7 @@ class SubjectGrade extends Model
         return [
             'units' => 'float',
             'is_failed' => 'boolean',
+            'is_incomplete' => 'boolean',
             'is_major_subject' => 'boolean',
             'needs_review' => 'boolean',
         ];

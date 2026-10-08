@@ -19,6 +19,7 @@ final class ParsedGradeRow
         public bool $needsReview,
         public array $warnings = [],
         public bool $isMajorSubject = false,
+        public bool $isIncomplete = false,
     ) {}
 
     /**
@@ -35,6 +36,7 @@ final class ParsedGradeRow
             'final_grade' => $this->finalGrade,
             'remarks' => $this->remarks,
             'is_failed' => $this->isFailed,
+            'is_incomplete' => $this->isIncomplete,
             'needs_review' => $this->needsReview,
             'is_major_subject' => $this->isMajorSubject,
             'warnings' => $this->warnings,

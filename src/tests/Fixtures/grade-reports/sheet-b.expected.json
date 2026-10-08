@@ -3,7 +3,7 @@
   "semester": "First",
   "program": "BS Information Systems",
   "portal_gpa": 2.33,
-  "computed_gpa": 2.33,
+  "computed_gpa": 1.93,
   "rows": [
     {"subject_code": "CCS 118", "subject_name": "Multimedia Systems", "units": "3", "midterm_grade": "1.00", "final_exam_grade": "1.75", "final_grade": "1.50", "remarks": "PASSED", "is_failed": false},
     {"subject_code": "GEE 003", "subject_name": "Gender and Society", "units": "3", "midterm_grade": "1.50", "final_exam_grade": "1.00", "final_grade": "1.25", "remarks": "PASSED", "is_failed": false},

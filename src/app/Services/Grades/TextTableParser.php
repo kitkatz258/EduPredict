@@ -51,6 +51,10 @@ final class TextTableParser
         if ($rows === []) {
             $warnings[] = 'No subject rows were detected. You can enter grades manually.';
         }
+        $removed = count(array_filter($rawRows, fn (array $row): bool => ! empty($row['instructor_removed'])));
+        if ($removed > 0) {
+            $warnings[] = "Instructor and section columns were left out of {$removed} ".($removed === 1 ? 'row' : 'rows').'. Check that each subject name is complete.';
+        }
 
         return new ParsedGradeReport(
             source: $source,
@@ -143,7 +147,12 @@ final class TextTableParser
         if ($hay === '') {
             return null;
         }
-        if (str_contains($hay, 'faculty') || str_contains($hay, 'section') || $hay === 'no' || $hay === '#') {
+        foreach (['faculty', 'instructor', 'professor', 'teacher', 'adviser', 'section', 'schedule', 'room'] as $ignored) {
+            if (str_contains($hay, $ignored)) {
+                return null;
+            }
+        }
+        if ($hay === 'no' || $hay === '#') {
             return null;
         }
         if (str_contains($hay, 'code')) {
@@ -209,14 +218,15 @@ final class TextTableParser
             if ($pos === false) {
                 continue;
             }
-            if (isset($columns[$index])) {
-                $positions[] = ['key' => $columns[$index], 'start' => $pos];
-            }
+            $positions[] = ['key' => $columns[$index] ?? null, 'start' => $pos];
             $offset = $pos + strlen($part);
         }
 
         $row = [];
         foreach ($positions as $i => $item) {
+            if ($item['key'] === null) {
+                continue;
+            }
             $start = $item['start'];
             $end = $positions[$i + 1]['start'] ?? strlen($line);
             $row[$item['key']] = trim(substr($line, $start, max(0, $end - $start)));
@@ -236,7 +246,7 @@ final class TextTableParser
 
         $code = strtoupper(trim($codeMatch[1][0]));
         $after = trim(substr($line, $codeMatch[0][1] + strlen($codeMatch[0][0])));
-        $tokens = preg_split('/\s+/', $after) ?: [];
+        $tokens = $this->dropTrailingInstructorTokens(preg_split('/\s+/', $after) ?: []);
         if ($tokens === []) {
             return null;
         }
@@ -259,12 +269,21 @@ final class TextTableParser
             break;
         }
 
+        // Units is the last standalone integer, so digits in titles ("Elective 1") stay in the
+        // name. Tokens after it are the UCC Section column, and Faculty sits before it.
         $units = null;
-        foreach ($tokens as $index => $token) {
-            if (is_numeric($token) && (float) $token >= 0 && (float) $token <= 9 && (float) $token == (int) $token) {
+        $instructorRemoved = false;
+        for ($index = count($tokens) - 1; $index >= 0; $index--) {
+            $token = $tokens[$index];
+            if (preg_match('/^\d$/', $token)) {
                 $units = $token;
-                unset($tokens[$index]);
-                $tokens = array_values($tokens);
+                $hasSection = $index < count($tokens) - 1;
+                $tokens = array_slice($tokens, 0, $index);
+                if ($hasSection) {
+                    $before = implode(' ', $tokens);
+                    $tokens = preg_split('/\s+/', $this->normalizer->stripFacultySuffix($before)) ?: [];
+                    $instructorRemoved = implode(' ', $tokens) !== $before;
+                }
                 break;
             }
         }
@@ -290,7 +309,38 @@ final class TextTableParser
             'final_exam_grade' => count($grades) >= 3 ? $grades[1] : $finalExam,
             'final_grade' => $final,
             'remarks' => $remarks,
+            'instructor_removed' => $instructorRemoved,
         ];
+    }
+
+    /**
+     * Portal rows end with Faculty and Section after the remarks. Anything after the
+     * last remarks token (or, without remarks, after the last grade) is dropped so
+     * instructor names never reach the description.
+     *
+     * @param  list<string>  $tokens
+     * @return list<string>
+     */
+    private function dropTrailingInstructorTokens(array $tokens): array
+    {
+        $remarksWords = ['PASSED', 'FAILED', 'INC', 'INCOMPLETE', 'DRP', 'W', 'WITHDRAWN', 'DROPPED'];
+        $cut = null;
+        foreach ($tokens as $index => $token) {
+            if (in_array(strtoupper($token), $remarksWords, true)) {
+                $cut = $index;
+            }
+        }
+
+        if ($cut === null) {
+            foreach ($tokens as $index => $token) {
+                $normalized = $this->scale->normalizeGradeToken($token);
+                if ($normalized !== null && str_contains($token, '.') && $this->scale->isNumericGrade($normalized)) {
+                    $cut = $index;
+                }
+            }
+        }
+
+        return $cut === null ? $tokens : array_slice($tokens, 0, $cut + 1);
     }
 
     /**

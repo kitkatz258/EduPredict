@@ -176,32 +176,56 @@
     @elseif ($step === 'skills')
         <livewire:student.skills-experience-section />
     @elseif ($step === 'grades')
+        @php
+            $hasGrades = $currentGradeReports->isNotEmpty();
+            $latestReport = $currentGradeReports->first();
+            $editorOpen = ! $hasGrades || $gradeChoice === 'update';
+        @endphp
         <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:p-6">
             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Step 3 of 4 · Optional update</p>
             <h2 class="mt-1 text-xl font-semibold text-brand-900">Grades</h2>
-            @if ($confirmedGradeReports->isNotEmpty())
-                <div class="mt-4 rounded-xl border border-brand-200 bg-brand-50 p-4">
-                    <p class="font-medium text-brand-900"><i class="ri-checkbox-circle-line mr-1" aria-hidden="true"></i>Use latest confirmed grades</p>
-                    <p class="mt-1 text-sm text-gray-600">The most recent confirmed report is {{ $confirmedGradeReports->first()->school_year }} · {{ $confirmedGradeReports->first()->semester }}. You can continue without re-uploading grades.</p>
+            <p class="mt-2 text-sm text-gray-600">Add a term by uploading a document, pasting from the UCC portal, or typing it in. You review every row before it is saved.</p>
+
+            @if ($hasGrades)
+                <div class="mt-5 grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Grades for this assessment">
+                    <button type="button" role="radio" aria-checked="{{ $gradeChoice === 'latest' ? 'true' : 'false' }}" wire:click="chooseGrades('latest')"
+                        class="{{ $gradeChoice === 'latest' ? 'border-brand-900 bg-brand-50 ring-1 ring-brand-900' : 'border-brand-200 hover:bg-brand-50/50' }} rounded-xl border p-4 text-left">
+                        <span class="flex items-center gap-2 font-semibold text-brand-900"><i class="{{ $gradeChoice === 'latest' ? 'ri-radio-button-line' : 'ri-checkbox-blank-circle-line' }}" aria-hidden="true"></i>Use latest confirmed grades</span>
+                        <span class="mt-1 block text-sm text-gray-600">{{ $currentGradeReports->count() }} {{ \Illuminate\Support\Str::plural('term', $currentGradeReports->count()) }} on file. Most recently saved: AY {{ $latestReport->school_year }} · {{ $latestReport->semester }}.</span>
+                    </button>
+                    <button type="button" role="radio" aria-checked="{{ $gradeChoice === 'update' ? 'true' : 'false' }}" wire:click="chooseGrades('update')"
+                        class="{{ $gradeChoice === 'update' ? 'border-brand-900 bg-brand-50 ring-1 ring-brand-900' : 'border-brand-200 hover:bg-brand-50/50' }} rounded-xl border p-4 text-left">
+                        <span class="flex items-center gap-2 font-semibold text-brand-900"><i class="{{ $gradeChoice === 'update' ? 'ri-radio-button-line' : 'ri-checkbox-blank-circle-line' }}" aria-hidden="true"></i>Update grades</span>
+                        <span class="mt-1 block text-sm text-gray-600">Add a new term or update a saved one, for example when an INC is completed.</span>
+                    </button>
                 </div>
+                <p class="mt-3 text-sm text-gray-700">
+                    GWA on file: <span class="font-semibold text-brand-900">{{ $academic['rounded_gwa'] !== null ? number_format($academic['rounded_gwa'], 2) : '—' }}</span>
+                    @if ($academic['gwa_provisional'])
+                        <span class="ml-1 inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900"><i class="ri-time-line" aria-hidden="true"></i>Provisional · {{ $academic['incomplete_subjects'] }} INC left out</span>
+                    @endif
+                </p>
             @else
                 <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <p class="font-medium text-amber-900">No confirmed grades on file</p>
-                    <p class="mt-1 text-sm text-amber-900/80">EduPredict does not fabricate academic data. A prediction without grades has less academic evidence.</p>
+                    <p class="mt-1 text-sm text-amber-900/80">EduPredict does not fabricate academic data. You can still continue: a prediction without grades has less academic evidence and is marked lower confidence.</p>
                 </div>
             @endif
-            <div class="mt-5 flex flex-wrap gap-3">
-                <button type="button" wire:click="toggleGradeEditor" class="rounded-lg border border-brand-900 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">{{ $showGradeEditor ? 'Hide grade editor' : 'Update grades' }}</button>
-                <button type="button" wire:click="goTo('review')" class="inline-flex items-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">Continue to review<i class="ri-arrow-right-line" aria-hidden="true"></i></button>
-            </div>
         </section>
 
-        @if ($showGradeEditor)
-            <div class="space-y-6">
-                <livewire:student.grade-report-form />
-                <livewire:tables.grade-reports-table />
-            </div>
+        @if ($editorOpen)
+            <livewire:student.grade-report-form :report-id="$gradeDraftId" :replace-id="$gradeReplaceId" :key="'grade-form-'.$gradeFormKey" />
         @endif
+
+        <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="grade-history-heading">
+            <h3 id="grade-history-heading" class="text-base font-semibold text-brand-900">Saved grade reports</h3>
+            <p class="mb-4 mt-1 text-sm text-gray-600">View any term read-only. Updating a term keeps the earlier version for your prediction history.</p>
+            <livewire:tables.grade-reports-table />
+        </section>
+
+        <div class="flex justify-end">
+            <button type="button" wire:click="goTo('review')" class="inline-flex items-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">Continue to review<i class="ri-arrow-right-line" aria-hidden="true"></i></button>
+        </div>
     @else
         <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:p-6">
             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Step 4 of 4</p>

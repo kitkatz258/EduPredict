@@ -69,13 +69,16 @@ class GradeEntryTest extends TestCase
         $this->assertDatabaseHas('subject_grades', [
             'subject_code' => 'IS 103',
             'is_failed' => 0,
+            'is_incomplete' => 1,
             'final_grade' => 'INC',
             'remarks' => 'INCOMPLETE',
         ]);
 
         $summary = app(AcademicSummary::class)->for($student->fresh());
-        $this->assertSame(2.33, $summary['rounded_gwa']);
+        $this->assertSame(1.93, $summary['rounded_gwa']);
         $this->assertSame(1, $summary['failed_subjects']);
+        $this->assertSame(1, $summary['incomplete_subjects']);
+        $this->assertTrue($summary['gwa_provisional']);
     }
 
     public function test_grades_live_inside_the_unified_assessment(): void
@@ -90,7 +93,10 @@ class GradeEntryTest extends TestCase
             ->get('/student/assessment?step=grades')
             ->assertOk()
             ->assertSee('Optional update')
-            ->assertSee('Update grades');
+            ->assertSee('Upload Document')
+            ->assertSee('Paste from UCC Portal')
+            ->assertSee('Manual Entry')
+            ->assertDontSee('extracted automatically using AI');
     }
 
     public function test_department_head_cannot_open_or_mutate_student_grade_entry(): void

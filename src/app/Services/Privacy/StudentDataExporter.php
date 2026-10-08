@@ -58,7 +58,9 @@ class StudentDataExporter
                 'semester' => $report->semester,
                 'source' => $report->source,
                 'status' => $report->status,
+                'version' => $report->version,
                 'confirmed_at' => $report->confirmed_at?->toIso8601String(),
+                'superseded_at' => $report->superseded_at?->toIso8601String(),
                 'subjects' => $report->subjectGrades->map(fn ($grade): array => [
                     'subject_code' => $grade->subject_code,
                     'subject_name' => $grade->subject_name,
@@ -68,6 +70,7 @@ class StudentDataExporter
                     'final_grade' => $grade->final_grade,
                     'remarks' => $grade->remarks,
                     'is_failed' => $grade->is_failed,
+                    'is_incomplete' => $grade->is_incomplete,
                     'is_major_subject' => $grade->is_major_subject,
                 ])->values()->all(),
             ])->values()->all(),
