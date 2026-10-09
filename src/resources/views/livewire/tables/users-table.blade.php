@@ -22,6 +22,7 @@
             </div>
         </div>
     </div>
+    <x-updating />
     <div class="overflow-hidden rounded-xl border border-brand-200 bg-white shadow-sm" wire:loading.class="opacity-60">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-brand-200 text-sm">
@@ -51,8 +52,9 @@
                                         @if ($row->is_active) data-confirm="{{ $row->name }} will not be able to sign in until the account is activated again." data-confirm-title="Deactivate this account?" data-confirm-button="Deactivate" @endif
                                         wire:loading.attr="disabled"
                                         wire:target="toggleActive({{ $row->id }})"
-                                        class="text-sm font-medium text-brand-900 underline disabled:opacity-50"
+                                        class="inline-flex items-center gap-1 text-sm font-medium text-brand-900 underline disabled:opacity-50"
                                     >
+                                        <x-spinner wire:loading wire:target="toggleActive({{ $row->id }})" />
                                         {{ $row->is_active ? 'Deactivate' : 'Activate' }}
                                     </button>
                                 </div>

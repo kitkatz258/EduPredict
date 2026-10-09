@@ -34,6 +34,7 @@
             </select>
         </div>
     </div>
+    <x-updating target="search,perPage,sortBy,gotoPage,nextPage,previousPage" />
     <div class="relative overflow-hidden rounded-xl border border-brand-200 bg-white shadow-sm">
         <div wire:loading.flex wire:target="search,perPage,sortBy,gotoPage,nextPage,previousPage" class="absolute inset-x-0 top-0 z-10 h-0.5 bg-brand-400" aria-hidden="true"></div>
         <div class="overflow-x-auto">

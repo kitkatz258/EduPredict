@@ -1,7 +1,8 @@
 <div>
     @if ($show)
         <x-dialog :title="$itemId ? 'Edit questionnaire item' : 'Add questionnaire item'" close="closeForm" description="Definitions with student answers stay locked. Add a new version instead of rewriting them.">
-            <form wire:submit="save" class="space-y-4 px-5 py-5 sm:px-6">
+            <form wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
+                <x-loading-overlay target="save" label="Saving question…" />
                 @if ($statusMessage !== '')
                     <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
                 @endif

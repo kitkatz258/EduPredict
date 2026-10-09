@@ -88,10 +88,10 @@
                     @if ($currentIndex > 0)
                         <button type="button" wire:click="previousConstruct" class="inline-flex items-center gap-1 rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50"><i class="ri-arrow-left-line" aria-hidden="true"></i>Back</button>
                     @endif
-                    <button type="button" wire:click="saveDraft" wire:loading.attr="disabled" wire:target="saveDraft" class="rounded-lg border border-brand-900 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 disabled:opacity-60">Save draft</button>
+                    <button type="button" wire:click="saveDraft" wire:loading.attr="disabled" wire:target="saveDraft" class="inline-flex items-center gap-2 rounded-lg border border-brand-900 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 disabled:opacity-60"><x-spinner wire:loading wire:target="saveDraft" />Save draft</button>
                 </div>
                 @if ($currentIndex < count($constructKeys) - 1)
-                    <button type="button" wire:click="saveAndContinue" wire:loading.attr="disabled" wire:target="saveAndContinue" class="inline-flex items-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">Save &amp; continue<i class="ri-arrow-right-line" aria-hidden="true"></i></button>
+                    <button type="button" wire:click="saveAndContinue" wire:loading.attr="disabled" wire:target="saveAndContinue" class="inline-flex items-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="saveAndContinue" />Save &amp; continue<i class="ri-arrow-right-line" wire:loading.remove wire:target="saveAndContinue" aria-hidden="true"></i></button>
                 @else
                     <button type="submit" wire:loading.attr="disabled" wire:target="submit" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="submit" />Submit questionnaire</button>
                 @endif

@@ -92,7 +92,7 @@
                 <x-spinner wire:loading wire:target="export" />
                 Export CSV
             </button>
-            <p wire:loading wire:target="search,filters,sortBy,showHighRisk" class="text-sm text-gray-500">Updating list…</p>
+            <p wire:loading wire:target="search,filters,sortBy,showHighRisk" class="text-sm text-gray-500" role="status">Updating list…</p>
         </div>
     </div>
 

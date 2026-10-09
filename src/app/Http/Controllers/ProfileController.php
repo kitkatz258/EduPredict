@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
@@ -38,23 +38,15 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Immediate deletion is not available. Students use the reviewed request on Privacy.
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
+        $student = $request->user()->isRole(UserRole::Student);
 
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return Redirect::route($student ? 'privacy' : 'profile.edit')->with(
+            'error',
+            'Accounts are not deleted from this page. Students submit a deletion request, and an administrator deactivates the login. Prediction history is kept.',
+        );
     }
 }

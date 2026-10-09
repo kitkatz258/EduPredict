@@ -13,7 +13,7 @@
     @if ($latest === null)
         <section class="rounded-2xl border border-brand-200 bg-white p-8 text-center shadow-sm">
             <h2 class="text-lg font-semibold text-brand-900">No prediction yet</h2>
-            <p class="mx-auto mt-2 max-w-lg text-sm text-gray-600">Complete the profile, then request an estimate. Nothing here decides admission, academic standing, employment, or discipline.</p>
+            <p class="mx-auto mt-2 max-w-lg text-sm text-gray-600">Save the required Assessment sections, then run a prediction. Nothing here decides admission, academic standing, employment, or discipline.</p>
         </section>
     @else
         <div class="grid gap-4 lg:grid-cols-3">
@@ -39,7 +39,7 @@
                 @endif
 
                 <div class="mt-5">
-                    <p class="text-xs font-medium text-gray-600">Estimated dropout probability {{ number_format((float) $latest->dropout_probability * 100, 0) }}%</p>
+                    <p class="text-xs font-medium text-gray-600">Placeholder dropout-risk index: {{ number_format((float) $latest->dropout_probability * 100, 0) }} / 100. This is not a trained probability.</p>
                     <div class="relative mt-2 h-2 rounded-full bg-gradient-to-r from-green-700 via-amber-500 to-red-700" aria-hidden="true">
                         <span class="absolute top-1/2 h-4 w-1 -translate-y-1/2 rounded bg-brand-900" style="left: {{ max(0, min(100, (float) $latest->dropout_probability * 100)) }}%"></span>
                     </div>
@@ -67,14 +67,14 @@
             <div class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
                 <h2 id="factors-heading" class="text-sm font-semibold text-brand-900">Employability factors</h2>
                 <p class="mt-1 text-xs text-gray-500">Green bars helped the estimate. Amber bars lowered it.</p>
-                <div class="relative mt-4 h-64" wire:ignore>
+                <div class="relative mt-4 h-64 min-w-0 overflow-hidden" wire:ignore>
                     <canvas id="employability-factors-{{ $student->id }}" class="h-full w-full" aria-label="Employability contributing factors" role="img"></canvas>
                 </div>
             </div>
             <div class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
                 <h2 class="text-sm font-semibold text-brand-900">Dropout-risk factors</h2>
                 <p class="mt-1 text-xs text-gray-500">Amber bars are areas where support could help.</p>
-                <div class="relative mt-4 h-64" wire:ignore>
+                <div class="relative mt-4 h-64 min-w-0 overflow-hidden" wire:ignore>
                     <canvas id="dropout-factors-{{ $student->id }}" class="h-full w-full" aria-label="Dropout risk contributing factors" role="img"></canvas>
                 </div>
             </div>
@@ -96,9 +96,16 @@
     @endif
 
     <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="history-heading">
-        <h2 id="history-heading" class="text-sm font-semibold text-brand-900">History</h2>
-        <p class="mt-1 text-xs text-gray-500">Each request is kept. Earlier results are not replaced.</p>
-        <div class="relative mt-4 h-56" wire:ignore>
+        <div class="flex flex-wrap items-end justify-between gap-3">
+            <div>
+                <h2 id="history-heading" class="text-sm font-semibold text-brand-900">History</h2>
+                <p class="mt-1 text-xs text-gray-500">Each request is kept. Earlier results are not replaced.</p>
+            </div>
+            @if ($forStudent ?? false)
+                <a href="{{ route('student.history') }}" class="inline-flex items-center gap-1 text-sm font-medium text-brand-900 hover:underline">Open History<i class="ri-arrow-right-s-line" aria-hidden="true"></i></a>
+            @endif
+        </div>
+        <div class="relative mt-4 h-56 min-w-0 overflow-hidden" wire:ignore>
             <canvas id="prediction-history-{{ $student->id }}" class="h-full w-full" aria-label="Employability and dropout probability over time" role="img"></canvas>
         </div>
         <div class="mt-6">

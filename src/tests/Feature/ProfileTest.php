@@ -61,38 +61,41 @@ class ProfileTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_delete_their_account(): void
+    public function test_profile_points_students_at_a_deletion_request_instead_of_erasing_the_account(): void
     {
         $user = User::factory()->create();
 
-        $response = $this
-            ->actingAs($user)
+        $this->actingAs($user)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('Request account deletion')
+            ->assertSee(route('privacy').'#deletion-request', false)
+            ->assertDontSee('permanently deleted', false);
+
+        $this->actingAs($user)
             ->delete('/profile', [
                 'password' => 'password',
-            ]);
+            ])
+            ->assertRedirect(route('privacy'))
+            ->assertSessionHas('error');
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/');
-
-        $this->assertGuest();
-        $this->assertNull($user->fresh());
+        $this->assertAuthenticated();
+        $this->assertNotNull($user->fresh());
     }
 
-    public function test_correct_password_must_be_provided_to_delete_account(): void
+    public function test_staff_profile_does_not_delete_the_account(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->administrator()->create();
 
-        $response = $this
-            ->actingAs($user)
-            ->from('/profile')
-            ->delete('/profile', [
-                'password' => 'wrong-password',
-            ]);
+        $this->actingAs($user)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('deactivated by an administrator')
+            ->assertDontSee('permanently deleted', false);
 
-        $response
-            ->assertSessionHasErrorsIn('userDeletion', 'password')
-            ->assertRedirect('/profile');
+        $this->actingAs($user)
+            ->delete('/profile')
+            ->assertRedirect(route('profile.edit'));
 
         $this->assertNotNull($user->fresh());
     }

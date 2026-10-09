@@ -141,13 +141,41 @@ function markBusy(form, submitter) {
     }, 0);
 }
 
+function lockControl(control) {
+    if (!control || control.dataset.locked === '1' || control.disabled) {
+        return;
+    }
+    control.dataset.locked = '1';
+    control.setAttribute('aria-busy', 'true');
+    setTimeout(() => {
+        if (control.dataset.locked === '1') {
+            control.disabled = true;
+        }
+    }, 0);
+}
+
+function releaseLocks() {
+    document.querySelectorAll('[data-locked]').forEach((el) => {
+        delete el.dataset.locked;
+        el.removeAttribute('aria-busy');
+        el.disabled = false;
+    });
+    clearBusy();
+}
+
 function clearBusy() {
     document.querySelectorAll('form[data-busy]').forEach((form) => {
         delete form.dataset.busy;
         form.removeAttribute('aria-busy');
-        form.querySelectorAll('[aria-busy="true"]').forEach((el) => el.removeAttribute('aria-busy'));
+        form.querySelectorAll('[aria-busy="true"]').forEach((el) => {
+            if (el.dataset.locked !== '1') {
+                el.removeAttribute('aria-busy');
+            }
+        });
         form.querySelectorAll('button[disabled][type="submit"], button[disabled]:not([type])').forEach((button) => {
-            button.disabled = false;
+            if (button.dataset.locked !== '1') {
+                button.disabled = false;
+            }
         });
     });
 }
@@ -165,6 +193,7 @@ export function installFeedback() {
         }
         if (el.dataset.confirmed === '1') {
             delete el.dataset.confirmed;
+            el.dataset.confirmPass = '1';
 
             return;
         }
@@ -181,6 +210,45 @@ export function installFeedback() {
                 el.click();
             }
         });
+    }, true);
+
+    // Block a second Livewire click or submit before the first request finishes.
+    document.addEventListener('click', (event) => {
+        const control = event.target.closest('button, input[type="submit"]');
+        const action = control ? [...control.attributes].find((attr) => attr.name === 'wire:click' || attr.name.startsWith('wire:click.')) : null;
+        if (!control || !action || action.value.trim().startsWith('$')) {
+            return;
+        }
+        if (control.dataset.confirmPass === '1') {
+            delete control.dataset.confirmPass;
+        } else if (control.dataset.confirm !== undefined && control.dataset.confirmed !== '1') {
+            return;
+        }
+        if (control.dataset.locked === '1') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            return;
+        }
+        lockControl(control);
+    }, true);
+
+    document.addEventListener('submit', (event) => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement) || !isLivewireForm(form)) {
+            return;
+        }
+        if (form.dataset.busy === '1') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            return;
+        }
+        form.dataset.busy = '1';
+        form.setAttribute('aria-busy', 'true');
+        if (event.submitter) {
+            lockControl(event.submitter);
+        }
     }, true);
 
     document.addEventListener('submit', (event) => {
@@ -231,7 +299,7 @@ export function installFeedback() {
 
     window.addEventListener('pageshow', () => {
         progress.reset();
-        clearBusy();
+        releaseLocks();
     });
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -244,10 +312,19 @@ export function installFeedback() {
             toast(data?.type ?? 'success', data?.message ?? '');
         });
 
+        let inflight = 0;
         window.Livewire.hook('request', ({ succeed, fail }) => {
+            inflight += 1;
             progress.start(250);
-            succeed(() => progress.done());
-            fail(() => progress.done());
+            const finish = () => {
+                inflight = Math.max(0, inflight - 1);
+                progress.done();
+                if (inflight === 0) {
+                    releaseLocks();
+                }
+            };
+            succeed(finish);
+            fail(finish);
         });
     });
 }

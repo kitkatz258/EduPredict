@@ -1,30 +1,23 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
-    </div>
+    <h1 class="text-lg font-semibold text-brand-900">Verify your email</h1>
+    <p class="mt-1 text-sm text-gray-600">Thanks for registering. Use the link we emailed you before continuing. If it did not arrive, we can send another.</p>
 
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-        </div>
+        <p class="mt-4 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">
+            A new verification link has been sent to the email address you provided during registration.
+        </p>
     @endif
 
-    <div class="mt-4 flex items-center justify-between">
+    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <form method="POST" action="{{ route('verification.send') }}">
             @csrf
-
-            <div>
-                <x-primary-button>
-                    {{ __('Resend Verification Email') }}
-                </x-primary-button>
-            </div>
+            <x-primary-button icon="ri-mail-send-line">Resend verification email</x-primary-button>
         </form>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-
-            <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                {{ __('Log Out') }}
+            <button type="submit" class="inline-flex items-center gap-1 text-sm font-medium text-brand-900 hover:underline">
+                <i class="ri-logout-box-r-line" aria-hidden="true"></i>Log out
             </button>
         </form>
     </div>

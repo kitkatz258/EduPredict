@@ -24,4 +24,5 @@
             >{{ $text }}</button>
         @endforeach
     </div>
+    <p wire:loading wire:target="{{ $method }}" class="mt-1 text-xs text-gray-500" role="status">Updating…</p>
 </div>

@@ -42,7 +42,8 @@
             </select>
         </div>
     </div>
-    <div class="overflow-hidden rounded-xl border border-brand-200 bg-white shadow-sm">
+    <x-updating />
+    <div class="overflow-hidden rounded-xl border border-brand-200 bg-white shadow-sm" wire:loading.class="opacity-60">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-brand-200 text-sm">
                 <thead class="bg-brand-50">

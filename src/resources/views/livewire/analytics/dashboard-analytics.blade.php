@@ -92,7 +92,7 @@
 
     <div
         wire:ignore
-        class="grid gap-4 lg:grid-cols-2"
+        class="grid min-w-0 gap-4 lg:grid-cols-2"
         x-data="{
             charts: {},
             draw(payload) {
@@ -168,33 +168,33 @@
     >
         <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
             <h3 class="text-sm font-semibold text-brand-900">Dropout risk distribution</h3>
-            <div class="relative mt-4 h-64">
+            <div class="relative mt-4 h-64 min-w-0 overflow-hidden">
                 <canvas id="cohort-risk-{{ $this->getId() }}" aria-label="Dropout risk distribution" role="img"></canvas>
             </div>
         </section>
         <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
             <h3 class="text-sm font-semibold text-brand-900">Employability score distribution</h3>
-            <div class="relative mt-4 h-64">
+            <div class="relative mt-4 h-64 min-w-0 overflow-hidden">
                 <canvas id="cohort-bands-{{ $this->getId() }}" aria-label="Employability score distribution" role="img"></canvas>
             </div>
         </section>
         <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
             <h3 class="text-sm font-semibold text-brand-900">Trend by month</h3>
             <p class="mt-1 text-xs text-gray-500">Each point is the latest estimate for students whose latest request falls in that month.</p>
-            <div class="relative mt-4 h-64">
+            <div class="relative mt-4 h-64 min-w-0 overflow-hidden">
                 <canvas id="cohort-trend-{{ $this->getId() }}" aria-label="Employability and high-risk trend" role="img"></canvas>
             </div>
         </section>
         <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm">
             <h3 class="text-sm font-semibold text-brand-900">Risk by year level</h3>
-            <div class="relative mt-4 h-64">
+            <div class="relative mt-4 h-64 min-w-0 overflow-hidden">
                 <canvas id="cohort-years-{{ $this->getId() }}" aria-label="Risk counts by year level" role="img"></canvas>
             </div>
         </section>
         @if (count($charts['programs']['labels']) > 1)
             <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm lg:col-span-2">
                 <h3 class="text-sm font-semibold text-brand-900">Employability by program</h3>
-                <div class="relative mt-4 h-64">
+                <div class="relative mt-4 h-64 min-w-0 overflow-hidden">
                     <canvas id="cohort-programs-{{ $this->getId() }}" aria-label="Average employability by program" role="img"></canvas>
                 </div>
             </section>

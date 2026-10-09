@@ -12,7 +12,7 @@
             <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="history-trend-heading">
                 <h2 id="history-trend-heading" class="text-sm font-semibold text-brand-900">Trend across attempts</h2>
                 <p class="mt-1 text-xs text-gray-500">Employability and the placeholder dropout-risk index (0–100) for each saved attempt.</p>
-                <div class="relative mt-4 h-56" wire:ignore>
+                <div class="relative mt-4 h-56 min-w-0 overflow-hidden" wire:ignore>
                     <canvas id="history-trend-chart" class="h-full w-full" aria-label="Employability and dropout-risk index over time" role="img"></canvas>
                 </div>
                 <script type="application/json" id="history-trend-data">@json($trend)</script>

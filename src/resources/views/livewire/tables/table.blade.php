@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    <p wire:loading class="mb-2 text-sm text-gray-500" role="status">Updating the table…</p>
+    <x-updating label="Updating the table…" />
     <div class="overflow-hidden rounded-xl border border-brand-200 bg-white shadow-sm" wire:loading.class="opacity-60">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-brand-200 text-sm">
@@ -68,6 +68,7 @@
                     @empty
                         <tr>
                             <td colspan="{{ count($columns) }}" class="px-4 py-12 text-center text-gray-500">
+                                <i class="ri-inbox-line mb-2 block text-2xl text-brand-400" aria-hidden="true"></i>
                                 {{ $emptyMessage }}
                             </td>
                         </tr>

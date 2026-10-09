@@ -40,7 +40,9 @@
             <button
                 type="button"
                 wire:click="goTo('{{ $key }}')"
-                class="{{ $step === $key ? 'border-brand-900 bg-white text-brand-900 shadow-sm' : 'border-brand-200 bg-white/70 text-gray-700 hover:bg-white' }} flex items-start gap-3 rounded-xl border p-3 text-left"
+                wire:loading.attr="disabled"
+                wire:target="goTo"
+                class="{{ $step === $key ? 'border-brand-900 bg-white text-brand-900 shadow-sm' : 'border-brand-200 bg-white/70 text-gray-700 hover:bg-white' }} flex items-start gap-3 rounded-xl border p-3 text-left disabled:opacity-60"
                 @if ($step === $key) aria-current="step" @endif
             >
                 <span class="{{ $step === $key ? 'bg-brand-900 text-white' : 'bg-brand-50 text-brand-900' }} flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold">{{ $number }}</span>
@@ -151,8 +153,8 @@
                 </div>
 
                 <div class="mt-6 flex flex-wrap gap-3">
-                    <button type="button" wire:click="saveSocioeconomic(true)" wire:loading.attr="disabled" wire:target="saveSocioeconomic" class="rounded-lg border border-brand-900 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 disabled:opacity-60">Save draft</button>
-                    <button type="submit" wire:loading.attr="disabled" wire:target="saveSocioeconomic" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">Save &amp; continue</button>
+                    <button type="button" wire:click="saveSocioeconomic(true)" wire:loading.attr="disabled" wire:target="saveSocioeconomic" class="inline-flex items-center gap-2 rounded-lg border border-brand-900 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 disabled:opacity-60"><x-spinner wire:loading wire:target="saveSocioeconomic" />Save draft</button>
+                    <button type="submit" wire:loading.attr="disabled" wire:target="saveSocioeconomic" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="saveSocioeconomic" />Save &amp; continue</button>
                 </div>
             </form>
         @else

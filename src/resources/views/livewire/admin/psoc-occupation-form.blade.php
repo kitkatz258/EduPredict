@@ -1,7 +1,8 @@
 <div>
     @if ($show)
         <x-dialog :title="$readOnly ? 'View occupation' : ($occupationId ? 'Edit occupation' : 'Add occupation')" close="closeForm" description="Editing a row does not change compatibility scores already stored on a prediction.">
-            <form wire:submit="save" class="space-y-4 px-5 py-5 sm:px-6">
+            <form wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
+                <x-loading-overlay target="save" label="Saving occupation…" />
                 @if ($statusMessage !== '')
                     <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
                 @endif

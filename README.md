@@ -154,6 +154,8 @@ Students sign in with their student number. Staff sign in with their work email.
 
 The pilot scope is the UCC College of Liberal Arts and Sciences (CLAS) with eight programs: BA Communication, Bachelor of Public Administration, and BS Computer Science, Entertainment and Multimedia Computing, Information Systems, Information Technology, Mathematics, and Psychology. The Department Head reviews individual students in their department (or one program, when narrowed). The Dean sees aggregated CLAS figures only, never individual students. Faculty is a legacy role: existing faculty accounts are kept for history but cannot sign in.
 
+Students use Dashboard, Assessment, History, profile/settings, and logout. Staff use a fixed sidebar. Slow actions show a progress indicator, a busy button, or a confirmation dialog. Account deletion is a reviewed request on the privacy notice; approving it deactivates login and keeps prediction history.
+
 Students use one resumable Assessment with Questionnaire, Skills & Experience, optional Grades, and Review steps. The current `draft-v1` questionnaire is explicitly a draft research instrument; definitions that already have student answers are locked instead of being rewritten in place.
 
 Sixty synthetic students (`SYN-0001` … `SYN-0060`, emails `syntheticN@edupredict.test`) sit across the CLAS programs. Of those with a stored prediction, 12 are high risk with a disengagement flag, 12 are moderate with a program-fit flag, 12 are low with mixed signals, and 24 are low with no shift pattern. A few use story names (Mara Bautista, Nico Reyes, Rico Dela Cruz, Liza Ramos, and others). Sam Student (`2024-00001`, BSIS) has a complete consent record and no prediction yet, so the student demo can request one. Una Applicant (`2024-88888`) is on the institution list and is not registered.
@@ -164,6 +166,10 @@ Sixty synthetic students (`SYN-0001` … `SYN-0060`, emails `syntheticN@edupredi
 docker compose exec app npm install
 docker compose exec app npm run build
 ```
+
+## 10. Privacy and ethics
+
+The system handles sensitive student data under RA 10173 (Data Privacy Act): informed consent, role-based access, encrypted sensitive fields, de-identified data sent to the AI API, and an activity log. Predictions are estimates, not guarantees, and are not clinical or diagnostic. Students download their data or request account deletion from the privacy notice. There is no public About page.
 
 ## 11. Tests
 
@@ -189,7 +195,3 @@ Career scores, program-shift labels, and institutional-action selection stay det
 ## 13. Known gaps
 
 Intentionally unfinished work is listed in [`src/docs/KNOWN_GAPS.md`](src/docs/KNOWN_GAPS.md).
-
-## 10. Privacy and ethics
-
-The system handles sensitive student data under RA 10173 (Data Privacy Act): informed consent, role-based access, encrypted sensitive fields, de-identified data sent to the AI API, audit logs. Predictions are estimates, not guarantees, and are not clinical or diagnostic.

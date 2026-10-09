@@ -107,18 +107,18 @@
                             </ul>
                         @endif
                         <p class="text-sm leading-6 text-gray-700">{{ $summary['employability'] }}</p>
-                        <div class="grid gap-4 lg:grid-cols-2">
+                        <div class="grid min-w-0 gap-4 lg:grid-cols-2">
                             <div>
                                 <h3 class="text-sm font-semibold text-brand-900">Employability factors</h3>
                                 <p class="mt-1 text-xs text-gray-500">Green bars helped the estimate. Amber bars lowered it.</p>
-                                <div class="relative mt-3 h-60" wire:ignore>
+                                <div class="relative mt-3 h-60 min-w-0 overflow-hidden" wire:ignore>
                                     <canvas id="dashboard-employability-factors" class="h-full w-full" aria-label="Employability contributing factors" role="img"></canvas>
                                 </div>
                             </div>
                             <div>
                                 <h3 class="text-sm font-semibold text-brand-900">Dropout-risk factors</h3>
                                 <p class="mt-1 text-xs text-gray-500">Amber bars are areas where support could help.</p>
-                                <div class="relative mt-3 h-60" wire:ignore>
+                                <div class="relative mt-3 h-60 min-w-0 overflow-hidden" wire:ignore>
                                     <canvas id="dashboard-dropout-factors" class="h-full w-full" aria-label="Dropout risk contributing factors" role="img"></canvas>
                                 </div>
                             </div>

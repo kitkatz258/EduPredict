@@ -1,13 +1,15 @@
 # Known gaps
 
-These items are unfinished on purpose or are limits of this build. They are not open defects in the milestones M0–M12.
+These items are unfinished on purpose or are limits of this build. They are not open defects in the milestones through M21.
 
 - The employability and dropout models are still the deterministic placeholder `HeuristicPredictor` (`placeholder-heuristic-v0`). `http` and `onnx` drivers throw until a trained model is approved. Do not describe placeholder output as a trained result.
 - The PSOC table is a starter set. Verify it against the official PSA PSOC 2012 before a final submission.
 - INC is left out of the GWA, which is then marked provisional. The UCC portal appears to count INC as 4.00, so its GPA can differ; confirm the official rule with the registrar. NSTP codes are excluded from GPA.
 - Predictions made before grade snapshots existed have no stored grade version; history should show "Not available for this attempt" for them.
 - `is_major_subject` defaults to false on newly entered grades, so a live program-fit result appears only when major subjects are marked. The seeded cohort stores shift labels for the demo story; those stored labels are not recomputed from the grade rows on each page load.
-- Account deletion approval deactivates the login and keeps prediction history. It does not hard-delete academic records.
+- Account deletion approval deactivates the login and keeps prediction history. It does not hard-delete academic records. The profile page does not delete an account; students submit the request from the privacy notice.
+- Faculty remains a legacy role so old rows still load. Those accounts cannot sign in and are not offered in active screens.
+- The public About page stays removed. Model limits are on the privacy notice.
 - Dashboard charts have no date-range filter and no career-match trend. Risk and program-shift figures are counts.
 - Content-Security-Policy allows inline and `unsafe-eval` scripts because Livewire and Alpine need them.
 - On Windows, Docker bind-mounted `src/` makes the first PHP response slow. That is the filesystem, not a query problem. Do not turn on config, route, or view caches for day-to-day development.

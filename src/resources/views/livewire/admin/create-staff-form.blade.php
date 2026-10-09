@@ -1,7 +1,8 @@
 <div>
     @if ($show)
         <x-dialog title="Add user" close="closeForm" description="Students register themselves when their student number is on the eligible list. This form adds a staff account.">
-            <form wire:submit="save" class="space-y-4 px-5 py-5 sm:px-6">
+            <form wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
+                <x-loading-overlay target="save" label="Creating account…" />
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="staff-name" class="mb-1 block text-sm font-medium">Name</label>

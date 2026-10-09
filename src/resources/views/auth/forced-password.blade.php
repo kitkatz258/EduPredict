@@ -1,19 +1,18 @@
 <x-guest-layout>
-    <h1 class="mb-4 text-lg font-semibold text-brand-900">Set a new password</h1>
-    <p class="mb-4 text-sm text-gray-600">Your administrator created this account with a temporary password. Choose a new one before continuing.</p>
-    <form method="POST" action="{{ route('password.forced.update') }}">
+    <h1 class="text-lg font-semibold text-brand-900">Set a new password</h1>
+    <p class="mt-1 text-sm text-gray-600">Your administrator created this account with a temporary password. Choose a new one before continuing.</p>
+
+    <form method="POST" action="{{ route('password.forced.update') }}" class="mt-6 space-y-4" novalidate>
         @csrf
         <div>
-            <x-input-label for="password" value="New password" />
-            <x-text-input id="password" class="mt-1 block w-full" type="password" name="password" required />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <label for="password" class="mb-1 block text-sm font-medium text-gray-800">New password</label>
+            <x-password-input id="password" name="password" autocomplete="new-password" required :invalid="$errors->has('password')" />
+            @error('password') <p id="password-error" class="mt-1 text-sm text-red-700" role="alert">{{ $message }}</p> @enderror
         </div>
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" value="Confirm password" />
-            <x-text-input id="password_confirmation" class="mt-1 block w-full" type="password" name="password_confirmation" required />
+        <div>
+            <label for="password_confirmation" class="mb-1 block text-sm font-medium text-gray-800">Confirm password</label>
+            <x-password-input id="password_confirmation" name="password_confirmation" autocomplete="new-password" required />
         </div>
-        <div class="mt-4 flex justify-end">
-            <x-primary-button>Save password</x-primary-button>
-        </div>
+        <x-primary-button class="w-full py-2.5" icon="ri-lock-password-line">Save password</x-primary-button>
     </form>
 </x-guest-layout>

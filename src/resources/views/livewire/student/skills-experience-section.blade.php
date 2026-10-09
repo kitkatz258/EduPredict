@@ -138,7 +138,7 @@
     <section class="relative flex flex-col gap-3 rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <x-loading-overlay target="completeSection" label="Saving section…" />
         <p class="text-sm text-gray-600">When the list looks right, mark the section saved. An empty list is allowed.</p>
-        <button type="button" wire:click="completeSection" wire:loading.attr="disabled" wire:target="completeSection" class="inline-flex items-center justify-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">Save section &amp; continue<i class="ri-arrow-right-line" aria-hidden="true"></i></button>
+        <button type="button" wire:click="completeSection" wire:loading.attr="disabled" wire:target="completeSection" class="inline-flex items-center justify-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="completeSection" />Save section &amp; continue<i class="ri-arrow-right-line" wire:loading.remove wire:target="completeSection" aria-hidden="true"></i></button>
     </section>
 
     @if ($modal === 'skill')
