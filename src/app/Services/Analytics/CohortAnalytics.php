@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Services\Analytics;
 
 use App\Enums\UserRole;
+use App\Models\Department;
 use App\Models\Prediction;
 use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 /**
@@ -21,11 +23,29 @@ final class CohortAnalytics
     /**
      * @return array<string, mixed>
      */
-    public function forUser(User $user, ?int $yearLevel = null, ?int $programId = null): array
-    {
-        $students = $this->students($user, $yearLevel, $programId);
-        $rows = $this->latestRows($students);
-        $studentCount = (clone $students)->count();
+    public function forUser(
+        User $user,
+        ?int $yearLevel = null,
+        ?int $programId = null,
+        ?int $departmentId = null,
+        ?string $period = null,
+    ): array {
+        $scoped = $this->students($user, $yearLevel, $programId, $departmentId);
+        $rows = $this->latestRows($scoped);
+        $periodStart = $this->periodStart($period);
+        $periodApplied = $periodStart !== null;
+
+        if ($periodApplied) {
+            $rows = $rows
+                ->filter(fn (Prediction $row): bool => $row->created_at !== null && $row->created_at->greaterThanOrEqualTo($periodStart))
+                ->values();
+            $ids = $rows->pluck('student_id')->map(fn (mixed $id): int => (int) $id)->all();
+            $cohort = Student::query()->whereIn('students.id', $ids === [] ? [0] : $ids);
+        } else {
+            $cohort = $scoped;
+        }
+
+        $studentCount = (clone $cohort)->count();
 
         $risk = [
             'low' => $rows->where('dropout_risk', 'low')->count(),
@@ -40,6 +60,7 @@ final class CohortAnalytics
         ];
 
         $average = $rows->isEmpty() ? null : round((float) $rows->avg('employability_score'), 1);
+        $programRows = $this->programs($cohort, $rows);
 
         return [
             'students' => $studentCount,
@@ -49,12 +70,14 @@ final class CohortAnalytics
             'risk' => $risk,
             'program_shift' => $shift,
             'program_concern' => $shift['program_fit'] + $shift['mixed'],
-            'unreviewed_high' => $this->unreviewedHigh($students),
-            'assessments_this_year' => $this->assessmentsThisYear($students),
+            'unreviewed_high' => $this->unreviewedHigh($scoped),
+            'assessments_this_year' => $this->assessmentsThisYear($scoped),
             'employability_bands' => $this->bands($rows),
-            'year_levels' => $this->yearLevels($students, $rows),
+            'year_levels' => $this->yearLevels($cohort, $rows),
             'trend' => $this->trend($rows),
-            'programs' => $this->programs($students, $rows),
+            'programs' => $programRows,
+            'departments' => $this->departmentSummary($programRows),
+            'period_applied' => $periodApplied,
             'charts' => $this->charts($risk, $average, $rows),
         ];
     }
@@ -67,22 +90,66 @@ final class CohortAnalytics
         return Program::query()
             ->whereIn('id', $this->allowedProgramIds($user))
             ->orderBy('code')
+            ->get(['id', 'code', 'name', 'department_id']);
+    }
+
+    /**
+     * @return Collection<int, Department>
+     */
+    public function departmentsFor(User $user): Collection
+    {
+        return Department::query()
+            ->whereIn('id', $this->allowedDepartmentIds($user))
+            ->orderBy('name')
             ->get(['id', 'code', 'name']);
     }
 
-    private function students(User $user, ?int $yearLevel, ?int $programId): Builder
+    private function students(User $user, ?int $yearLevel, ?int $programId, ?int $departmentId = null): Builder
     {
         $query = Student::query()->aggregatableBy($user);
+        $allowedPrograms = $this->allowedProgramIds($user);
 
         if (in_array($yearLevel, [1, 2, 3, 4], true)) {
             $query->where('year_level', $yearLevel);
         }
 
-        if ($programId !== null && in_array($programId, $this->allowedProgramIds($user), true)) {
+        if ($departmentId !== null && in_array($departmentId, $this->allowedDepartmentIds($user), true)) {
+            $departmentPrograms = array_values(array_map(
+                'intval',
+                Program::query()->where('department_id', $departmentId)->whereIn('id', $allowedPrograms)->pluck('id')->all(),
+            ));
+            $query->whereIn('students.program_id', $departmentPrograms === [] ? [0] : $departmentPrograms);
+        }
+
+        if ($programId !== null && in_array($programId, $allowedPrograms, true)) {
             $query->where('students.program_id', $programId);
         }
 
         return $query;
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function allowedDepartmentIds(User $user): array
+    {
+        return array_values(array_unique(array_map(
+            'intval',
+            Program::query()
+                ->whereIn('id', $this->allowedProgramIds($user))
+                ->whereNotNull('department_id')
+                ->pluck('department_id')
+                ->all(),
+        )));
+    }
+
+    private function periodStart(?string $period): ?Carbon
+    {
+        return match ($period) {
+            'this_year' => now()->startOfYear(),
+            'last_12_months' => now()->copy()->subMonths(12)->startOfDay(),
+            default => null,
+        };
     }
 
     /**
@@ -274,9 +341,16 @@ final class CohortAnalytics
     {
         $programs = (clone $students)
             ->join('programs', 'programs.id', '=', 'students.program_id')
-            ->select('programs.id', 'programs.code', 'programs.name')
+            ->leftJoin('departments', 'departments.id', '=', 'programs.department_id')
+            ->select(
+                'programs.id',
+                'programs.code',
+                'programs.name',
+                'departments.id as department_id',
+                'departments.name as department_name',
+            )
             ->selectRaw('count(students.id) as student_count')
-            ->groupBy('programs.id', 'programs.code', 'programs.name')
+            ->groupBy('programs.id', 'programs.code', 'programs.name', 'departments.id', 'departments.name')
             ->orderBy('programs.code')
             ->get();
 
@@ -287,6 +361,8 @@ final class CohortAnalytics
                 'id' => (int) $program->id,
                 'code' => (string) $program->code,
                 'name' => (string) $program->name,
+                'department_id' => $program->department_id !== null ? (int) $program->department_id : null,
+                'department_name' => $program->department_name !== null ? (string) $program->department_name : null,
                 'students' => (int) $program->student_count,
                 'with_prediction' => $matched->count(),
                 'average_employability' => $matched->isEmpty() ? null : round((float) $matched->avg('employability_score'), 1),
@@ -297,6 +373,62 @@ final class CohortAnalytics
         }
 
         return $comparison;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $programs
+     * @return list<array<string, mixed>>
+     */
+    private function departmentSummary(array $programs): array
+    {
+        $groups = [];
+
+        foreach ($programs as $program) {
+            $key = (int) ($program['department_id'] ?? 0);
+            if (! isset($groups[$key])) {
+                $groups[$key] = [
+                    'id' => $key,
+                    'name' => $program['department_name'] ?? 'No department',
+                    'students' => 0,
+                    'with_prediction' => 0,
+                    'low' => 0,
+                    'moderate' => 0,
+                    'high' => 0,
+                    'average_sum' => 0.0,
+                    'average_weight' => 0,
+                ];
+            }
+
+            $groups[$key]['students'] += (int) $program['students'];
+            $groups[$key]['with_prediction'] += (int) $program['with_prediction'];
+            $groups[$key]['low'] += (int) $program['low'];
+            $groups[$key]['moderate'] += (int) $program['moderate'];
+            $groups[$key]['high'] += (int) $program['high'];
+
+            if ($program['average_employability'] !== null && (int) $program['with_prediction'] > 0) {
+                $groups[$key]['average_sum'] += (float) $program['average_employability'] * (int) $program['with_prediction'];
+                $groups[$key]['average_weight'] += (int) $program['with_prediction'];
+            }
+        }
+
+        $summary = [];
+        foreach ($groups as $group) {
+            $summary[] = [
+                'id' => $group['id'],
+                'name' => $group['name'],
+                'students' => $group['students'],
+                'average_employability' => $group['average_weight'] === 0
+                    ? null
+                    : round($group['average_sum'] / $group['average_weight'], 1),
+                'low' => $group['low'],
+                'moderate' => $group['moderate'],
+                'high' => $group['high'],
+            ];
+        }
+
+        usort($summary, fn (array $left, array $right): int => strcmp((string) $left['name'], (string) $right['name']));
+
+        return $summary;
     }
 
     /**

@@ -9,10 +9,13 @@ use App\Models\Program;
 use App\Models\User;
 use App\Services\Admin\StaffAccountService;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class CreateStaffForm extends Component
 {
+    public bool $show = false;
+
     public string $name = '';
 
     public string $email = '';
@@ -26,6 +29,21 @@ class CreateStaffForm extends Component
     public ?int $program_id = null;
 
     public ?string $temporaryPassword = null;
+
+    #[On('open-staff-form')]
+    public function startCreate(): void
+    {
+        $this->authorize('create', User::class);
+        $this->reset(['name', 'email', 'college_id', 'department_id', 'program_id', 'temporaryPassword']);
+        $this->role = UserRole::DepartmentHead->value;
+        $this->resetValidation();
+        $this->show = true;
+    }
+
+    public function closeForm(): void
+    {
+        $this->show = false;
+    }
 
     public function mount(): void
     {
@@ -72,6 +90,8 @@ class CreateStaffForm extends Component
         $this->temporaryPassword = $result['temporary_password'];
         $this->reset(['name', 'email', 'college_id', 'department_id', 'program_id']);
         $this->role = UserRole::DepartmentHead->value;
+        $this->show = true;
+        $this->dispatch('users-changed');
         session()->flash('success', 'Staff account created. Share the temporary password securely.');
     }
 

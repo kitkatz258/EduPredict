@@ -51,6 +51,56 @@ class StaffAccountService
     }
 
     /**
+     * Updates an account without removing its history.
+     * Students, legacy faculty, and the signed-in administrator keep their current role.
+     *
+     * @param  array{name: string, email: string, role?: string, college_id?: int|null, department_id?: int|null, program_id?: int|null, reset_password?: bool}  $data
+     * @return array{user: User, temporary_password: ?string}
+     */
+    public function update(User $user, array $data, User $actor, ?string $ip = null): array
+    {
+        $locked = $user->is($actor) || $user->role === UserRole::Student || $user->role === UserRole::Faculty;
+        $payload = [
+            'name' => $data['name'],
+            'email' => $data['email'],
+        ];
+
+        if (! $locked) {
+            $role = UserRole::from((string) ($data['role'] ?? ''));
+
+            if (! in_array($role, UserRole::staffAssignable(), true)) {
+                abort(422, 'This role is no longer assignable.');
+            }
+
+            $payload['role'] = $role;
+            $payload = [...$payload, ...$this->scopeFor($role, $data)];
+        }
+
+        $temporary = null;
+        if (! empty($data['reset_password']) && $user->role !== UserRole::Student) {
+            $temporary = Str::password(12);
+            $payload['password'] = $temporary;
+            $payload['must_change_password'] = true;
+        }
+
+        $user->update($payload);
+
+        AuditLog::query()->create([
+            'user_id' => $actor->id,
+            'action' => 'account_updated',
+            'subject_type' => User::class,
+            'subject_id' => $user->id,
+            'meta' => [
+                'role' => $user->role->value,
+                'password_reset' => $temporary !== null,
+            ],
+            'ip' => $ip,
+        ]);
+
+        return ['user' => $user->fresh(), 'temporary_password' => $temporary];
+    }
+
+    /**
      * Only the fields that define each role's scope are stored.
      *
      * @param  array<string, mixed>  $data

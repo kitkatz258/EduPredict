@@ -8,10 +8,13 @@ use App\Models\College;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class CollegeForm extends Component
 {
+    public bool $show = false;
+
     public ?int $collegeId = null;
 
     public string $name = '';
@@ -25,7 +28,31 @@ class CollegeForm extends Component
         $this->authorize('create', College::class);
         if ($collegeId) {
             $this->loadCollege($collegeId);
+            $this->show = true;
         }
+    }
+
+    #[On('add-college')]
+    public function startCreate(): void
+    {
+        $this->authorize('create', College::class);
+        $this->reset(['collegeId', 'name', 'code', 'statusMessage']);
+        $this->resetValidation();
+        $this->show = true;
+    }
+
+    #[On('edit-college')]
+    public function startEdit(int $collegeId): void
+    {
+        $this->resetValidation();
+        $this->statusMessage = '';
+        $this->loadCollege($collegeId);
+        $this->show = true;
+    }
+
+    public function closeForm(): void
+    {
+        $this->show = false;
     }
 
     public function save(AuditLogger $audit): void
@@ -52,7 +79,9 @@ class CollegeForm extends Component
             $this->statusMessage = 'College added.';
         }
 
+        $this->show = true;
         $audit->record('college_saved', $college, ['code' => $college->code]);
+        $this->dispatch('catalog-changed');
     }
 
     public function render(): View

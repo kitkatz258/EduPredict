@@ -6,14 +6,55 @@ use App\Models\QuestionnaireItem;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 
 class QuestionnaireItemsTable extends BaseTable
 {
     public string $sortField = 'sort_order';
 
+    public string $sectionFilter = '';
+
+    public string $versionFilter = '';
+
+    public string $activeFilter = '';
+
+    public string $draftFilter = '';
+
     public function mount(): void
     {
         $this->authorize('viewAny', QuestionnaireItem::class);
+    }
+
+    public function updatingSectionFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingVersionFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingActiveFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingDraftFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function editItem(int $itemId): void
+    {
+        $item = QuestionnaireItem::query()->findOrFail($itemId);
+        $this->authorize('update', $item);
+        $this->dispatch('edit-questionnaire-item', itemId: $itemId);
+    }
+
+    #[On('catalog-changed')]
+    public function refreshCatalog(): void
+    {
     }
 
     public function toggleActive(int $itemId, AuditLogger $audit): void
@@ -45,6 +86,34 @@ class QuestionnaireItemsTable extends BaseTable
         return QuestionnaireItem::query();
     }
 
+    protected function applyFilters(Builder $query): Builder
+    {
+        $sections = array_keys(config('edupredict.questionnaire.sections', []));
+        $versions = array_keys(config('edupredict.questionnaire.versions', []));
+
+        if (in_array($this->sectionFilter, $sections, true)) {
+            $query->where('section', $this->sectionFilter);
+        }
+
+        if (in_array($this->versionFilter, $versions, true)) {
+            $query->where('definition_version', $this->versionFilter);
+        }
+
+        if ($this->activeFilter === 'active') {
+            $query->where('is_active', true);
+        } elseif ($this->activeFilter === 'inactive') {
+            $query->where('is_active', false);
+        }
+
+        if ($this->draftFilter === 'draft') {
+            $query->where('is_draft', true);
+        } elseif ($this->draftFilter === 'published') {
+            $query->where('is_draft', false);
+        }
+
+        return $query;
+    }
+
     protected function columns(): array
     {
         return [
@@ -66,12 +135,16 @@ class QuestionnaireItemsTable extends BaseTable
 
     protected function emptyMessage(): string
     {
-        return 'No questionnaire items yet.';
+        return 'No questionnaire items match the current search or filters.';
     }
 
     public function render(): View
     {
-        return view('livewire.tables.questionnaire-items-table', $this->tableViewData());
+        return view('livewire.tables.questionnaire-items-table', [
+            ...$this->tableViewData(),
+            'sections' => config('edupredict.questionnaire.sections', []),
+            'versions' => config('edupredict.questionnaire.versions', []),
+        ]);
     }
 
     private function locked(QuestionnaireItem $item): bool

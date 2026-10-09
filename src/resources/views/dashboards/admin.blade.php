@@ -7,11 +7,8 @@
     </x-slot>
 
     <div class="space-y-6">
-        <p class="text-sm text-gray-600">Institution totals use each student's latest estimate. The chart section is aggregate; the list below names students in your scope.</p>
+        <p class="text-sm text-gray-600">Institution totals use each student's latest estimate. This dashboard stays aggregate. Eligible students are managed on their own page.</p>
         <livewire:analytics.dashboard-analytics />
-        <section class="space-y-3" aria-labelledby="institution-students-heading">
-            <h3 id="institution-students-heading" class="text-sm font-semibold text-brand-900">Students</h3>
-            <livewire:tables.scoped-students-table />
-        </section>
+        {{-- Student rows stay off this dashboard. Department heads open tables.scoped-students-table from Students. Eligible students have their own admin page. --}}
     </div>
 </x-app-layout>

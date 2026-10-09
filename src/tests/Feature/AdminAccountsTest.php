@@ -73,6 +73,7 @@ class AdminAccountsTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(CreateStaffForm::class)
+            ->call('startCreate')
             ->assertDontSee('<option value="faculty"', false)
             ->set('name', 'Faculty Person')
             ->set('email', 'faculty@staff.test')

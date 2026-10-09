@@ -20,6 +20,8 @@ class DeletionRequestsTable extends BaseTable
 
     public string $adminNote = '';
 
+    public ?int $reviewingId = null;
+
     public function mount(): void
     {
         $this->authorize('viewAny', AccountDeletionRequest::class);
@@ -28,6 +30,32 @@ class DeletionRequestsTable extends BaseTable
     public function updatingStatusFilter(): void
     {
         $this->resetPage();
+    }
+
+    public function setStatus(string $status): void
+    {
+        if (! in_array($status, ['pending', 'approved', 'rejected', ''], true)) {
+            return;
+        }
+
+        $this->statusFilter = $status;
+        $this->resetPage();
+    }
+
+    public function openReview(int $requestId): void
+    {
+        $request = AccountDeletionRequest::query()->findOrFail($requestId);
+        $this->authorize('view', $request);
+        $this->reviewingId = $request->id;
+        $this->adminNote = (string) ($request->admin_note ?? '');
+        $this->resetValidation();
+    }
+
+    public function closeReview(): void
+    {
+        $this->reviewingId = null;
+        $this->adminNote = '';
+        $this->resetValidation();
     }
 
     public function approve(int $requestId, StaffAccountService $accounts, AuditLogger $audit): void
@@ -93,7 +121,12 @@ class DeletionRequestsTable extends BaseTable
 
     public function render(): View
     {
-        return view('livewire.tables.deletion-requests-table', $this->tableViewData());
+        return view('livewire.tables.deletion-requests-table', [
+            ...$this->tableViewData(),
+            'reviewing' => $this->reviewingId
+                ? AccountDeletionRequest::query()->with('user')->find($this->reviewingId)
+                : null,
+        ]);
     }
 
     private function decide(int $requestId, string $status, StaffAccountService $accounts, AuditLogger $audit): void
@@ -125,6 +158,9 @@ class DeletionRequestsTable extends BaseTable
         ]);
 
         $this->adminNote = '';
+        if ($this->reviewingId === $requestId) {
+            $this->reviewingId = null;
+        }
         $this->toast($status === 'approved'
             ? 'Account deactivated. Stored predictions were kept.'
             : 'Deletion request rejected. The account stays active.');

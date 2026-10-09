@@ -128,7 +128,10 @@ class DashboardAnalyticsTest extends TestCase
             ->assertOk()
             ->assertSee('Average employability is 72.3')
             ->assertSee('PROG-C')
-            ->assertSee('S-OUT');
+            ->assertDontSee('S-OUT')
+            ->assertDontSee('S-HIGH')
+            ->assertDontSee('S-LOW')
+            ->assertDontSee('S-MOD');
 
         $this->actingAs($head)
             ->get(route('department.students'))

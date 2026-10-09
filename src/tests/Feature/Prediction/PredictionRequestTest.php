@@ -212,7 +212,7 @@ class PredictionRequestTest extends TestCase
         $this->actingAs($dean)->get(route('students.show', $insider))->assertForbidden();
         Livewire::actingAs($dean)->test(PredictionHistoryTable::class, ['studentId' => $insider->id])->assertForbidden();
 
-        $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk()->assertSee('HIST-10001')->assertSee('HIST-20002');
+        $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk()->assertDontSee('HIST-10001')->assertDontSee('HIST-20002');
         $this->actingAs($admin)->get(route('students.show', $outsider))->assertOk()->assertDontSee('above_70k');
 
         $this->actingAs($outsider->user)

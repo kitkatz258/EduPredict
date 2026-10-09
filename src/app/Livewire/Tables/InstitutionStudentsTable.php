@@ -3,15 +3,37 @@
 namespace App\Livewire\Tables;
 
 use App\Models\InstitutionStudent;
+use App\Models\Program;
 use Illuminate\Database\Eloquent\Builder;
 
 class InstitutionStudentsTable extends BaseTable
 {
     public string $sortField = 'student_number';
 
+    public string $programFilter = '';
+
+    public string $yearFilter = '';
+
+    public string $registeredFilter = '';
+
     public function mount(): void
     {
         $this->authorize('viewAny', InstitutionStudent::class);
+    }
+
+    public function updatingProgramFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingYearFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingRegisteredFilter(): void
+    {
+        $this->resetPage();
     }
 
     protected function baseQuery(): Builder
@@ -19,6 +41,25 @@ class InstitutionStudentsTable extends BaseTable
         $this->authorize('viewAny', InstitutionStudent::class);
 
         return InstitutionStudent::query()->with('program');
+    }
+
+    protected function applyFilters(Builder $query): Builder
+    {
+        if (ctype_digit($this->programFilter)) {
+            $query->where('program_id', (int) $this->programFilter);
+        }
+
+        if (in_array($this->yearFilter, ['1', '2', '3', '4'], true)) {
+            $query->where('year_level', (int) $this->yearFilter);
+        }
+
+        if ($this->registeredFilter === 'yes') {
+            $query->where('is_registered', true);
+        } elseif ($this->registeredFilter === 'no') {
+            $query->where('is_registered', false);
+        }
+
+        return $query;
     }
 
     protected function columns(): array
@@ -39,6 +80,9 @@ class InstitutionStudentsTable extends BaseTable
 
     public function render(): \Illuminate\View\View
     {
-        return view('livewire.tables.institution-students-table', $this->tableViewData());
+        return view('livewire.tables.institution-students-table', [
+            ...$this->tableViewData(),
+            'programs' => Program::query()->orderBy('code')->get(['id', 'code']),
+        ]);
     }
 }

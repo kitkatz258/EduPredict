@@ -74,7 +74,7 @@ class AuditLogsTable extends BaseTable
 
     protected function emptyMessage(): string
     {
-        return 'No audit events match the current search.';
+        return 'No activity matches the current search.';
     }
 
     public function render(): View

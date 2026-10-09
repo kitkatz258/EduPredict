@@ -40,6 +40,7 @@ class AdminPageController extends Controller
 
         return view('admin.colleges', [
             'collegeId' => $request->integer('college') ?: null,
+            'departmentId' => $request->integer('department') ?: null,
             'programId' => $request->integer('program') ?: null,
         ]);
     }

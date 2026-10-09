@@ -1,28 +1,49 @@
 <div class="space-y-6">
     <div class="flex flex-col gap-3 rounded-2xl border border-brand-200 bg-white p-4 shadow-sm lg:flex-row lg:items-end lg:justify-between">
-        <p class="text-sm text-gray-600">Totals use each student's latest estimate. Earlier requests stay in history and are not averaged in.</p>
-        <div class="flex flex-wrap items-center gap-3">
-            <div>
-                <label for="analytics-year-{{ $this->getId() }}" class="mr-2 text-sm text-gray-600">Year</label>
-                <select id="analytics-year-{{ $this->getId() }}" wire:model.live="yearLevel" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
-                    <option value="">All years</option>
-                    @foreach ([1, 2, 3, 4] as $year)
-                        <option value="{{ $year }}">Year {{ $year }}</option>
-                    @endforeach
-                </select>
-            </div>
+        <p class="text-sm text-gray-600">Totals use each student's latest estimate. Earlier requests stay in history and are not averaged in.@if ($stats['period_applied']) This period includes students whose latest estimate falls in the selected window.@endif</p>
+        <div class="flex flex-wrap items-end gap-3">
+            @if ($departmentOptions->count() > 1)
+                <div>
+                    <label for="analytics-department-{{ $this->getId() }}" class="mb-1 block text-sm text-gray-600">Department</label>
+                    <select id="analytics-department-{{ $this->getId() }}" wire:model.live="departmentId" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
+                        <option value="">All departments</option>
+                        @foreach ($departmentOptions as $department)
+                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
             @if ($programs->count() > 1)
                 <div>
-                    <label for="analytics-program-{{ $this->getId() }}" class="mr-2 text-sm text-gray-600">Program</label>
+                    <label for="analytics-program-{{ $this->getId() }}" class="mb-1 block text-sm text-gray-600">Program</label>
                     <select id="analytics-program-{{ $this->getId() }}" wire:model.live="programId" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
                         <option value="">All programs</option>
                         @foreach ($programs as $program)
+                            @continue($departmentId !== '' && (string) $program->department_id !== $departmentId)
                             <option value="{{ $program->id }}">{{ $program->code }}</option>
                         @endforeach
                     </select>
                 </div>
             @endif
-            <p wire:loading class="text-sm text-gray-500">Updating totals…</p>
+            <div>
+                <label for="analytics-year-{{ $this->getId() }}" class="mb-1 block text-sm text-gray-600">Year</label>
+                <select id="analytics-year-{{ $this->getId() }}" wire:model.live="yearLevel" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
+                    <option value="">All years</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
+            </div>
+            <div>
+                <label for="analytics-period-{{ $this->getId() }}" class="mb-1 block text-sm text-gray-600">Period</label>
+                <select id="analytics-period-{{ $this->getId() }}" wire:model.live="period" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
+                    <option value="">All periods</option>
+                    <option value="this_year">This year</option>
+                    <option value="last_12_months">Last 12 months</option>
+                </select>
+            </div>
+            <p wire:loading class="pb-2 text-sm text-gray-500">Updating totals…</p>
         </div>
     </div>
 
@@ -32,7 +53,7 @@
 
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <article class="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Total students</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ $stats['period_applied'] ? 'Students in period' : 'Total students' }}</p>
             <p class="mt-2 text-3xl font-semibold text-brand-900">{{ $stats['students'] }}</p>
             <p class="sr-only">Total students: {{ $stats['students'] }}</p>
         </article>
@@ -242,6 +263,39 @@
             </div>
         </section>
     </div>
+
+    @if (count($stats['departments']) > 1)
+        <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="department-comparison-heading">
+            <h3 id="department-comparison-heading" class="text-sm font-semibold text-brand-900">Department comparison</h3>
+            <p class="mt-1 text-xs text-gray-500">Counts only. This table has no student names or records.</p>
+            <div class="mt-3 overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500">
+                            <th class="py-2 pr-3 font-medium">Department</th>
+                            <th class="py-2 pr-3 font-medium">Students</th>
+                            <th class="py-2 pr-3 font-medium">Average</th>
+                            <th class="py-2 pr-3 font-medium">Low</th>
+                            <th class="py-2 pr-3 font-medium">Moderate</th>
+                            <th class="py-2 font-medium">High</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($stats['departments'] as $department)
+                            <tr class="border-t border-brand-200">
+                                <td class="py-2 pr-3 font-medium text-brand-900">{{ $department['name'] }}</td>
+                                <td class="py-2 pr-3">{{ $department['students'] }}</td>
+                                <td class="py-2 pr-3">{{ $department['average_employability'] === null ? '—' : number_format((float) $department['average_employability'], 1) }}</td>
+                                <td class="py-2 pr-3">{{ $department['low'] }}</td>
+                                <td class="py-2 pr-3">{{ $department['moderate'] }}</td>
+                                <td class="py-2">{{ $department['high'] }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    @endif
 
     <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="program-comparison-heading">
         <h3 id="program-comparison-heading" class="text-sm font-semibold text-brand-900">Program comparison</h3>

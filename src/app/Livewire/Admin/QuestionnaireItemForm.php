@@ -6,10 +6,15 @@ use App\Http\Requests\Admin\QuestionnaireItemRequest;
 use App\Models\QuestionnaireItem;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class QuestionnaireItemForm extends Component
 {
+    public bool $show = false;
+
+    public bool $locked = false;
+
     public ?int $itemId = null;
 
     public string $section = 'academic_behavior';
@@ -36,7 +41,37 @@ class QuestionnaireItemForm extends Component
         $this->definition_version = (string) config('edupredict.questionnaire.current_version', 'draft-v1');
         if ($itemId) {
             $this->loadItem($itemId);
+            $this->show = true;
         }
+    }
+
+    #[On('add-questionnaire-item')]
+    public function startCreate(): void
+    {
+        $this->authorize('create', QuestionnaireItem::class);
+        $this->reset(['itemId', 'text', 'reverse_scored', 'sort_order', 'statusMessage']);
+        $this->section = 'academic_behavior';
+        $this->construct = 'study_habits';
+        $this->definition_version = (string) config('edupredict.questionnaire.current_version', 'draft-v1');
+        $this->is_active = true;
+        $this->is_draft = true;
+        $this->locked = false;
+        $this->resetValidation();
+        $this->show = true;
+    }
+
+    #[On('edit-questionnaire-item')]
+    public function startEdit(int $itemId): void
+    {
+        $this->resetValidation();
+        $this->statusMessage = '';
+        $this->loadItem($itemId);
+        $this->show = true;
+    }
+
+    public function closeForm(): void
+    {
+        $this->show = false;
     }
 
     public function save(AuditLogger $audit): void
@@ -76,10 +111,13 @@ class QuestionnaireItemForm extends Component
             $this->statusMessage = 'Questionnaire item added.';
         }
 
+        $this->show = true;
+        $this->locked = $item->answers()->exists();
         $audit->record('questionnaire_item_saved', $item, [
             'construct' => $item->construct,
             'is_active' => $item->is_active,
         ]);
+        $this->dispatch('catalog-changed');
     }
 
     public function render(): View
@@ -106,5 +144,6 @@ class QuestionnaireItemForm extends Component
         $this->is_active = $item->is_active;
         $this->is_draft = $item->is_draft;
         $this->sort_order = $item->sort_order;
+        $this->locked = $item->answers()->exists();
     }
 }

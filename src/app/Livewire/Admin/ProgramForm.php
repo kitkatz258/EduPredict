@@ -10,10 +10,13 @@ use App\Models\Program;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class ProgramForm extends Component
 {
+    public bool $show = false;
+
     public ?int $programId = null;
 
     public ?int $collegeId = null;
@@ -31,7 +34,31 @@ class ProgramForm extends Component
         $this->authorize('create', Program::class);
         if ($programId) {
             $this->loadProgram($programId);
+            $this->show = true;
         }
+    }
+
+    #[On('add-program')]
+    public function startCreate(): void
+    {
+        $this->authorize('create', Program::class);
+        $this->reset(['programId', 'collegeId', 'departmentId', 'name', 'code', 'statusMessage']);
+        $this->resetValidation();
+        $this->show = true;
+    }
+
+    #[On('edit-program')]
+    public function startEdit(int $programId): void
+    {
+        $this->resetValidation();
+        $this->statusMessage = '';
+        $this->loadProgram($programId);
+        $this->show = true;
+    }
+
+    public function closeForm(): void
+    {
+        $this->show = false;
     }
 
     public function save(AuditLogger $audit): void
@@ -69,7 +96,9 @@ class ProgramForm extends Component
             $this->statusMessage = 'Program added.';
         }
 
+        $this->show = true;
         $audit->record('program_saved', $program, ['code' => $program->code]);
+        $this->dispatch('catalog-changed');
     }
 
     public function render(): View

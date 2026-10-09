@@ -9,10 +9,15 @@ use App\Services\Audit\AuditLogger;
 use App\Support\CommaList;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class PsocOccupationForm extends Component
 {
+    public bool $show = false;
+
+    public bool $readOnly = false;
+
     public ?int $occupationId = null;
 
     public string $psocCode = '';
@@ -34,11 +39,54 @@ class PsocOccupationForm extends Component
         $this->authorize('create', PsocOccupation::class);
         if ($occupationId) {
             $this->loadOccupation($occupationId);
+            $this->show = true;
         }
+    }
+
+    #[On('add-occupation')]
+    public function startCreate(): void
+    {
+        $this->authorize('create', PsocOccupation::class);
+        $this->reset(['occupationId', 'psocCode', 'title', 'majorGroup', 'description', 'skillTags', 'programCodes', 'statusMessage']);
+        $this->readOnly = false;
+        $this->resetValidation();
+        $this->show = true;
+    }
+
+    #[On('edit-occupation')]
+    public function startEdit(int $occupationId): void
+    {
+        $this->resetValidation();
+        $this->statusMessage = '';
+        $this->readOnly = false;
+        $this->loadOccupation($occupationId);
+        $this->show = true;
+    }
+
+    #[On('view-occupation')]
+    public function startView(int $occupationId): void
+    {
+        $occupation = PsocOccupation::query()->findOrFail($occupationId);
+        $this->authorize('view', $occupation);
+        $this->resetValidation();
+        $this->statusMessage = '';
+        $this->readOnly = true;
+        $this->loadOccupation($occupationId);
+        $this->show = true;
+    }
+
+    public function closeForm(): void
+    {
+        $this->show = false;
+        $this->readOnly = false;
     }
 
     public function save(AuditLogger $audit): void
     {
+        if ($this->readOnly) {
+            return;
+        }
+
         $this->authorize('create', PsocOccupation::class);
         $validated = $this->validate([
             'psocCode' => ['required', 'string', 'max:32', Rule::unique('psoc_occupations', 'psoc_code')->ignore($this->occupationId)],
@@ -69,7 +117,9 @@ class PsocOccupationForm extends Component
             $this->statusMessage = 'Occupation added.';
         }
 
+        $this->show = true;
         $audit->record('psoc_saved', $occupation, ['psoc_code' => $occupation->psoc_code]);
+        $this->dispatch('catalog-changed');
     }
 
     public function render(): View

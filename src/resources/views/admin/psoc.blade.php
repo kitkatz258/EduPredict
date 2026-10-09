@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-lg font-semibold text-brand-900">PSOC occupations</h2>
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Admin console</p>
+            <h2 class="text-lg font-semibold text-brand-900">PSOC occupations</h2>
+        </div>
     </x-slot>
 
     <div class="space-y-6">
