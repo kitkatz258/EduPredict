@@ -38,22 +38,33 @@
         </div>
     @endif
 
-    <div class="inline-flex flex-wrap gap-1 rounded-xl bg-brand-50 p-1 ring-1 ring-brand-200" role="tablist" aria-label="How to add grades">
-        @foreach ($modes as $key => [$icon, $label])
-            <button
-                type="button"
-                role="tab"
-                id="grade-mode-{{ $key }}"
-                aria-selected="{{ $mode === $key ? 'true' : 'false' }}"
-                aria-controls="grade-mode-panel"
-                wire:click="setMode('{{ $key }}')"
-                wire:loading.attr="disabled"
-                wire:target="setMode"
-                class="{{ $mode === $key ? 'bg-white text-brand-900 shadow-sm ring-1 ring-brand-200' : 'text-gray-700 hover:text-brand-900' }} inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium"
-            >
-                <i class="{{ $icon }}" aria-hidden="true"></i>{{ $label }}
-            </button>
-        @endforeach
+    <div class="relative inline-flex max-w-full rounded-xl bg-brand-50 p-1 ring-1 ring-brand-200" x-data="segmentedTrack()">
+        <div x-ref="track" class="relative inline-flex max-w-full flex-wrap gap-1" role="tablist" aria-label="How to add grades">
+            <span
+                x-ref="indicator"
+                aria-hidden="true"
+                class="segment-indicator pointer-events-none absolute left-0 top-0 rounded-lg bg-white shadow-sm ring-1 ring-brand-200 motion-reduce:transition-none"
+                x-bind:class="ready ? 'opacity-100' : 'opacity-0'"
+                x-bind:style="`width: ${width}px; height: ${height}px; transform: translate(${left}px, ${top}px);`"
+            ></span>
+            @foreach ($modes as $key => [$icon, $label])
+                <button
+                    type="button"
+                    role="tab"
+                    id="grade-mode-{{ $key }}"
+                    aria-selected="{{ $mode === $key ? 'true' : 'false' }}"
+                    aria-controls="grade-mode-panel"
+                    wire:click="setMode('{{ $key }}')"
+                    wire:loading.attr="disabled"
+                    wire:target="setMode"
+                    x-on:click="select($el)"
+                    class="{{ $mode === $key ? 'bg-white text-brand-900 shadow-sm ring-1 ring-brand-200' : 'text-gray-700 hover:text-brand-900' }} relative z-10 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium"
+                    x-bind:class="ready ? 'bg-transparent shadow-none ring-transparent' : ''"
+                >
+                    <i class="{{ $icon }}" aria-hidden="true"></i>{{ $label }}
+                </button>
+            @endforeach
+        </div>
     </div>
 
     <div id="grade-mode-panel" role="tabpanel" aria-labelledby="grade-mode-{{ $mode }}" class="space-y-5">

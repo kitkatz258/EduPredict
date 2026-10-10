@@ -30,7 +30,7 @@ class AuditLogsTable extends BaseTable
     {
         $this->authorize('viewAny', AuditLog::class);
 
-        return AuditLog::query()->with('user');
+        return AuditLog::query()->with(['user', 'subject']);
     }
 
     protected function applyFilters(Builder $query): Builder
@@ -61,9 +61,9 @@ class AuditLogsTable extends BaseTable
     protected function columns(): array
     {
         return [
-            ['key' => 'created_at', 'label' => 'When', 'sortable' => true],
+            ['key' => 'created_at', 'label' => 'Date & time', 'sortable' => true],
             ['key' => 'action', 'label' => 'Action', 'sortable' => true],
-            ['key' => 'ip', 'label' => 'IP', 'sortable' => true],
+            ['key' => 'ip', 'label' => 'IP address', 'sortable' => true],
         ];
     }
 

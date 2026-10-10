@@ -40,9 +40,9 @@
                             <td class="px-4 py-3">{{ ucfirst($row->min_risk_level) }}</td>
                             <td class="px-4 py-3">{{ \App\Support\CommaList::display($row->targets_factor) }}</td>
                             <td class="px-4 py-3">
-                                <div class="flex flex-wrap gap-3">
-                                    <button type="button" wire:click="viewIntervention({{ $row->id }})" class="font-medium text-brand-900 underline">View</button>
-                                    <button type="button" wire:click="editIntervention({{ $row->id }})" class="font-medium text-brand-900 underline">Edit</button>
+                                <div class="flex flex-wrap gap-2">
+                                    <x-table-action icon="ri-eye-line" wire:click="viewIntervention({{ $row->id }})">View</x-table-action>
+                                    <x-table-action icon="ri-pencil-line" wire:click="editIntervention({{ $row->id }})">Edit</x-table-action>
                                 </div>
                             </td>
                         </tr>

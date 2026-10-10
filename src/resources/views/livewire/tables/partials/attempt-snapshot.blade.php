@@ -252,6 +252,6 @@
         <x-model-disclosure :version="$prediction->model_version" />
     </div>
     <div class="flex justify-end border-t border-brand-200 px-5 py-3 sm:px-6">
-        <button type="button" wire:click="closeView" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Close</button>
+        <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Close</button>
     </div>
 </x-dialog>

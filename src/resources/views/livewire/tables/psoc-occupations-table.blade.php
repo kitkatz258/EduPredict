@@ -38,9 +38,9 @@
                             <td class="px-4 py-3">{{ $row->title }}</td>
                             <td class="px-4 py-3">{{ $row->major_group }}</td>
                             <td class="px-4 py-3">
-                                <div class="flex flex-wrap gap-3">
-                                    <button type="button" wire:click="viewOccupation({{ $row->id }})" class="font-medium text-brand-900 underline">View</button>
-                                    <button type="button" wire:click="editOccupation({{ $row->id }})" class="font-medium text-brand-900 underline">Edit</button>
+                                <div class="flex flex-wrap gap-2">
+                                    <x-table-action icon="ri-eye-line" wire:click="viewOccupation({{ $row->id }})">View</x-table-action>
+                                    <x-table-action icon="ri-pencil-line" wire:click="editOccupation({{ $row->id }})">Edit</x-table-action>
                                 </div>
                             </td>
                         </tr>

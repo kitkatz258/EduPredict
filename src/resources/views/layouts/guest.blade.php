@@ -22,6 +22,7 @@
             <a href="{{ route('privacy') }}" class="font-medium text-white underline underline-offset-2">Privacy notice</a>
         </p>
     </div>
+    @include('layouts.partials.segmented-track-script')
     @livewireScripts
 </body>
 </html>

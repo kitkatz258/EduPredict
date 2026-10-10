@@ -74,13 +74,20 @@ class QuestionnaireItemForm extends Component
         $this->show = false;
     }
 
+    public function updatedSection(): void
+    {
+        $this->syncCategory();
+    }
+
     public function save(AuditLogger $audit): void
     {
         $this->authorize('create', QuestionnaireItem::class);
-        $validated = $this->validate(QuestionnaireItemRequest::fieldRules());
+        $validated = $this->validate(QuestionnaireItemRequest::fieldRules(), [], [
+            'construct' => 'category',
+        ]);
         $sectionConstructs = config('edupredict.questionnaire.sections.'.$validated['section'].'.constructs', []);
         if (! in_array($validated['construct'], $sectionConstructs, true)) {
-            $this->addError('construct', 'Choose a construct configured for this questionnaire section.');
+            $this->addError('construct', 'Choose a category configured for this questionnaire section.');
 
             return;
         }
@@ -125,10 +132,50 @@ class QuestionnaireItemForm extends Component
         $this->authorize('create', QuestionnaireItem::class);
 
         return view('livewire.admin.questionnaire-item-form', [
-            'constructs' => config('edupredict.questionnaire.constructs', []),
+            'categories' => $this->categoryOptions(),
             'sections' => config('edupredict.questionnaire.sections', []),
             'versions' => config('edupredict.questionnaire.versions', []),
         ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function categoryOptions(): array
+    {
+        $options = $this->categoriesFor($this->section);
+        if ($this->construct !== '' && ! array_key_exists($this->construct, $options)) {
+            $known = config('edupredict.questionnaire.constructs.'.$this->construct);
+            $options = [$this->construct => is_string($known) && $known !== '' ? $known : $this->construct] + $options;
+        }
+
+        return $options;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function categoriesFor(string $section): array
+    {
+        $allowed = config('edupredict.questionnaire.sections.'.$section.'.constructs', []);
+        $labels = config('edupredict.questionnaire.constructs', []);
+        $options = [];
+        foreach ($allowed as $key) {
+            if (! is_string($key) || ! isset($labels[$key]) || ! is_string($labels[$key])) {
+                continue;
+            }
+            $options[$key] = $labels[$key];
+        }
+
+        return $options;
+    }
+
+    private function syncCategory(): void
+    {
+        $allowed = $this->categoriesFor($this->section);
+        if (! array_key_exists($this->construct, $allowed)) {
+            $this->construct = (string) (array_key_first($allowed) ?? '');
+        }
     }
 
     private function loadItem(int $itemId): void

@@ -141,7 +141,7 @@
                 <p class="text-xs text-gray-500">Broad occupational categories, not job offers. Verify details against the official PSA PSOC.</p>
             </div>
             <div class="flex justify-end border-t border-brand-200 px-5 py-3 sm:px-6">
-                <button type="button" wire:click="closeDetails" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Close</button>
+                <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Close</button>
             </div>
         </x-dialog>
     @endif

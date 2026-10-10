@@ -2,6 +2,21 @@ import Swal from 'sweetalert2';
 
 const brand = '#1B5E20';
 
+function motionOptions() {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+        return {
+            showClass: { popup: 'swal2-noanimation', backdrop: 'swal2-noanimation', icon: 'swal2-noanimation' },
+            hideClass: { popup: 'swal2-noanimation', backdrop: 'swal2-noanimation', icon: 'swal2-noanimation' },
+        };
+    }
+
+    return {
+        showClass: { popup: 'ed-pop-in', backdrop: 'ed-pop-in' },
+        hideClass: { popup: 'ed-pop-out', backdrop: 'ed-pop-out' },
+    };
+}
+
 const toastMixin = Swal.mixin({
     toast: true,
     position: 'top-end',
@@ -24,6 +39,7 @@ export function toast(type, message) {
     toastMixin.fire({
         icon: toastIcons.includes(type) ? type : 'info',
         title: String(message),
+        ...motionOptions(),
     });
 }
 
@@ -39,6 +55,7 @@ export function confirmAction({ title = 'Are you sure?', text = '', confirmText 
         cancelButtonColor: '#6B7280',
         reverseButtons: true,
         focusCancel: danger,
+        ...motionOptions(),
     }).then((result) => result.isConfirmed);
 }
 

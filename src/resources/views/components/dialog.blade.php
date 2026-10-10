@@ -19,6 +19,7 @@
 
 {{-- Livewire decides when this exists. Focus stays inside without the Alpine Focus plugin. --}}
 <div
+    data-dialog-close="{{ $close }}"
     class="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto px-4 py-6 sm:items-center"
     role="dialog"
     aria-modal="true"
@@ -30,6 +31,7 @@
             const selector = 'a[href], button:not([disabled]), input:not([type=hidden]):not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex=\'-1\'])';
             return [...this.$el.querySelectorAll(selector)].filter((el) => !el.closest('[hidden]') && el.tabIndex !== -1);
         },
+        leaving: false,
         init() {
             this.previous = document.activeElement;
             document.body.classList.add('overflow-hidden');
@@ -38,6 +40,18 @@
                 const target = field || this.focusables()[0] || this.$refs.panel;
                 target?.focus();
             });
+        },
+        requestClose() {
+            if (this.leaving) {
+                return;
+            }
+            const method = this.$el.dataset.dialogClose;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                this.$wire.call(method);
+                return;
+            }
+            this.leaving = true;
+            setTimeout(() => this.$wire.call(method), 150);
         },
         destroy() {
             document.body.classList.remove('overflow-hidden');
@@ -70,14 +84,15 @@
         },
     }"
     x-on:keydown.tab="trap($event)"
-    x-on:keydown.escape.window="$wire.{{ $close }}()"
+    x-on:keydown.escape.window="requestClose()"
 >
-    <div class="fixed inset-0 bg-gray-900/50" wire:click="{{ $close }}" aria-hidden="true"></div>
+    <div class="dialog-backdrop fixed inset-0 bg-gray-900/50" x-bind:class="leaving && 'is-leaving'" x-on:click="requestClose()" aria-hidden="true"></div>
 
     <div
         x-ref="panel"
         tabindex="-1"
-        {{ $attributes->merge(['class' => 'relative w-full '.($widths[$maxWidth] ?? $widths['2xl']).' max-h-[90vh] overflow-y-auto overscroll-contain rounded-2xl bg-white shadow-xl outline-none']) }}
+        x-bind:class="leaving && 'is-leaving'"
+        {{ $attributes->merge(['class' => 'dialog-panel relative w-full '.($widths[$maxWidth] ?? $widths['2xl']).' max-h-[90vh] overflow-y-auto overscroll-contain rounded-2xl bg-white shadow-xl outline-none']) }}
     >
         <div class="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-brand-200 bg-white px-5 py-4 sm:px-6">
             <div>
@@ -86,7 +101,7 @@
                     <p id="{{ $descriptionId }}" class="mt-1 text-sm text-gray-600">{{ $description }}</p>
                 @endif
             </div>
-            <button type="button" wire:click="{{ $close }}" class="rounded-lg p-1 text-gray-500 hover:bg-brand-50 hover:text-brand-900" aria-label="Close dialog">
+            <button type="button" x-on:click="requestClose()" class="rounded-lg p-1 text-gray-500 hover:bg-brand-50 hover:text-brand-900" aria-label="Close dialog">
                 <i class="ri-close-line text-xl" aria-hidden="true"></i>
             </button>
         </div>

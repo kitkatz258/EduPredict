@@ -59,7 +59,7 @@
                             <td class="px-4 py-3">{{ $row->department?->name ?? '—' }}</td>
                             <td class="px-4 py-3">{{ $row->is_active ? 'Pilot (active)' : 'Legacy (outside pilot)' }}</td>
                             <td class="px-4 py-3">
-                                <button type="button" wire:click="editProgram({{ $row->id }})" class="font-medium text-brand-900 underline">Edit</button>
+                                <x-table-action icon="ri-pencil-line" wire:click="editProgram({{ $row->id }})">Edit</x-table-action>
                             </td>
                         </tr>
                     @empty

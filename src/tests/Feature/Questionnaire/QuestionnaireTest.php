@@ -218,6 +218,36 @@ class QuestionnaireTest extends TestCase
         ]);
     }
 
+    public function test_category_choices_follow_the_section_and_invalid_pairs_cannot_save(): void
+    {
+        $admin = User::factory()->role(UserRole::Administrator)->create();
+
+        Livewire::actingAs($admin)
+            ->test(QuestionnaireItemForm::class)
+            ->call('startCreate')
+            ->assertSee('Category')
+            ->assertDontSee('Construct')
+            ->assertSee('Study habits')
+            ->set('construct', 'procrastination')
+            ->set('section', 'socioeconomic')
+            ->assertSet('construct', '')
+            ->assertSee('No categories are configured for this section yet.')
+            ->assertDontSee('Procrastination')
+            ->assertDontSee('Mental alertness')
+            ->set('section', 'academic_behavior')
+            ->assertSet('construct', 'study_habits')
+            ->set('section', 'employability')
+            ->set('construct', 'motivation')
+            ->set('text', 'An employability item that should not save.')
+            ->call('save')
+            ->assertHasErrors('construct')
+            ->assertSee('Choose a category configured for this questionnaire section.');
+
+        $this->assertDatabaseMissing('questionnaire_items', [
+            'text' => 'An employability item that should not save.',
+        ]);
+    }
+
     private function makeStudent(): Student
     {
         $program = Program::factory()->create();

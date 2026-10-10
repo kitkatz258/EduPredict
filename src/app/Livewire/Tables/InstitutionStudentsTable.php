@@ -5,6 +5,7 @@ namespace App\Livewire\Tables;
 use App\Models\InstitutionStudent;
 use App\Models\Program;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\On;
 
 class InstitutionStudentsTable extends BaseTable
 {
@@ -32,6 +33,12 @@ class InstitutionStudentsTable extends BaseTable
     }
 
     public function updatingRegisteredFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    #[On('eligible-students-imported')]
+    public function refreshAfterImport(): void
     {
         $this->resetPage();
     }

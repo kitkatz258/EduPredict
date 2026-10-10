@@ -36,14 +36,14 @@
                 x-show="sidebarOpen"
                 x-cloak
                 x-transition.opacity
-                class="fixed inset-0 z-30 bg-black/40 lg:hidden"
+                class="fixed inset-0 z-30 bg-black/40 motion-reduce:transition-none lg:hidden"
                 @click="sidebarOpen = false"
                 aria-hidden="true"
             ></div>
 
             <aside
                 id="staff-sidebar"
-                class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-brand-900 text-white transition-transform duration-200 lg:translate-x-0"
+                class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-brand-900 text-white transition-transform duration-200 motion-reduce:transition-none lg:translate-x-0"
                 :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                 aria-label="Sidebar"
             >
@@ -128,6 +128,7 @@
         </main>
     @endif
 
+    @include('layouts.partials.segmented-track-script')
     @livewireScripts
 </body>
 </html>

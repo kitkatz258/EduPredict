@@ -87,10 +87,30 @@
                             <td class="px-4 py-3">{{ $row->is_active ? 'Yes' : 'No' }}</td>
                             <td class="px-4 py-3">{{ $row->is_draft ? 'Yes' : 'No' }}</td>
                             <td class="px-4 py-3">
-                                <div class="flex flex-wrap gap-3">
-                                    <button type="button" wire:click="editItem({{ $row->id }})" class="font-medium text-brand-900 underline">Edit</button>
-                                    <button type="button" wire:click="toggleActive({{ $row->id }})" class="font-medium text-brand-900 underline">{{ $row->is_active ? 'Deactivate' : 'Activate' }}</button>
-                                    <button type="button" wire:click="toggleDraft({{ $row->id }})" class="font-medium text-brand-900 underline">{{ $row->is_draft ? 'Mark published' : 'Mark draft' }}</button>
+                                <div class="flex flex-wrap gap-2">
+                                    <x-table-action icon="ri-pencil-line" wire:click="editItem({{ $row->id }})">Edit</x-table-action>
+                                    <x-table-action
+                                        :icon="$row->is_active ? 'ri-forbid-2-line' : 'ri-checkbox-circle-line'"
+                                        :tone="$row->is_active ? 'danger' : 'neutral'"
+                                        wire:click="toggleActive({{ $row->id }})"
+                                        wire:loading.attr="disabled"
+                                        wire:target="toggleActive({{ $row->id }})"
+                                        :data-confirm="$row->is_active ? 'Students will no longer see this item. Saved answers stay stored.' : null"
+                                        :data-confirm-title="$row->is_active ? 'Deactivate this item?' : null"
+                                        :data-confirm-button="$row->is_active ? 'Deactivate' : null"
+                                    >
+                                        <x-spinner wire:loading wire:target="toggleActive({{ $row->id }})" />
+                                        {{ $row->is_active ? 'Deactivate' : 'Activate' }}
+                                    </x-table-action>
+                                    <x-table-action
+                                        :icon="$row->is_draft ? 'ri-check-line' : 'ri-draft-line'"
+                                        wire:click="toggleDraft({{ $row->id }})"
+                                        wire:loading.attr="disabled"
+                                        wire:target="toggleDraft({{ $row->id }})"
+                                    >
+                                        <x-spinner wire:loading wire:target="toggleDraft({{ $row->id }})" />
+                                        {{ $row->is_draft ? 'Mark published' : 'Mark draft' }}
+                                    </x-table-action>
                                 </div>
                             </td>
                         </tr>

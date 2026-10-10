@@ -20,11 +20,11 @@
             <table class="min-w-full divide-y divide-brand-200 text-sm">
                 <thead class="bg-brand-50">
                     <tr>
-                        <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('created_at')">When</button></th>
+                        <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('created_at')">Date &amp; time</button></th>
                         <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('action')">Action</button></th>
-                        <th class="px-4 py-3 text-left font-semibold text-brand-900">Actor</th>
-                        <th class="px-4 py-3 text-left font-semibold text-brand-900">Subject</th>
-                        <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('ip')">IP</button></th>
+                        <th class="px-4 py-3 text-left font-semibold text-brand-900">Performed by</th>
+                        <th class="px-4 py-3 text-left font-semibold text-brand-900">Affected record</th>
+                        <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('ip')">IP address</button></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-brand-200">
@@ -32,9 +32,9 @@
                         <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-brand-50' }}">
                             <td class="px-4 py-3 whitespace-nowrap">{{ $row->created_at?->timezone(config('app.timezone'))->format('Y-m-d H:i') }}</td>
                             <td class="px-4 py-3">{{ $row->action }}</td>
-                            <td class="px-4 py-3">{{ $row->user?->name ?? 'System' }}</td>
-                            <td class="px-4 py-3">{{ class_basename((string) $row->subject_type) }} {{ $row->subject_id }}</td>
-                            <td class="px-4 py-3">{{ $row->ip }}</td>
+                            <td class="px-4 py-3">{{ \App\Support\AuditRecordLabel::actor($row) }}</td>
+                            <td class="px-4 py-3">{{ \App\Support\AuditRecordLabel::affected($row) }}</td>
+                            <td class="px-4 py-3">{{ $row->ip ?: '—' }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="px-4 py-12 text-center text-gray-500">{{ $emptyMessage }}</td></tr>

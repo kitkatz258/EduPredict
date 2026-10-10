@@ -68,7 +68,7 @@
         </div>
     </div>
 
-    <nav id="student-mobile-nav" x-show="open" x-cloak x-transition.origin.top class="border-t border-brand-200 bg-white px-4 py-3 md:hidden" aria-label="Student mobile">
+    <nav id="student-mobile-nav" x-show="open" x-cloak x-transition.origin.top class="border-t border-brand-200 bg-white px-4 py-3 motion-reduce:transition-none md:hidden" aria-label="Student mobile">
         <div class="mb-3 flex items-center gap-3 px-2">
             <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-900 text-sm font-semibold text-white" aria-hidden="true">{{ $initials }}</span>
             <span class="leading-tight">

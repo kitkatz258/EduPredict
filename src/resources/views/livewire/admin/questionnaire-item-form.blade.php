@@ -22,7 +22,7 @@
                     </div>
                     <div>
                         <label for="section" class="mb-1 block text-sm font-medium">Questionnaire section</label>
-                        <select id="section" wire:model="section" @disabled($locked) class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                        <select id="section" wire:model.live="section" @disabled($locked) class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
                             @foreach ($sections as $value => $definition)
                                 <option value="{{ $value }}">{{ $definition['label'] ?? $value }}</option>
                             @endforeach
@@ -30,12 +30,17 @@
                         @error('section') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label for="construct" class="mb-1 block text-sm font-medium">Construct</label>
-                        <select id="construct" wire:model="construct" @disabled($locked) class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
-                            @foreach ($constructs as $value => $label)
+                        <label for="category" class="mb-1 block text-sm font-medium">Category</label>
+                        <select id="category" wire:model="construct" @disabled($locked || $categories === []) class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                            @forelse ($categories as $value => $label)
                                 <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
+                            @empty
+                                <option value="">No categories configured</option>
+                            @endforelse
                         </select>
+                        @if ($categories === [])
+                            <p class="mt-1 text-sm text-gray-600">No categories are configured for this section yet.</p>
+                        @endif
                         @error('construct') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
                     <div>
@@ -55,7 +60,7 @@
                     <label class="inline-flex items-center gap-2"><input type="checkbox" wire:model="is_draft" @disabled($locked) class="rounded border-brand-200 text-brand-900"> Draft scale item</label>
                 </div>
                 <div class="flex flex-wrap justify-end gap-2">
-                    <button type="button" wire:click="closeForm" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900">Cancel</button>
+                    <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900">Cancel</button>
                     @unless ($locked)
                         <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">
                             <x-spinner wire:loading wire:target="save" />

@@ -49,7 +49,7 @@
                             <td class="px-4 py-3">{{ $row->programs_count }}</td>
                             <td class="px-4 py-3">{{ $row->is_active ? 'Active' : 'Inactive' }}</td>
                             <td class="px-4 py-3">
-                                <button type="button" wire:click="editDepartment({{ $row->id }})" class="font-medium text-brand-900 underline">Edit</button>
+                                <x-table-action icon="ri-pencil-line" wire:click="editDepartment({{ $row->id }})">Edit</x-table-action>
                             </td>
                         </tr>
                     @empty

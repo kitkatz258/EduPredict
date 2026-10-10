@@ -39,7 +39,7 @@
                             <td class="px-4 py-3">{{ $row->programs_count }}</td>
                             <td class="px-4 py-3">{{ $row->is_active ? 'Pilot' : 'Legacy' }}</td>
                             <td class="px-4 py-3">
-                                <button type="button" wire:click="editCollege({{ $row->id }})" class="font-medium text-brand-900 underline">Edit</button>
+                                <x-table-action icon="ri-pencil-line" wire:click="editCollege({{ $row->id }})">Edit</x-table-action>
                             </td>
                         </tr>
                     @empty
