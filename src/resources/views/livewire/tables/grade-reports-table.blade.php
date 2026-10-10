@@ -64,7 +64,8 @@
                             </td>
                             <td class="whitespace-nowrap px-4 py-3">
                                 <button type="button" wire:click="openView({{ $row->id }})" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-brand-900 hover:bg-brand-50" aria-label="View {{ $row->school_year }} {{ $row->semester }} version {{ $row->version }}"><i class="ri-eye-line" aria-hidden="true"></i>View</button>
-                                @if ($row->isDraft())
+                                @if ($readOnly)
+                                @elseif ($row->isDraft())
                                     <button type="button" wire:click="continueDraft({{ $row->id }})" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-brand-900 hover:bg-brand-50"><i class="ri-edit-line" aria-hidden="true"></i>Continue</button>
                                     <button type="button" wire:click="deleteReport({{ $row->id }})" data-confirm="The draft is removed. Confirmed grades are not affected." data-confirm-title="Delete this draft?" data-confirm-button="Delete" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm text-red-800 hover:bg-red-50"><i class="ri-delete-bin-line" aria-hidden="true"></i>Delete</button>
                                 @elseif ($row->isCurrent())

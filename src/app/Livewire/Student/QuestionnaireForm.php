@@ -85,6 +85,7 @@ class QuestionnaireForm extends Component
         $this->persist($student, submit: true, scorer: $scorer);
         $this->statusMessage = 'Questionnaire submitted. Your construct scores are saved with this response.';
         $this->toast('Questionnaire submitted.');
+        $this->dispatch('questionnaire-submitted');
     }
 
     public function retake(): void
@@ -149,12 +150,11 @@ class QuestionnaireForm extends Component
             ->count();
         $currentIndex = array_search($this->construct, $keys, true);
 
-        $history = $student->questionnaireResponses()
+        $latestSubmission = $student->questionnaireResponses()
             ->whereNotNull('submitted_at')
             ->latest('submitted_at')
             ->latest('id')
-            ->limit(5)
-            ->get();
+            ->first();
 
         return view('livewire.student.questionnaire-form', [
             'items' => $allItems->where('construct', $this->construct)->values(),
@@ -166,7 +166,7 @@ class QuestionnaireForm extends Component
             'answeredCount' => $answered,
             'totalCount' => $allItems->count(),
             'currentIndex' => is_int($currentIndex) ? $currentIndex : 0,
-            'history' => $history,
+            'latestSubmission' => $latestSubmission,
             'hasDraft' => $this->openDraft($student) !== null,
         ]);
     }

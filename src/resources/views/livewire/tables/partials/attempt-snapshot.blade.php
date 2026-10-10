@@ -85,6 +85,11 @@
             </div>
         </section>
 
+        <section aria-labelledby="attempt-constructs-heading">
+            <h3 id="attempt-constructs-heading" class="text-sm font-semibold text-brand-900">Category summary</h3>
+            <x-construct-summary class="mt-3 rounded-xl border border-brand-200 p-4" :constructs="$snapshot['constructs']" :unavailable="$unavailable" />
+        </section>
+
         <section aria-labelledby="attempt-questionnaire-heading">
             <h3 id="attempt-questionnaire-heading" class="text-sm font-semibold text-brand-900">Questionnaire used</h3>
             @if ($questionnaire === null)
@@ -98,13 +103,6 @@
                         · submitted {{ \Illuminate\Support\Carbon::parse($questionnaire['submitted_at'])->timezone(config('app.timezone'))->format('M j, Y') }}
                     @endif
                 </p>
-                @if (! empty($questionnaire['construct_scores']))
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        @foreach ($questionnaire['construct_scores'] as $construct => $score)
-                            <span class="rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs text-brand-900">{{ $snapshot['construct_labels'][$construct] ?? \Illuminate\Support\Str::headline((string) $construct) }}: {{ is_numeric($score) ? number_format((float) $score, 0) : '—' }}</span>
-                        @endforeach
-                    </div>
-                @endif
                 @if (empty($questionnaire['answers']))
                     <p class="mt-2 text-sm text-gray-500">Individual answers were not recorded with this attempt.</p>
                 @else

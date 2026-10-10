@@ -6,7 +6,7 @@
 <body class="min-h-screen bg-gradient-to-br from-[#123d17] via-brand-900 to-[#2E7D32] font-sans text-gray-800 antialiased">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-brand-900 focus:shadow">Skip to content</a>
     @include('layouts.partials.flash')
-    <div class="mx-auto flex min-h-screen w-full {{ ($wide ?? false) ? 'max-w-2xl' : 'max-w-md' }} flex-col justify-center px-4 py-10">
+    <div class="mx-auto flex min-h-screen w-full {{ ($wide ?? false) ? 'max-w-xl' : 'max-w-md' }} flex-col justify-center px-4 py-10">
         <a href="{{ route('home') }}" class="mb-6 flex flex-col items-center text-center text-white">
             <span class="flex h-12 w-12 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-sm font-bold shadow-sm">UCC</span>
             <span class="mt-3 text-2xl font-semibold tracking-tight">EduPredict</span>

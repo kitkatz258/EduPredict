@@ -79,7 +79,8 @@ class UxRegressionTest extends TestCase
         $assessment = $this->actingAs($student->user)
             ->get(route('student.assessment'))
             ->assertOk()
-            ->assertSee('Assessment workflow progress')
+            ->assertSee('aria-label="Assessment sections"', false)
+            ->assertDontSee('Assessment workflow progress')
             ->assertSee('wire:loading', false)
             ->assertDontSee('profile completeness', false);
 

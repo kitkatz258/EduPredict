@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Services\Grades\AcademicSummary;
+use App\Services\Prediction\AttemptSnapshot;
 use App\Services\Prediction\PredictionPresenter;
 use App\Services\Profile\AssessmentProgress;
 use App\Services\Profile\SkillsExperienceRecords;
@@ -15,7 +16,7 @@ class RoleDashboardController extends Controller
     /**
      * The student Dashboard is also the results overview for the latest prediction.
      */
-    public function student(Request $request, AcademicSummary $summary, AssessmentProgress $progress, PredictionPresenter $presenter, SkillsExperienceRecords $records): View
+    public function student(Request $request, AcademicSummary $summary, AssessmentProgress $progress, PredictionPresenter $presenter, SkillsExperienceRecords $records, AttemptSnapshot $snapshots): View
     {
         $student = $request->user()->student;
         $student?->load('program');
@@ -28,6 +29,8 @@ class RoleDashboardController extends Controller
             'latest' => $latest,
             'summary' => $presenter->summary($latest, true),
             'charts' => $student && $latest ? $presenter->charts($student, $latest) : null,
+            'contributors' => $presenter->topContributors($latest),
+            'constructs' => $latest ? $snapshots->constructSummary($latest) : null,
             'skillsLogged' => $this->skillsLogged($student, $records),
             'gradesConfirmedAt' => $student?->gradeReports()->current()->max('confirmed_at'),
         ]);

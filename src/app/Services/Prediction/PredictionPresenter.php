@@ -29,6 +29,25 @@ final class PredictionPresenter
     }
 
     /**
+     * Strongest stored factors on each side, largest magnitude first.
+     *
+     * @return array{positive: list<array<string, mixed>>, negative: list<array<string, mixed>>}
+     */
+    public function topContributors(?Prediction $prediction, string $group = 'employability', int $perSide = 2): array
+    {
+        $factors = $this->groups($prediction)[$group] ?? [];
+        usort($factors, fn (array $a, array $b): int => (float) ($b['magnitude'] ?? 0) <=> (float) ($a['magnitude'] ?? 0));
+
+        $positive = array_values(array_filter($factors, fn (array $factor): bool => ($factor['direction'] ?? '') === '+'));
+        $negative = array_values(array_filter($factors, fn (array $factor): bool => ($factor['direction'] ?? '') === '-'));
+
+        return [
+            'positive' => array_slice($positive, 0, $perSide),
+            'negative' => array_slice($negative, 0, $perSide),
+        ];
+    }
+
+    /**
      * @return array{history: array<string, list<mixed>>, employability: array<string, list<mixed>>, dropout: array<string, list<mixed>>}
      */
     public function charts(Student $student, ?Prediction $latest): array

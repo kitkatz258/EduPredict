@@ -124,7 +124,7 @@ class QuestionnaireTest extends TestCase
             ->assertSet('definitionVersion', 'draft-v1')
             ->assertSet('construct', 'study_habits')
             ->assertSee('0 / 20 answered')
-            ->assertSee('Step 1 of 5');
+            ->assertSee('Category 1 of 5');
 
         foreach ($studyItems as $item) {
             $component->set('answers.'.$item->id, 4);
@@ -188,7 +188,7 @@ class QuestionnaireTest extends TestCase
             ->assertSee('not a clinical or diagnostic assessment');
         Livewire::actingAs($student->user)
             ->test(AssessmentWizard::class)
-            ->call('selectQuestionnaireSection', 'employability')
+            ->call('goTo', 'employability')
             ->assertSee('Mental alertness')
             ->assertSee('planning categories only');
         $this->actingAs($head)->get(route('student.questionnaire'))->assertForbidden();

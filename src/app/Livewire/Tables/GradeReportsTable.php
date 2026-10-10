@@ -6,6 +6,7 @@ use App\Models\GradeReport;
 use App\Services\Grades\GradeRowNormalizer;
 use App\Services\Grades\GwaCalculator;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 
 class GradeReportsTable extends BaseTable
@@ -16,10 +17,15 @@ class GradeReportsTable extends BaseTable
 
     public ?int $viewingId = null;
 
-    public function mount(): void
+    /** History lists confirmed versions to view; editing happens in the Assessment. */
+    #[Locked]
+    public bool $readOnly = false;
+
+    public function mount(bool $readOnly = false): void
     {
         $this->authorize('viewAny', GradeReport::class);
         abort_unless(auth()->user()?->student, 403);
+        $this->readOnly = $readOnly;
     }
 
     #[On('grades-updated')]
@@ -42,6 +48,7 @@ class GradeReportsTable extends BaseTable
 
     public function continueDraft(int $id): void
     {
+        abort_if($this->readOnly, 403);
         $report = $this->ownedQuery()->findOrFail($id);
         $this->authorize('update', $report);
         $this->dispatch('grade-report-continue', id: $report->id);
@@ -49,6 +56,7 @@ class GradeReportsTable extends BaseTable
 
     public function replaceReport(int $id): void
     {
+        abort_if($this->readOnly, 403);
         $report = $this->ownedQuery()->findOrFail($id);
         $this->authorize('replace', $report);
         $this->dispatch('grade-report-replace', id: $report->id);
@@ -59,6 +67,7 @@ class GradeReportsTable extends BaseTable
      */
     public function deleteReport(int $id): void
     {
+        abort_if($this->readOnly, 403);
         $report = $this->ownedQuery()->findOrFail($id);
         $this->authorize('delete', $report);
         $report->subjectGrades()->delete();
@@ -70,7 +79,9 @@ class GradeReportsTable extends BaseTable
     {
         $this->authorize('viewAny', GradeReport::class);
 
-        return $this->ownedQuery()->with('supersededBy:id,supersedes_id,version');
+        return $this->ownedQuery()
+            ->when($this->readOnly, fn (Builder $query) => $query->where('status', 'confirmed'))
+            ->with('supersededBy:id,supersedes_id,version');
     }
 
     protected function columns(): array

@@ -12,8 +12,7 @@
     <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:p-6">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Step 2 of 4</p>
-                <h2 class="mt-1 text-xl font-semibold text-brand-900">Skills and experience</h2>
+                <h2 class="text-lg font-semibold text-brand-900">Skills, certifications, and work experience</h2>
                 <p class="mt-2 max-w-2xl text-sm text-gray-600">Add, edit, or archive entries one at a time. Each entry saves on its own, and archived entries stay in your history. OJT and internships are recorded as a work-experience type.</p>
             </div>
             <span class="{{ $sectionSaved ? 'border-brand-200 bg-brand-50 text-brand-900' : 'border-amber-200 bg-amber-50 text-amber-900' }} inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium">
@@ -135,11 +134,14 @@
         </section>
     @endif
 
-    <section class="relative flex flex-col gap-3 rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
+    <div class="relative">
         <x-loading-overlay target="completeSection" label="Saving section…" />
-        <p class="text-sm text-gray-600">When the list looks right, mark the section saved. An empty list is allowed.</p>
-        <button type="button" wire:click="completeSection" wire:loading.attr="disabled" wire:target="completeSection" class="inline-flex items-center justify-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="completeSection" />Save section &amp; continue<i class="ri-arrow-right-line" wire:loading.remove wire:target="completeSection" aria-hidden="true"></i></button>
-    </section>
+        <p class="mb-3 text-sm text-gray-600">When the list looks right, save the section. An empty list is allowed.</p>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <button type="button" wire:click="$parent.back" class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-brand-200 bg-white px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"><i class="ri-arrow-left-line" aria-hidden="true"></i>Back</button>
+            <button type="button" wire:click="completeSection" wire:loading.attr="disabled" wire:target="completeSection" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:opacity-60"><x-spinner wire:loading wire:target="completeSection" />Save section &amp; continue<i class="ri-arrow-right-line" wire:loading.remove wire:target="completeSection" aria-hidden="true"></i></button>
+        </div>
+    </div>
 
     @if ($modal === 'skill')
         <x-dialog :title="$editingId ? 'Edit skill' : 'Add skill'" close="closeModal" max-width="md">

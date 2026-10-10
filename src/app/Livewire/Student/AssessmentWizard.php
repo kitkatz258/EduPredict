@@ -4,6 +4,7 @@ namespace App\Livewire\Student;
 
 use App\Http\Requests\Student\SocioeconomicProfileRequest;
 use App\Livewire\Concerns\DispatchesToasts;
+use App\Models\GradeReport;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Services\Grades\AcademicSummary;
@@ -17,10 +18,21 @@ class AssessmentWizard extends Component
 {
     use DispatchesToasts;
 
-    #[Url(except: 'questionnaire', history: true)]
-    public string $step = 'questionnaire';
+    /** Wizard order. Continue and Back walk this list. */
+    public const STEPS = [
+        'academic_behavior' => 'Academic Behavior',
+        'socioeconomic' => 'Socioeconomic Factors',
+        'employability' => 'Employability Assessment',
+        'skills' => 'Skills & Experience',
+        'grades' => 'Grades',
+        'review' => 'Review & Run',
+    ];
 
-    public string $questionnaireSection = 'academic_behavior';
+    /** Older links used the M15 step names. */
+    private const ALIASES = ['questionnaire' => 'academic_behavior'];
+
+    #[Url(except: 'academic_behavior', history: true)]
+    public string $step = 'academic_behavior';
 
     /** `latest` keeps the confirmed grades on file; `update` opens the grade editor. */
     public string $gradeChoice = 'latest';
@@ -30,8 +42,6 @@ class AssessmentWizard extends Component
     public ?int $gradeReplaceId = null;
 
     public int $gradeFormKey = 0;
-
-    public string $statusMessage = '';
 
     public ?string $household_income_bracket = null;
 
@@ -52,9 +62,7 @@ class AssessmentWizard extends Component
     public function mount(): void
     {
         $this->authorizeStudent();
-        if (! in_array($this->step, $this->steps(), true)) {
-            $this->step = 'questionnaire';
-        }
+        $this->step = $this->normalizeStep($this->step) ?? 'academic_behavior';
         $student = $this->student();
         $this->fillSocioeconomic($student->socioeconomicProfile);
     }
@@ -62,20 +70,30 @@ class AssessmentWizard extends Component
     public function goTo(string $step): void
     {
         $this->authorizeStudent();
-        if (! in_array($step, $this->steps(), true)) {
+        $step = $this->normalizeStep($step);
+        if ($step === null) {
             return;
         }
 
         $this->step = $step;
-        $this->statusMessage = '';
+        $this->resetValidation();
     }
 
-    public function selectQuestionnaireSection(string $section): void
+    public function next(): void
     {
-        if (array_key_exists($section, config('edupredict.questionnaire.sections', []))) {
-            $this->questionnaireSection = $section;
-            $this->resetValidation();
-        }
+        $this->move(1);
+    }
+
+    public function back(): void
+    {
+        $this->move(-1);
+    }
+
+    #[On('questionnaire-submitted')]
+    public function questionnaireSubmitted(): void
+    {
+        $this->authorizeStudent();
+        $this->step = 'socioeconomic';
     }
 
     #[On('skills-section-saved')]
@@ -83,7 +101,6 @@ class AssessmentWizard extends Component
     {
         $this->authorizeStudent();
         $this->step = 'grades';
-        $this->statusMessage = 'Skills and experience section saved.';
     }
 
     public function chooseGrades(string $choice): void
@@ -104,6 +121,23 @@ class AssessmentWizard extends Component
     public function replaceGradeReport(int $id): void
     {
         $this->openGradeEditor(replaceId: $id);
+    }
+
+    /**
+     * Drafts only. Confirmed versions stay for history and are replaced, not deleted.
+     */
+    public function deleteGradeDraft(int $id): void
+    {
+        $student = $this->authorizeStudent();
+        $report = GradeReport::query()->where('student_id', $student->id)->findOrFail($id);
+        $this->authorize('delete', $report);
+        $report->subjectGrades()->delete();
+        $report->delete();
+        if ($this->gradeDraftId === $id) {
+            $this->gradeDraftId = null;
+            $this->gradeFormKey++;
+        }
+        $this->toast('Draft deleted.');
     }
 
     #[On('grades-updated')]
@@ -158,23 +192,30 @@ class AssessmentWizard extends Component
         );
 
         $this->authorize('update', $profile);
-        $this->statusMessage = $asDraft
+        $this->toast($asDraft
             ? 'Socioeconomic draft saved. It stays private to you.'
-            : 'Socioeconomic section saved.';
-        $this->toast($this->statusMessage);
+            : 'Socioeconomic section saved.');
 
         if (! $asDraft) {
-            $this->questionnaireSection = 'employability';
+            $this->step = 'employability';
         }
     }
 
     public function render(AcademicSummary $academic, AssessmentProgress $progress): View
     {
         $student = $this->authorizeStudent();
+        $questionnaireDraft = $student->questionnaireResponses()->whereNull('submitted_at')->exists();
+        $socioeconomic = $student->socioeconomicProfile()->first();
 
         return view('livewire.student.assessment-wizard', [
+            'steps' => self::STEPS,
+            'stepIndex' => (int) array_search($this->step, array_keys(self::STEPS), true),
             'academic' => $academic->for($student),
             'progress' => $progress->for($student),
+            'drafts' => [
+                'academic_behavior' => $questionnaireDraft,
+                'socioeconomic' => $socioeconomic !== null && $socioeconomic->is_draft,
+            ],
             'questionnaireSections' => config('edupredict.questionnaire.sections', []),
             'incomeOptions' => config('edupredict.profile.income_brackets', []),
             'scholarshipOptions' => config('edupredict.profile.scholarship_statuses', []),
@@ -184,7 +225,27 @@ class AssessmentWizard extends Component
             'deviceOptions' => config('edupredict.profile.device_access', []),
             'studySpaceOptions' => config('edupredict.profile.study_space', []),
             'currentGradeReports' => $student->gradeReports()->current()->latest('confirmed_at')->latest('id')->get(),
+            'draftGradeReports' => $student->gradeReports()->where('status', 'draft')->latest('updated_at')->latest('id')->get(),
         ]);
+    }
+
+    private function move(int $offset): void
+    {
+        $this->authorizeStudent();
+        $keys = array_keys(self::STEPS);
+        $index = array_search($this->step, $keys, true);
+        $target = $keys[(is_int($index) ? $index : 0) + $offset] ?? null;
+        if ($target !== null) {
+            $this->step = $target;
+            $this->resetValidation();
+        }
+    }
+
+    private function normalizeStep(string $step): ?string
+    {
+        $step = self::ALIASES[$step] ?? $step;
+
+        return array_key_exists($step, self::STEPS) ? $step : null;
     }
 
     private function authorizeStudent(): Student
@@ -248,13 +309,5 @@ class AssessmentWizard extends Component
         $value = trim((string) $value);
 
         return $value === '' ? null : $value;
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function steps(): array
-    {
-        return ['questionnaire', 'skills', 'grades', 'review'];
     }
 }

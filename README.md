@@ -156,7 +156,7 @@ The pilot scope is the UCC College of Liberal Arts and Sciences (CLAS) with eigh
 
 Students use Dashboard, Assessment, History, profile/settings, and logout. Staff use a fixed sidebar. Slow actions show a progress indicator, a busy button, or a confirmation dialog. Account deletion is a reviewed request on the privacy notice; approving it deactivates login and keeps prediction history.
 
-Students use one resumable Assessment with Questionnaire, Skills & Experience, optional Grades, and Review steps. The current `draft-v1` questionnaire is explicitly a draft research instrument; definitions that already have student answers are locked instead of being rewritten in place.
+Students use one resumable Assessment with six steps: Academic Behavior, Socioeconomic Factors, Employability Assessment (placeholder until approved items exist), Skills & Experience, optional Grades, and Review & Run. Saved grade report versions and full attempt details live on History. The current `draft-v1` questionnaire is explicitly a draft research instrument; definitions that already have student answers are locked instead of being rewritten in place.
 
 Sixty synthetic students (`SYN-0001` … `SYN-0060`, emails `syntheticN@edupredict.test`) sit across the CLAS programs. Of those with a stored prediction, 12 are high risk with a disengagement flag, 12 are moderate with a program-fit flag, 12 are low with mixed signals, and 24 are low with no shift pattern. A few use story names (Mara Bautista, Nico Reyes, Rico Dela Cruz, Liza Ramos, and others). Sam Student (`2024-00001`, BSIS) has a complete consent record and no prediction yet, so the student demo can request one. Una Applicant (`2024-88888`) is on the institution list and is not registered.
 

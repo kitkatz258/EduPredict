@@ -23,6 +23,12 @@
             <livewire:tables.prediction-history-table :student-id="$student->id" />
         </section>
 
+        <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="grade-versions-heading">
+            <h2 id="grade-versions-heading" class="text-sm font-semibold text-brand-900">Saved grade report versions</h2>
+            <p class="mb-4 mt-1 text-xs text-gray-500">Confirmed terms, including versions replaced by a later update. View is read-only. To add or update a term, use the Grades section of the <a href="{{ route('student.assessment', ['step' => 'grades']) }}" class="font-medium text-brand-900 underline">Assessment</a>.</p>
+            <livewire:tables.grade-reports-table :read-only="true" />
+        </section>
+
         <div class="space-y-1">
             <x-model-disclosure />
             <p class="text-xs text-gray-500">These results are estimates, not guarantees. They do not decide admission, academic standing, employment, or discipline.</p>

@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\StudentRegistrationRequest;
-use App\Models\Program;
 use App\Services\Auth\StudentRegistrationService;
+use App\Support\AuthAccessView;
 use App\Support\RoleHome;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -16,10 +16,7 @@ class RegisteredUserController extends Controller
 {
     public function create(): View
     {
-        return view('auth.register', [
-            'programs' => Program::query()->inPilotScope()->orderBy('name')->get(),
-            'consentVersion' => config('edupredict.consent.current_version'),
-        ]);
+        return AuthAccessView::make('register');
     }
 
     public function store(StudentRegistrationRequest $request, StudentRegistrationService $registration): RedirectResponse

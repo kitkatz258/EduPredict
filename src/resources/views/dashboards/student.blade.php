@@ -54,8 +54,38 @@
                 </section>
             @else
                 <div class="grid gap-4 lg:grid-cols-3">
-                    <section class="rounded-2xl border border-brand-200 bg-white p-6 shadow-sm" aria-label="Employability">
-                        <x-employability-gauge :score="$latest->employability_score" />
+                    <section class="flex flex-col rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="employability-heading">
+                        <p id="employability-heading" class="text-xs font-semibold uppercase tracking-wide text-gray-500">Employability score</p>
+                        <div class="mt-3 flex items-center gap-4">
+                            <x-employability-gauge :score="$latest->employability_score" compact class="shrink-0" />
+                            <p class="text-sm leading-6 text-gray-700">Based on academics, skills, experience, and self-reported study patterns saved with this attempt.</p>
+                        </div>
+                        <div class="mt-4 grid gap-3 border-t border-brand-200 pt-4 text-sm">
+                            @if ($contributors['positive'] === [] && $contributors['negative'] === [])
+                                <p class="text-gray-500">No contributing factors were stored with this attempt.</p>
+                            @else
+                                <div>
+                                    <p class="text-xs font-medium text-gray-600">Lifting the score</p>
+                                    <ul class="mt-1 space-y-1">
+                                        @forelse ($contributors['positive'] as $factor)
+                                            <li class="flex items-start gap-1.5 text-gray-800"><i class="ri-arrow-up-line mt-0.5 text-brand-900" aria-hidden="true"></i>{{ $factor['label'] }}<span class="sr-only"> (supports this estimate)</span></li>
+                                        @empty
+                                            <li class="text-gray-500">None stood out.</li>
+                                        @endforelse
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-600">Where support could help</p>
+                                    <ul class="mt-1 space-y-1">
+                                        @forelse ($contributors['negative'] as $factor)
+                                            <li class="flex items-start gap-1.5 text-gray-800"><i class="ri-arrow-down-line mt-0.5 text-amber-700" aria-hidden="true"></i>{{ $factor['label'] }}<span class="sr-only"> (an area where support could help)</span></li>
+                                        @empty
+                                            <li class="text-gray-500">None stood out.</li>
+                                        @endforelse
+                                    </ul>
+                                </div>
+                            @endif
+                        </div>
                     </section>
 
                     <section class="rounded-2xl border border-brand-200 bg-white p-6 shadow-sm lg:col-span-2" aria-labelledby="wellness-heading">
@@ -96,17 +126,11 @@
                         <i class="ri-arrow-down-s-line text-xl text-gray-500 transition group-open:rotate-180" aria-hidden="true"></i>
                     </summary>
                     <div class="space-y-5 border-t border-brand-200 px-5 py-5">
-                        @if ($summary['top'] !== [])
-                            <ul class="grid gap-3 sm:grid-cols-3">
-                                @foreach ($summary['top'] as $factor)
-                                    <li class="rounded-xl border border-brand-200 bg-brand-50 px-4 py-3">
-                                        <p class="text-sm font-medium text-brand-900">{{ $factor['label'] }}</p>
-                                        <p class="mt-1 text-xs text-gray-600">{{ ($factor['direction'] ?? '') === '+' ? 'Supports this estimate' : 'An area where support could help' }}</p>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @endif
                         <p class="text-sm leading-6 text-gray-700">{{ $summary['employability'] }}</p>
+                        <div class="rounded-xl border border-brand-200 p-4">
+                            <h3 class="text-sm font-semibold text-brand-900">Self-report category summary</h3>
+                            <x-construct-summary class="mt-3" :constructs="$constructs" unavailable="No questionnaire category scores were saved with this attempt." />
+                        </div>
                         <div class="grid min-w-0 gap-4 lg:grid-cols-2">
                             <div>
                                 <h3 class="text-sm font-semibold text-brand-900">Employability factors</h3>
@@ -172,26 +196,46 @@
 
             <livewire:student.career-matches />
 
-            <section aria-labelledby="next-steps-heading">
-                <h2 id="next-steps-heading" class="text-xs font-semibold uppercase tracking-wide text-gray-500">Next steps</h2>
-                <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <a href="{{ route('student.assessment') }}" class="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm hover:bg-brand-50">
-                        <p class="inline-flex items-center gap-2 font-semibold text-brand-900"><i class="ri-survey-line" aria-hidden="true"></i>Update Assessment</p>
-                        <p class="mt-1 text-sm text-gray-600">Edit only the section you need. Saved sections stay saved.</p>
-                    </a>
-                    <a href="{{ route('student.assessment', ['step' => 'grades']) }}" class="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm hover:bg-brand-50">
-                        <p class="inline-flex items-center gap-2 font-semibold text-brand-900"><i class="ri-file-list-3-line" aria-hidden="true"></i>Update Grades</p>
-                        <p class="mt-1 text-sm text-gray-600">{{ $gradesDate ? 'Latest confirmed '.$gradesDate : 'No confirmed grades yet' }}</p>
-                    </a>
-                    <a href="{{ $latest ? '#career-matches' : route('student.assessment') }}" class="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm hover:bg-brand-50">
-                        <p class="inline-flex items-center gap-2 font-semibold text-brand-900"><i class="ri-compass-3-line" aria-hidden="true"></i>View Career Details</p>
-                        <p class="mt-1 text-sm text-gray-600">{{ $latest ? 'Open a match above for skills and details.' : 'Available after your first prediction.' }}</p>
-                    </a>
-                    <div class="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm">
-                        <p class="inline-flex items-center gap-2 font-semibold text-brand-900"><i class="ri-refresh-line" aria-hidden="true"></i>Run a new prediction</p>
-                        <p class="mb-3 mt-1 text-sm text-gray-600">Uses your saved Assessment and latest confirmed grades. Earlier results are kept in <a href="{{ route('student.history') }}" class="font-medium text-brand-900 underline">History</a>.</p>
+            @php
+                $nextSteps = [
+                    [route('student.assessment'), 'ri-survey-line', 'Update Assessment', 'Edit only the section you need.'],
+                    [route('student.assessment', ['step' => 'grades']), 'ri-file-list-3-line', 'Update Grades', $gradesDate ? 'Latest confirmed '.$gradesDate : 'No confirmed grades yet'],
+                    [$latest ? '#career-matches' : null, 'ri-compass-3-line', 'View Career Details', $latest ? 'Open a match above for details.' : 'Available after your first prediction.'],
+                    [route('student.history'), 'ri-history-line', 'View History', 'Every saved attempt, unchanged.'],
+                ];
+            @endphp
+            <section class="overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm" aria-labelledby="next-steps-heading">
+                <div class="grid lg:grid-cols-5">
+                    <div class="border-b border-brand-200 bg-brand-50/60 p-5 lg:col-span-2 lg:border-b-0 lg:border-r">
+                        <h2 id="next-steps-heading" class="text-xs font-semibold uppercase tracking-wide text-gray-500">Next steps</h2>
+                        <p class="mt-2 inline-flex items-center gap-2 font-semibold text-brand-900"><i class="ri-refresh-line" aria-hidden="true"></i>Run a new prediction</p>
+                        <p class="mb-3 mt-1 text-sm text-gray-600">Uses your saved Assessment and latest confirmed grades. Earlier results stay in History.</p>
                         <livewire:student.request-prediction />
                     </div>
+                    <ul class="grid gap-px bg-brand-200/70 sm:grid-cols-2 lg:col-span-3">
+                        @foreach ($nextSteps as [$href, $icon, $title, $hint])
+                            <li class="bg-white">
+                                @if ($href)
+                                    <a href="{{ $href }}" class="group flex h-full items-center gap-3 px-5 py-4 transition-colors duration-150 hover:bg-brand-50 focus:outline-none focus-visible:bg-brand-50">
+                                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-900 group-hover:bg-white"><i class="{{ $icon }}" aria-hidden="true"></i></span>
+                                        <span class="min-w-0 flex-1">
+                                            <span class="block text-sm font-semibold text-brand-900">{{ $title }}</span>
+                                            <span class="block truncate text-xs text-gray-600">{{ $hint }}</span>
+                                        </span>
+                                        <i class="ri-arrow-right-s-line text-lg text-gray-400 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-brand-900" aria-hidden="true"></i>
+                                    </a>
+                                @else
+                                    <div class="flex h-full items-center gap-3 px-5 py-4 opacity-70">
+                                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-gray-500"><i class="{{ $icon }}" aria-hidden="true"></i></span>
+                                        <span class="min-w-0 flex-1">
+                                            <span class="block text-sm font-semibold text-gray-700">{{ $title }}</span>
+                                            <span class="block truncate text-xs text-gray-600">{{ $hint }}</span>
+                                        </span>
+                                    </div>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             </section>
         @endif
