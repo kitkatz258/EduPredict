@@ -126,8 +126,11 @@ class StudentDataExporter
                 'submitted_at' => $response->submitted_at?->toIso8601String(),
                 'construct_scores' => $response->construct_scores,
                 'answers' => $response->answers->map(fn ($answer): array => [
+                    'section' => $answer->item?->section,
                     'construct' => $answer->item?->construct,
-                    'value' => $answer->value,
+                    'code' => $answer->item?->displayCode(),
+                    'text' => $answer->item?->text,
+                    'value' => $answer->responseValue(),
                 ])->values()->all(),
             ])->values()->all(),
             'predictions' => $student->predictions->map(fn ($prediction): array => [

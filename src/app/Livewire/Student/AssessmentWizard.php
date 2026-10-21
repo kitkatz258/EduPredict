@@ -9,6 +9,7 @@ use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Profile\AssessmentProgress;
+use App\Services\Questionnaire\SectionScorePresenter;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
@@ -20,19 +21,21 @@ class AssessmentWizard extends Component
 
     /** Wizard order. Continue and Back walk this list. */
     public const STEPS = [
-        'academic_behavior' => 'Academic Behavior',
-        'socioeconomic' => 'Socioeconomic Factors',
-        'employability' => 'Employability Assessment',
+        'questionnaire' => 'Questionnaire',
+        'socioeconomic' => 'Household profile',
         'skills' => 'Skills & Experience',
         'grades' => 'Grades',
         'review' => 'Review & Run',
     ];
 
-    /** Older links used the M15 step names. */
-    private const ALIASES = ['questionnaire' => 'academic_behavior'];
+    /** Older links used the M15 and M22 step names. */
+    private const ALIASES = [
+        'academic_behavior' => 'questionnaire',
+        'employability' => 'questionnaire',
+    ];
 
-    #[Url(except: 'academic_behavior', history: true)]
-    public string $step = 'academic_behavior';
+    #[Url(except: 'questionnaire', history: true)]
+    public string $step = 'questionnaire';
 
     /** `latest` keeps the confirmed grades on file; `update` opens the grade editor. */
     public string $gradeChoice = 'latest';
@@ -62,7 +65,7 @@ class AssessmentWizard extends Component
     public function mount(): void
     {
         $this->authorizeStudent();
-        $this->step = $this->normalizeStep($this->step) ?? 'academic_behavior';
+        $this->step = $this->normalizeStep($this->step) ?? 'questionnaire';
         $student = $this->student();
         $this->fillSocioeconomic($student->socioeconomicProfile);
     }
@@ -197,15 +200,20 @@ class AssessmentWizard extends Component
             : 'Socioeconomic section saved.');
 
         if (! $asDraft) {
-            $this->step = 'employability';
+            $this->step = 'skills';
         }
     }
 
-    public function render(AcademicSummary $academic, AssessmentProgress $progress): View
+    public function render(AcademicSummary $academic, AssessmentProgress $progress, SectionScorePresenter $sectionScores): View
     {
         $student = $this->authorizeStudent();
         $questionnaireDraft = $student->questionnaireResponses()->whereNull('submitted_at')->exists();
         $socioeconomic = $student->socioeconomicProfile()->first();
+        $latestSubmission = $student->questionnaireResponses()
+            ->whereNotNull('submitted_at')
+            ->latest('submitted_at')
+            ->latest('id')
+            ->first();
 
         return view('livewire.student.assessment-wizard', [
             'steps' => self::STEPS,
@@ -213,9 +221,11 @@ class AssessmentWizard extends Component
             'academic' => $academic->for($student),
             'progress' => $progress->for($student),
             'drafts' => [
-                'academic_behavior' => $questionnaireDraft,
+                'questionnaire' => $questionnaireDraft,
                 'socioeconomic' => $socioeconomic !== null && $socioeconomic->is_draft,
             ],
+            'submissions' => $student->questionnaireResponses()->latest('id')->limit(8)->get(),
+            'sectionScores' => $sectionScores->rows(is_array($latestSubmission?->construct_scores) ? $latestSubmission->construct_scores : null),
             'questionnaireSections' => config('edupredict.questionnaire.sections', []),
             'incomeOptions' => config('edupredict.profile.income_brackets', []),
             'scholarshipOptions' => config('edupredict.profile.scholarship_statuses', []),

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\QuestionnaireItem;
+use App\Services\Questionnaire\ApprovedInstrumentCatalog;
 use Illuminate\Database\Seeder;
 
 class QuestionnaireItemSeeder extends Seeder
@@ -44,9 +45,9 @@ class QuestionnaireItemSeeder extends Seeder
 
         foreach ($items as $construct => $rows) {
             foreach ($rows as $index => [$text, $reverse]) {
-                QuestionnaireItem::query()->updateOrCreate(
+                $this->writeItem(
                     [
-                        'definition_version' => config('edupredict.questionnaire.current_version', 'draft-v1'),
+                        'definition_version' => 'draft-v1',
                         'construct' => $construct,
                         'text' => $text,
                     ],
@@ -60,5 +61,36 @@ class QuestionnaireItemSeeder extends Seeder
                 );
             }
         }
+
+        foreach (ApprovedInstrumentCatalog::items() as $item) {
+            $this->writeItem(
+                [
+                    'definition_version' => ApprovedInstrumentCatalog::VERSION,
+                    'section' => $item['section'],
+                    'sort_order' => $item['sort_order'],
+                ],
+                [
+                    'construct' => $item['construct'],
+                    'text' => $item['text'],
+                    'reverse_scored' => false,
+                    'is_active' => true,
+                    'is_draft' => false,
+                ],
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $keys
+     * @param  array<string, mixed>  $values
+     */
+    private function writeItem(array $keys, array $values): void
+    {
+        $existing = QuestionnaireItem::query()->where($keys)->first();
+        if ($existing !== null && $existing->answers()->exists()) {
+            return;
+        }
+
+        QuestionnaireItem::query()->updateOrCreate($keys, $values);
     }
 }

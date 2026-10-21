@@ -72,9 +72,9 @@ class StudentFlowPolishTest extends TestCase
     public function test_assessment_continue_and_back_follow_the_six_section_sequence(): void
     {
         $student = Student::factory()->create();
-        $sequence = ['academic_behavior', 'socioeconomic', 'employability', 'skills', 'grades', 'review'];
+        $sequence = ['questionnaire', 'socioeconomic', 'skills', 'grades', 'review'];
 
-        $wizard = Livewire::actingAs($student->user)->test(AssessmentWizard::class)->assertSet('step', 'academic_behavior');
+        $wizard = Livewire::actingAs($student->user)->test(AssessmentWizard::class)->assertSet('step', 'questionnaire');
         foreach (array_slice($sequence, 1) as $expected) {
             $wizard->call('next')->assertSet('step', $expected);
         }
@@ -82,19 +82,24 @@ class StudentFlowPolishTest extends TestCase
         foreach (array_reverse(array_slice($sequence, 0, -1)) as $expected) {
             $wizard->call('back')->assertSet('step', $expected);
         }
-        $wizard->call('back')->assertSet('step', 'academic_behavior')
-            ->call('goTo', 'nonsense')->assertSet('step', 'academic_behavior')
+        $wizard->call('back')->assertSet('step', 'questionnaire')
+            ->call('goTo', 'nonsense')->assertSet('step', 'questionnaire')
+            ->call('goTo', 'academic_behavior')->assertSet('step', 'questionnaire')
             ->dispatch('questionnaire-submitted')->assertSet('step', 'socioeconomic');
 
         Livewire::actingAs($student->user)
-            ->withQueryParams(['step' => 'questionnaire'])
+            ->withQueryParams(['step' => 'employability'])
             ->test(AssessmentWizard::class)
-            ->assertSet('step', 'academic_behavior');
+            ->assertSet('step', 'questionnaire');
     }
 
     public function test_submitting_the_questionnaire_moves_the_wizard_on(): void
     {
         $student = Student::factory()->create();
+        $student->questionnaireResponses()->create([
+            'definition_version' => 'draft-v1',
+            'submitted_at' => null,
+        ]);
         $item = QuestionnaireItem::factory()->create(['definition_version' => 'draft-v1', 'construct' => 'study_habits']);
 
         Livewire::actingAs($student->user)
@@ -120,9 +125,9 @@ class StudentFlowPolishTest extends TestCase
         $this->actingAs($student->user)
             ->get(route('student.assessment'))
             ->assertOk()
-            ->assertSee('Step 1 of 6')
+            ->assertSee('Step 1 of 5')
             ->assertSee('aria-label="Assessment sections"', false)
-            ->assertSeeInOrder(['Academic Behavior', 'Socioeconomic Factors', 'Employability Assessment', 'Skills &amp; Experience', 'Grades', 'Review &amp; Run'], false)
+            ->assertSeeInOrder(['Questionnaire', 'Household profile', 'Skills &amp; Experience', 'Grades', 'Review &amp; Run'], false)
             ->assertSee('Questionnaire submitted')
             ->assertDontSee('Assessment workflow progress')
             ->assertDontSee('aria-label="Assessment steps"', false)

@@ -56,6 +56,7 @@
                 </div>
                 <div class="flex flex-wrap gap-4 text-sm">
                     <label class="inline-flex items-center gap-2"><input type="checkbox" wire:model="reverse_scored" @disabled($locked) class="rounded border-brand-200 text-brand-900"> Reverse scored</label>
+                    @error('reverse_scored') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
                     <label class="inline-flex items-center gap-2"><input type="checkbox" wire:model="is_active" @disabled($locked) class="rounded border-brand-200 text-brand-900"> Active</label>
                     <label class="inline-flex items-center gap-2"><input type="checkbox" wire:model="is_draft" @disabled($locked) class="rounded border-brand-200 text-brand-900"> Draft scale item</label>
                 </div>

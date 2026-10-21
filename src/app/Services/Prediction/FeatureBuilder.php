@@ -84,6 +84,9 @@ final class FeatureBuilder
 
         $scores = $latest?->construct_scores;
 
+        // Only the legacy numeric 0–100 construct scores are model features.
+        // Panel-approved section means are nested arrays and stay out of this
+        // set, including Competence and Psychological Capital.
         return is_array($scores) ? $scores : [];
     }
 

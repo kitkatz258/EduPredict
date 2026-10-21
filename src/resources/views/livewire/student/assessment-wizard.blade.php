@@ -1,12 +1,9 @@
 @php
-    $sectionFor = ['academic_behavior' => 'questionnaire', 'socioeconomic' => 'socioeconomic', 'skills' => 'skills', 'grades' => 'academic'];
+    $sectionFor = ['questionnaire' => 'questionnaire', 'socioeconomic' => 'socioeconomic', 'skills' => 'skills', 'grades' => 'academic'];
     $savedCount = count(array_filter($progress['sections']));
     $sectionCount = count($progress['sections']);
     $stepKeys = array_keys($steps);
     $statusFor = function (string $key) use ($sectionFor, $progress, $drafts): array {
-        if ($key === 'employability') {
-            return ['placeholder', 'ri-flask-line', 'Awaiting approved items'];
-        }
         if ($key === 'review') {
             return ['open', 'ri-play-circle-line', 'Run when ready'];
         }
@@ -73,15 +70,15 @@
         x-data
         x-init="$nextTick(() => { const top = document.getElementById('assessment-progress'); if (top && top.getBoundingClientRect().top < 0) { top.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } })"
     >
-        @if ($step === 'academic_behavior')
+        @if ($step === 'questionnaire')
             <livewire:student.questionnaire-form />
         @elseif ($step === 'socioeconomic')
             <form class="relative rounded-2xl border border-brand-200 bg-white shadow-sm" wire:submit="saveSocioeconomic">
                 <x-loading-overlay target="saveSocioeconomic" label="Saving private context…" />
                 <div class="flex flex-wrap items-start justify-between gap-3 border-b border-brand-200 bg-brand-50/40 px-5 py-4 sm:px-6">
                     <div>
-                        <h2 class="text-lg font-semibold text-brand-900">Socioeconomic factors</h2>
-                        <p class="mt-1 text-sm text-gray-600">These values are encrypted. Department Heads, Deans, and Administrators cannot open the raw answers.</p>
+                        <h2 class="text-lg font-semibold text-brand-900">Household profile</h2>
+                        <p class="mt-1 text-sm text-gray-600">This private household record is separate from questionnaire section S. These values are encrypted. Department Heads, Deans, and Administrators cannot open the raw answers.</p>
                     </div>
                     <span class="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-medium text-brand-900"><i class="ri-lock-line" aria-hidden="true"></i>Private to you</span>
                 </div>
@@ -158,25 +155,6 @@
                     <button type="submit" wire:loading.attr="disabled" wire:target="saveSocioeconomic" class="{{ $primary }}"><x-spinner wire:loading wire:target="saveSocioeconomic" />Save &amp; continue<i class="ri-arrow-right-line" wire:loading.remove wire:target="saveSocioeconomic" aria-hidden="true"></i></button>
                 </div>
             </form>
-        @elseif ($step === 'employability')
-            <section class="rounded-2xl border border-brand-200 bg-white shadow-sm">
-                <div class="flex flex-wrap items-start justify-between gap-3 border-b border-brand-200 bg-brand-50/40 px-5 py-4 sm:px-6">
-                    <div>
-                        <h2 class="text-lg font-semibold text-brand-900">Employability assessment</h2>
-                        <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-600">No employability questions are collected yet. Final items must come from cited research or an approved instrument. The themes below are planning categories only—not questions, scores, or model weights.</p>
-                    </div>
-                    <span class="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900"><i class="ri-flask-line" aria-hidden="true"></i>Awaiting approved items</span>
-                </div>
-                <ul class="grid gap-2 px-5 py-5 sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
-                    @foreach (($questionnaireSections['employability']['planning_themes'] ?? []) as $theme)
-                        <li class="rounded-xl border border-dashed border-brand-200 bg-brand-50/50 px-4 py-3 text-sm text-gray-700">{{ $theme }}</li>
-                    @endforeach
-                </ul>
-                <div class="flex flex-wrap items-center justify-between gap-3 border-t border-brand-200 px-5 py-4 sm:px-6">
-                    <button type="button" wire:click="back" wire:loading.attr="disabled" wire:target="back" class="{{ $secondary }}"><i class="ri-arrow-left-line" aria-hidden="true"></i>Back</button>
-                    <button type="button" wire:click="next" wire:loading.attr="disabled" wire:target="next" class="{{ $primary }}">Continue<i class="ri-arrow-right-line" aria-hidden="true"></i></button>
-                </div>
-            </section>
         @elseif ($step === 'skills')
             <livewire:student.skills-experience-section />
         @elseif ($step === 'grades')
@@ -292,8 +270,27 @@
                     @endforeach
                 </ul>
 
+                <div class="border-t border-brand-200 px-5 py-4 sm:px-6">
+                    <h3 class="text-sm font-semibold text-brand-900">Questionnaire submissions</h3>
+                    <p class="mt-1 text-sm text-gray-600">These are questionnaire submissions. Prediction History is a separate record of each estimate and the inputs saved with it.</p>
+                    @if ($submissions->isEmpty())
+                        <p class="mt-2 text-sm text-gray-500">No questionnaire response yet.</p>
+                    @else
+                        <ul class="mt-2 space-y-1 text-sm text-gray-700">
+                            @foreach ($submissions as $submission)
+                                <li>
+                                    <span class="font-mono">{{ $submission->definition_version }}</span>
+                                    · {{ $submission->submitted_at ? 'Submitted '.$submission->submitted_at->timezone($tz)->format('M j, Y g:i A') : 'Draft, not submitted' }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                    <h3 class="mt-4 text-sm font-semibold text-brand-900">Section results from the latest submission</h3>
+                    <x-construct-summary class="mt-3" :constructs="$sectionScores" unavailable="No submitted questionnaire section results yet." />
+                </div>
+
                 <div class="border-t border-brand-200 bg-brand-50 px-5 py-4 sm:px-6">
-                    <p class="text-sm text-gray-700">Running a prediction creates a new saved attempt. Existing prediction history is never overwritten. Output comes from <span class="font-medium">placeholder-heuristic-v0</span>, not a final trained model.</p>
+                    <p class="text-sm text-gray-700">Running a prediction creates a new saved attempt. Existing prediction history is never overwritten. Output comes from <span class="font-medium">placeholder-heuristic-v0</span>, not a final trained model. Section means from the panel-approved questionnaire are not sent to that predictor.</p>
                     <div class="mt-4"><livewire:student.request-prediction /></div>
                 </div>
             </section>

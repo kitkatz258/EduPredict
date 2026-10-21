@@ -91,6 +91,11 @@ class QuestionnaireItemForm extends Component
 
             return;
         }
+        if ($validated['definition_version'] === 'ucc-panel-approved-v1' && $this->reverse_scored) {
+            $this->addError('reverse_scored', 'The panel-approved instrument has no reverse-scored items.');
+
+            return;
+        }
         $payload = [
             'section' => $validated['section'],
             'definition_version' => $validated['definition_version'],

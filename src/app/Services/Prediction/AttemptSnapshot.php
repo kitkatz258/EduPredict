@@ -6,7 +6,7 @@ namespace App\Services\Prediction;
 
 use App\Models\CareerMatch;
 use App\Models\Prediction;
-use Illuminate\Support\Str;
+use App\Services\Questionnaire\SectionScorePresenter;
 
 /**
  * Read-only view of one saved prediction attempt, built only from what the
@@ -20,6 +20,7 @@ final class AttemptSnapshot
     public function __construct(
         private PredictionPresenter $presenter,
         private ProgramShiftEvaluator $programShift,
+        private SectionScorePresenter $sectionScores,
     ) {}
 
     /**
@@ -47,7 +48,7 @@ final class AttemptSnapshot
      * Category scores exactly as stored with the attempt: the questionnaire
      * snapshot first, then the attempt's own feature snapshot. Never rescored.
      *
-     * @return list<array{key: string, label: string, score: float}>|null
+     * @return list<array<string, mixed>>|null
      */
     public function constructSummary(Prediction $prediction): ?array
     {
@@ -60,20 +61,7 @@ final class AttemptSnapshot
             return null;
         }
 
-        $labels = (array) config('edupredict.questionnaire.constructs', []);
-        $rows = [];
-        foreach ($scores as $key => $score) {
-            if (! is_numeric($score)) {
-                continue;
-            }
-            $rows[] = [
-                'key' => (string) $key,
-                'label' => (string) ($labels[$key] ?? Str::headline((string) $key)),
-                'score' => max(0.0, min(100.0, (float) $score)),
-            ];
-        }
-
-        return $rows === [] ? null : $rows;
+        return $this->sectionScores->rows($scores);
     }
 
     public function isComplete(Prediction $prediction): bool

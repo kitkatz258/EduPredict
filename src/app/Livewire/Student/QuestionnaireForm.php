@@ -7,6 +7,7 @@ use App\Models\QuestionnaireItem;
 use App\Models\QuestionnaireResponse;
 use App\Models\Student;
 use App\Services\Questionnaire\QuestionnaireScorer;
+use App\Services\Questionnaire\SectionScorePresenter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -21,25 +22,32 @@ class QuestionnaireForm extends Component
 
     public string $statusMessage = '';
 
-    public string $definitionVersion = 'draft-v1';
+    public string $definitionVersion = 'ucc-panel-approved-v1';
 
+    /** Selected legacy construct. Ignored while the approved instrument is open. */
     public string $construct = 'study_habits';
+
+    /** Selected approved section. */
+    public string $section = 'academic';
 
     public function mount(): void
     {
         $student = $this->student();
+        $this->bindVersion($student);
         $draft = $this->openDraft($student);
-        $this->definitionVersion = $draft?->definition_version
-            ?? (string) config('edupredict.questionnaire.current_version', 'draft-v1');
 
         if ($draft !== null) {
             $this->authorize('view', $draft);
             foreach ($draft->answers as $answer) {
-                $this->answers[$answer->questionnaire_item_id] = $answer->value;
+                $value = $answer->responseValue();
+                if ($value !== null) {
+                    $this->answers[$answer->questionnaire_item_id] = $value;
+                }
             }
         }
 
         $this->construct = $this->firstConstruct();
+        $this->section = $this->firstIncompleteSection();
     }
 
     public function saveDraft(): void
@@ -53,68 +61,34 @@ class QuestionnaireForm extends Component
     {
         $this->persist($this->student(), submit: false);
         $this->statusMessage = 'Your answers are saved.';
-        $this->nextConstruct();
+        $this->usesConstructNavigation() ? $this->nextConstruct() : $this->nextSection();
         $this->toast('Questionnaire progress saved.');
     }
 
-    public function submit(QuestionnaireScorer $scorer): void
+    public function previousPart(): void
     {
-        $student = $this->student();
-        if ($this->openDraft($student) === null && $student->questionnaireResponses()->whereNotNull('submitted_at')->exists()) {
-            $this->statusMessage = 'Start a new response before answering again. Earlier submissions are kept.';
-
-            return;
-        }
-
-        $items = $this->activeItems();
-        $missing = $items->first(fn (QuestionnaireItem $item): bool => ! isset($this->answers[$item->id]) || $this->answers[$item->id] === '');
-        if ($missing !== null) {
-            $this->construct = $missing->construct;
-            $this->addError('answers.'.$missing->id, 'Choose a response for this statement.');
-            $this->statusMessage = 'Answer every statement before submitting.';
-
-            return;
-        }
-
-        $rules = [];
-        foreach ($items as $item) {
-            $rules['answers.'.$item->id] = ['required', 'integer', 'between:1,5'];
-        }
-        $this->validate($rules);
-
-        $this->persist($student, submit: true, scorer: $scorer);
-        $this->statusMessage = 'Questionnaire submitted. Your construct scores are saved with this response.';
-        $this->toast('Questionnaire submitted.');
-        $this->dispatch('questionnaire-submitted');
+        $this->persist($this->student(), submit: false);
+        $this->usesConstructNavigation() ? $this->previousConstruct() : $this->previousSection();
     }
 
-    public function retake(): void
+    public function selectPart(string $part): void
     {
-        $student = $this->student();
-        $this->authorize('create', QuestionnaireResponse::class);
-
-        if ($this->openDraft($student) !== null) {
+        if (! in_array($part, $this->partKeys(), true)) {
             return;
         }
 
-        $this->definitionVersion = (string) config('edupredict.questionnaire.current_version', 'draft-v1');
-        $student->questionnaireResponses()->create([
-            'definition_version' => $this->definitionVersion,
-            'submitted_at' => null,
-            'construct_scores' => null,
-        ]);
-        $this->answers = [];
-        $this->construct = $this->firstConstruct();
-        $this->statusMessage = 'A new questionnaire response is ready. Earlier submissions stay in history.';
-        $this->toast($this->statusMessage);
+        $this->persist($this->student(), submit: false);
+        if ($this->usesConstructNavigation()) {
+            $this->construct = $part;
+        } else {
+            $this->section = $part;
+        }
+        $this->resetValidation();
     }
 
     public function selectConstruct(string $construct): void
     {
-        if (in_array($construct, $this->constructKeys(), true)) {
-            $this->construct = $construct;
-            $this->resetValidation();
-        }
+        $this->selectPart($construct);
     }
 
     public function previousConstruct(): void
@@ -137,18 +111,119 @@ class QuestionnaireForm extends Component
         }
     }
 
-    public function render(): View
+    public function previousSection(): void
+    {
+        $keys = $this->sectionKeys();
+        $index = array_search($this->section, $keys, true);
+        if (is_int($index) && $index > 0) {
+            $this->section = $keys[$index - 1];
+            $this->resetValidation();
+        }
+    }
+
+    public function nextSection(): void
+    {
+        $keys = $this->sectionKeys();
+        $index = array_search($this->section, $keys, true);
+        if (is_int($index) && isset($keys[$index + 1])) {
+            $this->section = $keys[$index + 1];
+            $this->resetValidation();
+        }
+    }
+
+    public function submit(QuestionnaireScorer $scorer): void
     {
         $student = $this->student();
-        $allItems = $this->activeItems();
-        $keys = $this->constructKeys($allItems);
-        if (! in_array($this->construct, $keys, true)) {
-            $this->construct = $keys[0] ?? 'study_habits';
+        $this->bindVersion($student);
+        if ($this->openDraft($student) === null && $student->questionnaireResponses()->whereNotNull('submitted_at')->exists()) {
+            $this->statusMessage = 'Start a new response before answering again. Earlier submissions are kept.';
+
+            return;
         }
-        $answered = $allItems
-            ->filter(fn (QuestionnaireItem $item): bool => isset($this->answers[$item->id]) && $this->answers[$item->id] !== '')
-            ->count();
-        $currentIndex = array_search($this->construct, $keys, true);
+
+        $items = $this->activeItems();
+        $missing = $items->first(fn (QuestionnaireItem $item): bool => ! isset($this->answers[$item->id]) || $this->answers[$item->id] === '');
+        if ($missing !== null) {
+            $this->focusItem($missing);
+            $this->addError('answers.'.$missing->id, 'Choose a response for this statement.');
+            $this->statusMessage = 'Answer every statement before submitting.';
+
+            return;
+        }
+
+        $rules = [];
+        foreach ($items as $item) {
+            $rules['answers.'.$item->id] = ['required', 'integer', 'between:1,5'];
+        }
+        $this->validate($rules);
+
+        $this->persist($student, submit: true, scorer: $scorer);
+        $this->statusMessage = 'Thank you for answering this questionnaire. Section results are saved with this submission.';
+        $this->toast('Questionnaire submitted.');
+        $this->dispatch('questionnaire-submitted');
+    }
+
+    public function retake(): void
+    {
+        $student = $this->student();
+        $this->authorize('create', QuestionnaireResponse::class);
+
+        if ($this->openDraft($student) !== null) {
+            return;
+        }
+
+        $this->definitionVersion = (string) config('edupredict.questionnaire.current_version', 'ucc-panel-approved-v1');
+        $student->questionnaireResponses()->create([
+            'definition_version' => $this->definitionVersion,
+            'submitted_at' => null,
+            'construct_scores' => null,
+        ]);
+        $this->answers = [];
+        $this->construct = $this->firstConstruct();
+        $this->section = $this->firstIncompleteSection();
+        $this->statusMessage = 'A new questionnaire response is ready. Earlier submissions stay on their original versions.';
+        $this->toast($this->statusMessage);
+    }
+
+    /**
+     * An unfinished legacy draft is not a submission. Discarding it does not
+     * change submitted responses or prediction history.
+     */
+    public function discardDraft(): void
+    {
+        $student = $this->student();
+        $draft = $this->openDraft($student);
+        if ($draft === null || $draft->definition_version === config('edupredict.questionnaire.current_version')) {
+            return;
+        }
+
+        $this->authorize('update', $draft);
+        abort_if($draft->submitted_at !== null, 403);
+        $draft->answers()->delete();
+        $draft->delete();
+        $this->definitionVersion = (string) config('edupredict.questionnaire.current_version');
+        $this->answers = [];
+        $this->construct = $this->firstConstruct();
+        $this->section = $this->firstIncompleteSection();
+        $this->statusMessage = 'The unfinished draft was discarded. Submitted responses were kept.';
+        $this->toast($this->statusMessage);
+    }
+
+    public function render(SectionScorePresenter $presenter): View
+    {
+        $student = $this->student();
+        $this->bindVersion($student);
+        $allItems = $this->activeItems();
+        $keys = $this->partKeys($allItems);
+        $current = $this->currentPart($keys);
+        $saved = $this->savedAnswerMap($student);
+        $answered = 0;
+        foreach ($allItems as $item) {
+            if (isset($saved[$item->id])) {
+                $answered++;
+            }
+        }
+        $currentIndex = array_search($current, $keys, true);
 
         $latestSubmission = $student->questionnaireResponses()
             ->whereNotNull('submitted_at')
@@ -156,18 +231,30 @@ class QuestionnaireForm extends Component
             ->latest('id')
             ->first();
 
+        $partLabels = [];
+        foreach ($keys as $key) {
+            $partLabels[$key] = $this->partLabel($key);
+        }
+
         return view('livewire.student.questionnaire-form', [
-            'items' => $allItems->where('construct', $this->construct)->values(),
+            'items' => $allItems->where($this->usesConstructNavigation() ? 'construct' : 'section', $current)->values(),
             'allItems' => $allItems,
-            'constructKeys' => $keys,
-            'constructs' => config('edupredict.questionnaire.constructs', []),
+            'partKeys' => $keys,
+            'partLabels' => $partLabels,
+            'partHeadings' => $this->partHeadings(),
+            'currentPart' => $current,
+            'navigation' => $this->usesConstructNavigation() ? 'construct' : 'section',
             'likert' => config('edupredict.questionnaire.likert', []),
             'version' => config('edupredict.questionnaire.versions.'.$this->definitionVersion, []),
-            'answeredCount' => $answered,
+            'savedCount' => $answered,
             'totalCount' => $allItems->count(),
             'currentIndex' => is_int($currentIndex) ? $currentIndex : 0,
             'latestSubmission' => $latestSubmission,
             'hasDraft' => $this->openDraft($student) !== null,
+            'saved' => $saved,
+            'sectionScores' => $presenter->rows(is_array($latestSubmission?->construct_scores) ? $latestSubmission->construct_scores : null),
+            'legacyDraft' => $this->usesConstructNavigation()
+                && $this->definitionVersion !== (string) config('edupredict.questionnaire.current_version'),
         ]);
     }
 
@@ -178,6 +265,19 @@ class QuestionnaireForm extends Component
         abort_unless($student instanceof Student, 403);
 
         return $student;
+    }
+
+    private function bindVersion(Student $student): void
+    {
+        $draft = $this->openDraft($student);
+        $version = $draft?->definition_version
+            ?? (string) config('edupredict.questionnaire.current_version', 'ucc-panel-approved-v1');
+        $allowed = array_keys(config('edupredict.questionnaire.versions', []));
+        if (! in_array($version, $allowed, true)) {
+            $version = (string) config('edupredict.questionnaire.current_version');
+        }
+
+        $this->definitionVersion = $version;
     }
 
     private function openDraft(Student $student): ?QuestionnaireResponse
@@ -194,27 +294,63 @@ class QuestionnaireForm extends Component
      */
     private function activeItems(): Collection
     {
-        return QuestionnaireItem::query()
+        $sections = config('edupredict.questionnaire.versions.'.$this->definitionVersion.'.sections', []);
+        $query = QuestionnaireItem::query()
             ->where('definition_version', $this->definitionVersion)
-            ->where('section', 'academic_behavior')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
+            ->where('is_active', true);
+
+        if (is_array($sections) && $sections !== []) {
+            $query->whereIn('section', $sections);
+        }
+
+        $items = $query->orderBy('sort_order')->orderBy('id')->get();
+        if (! is_array($sections) || $sections === []) {
+            return $items;
+        }
+
+        $order = array_flip($sections);
+
+        return $items->sortBy(function (QuestionnaireItem $item) use ($order): string {
+            $sectionOrder = $order[$item->section] ?? 99;
+
+            return sprintf('%03d-%05d-%05d', $sectionOrder, $item->sort_order, $item->id);
+        })->values();
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function savedAnswerMap(Student $student): array
+    {
+        $draft = $this->openDraft($student);
+        if ($draft === null) {
+            return [];
+        }
+
+        $saved = [];
+        foreach ($draft->answers as $answer) {
+            $value = $answer->responseValue();
+            if ($value !== null) {
+                $saved[$answer->questionnaire_item_id] = $value;
+            }
+        }
+
+        return $saved;
     }
 
     private function persist(Student $student, bool $submit, ?QuestionnaireScorer $scorer = null): void
     {
-        $allowed = $this->activeItems()->pluck('id')->all();
+        $this->bindVersion($student);
+        $allowed = $this->activeItems()->keyBy('id');
         $clean = [];
         foreach ($this->answers as $itemId => $value) {
-            if (! in_array((int) $itemId, $allowed, true) || $value === null || $value === '') {
+            if (! $allowed->has((int) $itemId) || $value === null || $value === '') {
                 continue;
             }
             $clean[(int) $itemId] = (int) $value;
         }
 
-        DB::transaction(function () use ($student, $submit, $scorer, $clean): void {
+        DB::transaction(function () use ($student, $submit, $scorer, $clean, $allowed): void {
             $response = $this->openDraft($student);
             if ($response === null) {
                 $this->authorize('create', QuestionnaireResponse::class);
@@ -227,9 +363,13 @@ class QuestionnaireForm extends Component
             }
 
             foreach ($clean as $itemId => $value) {
+                /** @var QuestionnaireItem $item */
+                $item = $allowed->get($itemId);
                 $response->answers()->updateOrCreate(
                     ['questionnaire_item_id' => $itemId],
-                    ['value' => $value],
+                    $item->isSensitive()
+                        ? ['value' => 0, 'protected_value' => (string) $value]
+                        : ['value' => $value, 'protected_value' => null],
                 );
             }
 
@@ -239,6 +379,40 @@ class QuestionnaireForm extends Component
                 $response->save();
             }
         });
+    }
+
+    private function usesConstructNavigation(): bool
+    {
+        return config('edupredict.questionnaire.versions.'.$this->definitionVersion.'.navigation') === 'construct';
+    }
+
+    /**
+     * @param  Collection<int, QuestionnaireItem>|null  $items
+     * @return list<string>
+     */
+    private function partKeys(?Collection $items = null): array
+    {
+        return $this->usesConstructNavigation()
+            ? $this->constructKeys($items)
+            : $this->sectionKeys($items);
+    }
+
+    /**
+     * @param  list<string>  $keys
+     */
+    private function currentPart(array $keys): string
+    {
+        $current = $this->usesConstructNavigation() ? $this->construct : $this->section;
+        if (! in_array($current, $keys, true)) {
+            $current = $keys[0] ?? ($this->usesConstructNavigation() ? 'study_habits' : 'academic');
+            if ($this->usesConstructNavigation()) {
+                $this->construct = $current;
+            } else {
+                $this->section = $current;
+            }
+        }
+
+        return $current;
     }
 
     /**
@@ -255,8 +429,84 @@ class QuestionnaireForm extends Component
         ));
     }
 
+    /**
+     * @param  Collection<int, QuestionnaireItem>|null  $items
+     * @return list<string>
+     */
+    private function sectionKeys(?Collection $items = null): array
+    {
+        $configured = config('edupredict.questionnaire.versions.'.$this->definitionVersion.'.sections', []);
+        $available = ($items ?? $this->activeItems())->pluck('section')->unique()->all();
+        if (! is_array($configured)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            $configured,
+            fn (mixed $section): bool => is_string($section) && in_array($section, $available, true),
+        ));
+    }
+
+    private function partLabel(string $key): string
+    {
+        if ($this->usesConstructNavigation()) {
+            return (string) config('edupredict.questionnaire.constructs.'.$key, $key);
+        }
+
+        return (string) config('edupredict.questionnaire.sections.'.$key.'.short', config('edupredict.questionnaire.sections.'.$key.'.label', $key));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function partHeadings(): array
+    {
+        $headings = [];
+        foreach ($this->partKeys() as $key) {
+            $headings[$key] = $this->usesConstructNavigation()
+                ? (string) config('edupredict.questionnaire.constructs.'.$key, $key)
+                : (string) config('edupredict.questionnaire.sections.'.$key.'.heading', config('edupredict.questionnaire.sections.'.$key.'.label', $key));
+        }
+
+        return $headings;
+    }
+
     private function firstConstruct(): string
     {
         return $this->constructKeys()[0] ?? 'study_habits';
+    }
+
+    private function firstIncompleteSection(): string
+    {
+        $items = $this->activeItems();
+        $saved = [];
+        foreach ($this->answers as $itemId => $value) {
+            if ($value !== null && $value !== '') {
+                $saved[(int) $itemId] = true;
+            }
+        }
+
+        foreach ($this->sectionKeys($items) as $section) {
+            $sectionItems = $items->where('section', $section);
+            $complete = $sectionItems->isNotEmpty() && $sectionItems->every(
+                fn (QuestionnaireItem $item): bool => isset($saved[$item->id]),
+            );
+            if (! $complete) {
+                return $section;
+            }
+        }
+
+        $keys = $this->sectionKeys($items);
+
+        return $keys === [] ? 'academic' : $keys[array_key_last($keys)];
+    }
+
+    private function focusItem(QuestionnaireItem $item): void
+    {
+        if ($this->usesConstructNavigation()) {
+            $this->construct = $item->construct;
+        } else {
+            $this->section = $item->section;
+        }
     }
 }

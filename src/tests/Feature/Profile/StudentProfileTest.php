@@ -29,7 +29,7 @@ class StudentProfileTest extends TestCase
             ->set($this->socioPayload())
             ->call('saveSocioeconomic')
             ->assertHasNoErrors()
-            ->assertSet('step', 'employability');
+            ->assertSet('step', 'skills');
 
         Livewire::actingAs($student->user)
             ->test(SkillsExperienceSection::class)
@@ -117,7 +117,7 @@ class StudentProfileTest extends TestCase
         $this->actingAs($student->user)
             ->get(route('student.assessment'))
             ->assertOk()
-            ->assertSee('Step 1 of 6')
+            ->assertSee('Step 1 of 5')
             ->assertSee('2/4 sections saved')
             ->assertSee('Assessment');
     }

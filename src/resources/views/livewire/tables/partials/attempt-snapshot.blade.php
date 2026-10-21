@@ -103,6 +103,9 @@
                         · submitted {{ \Illuminate\Support\Carbon::parse($questionnaire['submitted_at'])->timezone(config('app.timezone'))->format('M j, Y') }}
                     @endif
                 </p>
+                @if (! empty($questionnaire['sensitive_answers_omitted']))
+                    <p class="mt-2 text-sm text-gray-600">{{ $questionnaire['sensitive_answers_omitted'] }} socioeconomic {{ \Illuminate\Support\Str::plural('answer', $questionnaire['sensitive_answers_omitted']) }} stayed in your encrypted questionnaire and {{ $questionnaire['sensitive_answers_omitted'] === 1 ? 'was' : 'were' }} not copied into this prediction history.</p>
+                @endif
                 @if (empty($questionnaire['answers']))
                     <p class="mt-2 text-sm text-gray-500">Individual answers were not recorded with this attempt.</p>
                 @else

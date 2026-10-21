@@ -36,4 +36,19 @@ class QuestionnaireItem extends Model
     {
         return $this->hasMany(QuestionnaireAnswer::class);
     }
+
+    public function displayCode(): ?string
+    {
+        $prefix = config('edupredict.questionnaire.sections.'.$this->section.'.code');
+        if (! is_string($prefix) || $prefix === '' || $this->sort_order < 1) {
+            return null;
+        }
+
+        return $prefix.$this->sort_order;
+    }
+
+    public function isSensitive(): bool
+    {
+        return (bool) config('edupredict.questionnaire.sections.'.$this->section.'.sensitive', false);
+    }
 }

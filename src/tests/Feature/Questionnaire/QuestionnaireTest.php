@@ -7,14 +7,22 @@ use App\Livewire\Admin\QuestionnaireItemForm;
 use App\Livewire\Student\AssessmentWizard;
 use App\Livewire\Student\QuestionnaireForm;
 use App\Livewire\Tables\QuestionnaireItemsTable;
+use App\Models\Prediction;
 use App\Models\Program;
 use App\Models\QuestionnaireItem;
 use App\Models\QuestionnaireResponse;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\Prediction\AttemptSnapshot;
 use App\Services\Prediction\FeatureBuilder;
 use App\Services\Profile\AssessmentProgress;
+use App\Services\Questionnaire\ApprovedInstrumentCatalog;
+use App\Services\Questionnaire\QuestionnaireScorer;
+use App\Services\Questionnaire\QuestionnaireSnapshot;
+use App\Services\Questionnaire\SectionScorePresenter;
 use Database\Seeders\QuestionnaireItemSeeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -27,11 +35,25 @@ class QuestionnaireTest extends TestCase
     {
         $this->seed(QuestionnaireItemSeeder::class);
 
-        $this->assertSame(20, QuestionnaireItem::query()->count());
-        $this->assertSame(0, QuestionnaireItem::query()->where('is_draft', false)->count());
+        $this->assertSame(56, QuestionnaireItem::query()->count());
+        $this->assertSame(36, QuestionnaireItem::query()->where('is_draft', false)->count());
         $this->assertSame(20, QuestionnaireItem::query()->where('definition_version', 'draft-v1')->where('section', 'academic_behavior')->count());
-        foreach (array_keys(config('edupredict.questionnaire.constructs')) as $construct) {
-            $this->assertSame(4, QuestionnaireItem::query()->where('construct', $construct)->count(), $construct);
+        $this->assertSame(ApprovedInstrumentCatalog::VERSION, config('edupredict.questionnaire.current_version'));
+        $this->assertSame(36, QuestionnaireItem::query()->where('definition_version', ApprovedInstrumentCatalog::VERSION)->count());
+        $this->assertSame(0, QuestionnaireItem::query()->where('definition_version', ApprovedInstrumentCatalog::VERSION)->where('reverse_scored', true)->count());
+        foreach (ApprovedInstrumentCatalog::items() as $item) {
+            $this->assertDatabaseHas('questionnaire_items', [
+                'definition_version' => ApprovedInstrumentCatalog::VERSION,
+                'section' => $item['section'],
+                'sort_order' => $item['sort_order'],
+                'text' => $item['text'],
+                'reverse_scored' => 0,
+                'is_draft' => 0,
+            ]);
+        }
+        $this->assertSame(20, QuestionnaireItem::query()->where('definition_version', 'draft-v1')->where('is_draft', true)->count());
+        foreach (['study_habits', 'time_management', 'motivation', 'procrastination', 'engagement'] as $construct) {
+            $this->assertSame(4, QuestionnaireItem::query()->where('definition_version', 'draft-v1')->where('construct', $construct)->count(), $construct);
             $this->assertTrue(
                 QuestionnaireItem::query()->where('construct', $construct)->where('reverse_scored', true)->exists(),
                 $construct,
@@ -42,12 +64,18 @@ class QuestionnaireTest extends TestCase
     public function test_reverse_scoring_and_submission_feed_feature_builder(): void
     {
         $student = $this->makeStudent();
+        $student->questionnaireResponses()->create([
+            'definition_version' => 'draft-v1',
+            'submitted_at' => null,
+        ]);
         $normal = QuestionnaireItem::factory()->create([
+            'definition_version' => 'draft-v1',
             'construct' => 'study_habits',
             'reverse_scored' => false,
             'sort_order' => 1,
         ]);
         $reverse = QuestionnaireItem::factory()->create([
+            'definition_version' => 'draft-v1',
             'construct' => 'study_habits',
             'text' => 'I cram at the last minute.',
             'reverse_scored' => true,
@@ -62,6 +90,7 @@ class QuestionnaireTest extends TestCase
             ])
             ->call('submit')
             ->assertHasNoErrors()
+            ->assertSee('Thank you for answering this questionnaire.')
             ->assertSee('Questionnaire submitted');
 
         $response = QuestionnaireResponse::query()->where('student_id', $student->id)->first();
@@ -78,7 +107,12 @@ class QuestionnaireTest extends TestCase
     public function test_a_single_reverse_item_answered_low_scores_high(): void
     {
         $student = $this->makeStudent();
+        $student->questionnaireResponses()->create([
+            'definition_version' => 'draft-v1',
+            'submitted_at' => null,
+        ]);
         $reverse = QuestionnaireItem::factory()->create([
+            'definition_version' => 'draft-v1',
             'construct' => 'procrastination',
             'reverse_scored' => true,
         ]);
@@ -97,17 +131,25 @@ class QuestionnaireTest extends TestCase
     {
         $student = $this->makeStudent();
         $item = QuestionnaireItem::factory()->create([
+            'definition_version' => 'draft-v1',
             'construct' => 'motivation',
             'reverse_scored' => false,
         ]);
-
-        $component = Livewire::actingAs($student->user)->test(QuestionnaireForm::class);
-        $component->set('answers.'.$item->id, 1)->call('submit')->assertHasNoErrors();
-        $component->call('retake')->set('answers.'.$item->id, 5)->call('submit')->assertHasNoErrors();
+        $first = $student->questionnaireResponses()->create([
+            'definition_version' => 'draft-v1',
+            'submitted_at' => now()->subDay(),
+            'construct_scores' => ['motivation' => 0],
+        ]);
+        $first->answers()->create(['questionnaire_item_id' => $item->id, 'value' => 1]);
+        $second = $student->questionnaireResponses()->create([
+            'definition_version' => 'draft-v1',
+            'submitted_at' => now(),
+            'construct_scores' => ['motivation' => 100],
+        ]);
+        $second->answers()->create(['questionnaire_item_id' => $item->id, 'value' => 5]);
 
         $responses = QuestionnaireResponse::query()->where('student_id', $student->id)->orderBy('id')->get();
         $this->assertCount(2, $responses);
-        $this->assertNotNull($responses[0]->submitted_at);
         $this->assertEquals(0, $responses[0]->construct_scores['motivation']);
         $this->assertEquals(100, $responses[1]->construct_scores['motivation']);
         $this->assertEquals(100, app(FeatureBuilder::class)->build($student->fresh())->constructScores()['motivation']);
@@ -117,14 +159,20 @@ class QuestionnaireTest extends TestCase
     {
         $this->seed(QuestionnaireItemSeeder::class);
         $student = $this->makeStudent();
-        $studyItems = QuestionnaireItem::query()->where('construct', 'study_habits')->orderBy('sort_order')->get();
+        $studyItems = QuestionnaireItem::query()
+            ->where('definition_version', ApprovedInstrumentCatalog::VERSION)
+            ->where('section', 'academic')
+            ->orderBy('sort_order')
+            ->get();
 
         $component = Livewire::actingAs($student->user)
             ->test(QuestionnaireForm::class)
-            ->assertSet('definitionVersion', 'draft-v1')
-            ->assertSet('construct', 'study_habits')
-            ->assertSee('0 / 20 answered')
-            ->assertSee('Category 1 of 5');
+            ->assertSet('definitionVersion', ApprovedInstrumentCatalog::VERSION)
+            ->assertSet('section', 'academic')
+            ->assertSee('0 / 36 saved')
+            ->assertSee('Section 1 of 6')
+            ->assertSee('I am satisfied with my current academic performance.')
+            ->assertSee('Strongly Disagree');
 
         foreach ($studyItems as $item) {
             $component->set('answers.'.$item->id, 4);
@@ -132,17 +180,23 @@ class QuestionnaireTest extends TestCase
 
         $component->call('saveAndContinue')
             ->assertHasNoErrors()
-            ->assertSet('construct', 'time_management');
+            ->assertSet('section', 'socioeconomic');
 
         $response = QuestionnaireResponse::query()->where('student_id', $student->id)->firstOrFail();
         $this->assertNull($response->submitted_at);
-        $this->assertSame('draft-v1', $response->definition_version);
-        $this->assertCount(4, $response->answers);
+        $this->assertSame(ApprovedInstrumentCatalog::VERSION, $response->definition_version);
+        $this->assertCount(6, $response->answers);
+        $this->assertDatabaseHas('questionnaire_items', [
+            'definition_version' => 'draft-v1',
+            'text' => 'I review my notes after class.',
+        ]);
 
         Livewire::actingAs($student->user)
             ->test(QuestionnaireForm::class)
+            ->assertSet('section', 'socioeconomic')
             ->assertSet('answers.'.$studyItems->first()->id, 4)
-            ->assertSee('4 / 20 answered');
+            ->assertSee('6 / 36 saved')
+            ->assertSee('My available budget is sufficient to cover my school-related expenses.');
     }
 
     public function test_definitions_with_student_answers_are_locked_instead_of_rewritten(): void
@@ -189,8 +243,10 @@ class QuestionnaireTest extends TestCase
         Livewire::actingAs($student->user)
             ->test(AssessmentWizard::class)
             ->call('goTo', 'employability')
-            ->assertSee('Mental alertness')
-            ->assertSee('planning categories only');
+            ->assertSet('step', 'questionnaire')
+            ->assertSee('Panel-approved · not psychometrically validated')
+            ->assertDontSee('planning categories only')
+            ->assertDontSee('Mental alertness');
         $this->actingAs($head)->get(route('student.questionnaire'))->assertForbidden();
         $this->actingAs($student->user)->get(route('admin.questionnaire'))->assertForbidden();
         $this->actingAs($admin)->get(route('admin.questionnaire'))->assertOk()->assertSee('Questionnaire items');
@@ -230,13 +286,12 @@ class QuestionnaireTest extends TestCase
             ->assertSee('Study habits')
             ->set('construct', 'procrastination')
             ->set('section', 'socioeconomic')
-            ->assertSet('construct', '')
-            ->assertSee('No categories are configured for this section yet.')
-            ->assertDontSee('Procrastination')
-            ->assertDontSee('Mental alertness')
+            ->assertSet('construct', 'socioeconomic_context')
+            ->assertSee('Socioeconomic factors')
+            ->assertDontSee('No categories are configured for this section yet.')
             ->set('section', 'academic_behavior')
             ->assertSet('construct', 'study_habits')
-            ->set('section', 'employability')
+            ->set('section', 'competence')
             ->set('construct', 'motivation')
             ->set('text', 'An employability item that should not save.')
             ->call('save')
@@ -246,6 +301,196 @@ class QuestionnaireTest extends TestCase
         $this->assertDatabaseMissing('questionnaire_items', [
             'text' => 'An employability item that should not save.',
         ]);
+    }
+
+    public function test_approved_section_means_follow_the_scoring_reference_and_do_not_enter_the_predictor(): void
+    {
+        $student = $this->makeStudent();
+        $this->seedApprovedItems(['competence', 'psychological_capital', 'self_perceived_employability', 'academic']);
+        $response = $student->questionnaireResponses()->create([
+            'definition_version' => ApprovedInstrumentCatalog::VERSION,
+            'submitted_at' => now(),
+        ]);
+        $this->answerSection($response, 'competence', [4, 5, 4, 3, 4, 4, 5, 4]);
+        $this->answerSection($response, 'psychological_capital', [4, 4, 5, 4, 3, 4]);
+        $this->answerSection($response, 'self_perceived_employability', [4, 4, 3, 4]);
+        $academic = QuestionnaireItem::query()->where('section', 'academic')->orderBy('sort_order')->firstOrFail();
+        $academic->update(['reverse_scored' => true]);
+        $response->answers()->create(['questionnaire_item_id' => $academic->id, 'value' => 1]);
+        foreach (QuestionnaireItem::query()->where('section', 'academic')->where('id', '!=', $academic->id)->get() as $item) {
+            $response->answers()->create(['questionnaire_item_id' => $item->id, 'value' => 1]);
+        }
+
+        $scores = app(QuestionnaireScorer::class)->score($response->fresh('answers.item'));
+        $this->assertSame(4.125, $scores['competence']['mean']);
+        $this->assertSame('High', $scores['competence']['level']);
+        $this->assertSame(78.13, $scores['competence']['readiness_percent']);
+        $this->assertFalse($scores['competence']['context_flag']);
+        $this->assertSame('not_connected', $scores['competence']['role']);
+        $this->assertSame(4.0, $scores['psychological_capital']['mean']);
+        $this->assertSame(75.0, $scores['psychological_capital']['readiness_percent']);
+        $this->assertSame(3.75, $scores['self_perceived_employability']['mean']);
+        $this->assertSame(68.75, $scores['self_perceived_employability']['readiness_percent']);
+        $this->assertSame('descriptive', $scores['self_perceived_employability']['role']);
+        $this->assertSame(1.0, $scores['academic_self_perception']['mean']);
+        $this->assertSame('Very Low', $scores['academic_self_perception']['level']);
+        $this->assertTrue($scores['academic_self_perception']['context_flag']);
+
+        $response->construct_scores = $scores;
+        $response->save();
+        $features = app(FeatureBuilder::class)->build($student->fresh());
+        $this->assertNull($features->studyHabits);
+        $this->assertNull($features->engagement);
+        $this->assertNotContains(4.125, $features->constructScores());
+
+        $scorer = app(QuestionnaireScorer::class);
+        $this->assertSame(['level' => 'Very Low', 'context_flag' => true], $scorer->interpret(1.80, true));
+        $this->assertSame(['level' => 'Low', 'context_flag' => true], $scorer->interpret(1.805, true));
+        $this->assertSame(['level' => 'Low', 'context_flag' => true], $scorer->interpret(2.60, true));
+        $this->assertSame(['level' => 'Moderate', 'context_flag' => false], $scorer->interpret(2.605, true));
+        $this->assertSame(['level' => 'High', 'context_flag' => false], $scorer->interpret(4.20, false));
+        $this->assertSame(['level' => 'Very High', 'context_flag' => false], $scorer->interpret(4.21, false));
+
+        $stored = app(SectionScorePresenter::class)->rows([
+            'academic_self_perception' => ['mean' => 1.5, 'label' => 'Academic factors', 'code' => 'A'],
+        ]);
+        $this->assertNull($stored[0]['level']);
+        $this->assertSame(1.5, $stored[0]['mean']);
+    }
+
+    public function test_socioeconomic_answers_are_encrypted_and_omitted_from_prediction_snapshots(): void
+    {
+        $this->seed(QuestionnaireItemSeeder::class);
+        $student = $this->makeStudent();
+        $items = QuestionnaireItem::query()->where('definition_version', ApprovedInstrumentCatalog::VERSION)->orderBy('id')->get();
+        $answers = [];
+        foreach ($items as $item) {
+            $answers[$item->id] = $item->section === 'socioeconomic' ? 2 : 4;
+        }
+
+        Livewire::actingAs($student->user)
+            ->test(QuestionnaireForm::class)
+            ->set('answers', $answers)
+            ->call('submit')
+            ->assertHasNoErrors();
+
+        $response = QuestionnaireResponse::query()->where('student_id', $student->id)->firstOrFail();
+        $sensitive = $response->answers()->whereHas('item', fn ($query) => $query->where('section', 'socioeconomic'))->firstOrFail();
+        $raw = DB::table('questionnaire_answers')->where('id', $sensitive->id)->first();
+        $this->assertSame(0, (int) $raw->value);
+        $this->assertNotSame('2', $raw->protected_value);
+        $this->assertGreaterThan(20, strlen((string) $raw->protected_value));
+        $this->assertSame(2, $sensitive->fresh()->responseValue());
+
+        $snapshot = app(QuestionnaireSnapshot::class)->for($student->fresh());
+        $encoded = json_encode($snapshot);
+        $this->assertSame(6, $snapshot['sensitive_answers_omitted']);
+        $this->assertStringNotContainsString('My available budget is sufficient to cover my school-related expenses.', $encoded);
+        $this->assertStringContainsString('I am satisfied with my current academic performance.', $encoded);
+        $this->assertEquals(4.0, $snapshot['construct_scores']['academic_self_perception']['mean']);
+
+        $prediction = Prediction::factory()->create([
+            'student_id' => $student->id,
+            'requested_by' => $student->user_id,
+            'assessment_snapshot' => [
+                'questionnaire' => [
+                    'submitted' => true,
+                    'definition_version' => 'draft-v1',
+                    'construct_scores' => ['study_habits' => 12],
+                    'answers' => [['text' => 'Saved at the time.', 'value' => 2]],
+                ],
+            ],
+            'feature_snapshot' => ['construct_scores' => ['study_habits' => 12]],
+        ]);
+        $response->construct_scores = ['study_habits' => 99];
+        $response->save();
+
+        $summary = app(AttemptSnapshot::class)->constructSummary($prediction->fresh());
+        $this->assertSame('percent', $summary[0]['presentation']);
+        $this->assertSame(12.0, $summary[0]['score']);
+        $this->assertSame(12, $prediction->fresh()->assessment_snapshot['questionnaire']['construct_scores']['study_habits']);
+
+        $head = User::factory()->departmentHead()->create();
+        $this->assertFalse(Gate::forUser($head)->allows('view', $response));
+    }
+
+    public function test_reseed_does_not_rewrite_answered_definitions_or_duplicate_items(): void
+    {
+        $this->seed(QuestionnaireItemSeeder::class);
+        $item = QuestionnaireItem::query()->where('definition_version', ApprovedInstrumentCatalog::VERSION)->where('sort_order', 1)->where('section', 'academic')->firstOrFail();
+        $student = $this->makeStudent();
+        $response = $student->questionnaireResponses()->create([
+            'definition_version' => ApprovedInstrumentCatalog::VERSION,
+            'submitted_at' => now(),
+        ]);
+        $response->answers()->create(['questionnaire_item_id' => $item->id, 'value' => 5]);
+        $item->update(['text' => 'Temporarily changed.']);
+
+        $this->seed(QuestionnaireItemSeeder::class);
+
+        $this->assertSame(56, QuestionnaireItem::query()->count());
+        $this->assertSame('Temporarily changed.', $item->fresh()->text);
+        $this->assertSame('I review my notes after class.', QuestionnaireItem::query()->where('definition_version', 'draft-v1')->where('construct', 'study_habits')->orderBy('sort_order')->value('text'));
+    }
+
+    public function test_retake_opens_the_current_instrument_and_keeps_the_submitted_response(): void
+    {
+        $this->seed(QuestionnaireItemSeeder::class);
+        $student = $this->makeStudent();
+        $items = QuestionnaireItem::query()->where('definition_version', ApprovedInstrumentCatalog::VERSION)->get();
+        $answers = [];
+        foreach ($items as $item) {
+            $answers[$item->id] = 3;
+        }
+
+        $component = Livewire::actingAs($student->user)->test(QuestionnaireForm::class);
+        $component->set('answers', $answers)->call('submit')->assertHasNoErrors();
+        $storedMean = QuestionnaireResponse::query()->where('student_id', $student->id)->firstOrFail()->construct_scores['competence']['mean'];
+        $component->call('retake')->assertSet('definitionVersion', ApprovedInstrumentCatalog::VERSION);
+
+        $responses = QuestionnaireResponse::query()->where('student_id', $student->id)->orderBy('id')->get();
+        $this->assertCount(2, $responses);
+        $this->assertNotNull($responses[0]->submitted_at);
+        $this->assertNull($responses[1]->submitted_at);
+        $this->assertEquals($storedMean, $responses[0]->fresh()->construct_scores['competence']['mean']);
+        $this->assertEquals(3.0, $responses[0]->construct_scores['competence']['mean']);
+        $this->assertSame([], $component->get('answers'));
+    }
+
+    /**
+     * @param  list<string>  $sections
+     */
+    private function seedApprovedItems(array $sections): void
+    {
+        foreach (ApprovedInstrumentCatalog::items() as $item) {
+            if (! in_array($item['section'], $sections, true)) {
+                continue;
+            }
+            QuestionnaireItem::query()->create([
+                'definition_version' => ApprovedInstrumentCatalog::VERSION,
+                'section' => $item['section'],
+                'construct' => $item['construct'],
+                'text' => $item['text'],
+                'reverse_scored' => false,
+                'is_active' => true,
+                'is_draft' => false,
+                'sort_order' => $item['sort_order'],
+            ]);
+        }
+    }
+
+    /**
+     * @param  list<int>  $values
+     */
+    private function answerSection(QuestionnaireResponse $response, string $section, array $values): void
+    {
+        $items = QuestionnaireItem::query()->where('section', $section)->orderBy('sort_order')->get();
+        foreach ($items as $index => $item) {
+            $response->answers()->create([
+                'questionnaire_item_id' => $item->id,
+                'value' => $values[$index],
+            ]);
+        }
     }
 
     private function makeStudent(): Student
