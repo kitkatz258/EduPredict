@@ -130,6 +130,7 @@ class AdminUxPolishTest extends TestCase
             ->assertDontSee('>When<', false)
             ->assertDontSee('>Actor<', false)
             ->assertDontSee('>Subject<', false)
+            ->assertSee('Signed in')
             ->assertSee('Ada Admin')
             ->assertSee('Eligible student (no specific record)')
             ->assertSee('Socioeconomic profile')

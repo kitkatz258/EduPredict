@@ -7,7 +7,7 @@
     </x-slot>
 
     <div class="space-y-6">
-        <p class="text-sm text-gray-600">{{ $college?->name ?? 'Your college' }}. These are college totals by department, program, year, and period. The page stays aggregate.</p>
+        <p class="text-sm text-gray-600">{{ $college?->name ?? 'Your college' }}. College totals only.</p>
         <livewire:analytics.dashboard-analytics />
     </div>
 </x-app-layout>

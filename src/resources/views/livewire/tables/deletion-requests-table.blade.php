@@ -5,8 +5,9 @@
             <input id="deletion-search-{{ $this->getId() }}" type="search" wire:model.live.debounce.400ms="search" placeholder="Name, email, or reason…" class="w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm">
         </div>
         <x-segmented-control
-            label="Status"
+            label="Request status"
             :options="['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected', '' => 'All']"
+            :marks="['pending' => 'bg-amber-500', 'approved' => 'bg-emerald-600', 'rejected' => 'bg-red-600', '' => 'bg-gray-400']"
             :current="$statusFilter"
             method="setStatus"
         />
@@ -33,7 +34,17 @@
                                 <span class="text-gray-600">{{ $row->user?->email }}</span>
                             </td>
                             <td class="px-4 py-3">{{ $row->reason ?: '—' }}</td>
-                            <td class="px-4 py-3">{{ ucfirst($row->status) }}</td>
+                            <td class="px-4 py-3">
+                                @php
+                                    $statusTone = match ($row->status) {
+                                        'pending' => 'bg-amber-50 text-amber-900 ring-amber-200',
+                                        'approved' => 'bg-emerald-50 text-emerald-900 ring-emerald-200',
+                                        'rejected' => 'bg-red-50 text-red-900 ring-red-200',
+                                        default => 'bg-gray-50 text-gray-700 ring-gray-200',
+                                    };
+                                @endphp
+                                <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium ring-1 {{ $statusTone }}">{{ ucfirst($row->status) }}</span>
+                            </td>
                             <td class="px-4 py-3">
                                 <x-table-action icon="ri-file-search-line" wire:click="openReview({{ $row->id }})">Review</x-table-action>
                             </td>

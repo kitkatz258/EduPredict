@@ -4,15 +4,20 @@ declare(strict_types=1);
 
 namespace App\Livewire\Tables;
 
+use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\Program;
+use App\Services\Academic\AcademicActivation;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\On;
 
 class ProgramsTable extends BaseTable
 {
+    use DispatchesToasts;
+
     public string $sortField = 'name';
 
     public string $collegeFilter = '';
@@ -62,6 +67,25 @@ class ProgramsTable extends BaseTable
         $program = Program::query()->findOrFail($programId);
         $this->authorize('update', $program);
         $this->dispatch('edit-program', programId: $programId);
+    }
+
+    public function setProgramActive(int $programId, AcademicActivation $activation): void
+    {
+        $program = Program::query()->findOrFail($programId);
+        $this->authorize('update', $program);
+        $next = ! $program->is_active;
+
+        try {
+            $activation->setProgramActive($program, $next);
+        } catch (ValidationException $exception) {
+            $this->toast($exception->validator->errors()->first() ?: 'That status change is not allowed.', 'error');
+
+            return;
+        }
+
+        $this->toast($next
+            ? 'Program activated.'
+            : 'Program deactivated. Students, grades, and predictions stay linked.');
     }
 
     #[On('catalog-changed')]
@@ -117,6 +141,7 @@ class ProgramsTable extends BaseTable
     {
         return view('livewire.tables.programs-table', [
             ...$this->tableViewData(),
+            'activeProgramCount' => Program::query()->where('is_active', true)->count(),
             'colleges' => College::query()->orderBy('code')->get(['id', 'code']),
             'departments' => Department::query()
                 ->when(ctype_digit($this->collegeFilter), fn (Builder $query) => $query->where('college_id', (int) $this->collegeFilter))

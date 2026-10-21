@@ -91,6 +91,7 @@ class ProgramForm extends Component
             $program->update($payload);
             $this->statusMessage = 'Program updated.';
         } else {
+            $payload['is_active'] = false;
             $program = Program::query()->create($payload);
             $this->programId = $program->id;
             $this->statusMessage = 'Program added.';

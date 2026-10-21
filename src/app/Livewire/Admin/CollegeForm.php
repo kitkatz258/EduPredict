@@ -70,6 +70,10 @@ class CollegeForm extends Component
             'code' => strtoupper($validated['code']),
         ];
 
+        if ($this->collegeId === null) {
+            $payload['is_active'] = false;
+        }
+
         if ($this->collegeId) {
             $college = College::query()->findOrFail($this->collegeId);
             $this->authorize('update', $college);

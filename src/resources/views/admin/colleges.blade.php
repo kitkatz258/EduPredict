@@ -7,7 +7,7 @@
     </x-slot>
 
     <div class="space-y-8">
-        <p class="text-sm text-gray-600">College, department, and program stay linked. The pilot scope is the College of Liberal Arts and Sciences (CLAS). Legacy rows stay in place so students and staff keep their links. Delete is not offered.</p>
+        <p class="text-sm text-gray-600">CLAS is the pilot. Rows stay linked, so students and history are kept. Delete is not offered.</p>
         <livewire:admin.college-form :college-id="$collegeId" :key="'college-form-'.($collegeId ?: 'new')" />
         <livewire:admin.department-form :department-id="$departmentId" :key="'department-form-'.($departmentId ?: 'new')" />
         <livewire:admin.program-form :program-id="$programId" :key="'program-form-'.($programId ?: 'new')" />

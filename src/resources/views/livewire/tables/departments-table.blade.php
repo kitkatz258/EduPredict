@@ -49,7 +49,30 @@
                             <td class="px-4 py-3">{{ $row->programs_count }}</td>
                             <td class="px-4 py-3">{{ $row->is_active ? 'Active' : 'Inactive' }}</td>
                             <td class="px-4 py-3">
-                                <x-table-action icon="ri-pencil-line" wire:click="editDepartment({{ $row->id }})">Edit</x-table-action>
+                                <div class="flex flex-wrap gap-2">
+                                    <x-table-action icon="ri-pencil-line" wire:click="editDepartment({{ $row->id }})">Edit</x-table-action>
+                                    @if ($row->is_active)
+                                        @if ((int) $row->college_id !== (int) $pilotCollegeId || $activePilotDepartments > 1)
+                                            <x-table-action
+                                                icon="ri-pause-circle-line"
+                                                tone="danger"
+                                                wire:click="setDepartmentActive({{ $row->id }})"
+                                                data-confirm="Students, programs, and prediction history stay linked. The department leaves active filters. Accounts are not deleted."
+                                                data-confirm-title="Deactivate this department?"
+                                                data-confirm-button="Deactivate"
+                                            >Deactivate</x-table-action>
+                                        @endif
+                                    @else
+                                        <x-table-action
+                                            icon="ri-play-circle-line"
+                                            wire:click="setDepartmentActive({{ $row->id }})"
+                                            data-confirm="The department is marked active again. Programs keep their current pilot status. No records are deleted."
+                                            data-confirm-title="Activate this department?"
+                                            data-confirm-button="Activate"
+                                            data-confirm-tone="neutral"
+                                        >Activate</x-table-action>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

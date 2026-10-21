@@ -3,6 +3,7 @@
     'options',
     'current',
     'method',
+    'marks' => [],
 ])
 
 @php
@@ -34,9 +35,9 @@
                     wire:loading.attr="disabled"
                     wire:target="{{ $method }}"
                     x-on:click="select($el)"
-                    class="{{ (string) $current === (string) $value ? 'bg-white text-brand-900 shadow-sm ring-1 ring-brand-200' : 'text-gray-700 hover:text-brand-900' }} relative z-10 rounded-lg px-3 py-1.5 text-sm font-medium"
+                    class="{{ (string) $current === (string) $value ? 'bg-white text-brand-900 shadow-sm ring-1 ring-brand-200' : 'text-gray-700 hover:text-brand-900' }} relative z-10 inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-medium"
                     x-bind:class="ready ? 'bg-transparent shadow-none ring-transparent' : ''"
-                >{{ $text }}</button>
+                >@if (! empty($marks[$value]))<span class="mr-1.5 inline-block h-2 w-2 rounded-full {{ $marks[$value] }}" aria-hidden="true"></span>@endif{{ $text }}</button>
             @endforeach
         </div>
     </div>

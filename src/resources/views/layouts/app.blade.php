@@ -43,8 +43,17 @@
 
             <aside
                 id="staff-sidebar"
-                class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-brand-900 text-white transition-transform duration-200 motion-reduce:transition-none lg:translate-x-0"
+                class="fixed inset-y-0 left-0 z-40 flex h-dvh w-64 -translate-x-full flex-col overscroll-contain bg-brand-900 text-white transition-transform duration-200 motion-reduce:transition-none lg:translate-x-0"
                 :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+                x-init="
+                    const applySidebar = () => {
+                        const desktop = window.matchMedia('(min-width: 1024px)').matches;
+                        $el.inert = ! desktop && ! sidebarOpen;
+                    };
+                    applySidebar();
+                    window.matchMedia('(min-width: 1024px)').addEventListener('change', applySidebar);
+                    $watch('sidebarOpen', applySidebar);
+                "
                 aria-label="Sidebar"
             >
                 <div class="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-white/10 px-5">
@@ -59,7 +68,7 @@
                         <i class="ri-close-line text-xl" aria-hidden="true"></i>
                     </button>
                 </div>
-                <nav class="flex-1 space-y-1 overflow-y-auto p-3 text-sm" aria-label="Main">
+                <nav data-sidebar-scroll class="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain p-3 text-sm" aria-label="Main">
                     @include('layouts.partials.sidebar-links')
                 </nav>
                 <div class="shrink-0 space-y-1 border-t border-white/10 p-3 text-sm">

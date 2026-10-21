@@ -1,6 +1,5 @@
 <div class="space-y-6">
-    <div class="flex flex-col gap-3 rounded-2xl border border-brand-200 bg-white p-4 shadow-sm lg:flex-row lg:items-end lg:justify-between">
-        <p class="text-sm text-gray-600">Totals use each student's latest estimate. Earlier requests stay in history and are not averaged in.@if ($stats['period_applied']) This period includes students whose latest estimate falls in the selected window.@endif</p>
+    <div class="space-y-2">
         <div class="flex flex-wrap items-end gap-3">
             @if ($departmentOptions->count() > 1)
                 <div>
@@ -45,6 +44,7 @@
             </div>
             <p wire:loading class="pb-2 text-sm text-gray-500">Updating totals…</p>
         </div>
+        <p class="text-xs text-gray-500">Totals use each student's latest estimate. Earlier requests stay in history and are not averaged in.@if ($stats['period_applied']) This period includes students whose latest estimate falls in the selected window.@endif</p>
     </div>
 
     @php

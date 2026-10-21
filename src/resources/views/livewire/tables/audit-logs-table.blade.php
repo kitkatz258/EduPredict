@@ -9,7 +9,7 @@
             <select id="audit-action-{{ $this->getId() }}" wire:model.live="actionFilter" class="rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm">
                 <option value="">All</option>
                 @foreach ($actions as $action)
-                    <option value="{{ $action }}">{{ $action }}</option>
+                    <option value="{{ $action }}">{{ \App\Support\AuditRecordLabel::action($action) }}</option>
                 @endforeach
             </select>
         </div>
@@ -31,7 +31,7 @@
                     @forelse ($rows as $index => $row)
                         <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-brand-50' }}">
                             <td class="px-4 py-3 whitespace-nowrap">{{ $row->created_at?->timezone(config('app.timezone'))->format('Y-m-d H:i') }}</td>
-                            <td class="px-4 py-3">{{ $row->action }}</td>
+                            <td class="px-4 py-3">{{ \App\Support\AuditRecordLabel::action($row->action) }}</td>
                             <td class="px-4 py-3">{{ \App\Support\AuditRecordLabel::actor($row) }}</td>
                             <td class="px-4 py-3">{{ \App\Support\AuditRecordLabel::affected($row) }}</td>
                             <td class="px-4 py-3">{{ $row->ip ?: '—' }}</td>

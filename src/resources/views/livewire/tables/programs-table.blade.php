@@ -59,7 +59,19 @@
                             <td class="px-4 py-3">{{ $row->department?->name ?? '—' }}</td>
                             <td class="px-4 py-3">{{ $row->is_active ? 'Pilot (active)' : 'Legacy (outside pilot)' }}</td>
                             <td class="px-4 py-3">
-                                <x-table-action icon="ri-pencil-line" wire:click="editProgram({{ $row->id }})">Edit</x-table-action>
+                                <div class="flex flex-wrap gap-2">
+                                    <x-table-action icon="ri-pencil-line" wire:click="editProgram({{ $row->id }})">Edit</x-table-action>
+                                    @if ($row->is_active && $activeProgramCount > 1)
+                                        <x-table-action
+                                            icon="ri-pause-circle-line"
+                                            tone="danger"
+                                            wire:click="setProgramActive({{ $row->id }})"
+                                            data-confirm="New students in this program cannot register, and it leaves CLAS aggregates. Existing students, grades, and predictions stay linked."
+                                            data-confirm-title="Deactivate this program?"
+                                            data-confirm-button="Deactivate"
+                                        >Deactivate</x-table-action>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

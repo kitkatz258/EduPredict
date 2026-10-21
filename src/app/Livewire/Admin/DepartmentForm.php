@@ -6,6 +6,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\College;
 use App\Models\Department;
+use App\Services\Academic\AcademicActivation;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
@@ -61,7 +62,7 @@ class DepartmentForm extends Component
         $this->show = false;
     }
 
-    public function save(AuditLogger $audit): void
+    public function save(AuditLogger $audit, AcademicActivation $activation): void
     {
         $this->authorize('create', Department::class);
         $validated = $this->validate([
@@ -81,6 +82,7 @@ class DepartmentForm extends Component
         if ($this->departmentId) {
             $department = Department::query()->findOrFail($this->departmentId);
             $this->authorize('update', $department);
+            $activation->assertDepartmentActive($department, (bool) $this->isActive);
             $collegeChanged = (int) $department->college_id !== (int) $payload['college_id'];
             $department->update($payload);
             if ($collegeChanged) {

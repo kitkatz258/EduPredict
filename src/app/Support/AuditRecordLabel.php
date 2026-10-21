@@ -56,6 +56,35 @@ final class AuditRecordLabel
         return $label !== '' ? $label : $type;
     }
 
+    public static function action(string $action): string
+    {
+        return match ($action) {
+            'login' => 'Signed in',
+            'account_created' => 'Account created',
+            'account_updated' => 'Account updated',
+            'account_activated' => 'Account activated',
+            'account_deactivated' => 'Account deactivated',
+            'institution_students_imported' => 'Eligible students imported',
+            'eligible_student_saved' => 'Eligible student saved',
+            'student_registered' => 'Student registered',
+            'prediction_requested' => 'Prediction requested',
+            'students.export' => 'Student list exported',
+            'student_record_viewed' => 'Student record viewed',
+            'account_deletion_requested' => 'Account deletion requested',
+            'account_deletion_processed' => 'Account deletion reviewed',
+            'college_saved' => 'College saved',
+            'department_saved' => 'Department saved',
+            'program_saved' => 'Program saved',
+            'questionnaire_item_saved' => 'Questionnaire item saved',
+            'psoc_saved' => 'Occupation saved',
+            'intervention_saved' => 'Intervention saved',
+            'data_exported' => 'Data exported',
+            'profile_saved' => 'Profile saved',
+            'adviser_assigned' => 'Adviser assigned',
+            default => ucfirst(str_replace(['_', '.'], ' ', $action)),
+        };
+    }
+
     public static function actor(AuditLog $log): string
     {
         $user = $log->user;

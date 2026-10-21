@@ -31,6 +31,7 @@
                             <input type="checkbox" wire:model="isActive" class="rounded border-brand-200 text-brand-900">
                             Active
                         </label>
+                        @error('is_active') <p class="mt-1 text-sm text-red-700" role="alert">{{ $message }}</p> @enderror
                     </div>
                 </div>
                 <div class="flex flex-wrap justify-end gap-2">

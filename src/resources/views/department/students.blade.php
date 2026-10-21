@@ -7,10 +7,7 @@
     </x-slot>
 
     <div class="space-y-6">
-        <p class="text-sm text-gray-600">
-            {{ $department?->name ?? 'Your department' }}{{ $program ? ' · '.$program->name : '' }}.
-            Status opens here. This page does not include raw questionnaire answers or socioeconomic details.
-        </p>
+        <p class="text-sm text-gray-600">{{ $department?->name ?? 'Your department' }}{{ $program ? ' · '.$program->name : '' }}. Questionnaire answers and socioeconomic details stay off this page.</p>
         <livewire:tables.scoped-students-table :status-modal="true" :initial-student-id="$openStudentId" />
     </div>
 </x-app-layout>

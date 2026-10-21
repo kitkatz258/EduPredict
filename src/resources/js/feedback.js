@@ -202,6 +202,41 @@ function clearBusy() {
     });
 }
 
+function bindStaffSidebar() {
+    document.querySelectorAll('#staff-sidebar').forEach((sidebar) => {
+        if (sidebar.dataset.wheelBound === '1') {
+            return;
+        }
+        sidebar.dataset.wheelBound = '1';
+        sidebar.addEventListener('wheel', (event) => {
+            const scroller = sidebar.querySelector('[data-sidebar-scroll]');
+            if (!scroller) {
+                return;
+            }
+            const max = scroller.scrollHeight - scroller.clientHeight;
+            if (max <= 1) {
+                event.preventDefault();
+
+                return;
+            }
+            if (event.deltaY < 0 && scroller.scrollTop <= 0) {
+                event.preventDefault();
+
+                return;
+            }
+            if (event.deltaY > 0 && scroller.scrollTop >= max - 1) {
+                event.preventDefault();
+
+                return;
+            }
+            if (!scroller.contains(event.target)) {
+                scroller.scrollTop = Math.max(0, Math.min(max, scroller.scrollTop + event.deltaY));
+                event.preventDefault();
+            }
+        }, { passive: false });
+    });
+}
+
 export function installFeedback() {
     window.toast = toast;
     window.confirmAction = confirmAction;
@@ -326,7 +361,10 @@ export function installFeedback() {
 
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('[data-flash]').forEach((el) => toast(el.dataset.flash, el.textContent.trim()));
+        bindStaffSidebar();
     });
+
+    bindStaffSidebar();
 
     document.addEventListener('livewire:init', () => {
         window.Livewire.on('toast', (payload) => {

@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Admin console</p>
-            <h2 class="text-lg font-semibold text-brand-900">Deletion requests</h2>
+            <h2 class="text-lg font-semibold text-brand-900">Account deletion requests</h2>
         </div>
     </x-slot>
 

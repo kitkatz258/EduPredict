@@ -99,7 +99,7 @@ class AdminManagementTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Eligible students are managed on their own page.')
+            ->assertSee('Institution dashboard')
             ->assertDontSee('2024-92001')
             ->assertDontSee($student->user->name);
     }

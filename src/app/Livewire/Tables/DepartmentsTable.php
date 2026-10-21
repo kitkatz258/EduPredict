@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace App\Livewire\Tables;
 
+use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Models\Department;
+use App\Services\Academic\AcademicActivation;
+use App\Services\Academic\ClasStructureSynchronizer;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\On;
 
 class DepartmentsTable extends BaseTable
 {
+    use DispatchesToasts;
+
     public string $sortField = 'name';
 
     public string $collegeFilter = '';
@@ -38,6 +44,23 @@ class DepartmentsTable extends BaseTable
         $department = Department::query()->findOrFail($departmentId);
         $this->authorize('update', $department);
         $this->dispatch('edit-department', departmentId: $departmentId);
+    }
+
+    public function setDepartmentActive(int $departmentId, AcademicActivation $activation): void
+    {
+        $department = Department::query()->findOrFail($departmentId);
+        $this->authorize('update', $department);
+        $next = ! $department->is_active;
+
+        try {
+            $activation->setDepartmentActive($department, $next);
+        } catch (ValidationException $exception) {
+            $this->toast($exception->validator->errors()->first() ?: 'That status change is not allowed.', 'error');
+
+            return;
+        }
+
+        $this->toast($next ? 'Department activated. Linked programs and students were kept.' : 'Department deactivated. Linked programs, students, and predictions were kept.');
     }
 
     #[On('catalog-changed')]
@@ -87,9 +110,15 @@ class DepartmentsTable extends BaseTable
 
     public function render(): View
     {
+        $pilotId = College::query()->where('code', ClasStructureSynchronizer::COLLEGE_CODE)->value('id');
+
         return view('livewire.tables.departments-table', [
             ...$this->tableViewData(),
             'colleges' => College::query()->orderBy('code')->get(['id', 'code', 'name']),
+            'activePilotDepartments' => $pilotId
+                ? Department::query()->where('college_id', $pilotId)->where('is_active', true)->count()
+                : 0,
+            'pilotCollegeId' => $pilotId,
         ]);
     }
 }
