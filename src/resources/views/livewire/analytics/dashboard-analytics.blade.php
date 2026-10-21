@@ -94,7 +94,6 @@
         wire:ignore
         class="grid min-w-0 gap-4 lg:grid-cols-2"
         x-data="{
-            charts: {},
             draw(payload) {
                 if (!payload || !window.Chart) {
                     return;
@@ -139,7 +138,7 @@
                     },
                     options: { maintainAspectRatio: false, plugins: { legend }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } },
                 });
-                if (payload.programs.labels.length > 1) {
+                if (payload.programs && payload.programs.labels.length > 0) {
                     this.upsert('cohort-programs-{{ $this->getId() }}', {
                         type: 'bar',
                         data: {
@@ -155,12 +154,12 @@
                 if (!canvas) {
                     return;
                 }
-                if (this.charts[id]) {
-                    this.charts[id].data = config.data;
-                    this.charts[id].update();
-                    return;
+                // Keep Chart instances off Alpine state. A proxied chart throws on the next filter update.
+                const registry = window.__edupredictCharts || (window.__edupredictCharts = {});
+                if (registry[id] && typeof registry[id].destroy === 'function') {
+                    registry[id].destroy();
                 }
-                this.charts[id] = new window.Chart(canvas, config);
+                registry[id] = new window.Chart(canvas, config);
             },
         }"
         x-init="draw(@js($charts))"

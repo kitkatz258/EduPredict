@@ -100,7 +100,12 @@ class UxRegressionTest extends TestCase
             ->call('openCreate', 'skill')
             ->assertSeeHtml('role="dialog"')
             ->assertSeeHtml('aria-modal="true"')
-            ->assertSeeHtml('aria-label="Close dialog"');
+            ->assertSeeHtml('aria-label="Close dialog"')
+            ->assertSeeHtml('data-dialog-close="closeModal"')
+            ->assertSeeHtml('window.edupredictDialogClose')
+            ->assertDontSeeHtml('$wire.call(undefined)')
+            ->assertDontSeeHtml('$wire.$call(undefined)')
+            ->assertDontSeeHtml('method: "undefined"');
     }
 
     public function test_profile_status_tokens_are_not_toasted_as_raw_text(): void

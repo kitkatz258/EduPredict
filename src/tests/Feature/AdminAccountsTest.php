@@ -99,13 +99,15 @@ class AdminAccountsTest extends TestCase
         $inside = Program::factory()->create(['college_id' => $department->college_id, 'department_id' => $department->id]);
         $outside = Program::factory()->create();
 
-        Livewire::actingAs($admin)
+        $missingDepartment = Livewire::actingAs($admin)
             ->test(CreateStaffForm::class)
             ->set('name', 'No Department')
             ->set('email', 'nodept@staff.test')
             ->set('role', UserRole::DepartmentHead->value)
             ->call('save')
             ->assertHasErrors(['department_id']);
+
+        $this->assertSame('Choose a department.', $missingDepartment->errors()->first('department_id'));
 
         Livewire::actingAs($admin)
             ->test(CreateStaffForm::class)

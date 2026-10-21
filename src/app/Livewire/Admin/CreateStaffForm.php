@@ -83,6 +83,8 @@ class CreateStaffForm extends Component
                     ->where('department_id', $this->department_id ?? 0),
             ],
         ], [
+            'department_id.required' => 'Choose a department.',
+            'college_id.required' => 'Choose a college.',
             'program_id.exists' => 'Choose a program inside the selected department.',
         ]);
 

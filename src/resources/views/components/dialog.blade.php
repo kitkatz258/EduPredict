@@ -45,9 +45,12 @@
             // $el during a click is the control that fired the listener, not this dialog.
             // Reading the host here keeps Cancel, Escape, and the backdrop on the real method.
             const host = this.$el?.closest?.('[data-dialog-close]') ?? this.$el;
+            if (typeof window.edupredictDialogClose === 'function') {
+                return window.edupredictDialogClose(host);
+            }
             const method = host?.dataset?.dialogClose ?? '';
 
-            return /^[A-Za-z_][A-Za-z0-9_]*$/.test(method) ? method : '';
+            return method !== 'undefined' && /^[A-Za-z_][A-Za-z0-9_]*$/.test(method) ? method : '';
         },
         requestClose() {
             if (this.leaving) {

@@ -123,7 +123,7 @@ class DashboardAnalyticsTest extends TestCase
             ->assertDontSee('S-MOD')
             ->assertDontSee($high->user->name);
 
-        $this->actingAs($admin)
+        $dashboard = $this->actingAs($admin)
             ->get(route('admin.dashboard'))
             ->assertOk()
             ->assertSee('Average employability is 72.3')
@@ -132,6 +132,11 @@ class DashboardAnalyticsTest extends TestCase
             ->assertDontSee('S-HIGH')
             ->assertDontSee('S-LOW')
             ->assertDontSee('S-MOD');
+
+        $dashboard
+            ->assertSee('window.__edupredictCharts', false)
+            ->assertDontSee('this.charts[id]', false)
+            ->assertDontSee('.update()', false);
 
         $this->actingAs($head)
             ->get(route('department.students'))
