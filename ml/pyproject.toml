@@ -1,0 +1,9 @@
+[project]
+name = "edupredict-ml"
+version = "0.25.0"
+description = "EduPredict M25 research-candidate training. Not a production predictor."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
