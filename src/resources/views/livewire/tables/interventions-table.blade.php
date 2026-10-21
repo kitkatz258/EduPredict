@@ -6,13 +6,14 @@
                 <input id="intervention-search-{{ $this->getId() }}" type="search" wire:model.live.debounce.400ms="search" placeholder="Search interventions…" class="w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm">
             </div>
             <div>
-                <label for="intervention-risk-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Minimum risk</label>
+                <label for="intervention-risk-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Eligible from risk level</label>
                 <select id="intervention-risk-{{ $this->getId() }}" wire:model.live="riskFilter" class="rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm">
                     <option value="">All levels</option>
                     <option value="low">Low</option>
                     <option value="moderate">Moderate</option>
                     <option value="high">High</option>
                 </select>
+                <p class="mt-1 max-w-xs text-xs text-gray-500">Moderate applies to Moderate and High. High applies only to High. The rule engine still chooses from relevant factors.</p>
             </div>
         </div>
         <button type="button" wire:click="$dispatch('add-intervention')" class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">
@@ -27,7 +28,8 @@
                     <tr>
                         <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('code')">Code</button></th>
                         <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('title')">Intervention</button></th>
-                        <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('min_risk_level')">Minimum risk</button></th>
+                        <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('min_risk_level')">Eligible from risk level</button></th>
+                        <th class="px-4 py-3 text-left font-semibold text-brand-900">Status</th>
                         <th class="px-4 py-3 text-left font-semibold text-brand-900">Factors</th>
                         <th class="px-4 py-3 text-left font-semibold text-brand-900">Actions</th>
                     </tr>
@@ -38,16 +40,36 @@
                             <td class="px-4 py-3">{{ $row->code }}</td>
                             <td class="px-4 py-3">{{ $row->title }}</td>
                             <td class="px-4 py-3">{{ ucfirst($row->min_risk_level) }}</td>
+                            <td class="px-4 py-3">{{ $row->is_active ? 'Active' : 'Inactive' }}</td>
                             <td class="px-4 py-3">{{ \App\Support\CommaList::display($row->targets_factor) }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex flex-wrap gap-2">
                                     <x-table-action icon="ri-eye-line" wire:click="viewIntervention({{ $row->id }})">View</x-table-action>
                                     <x-table-action icon="ri-pencil-line" wire:click="editIntervention({{ $row->id }})">Edit</x-table-action>
+                                    @if ($row->is_active)
+                                        <x-table-action
+                                            icon="ri-pause-circle-line"
+                                            tone="danger"
+                                            wire:click="setInterventionActive({{ $row->id }})"
+                                            data-confirm="This intervention stays on existing predictions. It will not be chosen for a new prediction."
+                                            data-confirm-title="Deactivate this intervention?"
+                                            data-confirm-button="Deactivate"
+                                        >Deactivate</x-table-action>
+                                    @else
+                                        <x-table-action
+                                            icon="ri-play-circle-line"
+                                            wire:click="setInterventionActive({{ $row->id }})"
+                                            data-confirm="This intervention can be selected again for new predictions. Existing stored actions are not rewritten."
+                                            data-confirm-title="Activate this intervention?"
+                                            data-confirm-button="Activate"
+                                            data-confirm-tone="neutral"
+                                        >Activate</x-table-action>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="px-4 py-12 text-center text-gray-500">{{ $emptyMessage }}</td></tr>
+                        <tr><td colspan="6" class="px-4 py-12 text-center text-gray-500">{{ $emptyMessage }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

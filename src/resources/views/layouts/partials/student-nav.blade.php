@@ -30,7 +30,6 @@
         </nav>
 
         <div class="ml-auto flex items-center gap-1 sm:gap-2">
-            <livewire:notification-bell />
             <div class="hidden items-center gap-2 pl-1 lg:flex">
                 <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-900 text-sm font-semibold text-white" aria-hidden="true">{{ $initials }}</span>
                 <span class="leading-tight">

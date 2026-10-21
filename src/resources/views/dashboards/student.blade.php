@@ -31,20 +31,15 @@
                 <p class="text-sm text-gray-700">Your student record is not available yet.</p>
             </section>
         @else
-            @if ($progress)
-                <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="dashboard-progress">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <p id="dashboard-progress" class="text-sm text-gray-700">Assessment workflow progress — saved sections, not a prediction-accuracy score</p>
-                        <div class="flex items-center gap-3">
-                            <p class="text-sm font-semibold text-brand-900">{{ $progress['percent'] }}%</p>
-                            <a href="{{ route('student.assessment') }}" class="inline-flex items-center gap-1 text-sm font-medium text-brand-900 hover:underline">Update assessment<i class="ri-arrow-right-s-line" aria-hidden="true"></i></a>
-                        </div>
-                    </div>
-                    <div class="mt-3 h-2 overflow-hidden rounded-full bg-brand-50" role="progressbar" aria-valuenow="{{ $progress['percent'] }}" aria-valuemin="0" aria-valuemax="100" aria-labelledby="dashboard-progress">
-                        <div class="h-full rounded-full bg-brand-400" style="width: {{ $progress['percent'] }}%"></div>
-                    </div>
-                </section>
-            @endif
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                @if (! ($progress['sections']['questionnaire'] ?? false))
+                    <p class="text-sm text-gray-700">A new prediction needs a completed current questionnaire and consent. Grades and skills are optional.</p>
+                @endif
+                <a href="{{ route('student.assessment') }}" class="inline-flex items-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">
+                    {{ ($progress['sections']['questionnaire'] ?? false) ? 'Update Assessment' : 'Complete Assessment' }}
+                    <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
+                </a>
+            </div>
 
             @if ($latest === null)
                 <section class="rounded-2xl border border-brand-200 bg-white p-8 text-center shadow-sm" aria-labelledby="no-prediction-heading">
@@ -209,7 +204,7 @@
                     <div class="border-b border-brand-200 bg-brand-50/60 p-5 lg:col-span-2 lg:border-b-0 lg:border-r">
                         <h2 id="next-steps-heading" class="text-xs font-semibold uppercase tracking-wide text-gray-500">Next steps</h2>
                         <p class="mt-2 inline-flex items-center gap-2 font-semibold text-brand-900"><i class="ri-refresh-line" aria-hidden="true"></i>Run a new prediction</p>
-                        <p class="mb-3 mt-1 text-sm text-gray-600">Uses your saved Assessment and latest confirmed grades. Earlier results stay in History.</p>
+                        <p class="mb-3 mt-1 text-sm text-gray-600">Uses the current questionnaire, consent, and the latest confirmed grades when they exist. Grades and skills are optional. Earlier results stay in History.</p>
                         <livewire:student.request-prediction />
                     </div>
                     <ul class="grid gap-px bg-brand-200/70 sm:grid-cols-2 lg:col-span-3">

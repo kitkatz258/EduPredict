@@ -261,6 +261,78 @@ class PredictionRequestTest extends TestCase
             ->assertDontSee('RISK-30002');
     }
 
+    public function test_a_questionnaire_without_grades_skills_or_household_data_does_not_invent_a_score(): void
+    {
+        $student = $this->makeStudent();
+        QuestionnaireResponse::query()->create([
+            'student_id' => $student->id,
+            'submitted_at' => now(),
+            'definition_version' => config('edupredict.questionnaire.current_version'),
+            'construct_scores' => [],
+        ]);
+
+        Livewire::actingAs($student->user)
+            ->test(RequestPrediction::class)
+            ->call('request')
+            ->assertHasErrors('request');
+
+        $this->assertSame(0, Prediction::query()->count());
+        $this->actingAs($student->user)
+            ->get(route('student.dashboard'))
+            ->assertOk()
+            ->assertSee('Insufficient information for a reliable estimate')
+            ->assertDontSee('Assessment workflow progress');
+    }
+
+    public function test_confirmed_grades_can_be_reused_without_reupload_or_skills(): void
+    {
+        $student = $this->makeStudent(semesters: 2);
+        $this->completeProfile($student, '20k_40k');
+        $student->skillsExperience()->delete();
+        $student->skills()->delete();
+
+        Livewire::actingAs($student->user)
+            ->test(RequestPrediction::class)
+            ->call('request')
+            ->assertHasNoErrors();
+
+        $prediction = Prediction::query()->sole();
+        $this->assertNotNull($prediction->feature_snapshot['gwa']);
+        $this->assertContains('skills_experience', $prediction->feature_snapshot['unavailable_inputs']);
+        $this->assertSame(0, $prediction->feature_snapshot['technical_skill_count']);
+    }
+
+    public function test_a_legacy_submission_does_not_satisfy_the_current_instrument(): void
+    {
+        $this->seed(\Database\Seeders\QuestionnaireItemSeeder::class);
+        $student = $this->makeStudent(semesters: 2);
+        $this->completeProfile($student, '20k_40k');
+        QuestionnaireResponse::query()->where('student_id', $student->id)->update([
+            'definition_version' => 'draft-v1',
+        ]);
+
+        Livewire::actingAs($student->user)
+            ->test(RequestPrediction::class)
+            ->call('request')
+            ->assertHasErrors('request');
+
+        $this->assertSame(0, Prediction::query()->count());
+    }
+
+    public function test_missing_consent_blocks_a_new_prediction(): void
+    {
+        $student = $this->makeStudent(semesters: 2);
+        $student->user->forceFill(['consented_at' => null])->save();
+        $this->completeProfile($student, '20k_40k');
+
+        Livewire::actingAs($student->user)
+            ->test(RequestPrediction::class)
+            ->call('request')
+            ->assertHasErrors('request');
+
+        $this->assertSame(0, Prediction::query()->count());
+    }
+
     private function makeStudent(
         int $semesters = 0,
         ?Program $program = null,

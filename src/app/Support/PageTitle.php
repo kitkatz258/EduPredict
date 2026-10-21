@@ -46,7 +46,7 @@ class PageTitle
             'admin.psoc' => 'PSOC occupations',
             'admin.interventions' => 'Interventions',
             'admin.audit' => 'Activity Log',
-            'admin.deletion-requests' => 'Deletion requests',
+            'admin.deletion-requests' => 'Account deletion requests',
             'students.show' => 'Student record',
             'profile.edit' => 'Account',
             'demo.table' => 'Demo table',

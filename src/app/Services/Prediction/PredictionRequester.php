@@ -7,6 +7,7 @@ namespace App\Services\Prediction;
 use App\Contracts\PredictorInterface;
 use App\Enums\UserRole;
 use App\Models\Prediction;
+use App\Models\QuestionnaireItem;
 use App\Models\Student;
 use App\Models\User;
 use App\Notifications\StudentPredictionReady;
@@ -15,7 +16,6 @@ use App\Services\Career\CareerMatchBuilder;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Grades\GradeSnapshot;
 use App\Services\Interventions\RecommendedActionBuilder;
-use App\Services\Profile\AssessmentProgress;
 use App\Services\Profile\SkillsExperienceRecords;
 use App\Services\Questionnaire\QuestionnaireSnapshot;
 use Carbon\CarbonInterface;
@@ -29,7 +29,6 @@ final class PredictionRequester
     public function __construct(
         private FeatureBuilder $features,
         private PredictorInterface $predictor,
-        private AssessmentProgress $progress,
         private AcademicSummary $academic,
         private ProgramShiftEvaluator $programShift,
         private CareerMatchBuilder $careers,
@@ -52,21 +51,13 @@ final class PredictionRequester
 
     public function blockMessage(Student $student): ?string
     {
-        $progress = $this->progress->for($student);
-        $labels = [
-            'socioeconomic' => 'a saved socioeconomic profile',
-            'skills' => 'saved skills and experience',
-            'questionnaire' => 'a submitted questionnaire',
-        ];
-        $missing = [];
-        foreach ($labels as $section => $label) {
-            if (! $progress['sections'][$section]) {
-                $missing[] = $label;
-            }
+        $student->loadMissing('user');
+        if ($student->user?->consented_at === null) {
+            return 'Consent is required before a new prediction.';
         }
 
-        if ($missing !== []) {
-            return 'Complete the required Assessment sections before requesting a prediction. Still needed: '.implode(', ', $missing).'.';
+        if (! $this->hasCurrentQuestionnaire($student)) {
+            return 'Complete the required Assessment sections before requesting a prediction. Still needed: a completed submission of the current questionnaire.';
         }
 
         $ends = $this->cooldownEndsAt($student);
@@ -74,7 +65,7 @@ final class PredictionRequester
             return 'You can request another prediction after '.$ends->timezone((string) config('app.timezone'))->format('M j, Y g:i A').'.';
         }
 
-        return null;
+        return $this->unsupportedEstimateMessage($this->features->build($student));
     }
 
     public function request(Student $student, User $actor): Prediction
@@ -92,6 +83,11 @@ final class PredictionRequester
         $this->academic->syncStudent($student);
         $current = $student->fresh();
         $featureSet = $this->features->build($current);
+        $unsupported = $this->unsupportedEstimateMessage($featureSet);
+        if ($unsupported !== null) {
+            throw new PredictionBlockedException($unsupported);
+        }
+
         $assessment = [
             'skills_experience' => $this->skillRecords->snapshot($current),
             'grades' => $this->grades->for($current),
@@ -109,7 +105,7 @@ final class PredictionRequester
                 'employability_score' => $employability->score,
                 'dropout_probability' => $dropout->probability,
                 'dropout_risk' => $dropout->riskLevel,
-                'confidence' => $dropout->confidence,
+                'confidence' => $this->confidenceFor($featureSet, $dropout->confidence),
                 'program_shift_flag' => $programShift->flag,
                 'factors' => [
                     'employability' => array_map(
@@ -122,7 +118,7 @@ final class PredictionRequester
                     ),
                     'program_shift' => $programShift->toArray(),
                 ],
-                'feature_snapshot' => $featureSet->toSnapshot(),
+                'feature_snapshot' => $this->snapshot($featureSet),
                 'assessment_snapshot' => $assessment,
             ]);
 
@@ -143,5 +139,105 @@ final class PredictionRequester
         $this->actions->ensure($prediction);
 
         return $prediction;
+    }
+
+    public const INSUFFICIENT_ESTIMATE = 'Insufficient information for a reliable estimate';
+
+    private function hasCurrentQuestionnaire(Student $student): bool
+    {
+        $version = (string) config('edupredict.questionnaire.current_version');
+        $required = QuestionnaireItem::query()
+            ->where('definition_version', $version)
+            ->where('is_active', true)
+            ->pluck('id');
+
+        if ($required->isEmpty()) {
+            return $student->questionnaireResponses()->whereNotNull('submitted_at')->exists();
+        }
+
+        $submission = $student->questionnaireResponses()
+            ->where('definition_version', $version)
+            ->whereNotNull('submitted_at')
+            ->latest('submitted_at')
+            ->latest('id')
+            ->first();
+
+        if ($submission === null) {
+            return false;
+        }
+
+        $answered = $submission->answers()
+            ->whereIn('questionnaire_item_id', $required)
+            ->pluck('questionnaire_item_id')
+            ->unique();
+
+        return $required->diff($answered)->isEmpty();
+    }
+
+    /**
+     * The placeholder can omit a missing field. It must not invent a score
+     * when every scored input would be a silent zero.
+     */
+    private function unsupportedEstimateMessage(FeatureSet $features): ?string
+    {
+        if ($features->gwa !== null) {
+            return null;
+        }
+
+        foreach ($features->constructScores() as $score) {
+            if ($score !== null) {
+                return null;
+            }
+        }
+
+        foreach ([$features->scholarshipStatus, $features->incomeBracket, $features->internetAccess, $features->deviceAccess, $features->studySpace, $features->employmentStatus] as $value) {
+            if ($value !== null) {
+                return null;
+            }
+        }
+
+        if ($features->technicalSkillCount > 0 || $features->certificationCount > 0 || $features->internshipCount > 0 || $features->workExperienceCount > 0) {
+            return null;
+        }
+
+        return self::INSUFFICIENT_ESTIMATE;
+    }
+
+    private function confidenceFor(FeatureSet $features, string $confidence): string
+    {
+        if ($features->gwa === null || in_array(null, $features->constructScores(), true)) {
+            return 'low';
+        }
+
+        return $confidence;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function snapshot(FeatureSet $features): array
+    {
+        $snapshot = $features->toSnapshot();
+        $unavailable = [];
+
+        if ($features->gwa === null) {
+            $unavailable[] = 'gwa';
+            $unavailable[] = 'failed_subjects';
+        }
+
+        foreach ($features->constructScores() as $key => $score) {
+            if ($score === null) {
+                $unavailable[] = $key;
+            }
+        }
+
+        if ($features->technicalSkillCount === 0 && $features->certificationCount === 0 && $features->internshipCount === 0 && $features->workExperienceCount === 0) {
+            $unavailable[] = 'skills_experience';
+        }
+
+        $snapshot['unavailable_inputs'] = $unavailable;
+        $snapshot['estimate_note'] = 'Workflow completeness is separate from placeholder confidence and from the risk classification. Missing grades and unmapped questionnaire section means are omitted. They are not scored as zero. Skills that were not logged are not treated as zero ability.';
+
+        return $snapshot;
     }
 }

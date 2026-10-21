@@ -19,12 +19,14 @@ class Intervention extends Model
         'description',
         'targets_factor',
         'min_risk_level',
+        'is_active',
     ];
 
     protected function casts(): array
     {
         return [
             'targets_factor' => 'array',
+            'is_active' => 'boolean',
         ];
     }
 

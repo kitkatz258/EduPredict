@@ -61,6 +61,8 @@
                                                 data-confirm-title="Deactivate this department?"
                                                 data-confirm-button="Deactivate"
                                             >Deactivate</x-table-action>
+                                        @else
+                                            <p class="max-w-xs text-xs text-gray-600">CLAS needs this active department. Students, programs, and predictions stay linked.</p>
                                         @endif
                                     @else
                                         <x-table-action

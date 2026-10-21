@@ -97,6 +97,12 @@ class InstitutionStudentsTable extends BaseTable
         return view('livewire.tables.institution-students-table', [
             ...$this->tableViewData(),
             'programs' => Program::query()->orderBy('code')->get(['id', 'code']),
+            'outOfRangeYears' => InstitutionStudent::query()
+                ->where(function (Builder $query): void {
+                    $query->where('year_level', '<', 1)->orWhere('year_level', '>', 4);
+                })
+                ->orderBy('student_number')
+                ->get(['id', 'student_number', 'year_level']),
         ]);
     }
 }

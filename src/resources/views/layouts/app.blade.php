@@ -107,7 +107,6 @@
                             <h1 class="truncate text-base font-semibold text-brand-900">{{ $heading ?? config('app.name') }}</h1>
                         @endisset
                     </div>
-                    <livewire:notification-bell />
                 </header>
 
                 <main id="main-content" class="flex-1 p-4 sm:p-6">

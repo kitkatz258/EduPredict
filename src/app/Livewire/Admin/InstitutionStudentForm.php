@@ -31,7 +31,7 @@ class InstitutionStudentForm extends Component
 
     public ?int $programId = null;
 
-    public ?int $yearLevel = null;
+    public mixed $yearLevel = null;
 
     public string $email = '';
 
@@ -80,10 +80,10 @@ class InstitutionStudentForm extends Component
 
         if ($this->recordId !== null && $this->registered) {
             $validated = $this->validate([
-                'yearLevel' => ['required', 'integer', 'between:1,6'],
+                'yearLevel' => ['required', 'integer', 'between:1,4'],
                 'email' => ['nullable', 'email', 'max:255'],
                 'birthdate' => ['nullable', 'date'],
-            ]);
+            ], $this->yearMessages());
             $record = InstitutionStudent::query()->findOrFail($this->recordId);
             $this->authorize('update', $record);
             $registry->update($record, [
@@ -98,10 +98,10 @@ class InstitutionStudentForm extends Component
                 'lastName' => ['required', 'string', 'max:255'],
                 'firstName' => ['required', 'string', 'max:255'],
                 'programId' => ['required', 'integer', Rule::exists('programs', 'id')->where('is_active', true)],
-                'yearLevel' => ['required', 'integer', 'between:1,6'],
+                'yearLevel' => ['required', 'integer', 'between:1,4'],
                 'email' => ['nullable', 'email', 'max:255'],
                 'birthdate' => ['nullable', 'date'],
-            ]);
+            ], $this->yearMessages());
             $payload = [
                 'student_number' => $validated['studentNumber'],
                 'last_name' => $validated['lastName'],
@@ -135,6 +135,20 @@ class InstitutionStudentForm extends Component
         return view('livewire.admin.institution-student-form', [
             'programs' => Program::query()->inPilotScope()->orderBy('code')->get(['id', 'code', 'name']),
         ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function yearMessages(): array
+    {
+        $message = InstitutionStudentImporter::YEAR_MESSAGE;
+
+        return [
+            'yearLevel.required' => 'Year level is required.',
+            'yearLevel.integer' => $message,
+            'yearLevel.between' => $message,
+        ];
     }
 
     private function resetForm(): void

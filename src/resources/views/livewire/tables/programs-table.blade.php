@@ -70,6 +70,10 @@
                                             data-confirm-title="Deactivate this program?"
                                             data-confirm-button="Deactivate"
                                         >Deactivate</x-table-action>
+                                    @elseif ($row->is_active)
+                                        <p class="max-w-xs text-xs text-gray-600">CLAS needs this active program. Students, grades, and predictions stay linked.</p>
+                                    @else
+                                        <p class="max-w-xs text-xs text-gray-600">Inactive. Activating this program would allow new registrations, so it stays outside the pilot.</p>
                                     @endif
                                 </div>
                             </td>

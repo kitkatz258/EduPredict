@@ -14,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class InstitutionStudentImporter
 {
+    public const YEAR_MESSAGE = 'Year level must be an integer from 1 to 4.';
     /**
      * @return array{
      *     examined: int,
@@ -85,7 +86,7 @@ class InstitutionStudentImporter
                     'last_name' => $parsed['last_name'],
                     'first_name' => $parsed['first_name'],
                     'program_id' => $programId,
-                    'year_level' => $parsed['year_level'],
+                    'year_level' => (int) $parsed['year_level_raw'],
                     'email' => $parsed['email'],
                     'birthdate' => $parsed['birthdate'],
                     'is_registered' => false,
@@ -229,7 +230,7 @@ class InstitutionStudentImporter
     /**
      * @param  list<string|null>  $row
      * @param  array<string, int>  $indexes
-     * @return array{student_number: string, last_name: string, first_name: string, program_code: string, year_level: int, email: ?string, birthdate: ?string}
+     * @return array{student_number: string, last_name: string, first_name: string, program_code: string, year_level_raw: string, email: ?string, birthdate: ?string}
      */
     private function parseRow(array $row, array $indexes): array
     {
@@ -241,14 +242,14 @@ class InstitutionStudentImporter
             'last_name' => trim((string) ($row[$indexes['last_name']] ?? '')),
             'first_name' => trim((string) ($row[$indexes['first_name']] ?? '')),
             'program_code' => strtoupper(trim((string) ($row[$indexes['program_code']] ?? ''))),
-            'year_level' => (int) ($row[$indexes['year_level']] ?? 0),
+            'year_level_raw' => trim((string) ($row[$indexes['year_level']] ?? '')),
             'email' => $email !== '' ? $email : null,
             'birthdate' => $birthdate !== '' ? $birthdate : null,
         ];
     }
 
     /**
-     * @param  array{student_number: string, last_name: string, first_name: string, program_code: string, year_level: int, email: ?string, birthdate: ?string}  $parsed
+     * @param  array{student_number: string, last_name: string, first_name: string, program_code: string, year_level_raw: string, email: ?string, birthdate: ?string}  $parsed
      * @param  array<string, true>  $seen
      * @return array{skipped: bool, message: string}|null
      */
@@ -258,8 +259,8 @@ class InstitutionStudentImporter
             return ['skipped' => false, 'message' => 'Required fields are missing.'];
         }
 
-        if ($parsed['year_level'] < 1 || $parsed['year_level'] > 6) {
-            return ['skipped' => false, 'message' => 'Year level must be between 1 and 6.'];
+        if (! preg_match('/^[1-4]$/', $parsed['year_level_raw'])) {
+            return ['skipped' => false, 'message' => self::YEAR_MESSAGE];
         }
 
         if ($parsed['birthdate'] !== null && strtotime($parsed['birthdate']) === false) {
@@ -313,14 +314,17 @@ class InstitutionStudentImporter
 
     private function yearLevel(mixed $year): int
     {
-        $year = (int) $year;
-        if ($year < 1 || $year > 6) {
+        $raw = is_string($year) ? trim($year) : $year;
+        $valid = (is_int($raw) && $raw >= 1 && $raw <= 4)
+            || (is_string($raw) && preg_match('/^[1-4]$/', $raw) === 1);
+
+        if (! $valid) {
             throw ValidationException::withMessages([
-                'yearLevel' => 'Year level must be between 1 and 6.',
+                'yearLevel' => self::YEAR_MESSAGE,
             ]);
         }
 
-        return $year;
+        return (int) $raw;
     }
 
     private function blankToNull(mixed $value): ?string

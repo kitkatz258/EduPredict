@@ -3,9 +3,6 @@
         <x-dialog :title="$readOnly ? 'View intervention' : ($interventionId ? 'Edit intervention' : 'Add intervention')" close="closeForm" description="This list is the only source of recommended actions. Saving here does not rewrite actions already stored on a prediction.">
             <form wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="save" label="Saving intervention…" />
-                @if ($statusMessage !== '')
-                    <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
-                @endif
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="intervention-code" class="mb-1 block text-sm font-medium">Code</label>
@@ -13,12 +10,13 @@
                         @error('code') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label for="intervention-risk" class="mb-1 block text-sm font-medium">Minimum risk</label>
+                        <label for="intervention-risk" class="mb-1 block text-sm font-medium">Eligible from risk level</label>
                         <select id="intervention-risk" wire:model="minRiskLevel" @disabled($readOnly) class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
                             <option value="low">Low</option>
                             <option value="moderate">Moderate</option>
                             <option value="high">High</option>
                         </select>
+                        <p id="intervention-risk-help" class="mt-1 text-xs text-gray-500">Moderate = applicable to Moderate and High; High = applicable only to High. The rule engine still selects actions based on relevant factors; it does not mean the action is automatically applied.</p>
                         @error('minRiskLevel') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
                     <div class="sm:col-span-2">

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Tables;
 
 use App\Models\College;
+use App\Services\Academic\ClasStructureSynchronizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
 use Livewire\Attributes\On;
@@ -75,6 +76,9 @@ class CollegesTable extends BaseTable
 
     public function render(): View
     {
-        return view('livewire.tables.colleges-table', $this->tableViewData());
+        return view('livewire.tables.colleges-table', [
+            ...$this->tableViewData(),
+            'clasCode' => ClasStructureSynchronizer::COLLEGE_CODE,
+        ]);
     }
 }

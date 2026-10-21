@@ -22,8 +22,8 @@
                     <option value="2">2nd Year</option>
                     <option value="3">3rd Year</option>
                     <option value="4">4th Year</option>
-                    <option value="5">5th Year</option>
-                    <option value="6">6th Year</option>
+                    <option value="5">5th Year (needs correction)</option>
+                    <option value="6">6th Year (needs correction)</option>
                 </select>
             </div>
             <div>
@@ -44,6 +44,16 @@
             </select>
         </div>
     </div>
+    @if ($outOfRangeYears->isNotEmpty())
+        <div class="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950" role="status">
+            <p class="font-medium">These eligible-student year levels are outside 1–4. They were left unchanged for correction.</p>
+            <ul class="mt-2 list-disc space-y-1 pl-5">
+                @foreach ($outOfRangeYears as $record)
+                    <li>{{ $record->student_number }} is stored as year {{ $record->year_level }}.</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <x-updating />
     <div class="overflow-hidden rounded-xl border border-brand-200 bg-white shadow-sm" wire:loading.class="opacity-60">
         <div class="overflow-x-auto">

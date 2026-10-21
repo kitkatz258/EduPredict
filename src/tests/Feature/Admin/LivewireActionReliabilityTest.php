@@ -106,7 +106,7 @@ class LivewireActionReliabilityTest extends TestCase
             ->assertSet('imported', 1)
             ->assertSet('skipped', 1)
             ->assertSee('Skipped duplicate student number 2024-55555')
-            ->assertSee('Year level must be between 1 and 6');
+            ->assertSee('Year level must be an integer from 1 to 4');
 
         $this->assertDatabaseHas('institution_students', [
             'student_number' => '2024-66666',

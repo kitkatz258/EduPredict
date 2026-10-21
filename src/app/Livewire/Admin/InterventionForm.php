@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\Intervention;
 use App\Services\Audit\AuditLogger;
 use App\Support\CommaList;
@@ -15,6 +16,7 @@ use Livewire\Component;
 
 class InterventionForm extends Component
 {
+    use DispatchesToasts;
     public bool $show = false;
 
     public bool $readOnly = false;
@@ -112,16 +114,20 @@ class InterventionForm extends Component
             $intervention = Intervention::query()->findOrFail($this->interventionId);
             $this->authorize('update', $intervention);
             $intervention->update($payload);
-            $this->statusMessage = 'Intervention updated. Actions already stored on predictions are not rewritten.';
+            $message = 'Intervention updated. Actions already stored on predictions are not rewritten.';
         } else {
             $intervention = Intervention::query()->create($payload);
-            $this->interventionId = $intervention->id;
-            $this->statusMessage = 'Intervention added to the predefined list.';
+            $message = 'Intervention added to the predefined list.';
         }
 
-        $this->show = true;
         $audit->record('intervention_saved', $intervention, ['code' => $intervention->code]);
+        $this->show = false;
+        $this->readOnly = false;
+        $this->reset(['interventionId', 'code', 'title', 'description', 'targets', 'statusMessage']);
+        $this->minRiskLevel = 'moderate';
+        $this->resetValidation();
         $this->dispatch('catalog-changed');
+        $this->toast($message);
     }
 
     public function render(): View

@@ -18,7 +18,8 @@
                     </div>
                     <div>
                         <label for="eligible-year" class="mb-1 block text-sm font-medium">Year level</label>
-                        <input id="eligible-year" type="number" min="1" max="6" wire:model="yearLevel" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                        <input id="eligible-year" type="number" min="1" max="4" step="1" wire:model="yearLevel" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                        <p class="mt-1 text-xs text-gray-500">Enter a whole number from 1 to 4.</p>
                         @error('yearLevel') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
                     <div>

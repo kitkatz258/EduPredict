@@ -111,8 +111,8 @@ class StudentProfileTest extends TestCase
         $this->actingAs($student->user)
             ->get(route('student.dashboard'))
             ->assertOk()
-            ->assertSee('Assessment workflow progress')
-            ->assertSee('50%');
+            ->assertDontSee('Assessment workflow progress')
+            ->assertSee('Complete Assessment');
 
         $this->actingAs($student->user)
             ->get(route('student.assessment'))

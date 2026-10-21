@@ -27,7 +27,7 @@
                         <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('code')">Code</button></th>
                         <th class="px-4 py-3 text-left font-semibold text-brand-900"><button type="button" wire:click="sortBy('name')">College</button></th>
                         <th class="px-4 py-3 text-left font-semibold text-brand-900">Programs</th>
-                        <th class="px-4 py-3 text-left font-semibold text-brand-900">Scope</th>
+                        <th class="px-4 py-3 text-left font-semibold text-brand-900">Status</th>
                         <th class="px-4 py-3 text-left font-semibold text-brand-900">Actions</th>
                     </tr>
                 </thead>
@@ -37,9 +37,16 @@
                             <td class="px-4 py-3">{{ $row->code }}</td>
                             <td class="px-4 py-3">{{ $row->name }}</td>
                             <td class="px-4 py-3">{{ $row->programs_count }}</td>
-                            <td class="px-4 py-3">{{ $row->is_active ? 'Pilot' : 'Legacy' }}</td>
+                            <td class="px-4 py-3">{{ $row->is_active ? 'Active' : 'Inactive' }}</td>
                             <td class="px-4 py-3">
-                                <x-table-action icon="ri-pencil-line" wire:click="editCollege({{ $row->id }})">Edit</x-table-action>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <x-table-action icon="ri-pencil-line" wire:click="editCollege({{ $row->id }})">Edit</x-table-action>
+                                    @if ($row->code === $clasCode)
+                                        <p class="max-w-xs text-xs text-gray-600">The CLAS pilot college stays active. Departments, programs, students, and predictions are not removed.</p>
+                                    @else
+                                        <p class="max-w-xs text-xs text-gray-600">Inactive colleges stay outside the pilot. Activating one would widen registration.</p>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

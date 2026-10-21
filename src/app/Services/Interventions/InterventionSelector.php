@@ -24,7 +24,7 @@ final class InterventionSelector
             return collect();
         }
 
-        $interventions = Intervention::query()->orderBy('code')->get()
+        $interventions = Intervention::query()->where('is_active', true)->orderBy('code')->get()
             ->filter(fn (Intervention $intervention): bool => $this->meetsMinimum($risk, (string) $intervention->min_risk_level))
             ->values();
 
