@@ -27,6 +27,15 @@ MODELS_DIR = ML_ROOT / "models"
 
 EMPLOYABILITY_CANDIDATE = MODELS_DIR / "employability_candidate_v1.joblib"
 DROPOUT_CANDIDATE = MODELS_DIR / "dropout_candidate_v1.joblib"
+BINARY_DROPOUT_MODELS = {
+    "full": MODELS_DIR / "dropout_binary_full_exploratory_m27.joblib",
+    "after_first_semester": MODELS_DIR / "dropout_binary_after_first_semester_m27.joblib",
+    "at_enrollment": MODELS_DIR / "dropout_binary_at_enrollment_m27.joblib",
+    "scholarship_only": MODELS_DIR / "dropout_binary_scholarship_baseline_m27.joblib",
+}
+BINARY_DROPOUT_REPORT = REPORTS_DIR / "binary_dropout_model_comparison.md"
+BINARY_DROPOUT_METRICS = REPORTS_DIR / "binary_dropout_metrics.json"
+M27_SUMMARY = REPORTS_DIR / "m27_summary.md"
 
 LIKERT_MIN = 1
 LIKERT_MAX = 5

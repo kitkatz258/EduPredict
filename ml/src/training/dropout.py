@@ -23,7 +23,6 @@ from sklearn.model_selection import (
     StratifiedKFold,
     cross_val_predict,
     cross_validate,
-    train_test_split,
 )
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -43,6 +42,7 @@ from src.data.dropout import (
     SECOND_SEMESTER_COLUMNS,
     TARGET_COLUMN,
 )
+from src.data.partitions import dropout_train_test_split
 from src.features.catalog import (
     BINARY_DROPOUT_COLUMNS,
     NOMINAL_DROPOUT_COLUMNS,
@@ -222,13 +222,11 @@ def _evaluate_feature_set(
 ) -> dict:
     predictors = frame.loc[:, list(columns)]
     target = frame[TARGET_COLUMN]
-    x_train, x_test, y_train, y_test = train_test_split(
+    x_train, x_test, y_train, y_test = dropout_train_test_split(
         predictors,
         target,
+        seed=seed,
         test_size=test_size,
-        random_state=seed,
-        shuffle=True,
-        stratify=target,
     )
     cv = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=seed)
     scoring = {
@@ -353,13 +351,11 @@ def _score_named_pipeline(
     """CV the already chosen exploratory algorithm on a timing-restricted column set."""
     predictors = frame.loc[:, list(columns)]
     target = frame[TARGET_COLUMN]
-    x_train, _x_test, y_train, _y_test = train_test_split(
+    x_train, _x_test, y_train, _y_test = dropout_train_test_split(
         predictors,
         target,
+        seed=seed,
         test_size=test_size,
-        random_state=seed,
-        shuffle=True,
-        stratify=target,
     )
     pipeline = candidate_pipelines(columns, seed)[algorithm]
     result = cross_validate(

@@ -9,7 +9,7 @@ from sklearn.dummy import DummyRegressor
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import RepeatedKFold, cross_validate, train_test_split
+from sklearn.model_selection import RepeatedKFold, cross_validate
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -21,6 +21,7 @@ from src.common import (
     TEST_SIZE,
 )
 from src.data.employability import EMPLOYABILITY_TARGET, V1_PREDICTORS
+from src.data.partitions import employability_train_test_split
 from src.features.schemas import FrameSchema
 from src.training.selection import select_candidate
 
@@ -101,12 +102,11 @@ def train_employability(
     if forbidden:
         raise ValueError(f"Target columns leaked into predictors: {forbidden}.")
 
-    x_train, x_test, y_train, y_test = train_test_split(
+    x_train, x_test, y_train, y_test = employability_train_test_split(
         predictors,
         target,
+        seed=seed,
         test_size=test_size,
-        random_state=seed,
-        shuffle=True,
     )
     cv = RepeatedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=seed)
     scoring = {

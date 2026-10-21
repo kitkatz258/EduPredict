@@ -90,6 +90,39 @@ def confusion(matrix: list[list[int]], labels: list[str], title: str, path: Path
     _save(figure, path)
 
 
+def binary_f1_bars(feature_sets: list[dict], path: Path) -> None:
+    algorithms = [row["algorithm"] for row in feature_sets[0]["rows"]]
+    colors = ["#1B5E20", "#388E3C", "#81C784", "#BDBDBD"]
+    figure, axis = plt.subplots(figsize=(10.5, 5))
+    positions = np.arange(len(feature_sets))
+    width = 0.18
+    for index, algorithm in enumerate(algorithms):
+        means = []
+        errors = []
+        for feature_set in feature_sets:
+            row = next(item for item in feature_set["rows"] if item["algorithm"] == algorithm)
+            means.append(0.0 if row["cv_f1_dropout_mean"] is None else row["cv_f1_dropout_mean"])
+            std = row["cv_f1_dropout_std"]
+            errors.append(0.0 if std is None else std)
+        offset = (index - (len(algorithms) - 1) / 2) * width
+        axis.bar(
+            positions + offset,
+            means,
+            width,
+            yerr=errors,
+            label=algorithm,
+            color=colors[index % len(colors)],
+            capsize=3,
+        )
+    labels = [feature_set["name"].replace("_", "\n") for feature_set in feature_sets]
+    axis.set_xticks(positions, labels, fontsize=8)
+    axis.set_ylabel("Repeated CV F1 for Dropout")
+    axis.set_ylim(0, 1)
+    axis.legend(fontsize=8)
+    axis.set_title("Binary dropout comparison on the training partition")
+    _save(figure, path)
+
+
 def calibration(curve: dict, title: str, path: Path) -> None:
     figure, axis = plt.subplots(figsize=(5, 5))
     axis.plot([0, 1], [0, 1], color="#666666", linewidth=1)

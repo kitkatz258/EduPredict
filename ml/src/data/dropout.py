@@ -57,6 +57,36 @@ SECOND_SEMESTER_COLUMNS = tuple(
     column for column in PREDICTOR_COLUMNS if column.startswith("Curricular units 2nd sem")
 )
 REDUCED_PREDICTORS = (SCHOLARSHIP_COLUMN,)
+DROPOUT_POSITIVE = 1
+NOT_DROPOUT = 0
+NOT_DROPOUT_SOURCE_LABELS = ("Enrolled", "Graduate")
+BINARY_TARGET_RULE = (
+    "Dropout is coded 1. Enrolled and Graduate are coded 0 and called Not Dropout."
+)
+NOT_DROPOUT_NOTE = (
+    "Not Dropout is an observed grouping of UCI records labeled Enrolled or Graduate "
+    "at the end of the normal course duration. It is not proof of future retention."
+)
+
+
+def binary_dropout_indicator(labels: pd.Series) -> pd.Series:
+    """Map the verified three-class target onto Dropout=1 and Not Dropout=0."""
+    if not isinstance(labels, pd.Series):
+        raise TypeError("Target labels must be a pandas Series.")
+    coded = labels.map(
+        {
+            "Dropout": DROPOUT_POSITIVE,
+            "Enrolled": NOT_DROPOUT,
+            "Graduate": NOT_DROPOUT,
+        }
+    )
+    if coded.isna().any():
+        unknown = sorted(set(labels.astype(str)) - {"Dropout", "Enrolled", "Graduate"})
+        raise ValueError(f"Unexpected target labels: {unknown}.")
+    result = coded.astype("int64")
+    result.index = labels.index
+    result.name = "binary_dropout"
+    return result
 
 
 def load_dropout(path=None) -> tuple[pd.DataFrame, dict]:

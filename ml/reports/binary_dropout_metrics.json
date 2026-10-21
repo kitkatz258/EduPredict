@@ -1,0 +1,2665 @@
+{
+  "generated_at": "2026-10-22T00:15:50+08:00",
+  "versions": {
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "scipy": "1.16.2",
+    "scikit-learn": "1.7.2",
+    "matplotlib": "3.10.7",
+    "joblib": "1.5.2",
+    "openpyxl": "3.1.5"
+  },
+  "dataset": {
+    "path": "ml/data/raw/dropout/data.csv",
+    "bytes": 533230,
+    "sha256": "3ef126de5cefff26eb11fbb4237f1a1401cb64b488e2f1d598c23cedeb4c45ae"
+  },
+  "dropout_quirks": {
+    "utf8_bom_on_first_column": true,
+    "trailing_tab_columns": [
+      "Daytime/evening attendance\t"
+    ]
+  },
+  "source_counts": {
+    "Graduate": 2209,
+    "Dropout": 1421,
+    "Enrolled": 794
+  },
+  "binary_counts": {
+    "Dropout": 1421,
+    "Not Dropout": 3003
+  },
+  "split": {
+    "seed": 42,
+    "test_size": 0.2,
+    "outer_split": "M25 train_test_split, stratify=three-class Target, shuffle=True. The binary label is applied after the split.",
+    "inner_cv": "RepeatedStratifiedKFold on the training partition, stratified on the binary indicator. Folds do not preserve the Enrolled versus Graduate mix inside Not Dropout.",
+    "oof": "One StratifiedKFold pass on the training partition, stratified on the binary indicator.",
+    "train_rows": 3539,
+    "test_rows": 885,
+    "train_source_counts": {
+      "Graduate": 1767,
+      "Dropout": 1137,
+      "Enrolled": 635
+    },
+    "test_source_counts": {
+      "Graduate": 442,
+      "Dropout": 284,
+      "Enrolled": 159
+    },
+    "train_binary_counts": {
+      "Dropout": 1137,
+      "Not Dropout": 2402
+    },
+    "test_binary_counts": {
+      "Dropout": 284,
+      "Not Dropout": 601
+    },
+    "train_index_sha256": "ed812c87afca7a2b7d37262498831fcc558d1531bcd9d4e4d3b696f199fc697e",
+    "test_index_sha256": "de6543c05ab9f5217ac461430845211cb2d0046be45724fd4e407c6db8a4798c",
+    "holdout_role": "exploratory_reuse_of_m25_partition",
+    "holdout_used_for_selection": false,
+    "holdout_used_for_fitting": false,
+    "target_rule": "Dropout is coded 1. Enrolled and Graduate are coded 0 and called Not Dropout.",
+    "not_dropout_note": "Not Dropout is an observed grouping of UCI records labeled Enrolled or Graduate at the end of the normal course duration. It is not proof of future retention.",
+    "n_splits": 5,
+    "n_repeats": 5
+  },
+  "feature_sets": [
+    {
+      "name": "full",
+      "role": "exploratory_reference",
+      "timing_note": "Uses all 36 UCI predictors, including second-semester curricular units and grades. Those fields are late academic results. This set is an exploratory reference, not an enrollment-time model, and it has no verified UCC mapping.",
+      "columns": [
+        "Marital status",
+        "Application mode",
+        "Application order",
+        "Course",
+        "Daytime/evening attendance",
+        "Previous qualification",
+        "Previous qualification (grade)",
+        "Nacionality",
+        "Mother's qualification",
+        "Father's qualification",
+        "Mother's occupation",
+        "Father's occupation",
+        "Admission grade",
+        "Displaced",
+        "Educational special needs",
+        "Debtor",
+        "Tuition fees up to date",
+        "Gender",
+        "Scholarship holder",
+        "Age at enrollment",
+        "International",
+        "Curricular units 1st sem (credited)",
+        "Curricular units 1st sem (enrolled)",
+        "Curricular units 1st sem (evaluations)",
+        "Curricular units 1st sem (approved)",
+        "Curricular units 1st sem (grade)",
+        "Curricular units 1st sem (without evaluations)",
+        "Curricular units 2nd sem (credited)",
+        "Curricular units 2nd sem (enrolled)",
+        "Curricular units 2nd sem (evaluations)",
+        "Curricular units 2nd sem (approved)",
+        "Curricular units 2nd sem (grade)",
+        "Curricular units 2nd sem (without evaluations)",
+        "Unemployment rate",
+        "Inflation rate",
+        "GDP"
+      ],
+      "removed_columns": [],
+      "n_columns": 36,
+      "rows": [
+        {
+          "algorithm": "Logistic Regression",
+          "selectable": true,
+          "cv_precision_mean": 0.7762200898415571,
+          "cv_precision_std": 0.023146082873523648,
+          "cv_recall_mean": 0.8189744184249169,
+          "cv_recall_std": 0.030314146973119453,
+          "cv_f1_dropout_mean": 0.7965477095875836,
+          "cv_f1_dropout_std": 0.018307803796538808,
+          "cv_balanced_accuracy_mean": 0.8533667137169629,
+          "cv_balanced_accuracy_std": 0.014508988087188349,
+          "cv_roc_auc_mean": 0.9235273494860499,
+          "cv_roc_auc_std": 0.012015500698922597,
+          "cv_pr_auc_mean": 0.8845115096341226,
+          "cv_pr_auc_std": 0.017354749567056186,
+          "cv_brier_mean": 0.09961994563304709,
+          "cv_brier_std": 0.007184516086620766,
+          "cv_accuracy_mean": 0.865666099297581,
+          "cv_accuracy_std": 0.011832742840466611,
+          "cv_train_f1_dropout_mean": 0.8238858845534289,
+          "f1_generalization_gap": 0.02733817496584534,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.7790794979079498,
+            "recall_dropout": 0.8188214599824098,
+            "f1_dropout": 0.7984562607204116,
+            "precision_not_dropout": 0.9121160409556314,
+            "recall_not_dropout": 0.8900915903413822,
+            "f1_not_dropout": 0.9009692372524231,
+            "f1_macro": 0.8497127489864174,
+            "balanced_accuracy": 0.8544565251618961,
+            "accuracy": 0.8671941226335123,
+            "roc_auc": 0.923664829294263,
+            "pr_auc": 0.883018910407447,
+            "brier": 0.09908992037375562,
+            "confusion_matrix": [
+              [
+                2138,
+                264
+              ],
+              [
+                206,
+                931
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 2138,
+            "false_positive": 264,
+            "false_negative": 206,
+            "true_positive": 931,
+            "false_negative_rate": 0.18117854001759015,
+            "false_positive_rate": 0.10990840965861781,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.01805869074492099,
+                0.042986425339366516,
+                0.06334841628959276,
+                0.06772009029345373,
+                0.19230769230769232,
+                0.3936651583710407,
+                0.8212669683257918,
+                0.9706546275395034
+              ],
+              "mean_predicted": [
+                0.026327387380787912,
+                0.056211961640898554,
+                0.09238882187011714,
+                0.15961660282949344,
+                0.30482382169649336,
+                0.5766990079442642,
+                0.9086356413538605,
+                0.9919400532125334
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 176,
+              "Graduate": 88
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.760655737704918,
+            "recall_dropout": 0.8169014084507042,
+            "f1_dropout": 0.7877758913412564,
+            "precision_not_dropout": 0.9103448275862069,
+            "recall_not_dropout": 0.8785357737104825,
+            "f1_not_dropout": 0.8941574936494496,
+            "f1_macro": 0.8409666924953529,
+            "balanced_accuracy": 0.8477185910805933,
+            "accuracy": 0.8587570621468926,
+            "roc_auc": 0.9131611633193504,
+            "pr_auc": 0.8795595893506213,
+            "brier": 0.10637747600154088,
+            "confusion_matrix": [
+              [
+                528,
+                73
+              ],
+              [
+                52,
+                232
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 528,
+            "false_positive": 73,
+            "false_negative": 52,
+            "true_positive": 232,
+            "false_negative_rate": 0.18309859154929578,
+            "false_positive_rate": 0.12146422628951747,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.036036036036036036,
+                0.06306306306306306,
+                0.05454545454545454,
+                0.08108108108108109,
+                0.18181818181818182,
+                0.38738738738738737,
+                0.7727272727272727,
+                0.990990990990991
+              ],
+              "mean_predicted": [
+                0.027629807853505325,
+                0.06088137407118698,
+                0.09584705840076736,
+                0.17421819804106986,
+                0.31095210621499914,
+                0.5866544744756569,
+                0.9044160559165594,
+                0.9918111875091978
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 51,
+              "Graduate": 22
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Random Forest Classifier",
+          "selectable": true,
+          "cv_precision_mean": 0.8763649567873252,
+          "cv_precision_std": 0.02131527492991637,
+          "cv_recall_mean": 0.6909142901306129,
+          "cv_recall_std": 0.03250263640688398,
+          "cv_f1_dropout_mean": 0.7722133788085199,
+          "cv_f1_dropout_std": 0.02336221883538325,
+          "cv_balanced_accuracy_mean": 0.8223081499163112,
+          "cv_balanced_accuracy_std": 0.01640786468468648,
+          "cv_roc_auc_mean": 0.916645922145973,
+          "cv_roc_auc_std": 0.01178077027357571,
+          "cv_pr_auc_mean": 0.8724807137126751,
+          "cv_pr_auc_std": 0.01715815421838619,
+          "cv_brier_mean": 0.10061120259871023,
+          "cv_brier_std": 0.006253884430479214,
+          "cv_accuracy_mean": 0.8692841560185074,
+          "cv_accuracy_std": 0.011549614698648614,
+          "cv_train_f1_dropout_mean": 1.0,
+          "f1_generalization_gap": 0.22778662119148008,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.8797752808988764,
+            "recall_dropout": 0.6886543535620053,
+            "f1_dropout": 0.7725703009373458,
+            "precision_not_dropout": 0.8663646659116648,
+            "recall_not_dropout": 0.9554537885095754,
+            "f1_not_dropout": 0.9087309443674519,
+            "f1_macro": 0.8406506226523989,
+            "balanced_accuracy": 0.8220540710357904,
+            "accuracy": 0.8697372139022322,
+            "roc_auc": 0.9171022096069166,
+            "pr_auc": 0.8704131952472715,
+            "brier": 0.10089776773099744,
+            "confusion_matrix": [
+              [
+                2295,
+                107
+              ],
+              [
+                354,
+                783
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 2295,
+            "false_positive": 107,
+            "false_negative": 354,
+            "true_positive": 783,
+            "false_negative_rate": 0.3113456464379947,
+            "false_positive_rate": 0.04454621149042465,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.028142589118198873,
+                0.02824858757062147,
+                0.056112224448897796,
+                0.1323529411764706,
+                0.1867881548974943,
+                0.4045977011494253,
+                0.8090909090909091,
+                0.9651972157772621
+              ],
+              "mean_predicted": [
+                0.024033771106941618,
+                0.058644067796610314,
+                0.09775551102204405,
+                0.1570833333333332,
+                0.24537585421412314,
+                0.40213793103448253,
+                0.6645454545454543,
+                0.9124593967517395
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 89,
+              "Graduate": 18
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.8603603603603603,
+            "recall_dropout": 0.6725352112676056,
+            "f1_dropout": 0.7549407114624506,
+            "precision_not_dropout": 0.8597285067873304,
+            "recall_not_dropout": 0.9484193011647255,
+            "f1_not_dropout": 0.9018987341772152,
+            "f1_macro": 0.8284197228198329,
+            "balanced_accuracy": 0.8104772562161655,
+            "accuracy": 0.8598870056497175,
+            "roc_auc": 0.9104895596540976,
+            "pr_auc": 0.8631515026968916,
+            "brier": 0.10425717514124294,
+            "confusion_matrix": [
+              [
+                570,
+                31
+              ],
+              [
+                93,
+                191
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 570,
+            "false_positive": 31,
+            "false_negative": 93,
+            "true_positive": 191,
+            "false_negative_rate": 0.3274647887323944,
+            "false_positive_rate": 0.051580698835274545,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.031746031746031744,
+                0.040983606557377046,
+                0.06741573033707865,
+                0.09401709401709402,
+                0.21568627450980393,
+                0.42105263157894735,
+                0.7830188679245284,
+                0.963302752293578
+              ],
+              "mean_predicted": [
+                0.024365079365079347,
+                0.06590163934426228,
+                0.10483146067415725,
+                0.16452991452991456,
+                0.24882352941176486,
+                0.4068421052631578,
+                0.649056603773585,
+                0.9019266055045873
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 26,
+              "Graduate": 5
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Gradient Boosting Classifier",
+          "selectable": true,
+          "cv_precision_mean": 0.7782750983284604,
+          "cv_precision_std": 0.022596597914142456,
+          "cv_recall_mean": 0.8075438596491229,
+          "cv_recall_std": 0.03711665493990884,
+          "cv_f1_dropout_mean": 0.7921262690152776,
+          "cv_f1_dropout_std": 0.022929530722716307,
+          "cv_balanced_accuracy_mean": 0.8491487489513804,
+          "cv_balanced_accuracy_std": 0.01834776080854842,
+          "cv_roc_auc_mean": 0.9204818504827706,
+          "cv_roc_auc_std": 0.013177457985832797,
+          "cv_pr_auc_mean": 0.8793131742452384,
+          "cv_pr_auc_std": 0.018694056933604538,
+          "cv_brier_mean": 0.10108208878014914,
+          "cv_brier_std": 0.006928041287505152,
+          "cv_accuracy_mean": 0.8640276013073462,
+          "cv_accuracy_std": 0.0137915331199768,
+          "cv_train_f1_dropout_mean": 0.8479617515024651,
+          "f1_generalization_gap": 0.055835482487187504,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.7729184188393609,
+            "recall_dropout": 0.8082673702726473,
+            "f1_dropout": 0.7901977644024075,
+            "precision_not_dropout": 0.9072340425531915,
+            "recall_not_dropout": 0.88759367194005,
+            "f1_not_dropout": 0.8973063973063973,
+            "f1_macro": 0.8437520808544023,
+            "balanced_accuracy": 0.8479305211063486,
+            "accuracy": 0.8621079400960724,
+            "roc_auc": 0.9186395169080002,
+            "pr_auc": 0.8763270105564144,
+            "brier": 0.10160640600653062,
+            "confusion_matrix": [
+              [
+                2132,
+                270
+              ],
+              [
+                218,
+                919
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 2132,
+            "false_positive": 270,
+            "false_negative": 218,
+            "true_positive": 919,
+            "false_negative_rate": 0.1917326297273527,
+            "false_positive_rate": 0.11240632805995004,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.033860045146726865,
+                0.04524886877828054,
+                0.05656108597285068,
+                0.0744920993227991,
+                0.19230769230769232,
+                0.3778280542986425,
+                0.8280542986425339,
+                0.9616252821670429
+              ],
+              "mean_predicted": [
+                0.05816151224086002,
+                0.08331962396775718,
+                0.11537914283690826,
+                0.17632102961983734,
+                0.3021457407254368,
+                0.5635224919870249,
+                0.8734405712597355,
+                0.9680967977755868
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 194,
+              "Graduate": 76
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.7435064935064936,
+            "recall_dropout": 0.8063380281690141,
+            "f1_dropout": 0.7736486486486487,
+            "precision_not_dropout": 0.9046793760831889,
+            "recall_not_dropout": 0.8685524126455907,
+            "f1_not_dropout": 0.8862478777589134,
+            "f1_macro": 0.8299482632037811,
+            "balanced_accuracy": 0.8374452204073024,
+            "accuracy": 0.848587570621469,
+            "roc_auc": 0.9135507721871998,
+            "pr_auc": 0.8717723405085549,
+            "brier": 0.10862186792554311,
+            "confusion_matrix": [
+              [
+                522,
+                79
+              ],
+              [
+                55,
+                229
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 522,
+            "false_positive": 79,
+            "false_negative": 55,
+            "true_positive": 229,
+            "false_negative_rate": 0.1936619718309859,
+            "false_positive_rate": 0.1314475873544093,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.02702702702702703,
+                0.018018018018018018,
+                0.06363636363636363,
+                0.11711711711711711,
+                0.22727272727272727,
+                0.36936936936936937,
+                0.7727272727272727,
+                0.972972972972973
+              ],
+              "mean_predicted": [
+                0.06269179366009571,
+                0.08565306681855764,
+                0.11946679774406083,
+                0.1834404294848586,
+                0.3149713153370645,
+                0.5795998909091591,
+                0.8644235040360012,
+                0.9691631773500904
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 61,
+              "Graduate": 18
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Majority baseline",
+          "selectable": false,
+          "cv_precision_mean": 0.0,
+          "cv_precision_std": 0.0,
+          "cv_recall_mean": 0.0,
+          "cv_recall_std": 0.0,
+          "cv_f1_dropout_mean": 0.0,
+          "cv_f1_dropout_std": 0.0,
+          "cv_balanced_accuracy_mean": 0.5,
+          "cv_balanced_accuracy_std": 0.0,
+          "cv_roc_auc_mean": null,
+          "cv_roc_auc_std": null,
+          "cv_pr_auc_mean": 0.3212771398205196,
+          "cv_pr_auc_std": 0.0006528862608645576,
+          "cv_brier_mean": 0.3212771398205196,
+          "cv_brier_std": 0.0006528862608645576,
+          "cv_accuracy_mean": 0.6787228601794805,
+          "cv_accuracy_std": 0.0006528862608646077,
+          "cv_train_f1_dropout_mean": 0.0,
+          "f1_generalization_gap": 0.0,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.0,
+            "recall_dropout": 0.0,
+            "f1_dropout": 0.0,
+            "precision_not_dropout": 0.6787228030517095,
+            "recall_not_dropout": 1.0,
+            "f1_not_dropout": 0.8086180777646861,
+            "f1_macro": 0.40430903888234304,
+            "balanced_accuracy": 0.5,
+            "accuracy": 0.6787228030517095,
+            "roc_auc": null,
+            "pr_auc": 0.3212771969482905,
+            "brier": 0.3212771969482905,
+            "confusion_matrix": [
+              [
+                2402,
+                0
+              ],
+              [
+                1137,
+                0
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 2402,
+            "false_positive": 0,
+            "false_negative": 1137,
+            "true_positive": 0,
+            "false_negative_rate": 1.0,
+            "false_positive_rate": 0.0,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.3212771969482905
+              ],
+              "mean_predicted": [
+                0.0
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 0,
+              "Graduate": 0
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.0,
+            "recall_dropout": 0.0,
+            "f1_dropout": 0.0,
+            "precision_not_dropout": 0.6790960451977401,
+            "recall_not_dropout": 1.0,
+            "f1_not_dropout": 0.8088829071332436,
+            "f1_macro": 0.4044414535666218,
+            "balanced_accuracy": 0.5,
+            "accuracy": 0.6790960451977401,
+            "roc_auc": null,
+            "pr_auc": 0.32090395480225986,
+            "brier": 0.32090395480225986,
+            "confusion_matrix": [
+              [
+                601,
+                0
+              ],
+              [
+                284,
+                0
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 601,
+            "false_positive": 0,
+            "false_negative": 284,
+            "true_positive": 0,
+            "false_negative_rate": 1.0,
+            "false_positive_rate": 0.0,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.32090395480225986
+              ],
+              "mean_predicted": [
+                0.0
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 0,
+              "Graduate": 0
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        }
+      ],
+      "decision": {
+        "algorithm": "Logistic Regression",
+        "metric": "cv_f1_dropout_mean",
+        "higher_is_better": true,
+        "margin": 0.01,
+        "preference": [
+          "Logistic Regression",
+          "Random Forest Classifier",
+          "Gradient Boosting Classifier"
+        ],
+        "contenders": [
+          "Logistic Regression",
+          "Gradient Boosting Classifier"
+        ],
+        "best_metric_value": 0.7965477095875836,
+        "accuracy_not_used": true,
+        "holdout_not_used": true
+      },
+      "accuracy_leaders": [
+        "Random Forest Classifier"
+      ],
+      "balanced_accuracy_leaders": [
+        "Logistic Regression"
+      ],
+      "pr_auc_leaders": [
+        "Logistic Regression"
+      ],
+      "training_rows_fit": 3539
+    },
+    {
+      "name": "after_first_semester",
+      "role": "timing_sensitivity",
+      "timing_note": "Drops the six second-semester curricular columns and keeps first-semester curricular results. The columns are appropriate only after those first-semester results exist. Grades stay on the UCI scale. No UCC conversion is applied.",
+      "columns": [
+        "Marital status",
+        "Application mode",
+        "Application order",
+        "Course",
+        "Daytime/evening attendance",
+        "Previous qualification",
+        "Previous qualification (grade)",
+        "Nacionality",
+        "Mother's qualification",
+        "Father's qualification",
+        "Mother's occupation",
+        "Father's occupation",
+        "Admission grade",
+        "Displaced",
+        "Educational special needs",
+        "Debtor",
+        "Tuition fees up to date",
+        "Gender",
+        "Scholarship holder",
+        "Age at enrollment",
+        "International",
+        "Curricular units 1st sem (credited)",
+        "Curricular units 1st sem (enrolled)",
+        "Curricular units 1st sem (evaluations)",
+        "Curricular units 1st sem (approved)",
+        "Curricular units 1st sem (grade)",
+        "Curricular units 1st sem (without evaluations)",
+        "Unemployment rate",
+        "Inflation rate",
+        "GDP"
+      ],
+      "removed_columns": [
+        "Curricular units 2nd sem (credited)",
+        "Curricular units 2nd sem (enrolled)",
+        "Curricular units 2nd sem (evaluations)",
+        "Curricular units 2nd sem (approved)",
+        "Curricular units 2nd sem (grade)",
+        "Curricular units 2nd sem (without evaluations)"
+      ],
+      "n_columns": 30,
+      "rows": [
+        {
+          "algorithm": "Logistic Regression",
+          "selectable": true,
+          "cv_precision_mean": 0.7484917381797926,
+          "cv_precision_std": 0.02331489039497122,
+          "cv_recall_mean": 0.7975291753613107,
+          "cv_recall_std": 0.029072449891199514,
+          "cv_f1_dropout_mean": 0.7716864065248934,
+          "cv_f1_dropout_std": 0.01596574481749482,
+          "cv_balanced_accuracy_mean": 0.8350263686924364,
+          "cv_balanced_accuracy_std": 0.012718169167620296,
+          "cv_roc_auc_mean": 0.9046355858245928,
+          "cv_roc_auc_std": 0.011991829879057397,
+          "cv_pr_auc_mean": 0.8585857374380703,
+          "cv_pr_auc_std": 0.018675488484621056,
+          "cv_brier_mean": 0.11326483635857269,
+          "cv_brier_std": 0.006705718550278478,
+          "cv_accuracy_mean": 0.8484311046116717,
+          "cv_accuracy_std": 0.010965363249693372,
+          "cv_train_f1_dropout_mean": 0.8005320730781732,
+          "f1_generalization_gap": 0.028845666553279803,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.7438423645320197,
+            "recall_dropout": 0.7968337730870713,
+            "f1_dropout": 0.7694267515923567,
+            "precision_not_dropout": 0.9004739336492891,
+            "recall_not_dropout": 0.8701082431307244,
+            "f1_not_dropout": 0.8850307008257463,
+            "f1_macro": 0.8272287262090515,
+            "balanced_accuracy": 0.8334710081088978,
+            "accuracy": 0.846566826787228,
+            "roc_auc": 0.9044247794091262,
+            "pr_auc": 0.8563199986885782,
+            "brier": 0.1134268967399828,
+            "confusion_matrix": [
+              [
+                2090,
+                312
+              ],
+              [
+                231,
+                906
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 2090,
+            "false_positive": 312,
+            "false_negative": 231,
+            "true_positive": 906,
+            "false_negative_rate": 0.20316622691292877,
+            "false_positive_rate": 0.1298917568692756,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.02708803611738149,
+                0.058823529411764705,
+                0.07918552036199095,
+                0.09255079006772009,
+                0.18552036199095023,
+                0.4072398190045249,
+                0.753393665158371,
+                0.9661399548532731
+              ],
+              "mean_predicted": [
+                0.036160972926557344,
+                0.07614263203253702,
+                0.1233473931167967,
+                0.19918760931899523,
+                0.3378433151325732,
+                0.5708965118024112,
+                0.8678505728277673,
+                0.9872886082491045
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 196,
+              "Graduate": 116
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.735973597359736,
+            "recall_dropout": 0.7852112676056338,
+            "f1_dropout": 0.7597955706984668,
+            "precision_not_dropout": 0.8951890034364262,
+            "recall_not_dropout": 0.8668885191347754,
+            "f1_not_dropout": 0.8808114961961115,
+            "f1_macro": 0.8203035334472892,
+            "balanced_accuracy": 0.8260498933702045,
+            "accuracy": 0.8406779661016949,
+            "roc_auc": 0.9043319819080875,
+            "pr_auc": 0.8611458991331731,
+            "brier": 0.11518333404294741,
+            "confusion_matrix": [
+              [
+                521,
+                80
+              ],
+              [
+                61,
+                223
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 521,
+            "false_positive": 80,
+            "false_negative": 61,
+            "true_positive": 223,
+            "false_negative_rate": 0.2147887323943662,
+            "false_positive_rate": 0.13311148086522462,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.04504504504504504,
+                0.036036036036036036,
+                0.03636363636363636,
+                0.13513513513513514,
+                0.21818181818181817,
+                0.3963963963963964,
+                0.7272727272727273,
+                0.972972972972973
+              ],
+              "mean_predicted": [
+                0.03776231268481644,
+                0.08401237925731424,
+                0.134762261145836,
+                0.20906620716723232,
+                0.34668980709668773,
+                0.5669187969276032,
+                0.8557099791348939,
+                0.9868386683286572
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 50,
+              "Graduate": 30
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Random Forest Classifier",
+          "selectable": true,
+          "cv_precision_mean": 0.8574277248023576,
+          "cv_precision_std": 0.023155460029295742,
+          "cv_recall_mean": 0.6543504134786304,
+          "cv_recall_std": 0.03235546899332566,
+          "cv_f1_dropout_mean": 0.7417412056572061,
+          "cv_f1_dropout_std": 0.023869678400421625,
+          "cv_balanced_accuracy_mean": 0.8013211700102785,
+          "cv_balanced_accuracy_std": 0.01625442199598968,
+          "cv_roc_auc_mean": 0.8973575141264031,
+          "cv_roc_auc_std": 0.01305699838183784,
+          "cv_pr_auc_mean": 0.8469817431624337,
+          "cv_pr_auc_std": 0.02114971816410207,
+          "cv_brier_mean": 0.1136296879869585,
+          "cv_brier_std": 0.006330623629535733,
+          "cv_accuracy_mean": 0.8538573905816732,
+          "cv_accuracy_std": 0.011591491719375771,
+          "cv_train_f1_dropout_mean": 1.0,
+          "f1_generalization_gap": 0.25825879434279386,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.8592848904267589,
+            "recall_dropout": 0.6552330694810906,
+            "f1_dropout": 0.7435129740518962,
+            "precision_not_dropout": 0.8532934131736527,
+            "recall_not_dropout": 0.9492089925062448,
+            "f1_not_dropout": 0.8986992510839574,
+            "f1_macro": 0.8211061125679269,
+            "balanced_accuracy": 0.8022210309936677,
+            "accuracy": 0.8547612319864368,
+            "roc_auc": 0.8981234122546661,
+            "pr_auc": 0.8459725428938845,
+            "brier": 0.11385611754732976,
+            "confusion_matrix": [
+              [
+                2280,
+                122
+              ],
+              [
+                392,
+                745
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 2280,
+            "false_positive": 122,
+            "false_negative": 392,
+            "true_positive": 745,
+            "false_negative_rate": 0.3447669305189094,
+            "false_positive_rate": 0.0507910074937552,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.03289473684210526,
+                0.04950495049504951,
+                0.08333333333333333,
+                0.1431818181818182,
+                0.19714964370546317,
+                0.391304347826087,
+                0.7560975609756098,
+                0.9560185185185185
+              ],
+              "mean_predicted": [
+                0.031666666666666544,
+                0.08071287128712887,
+                0.1298095238095236,
+                0.18752272727272715,
+                0.27080760095011913,
+                0.4027053140096618,
+                0.6125498891352551,
+                0.8488425925925925
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 89,
+              "Graduate": 33
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.8333333333333334,
+            "recall_dropout": 0.6161971830985915,
+            "f1_dropout": 0.708502024291498,
+            "precision_not_dropout": 0.8385185185185186,
+            "recall_not_dropout": 0.9417637271214643,
+            "f1_not_dropout": 0.8871473354231975,
+            "f1_macro": 0.7978246798573477,
+            "balanced_accuracy": 0.7789804551100279,
+            "accuracy": 0.8372881355932204,
+            "roc_auc": 0.8903089920554944,
+            "pr_auc": 0.8351784525586325,
+            "brier": 0.1183084745762712,
+            "confusion_matrix": [
+              [
+                566,
+                35
+              ],
+              [
+                109,
+                175
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 566,
+            "false_positive": 35,
+            "false_negative": 109,
+            "true_positive": 175,
+            "false_negative_rate": 0.38380281690140844,
+            "false_positive_rate": 0.05823627287853577,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.047619047619047616,
+                0.037037037037037035,
+                0.08620689655172414,
+                0.11224489795918367,
+                0.26666666666666666,
+                0.3783783783783784,
+                0.6936936936936937,
+                0.9636363636363636
+              ],
+              "mean_predicted": [
+                0.03746031746031742,
+                0.0851851851851852,
+                0.13034482758620689,
+                0.1840816326530613,
+                0.2661904761904762,
+                0.39243243243243237,
+                0.5966666666666667,
+                0.8494545454545457
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 27,
+              "Graduate": 8
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Gradient Boosting Classifier",
+          "selectable": true,
+          "cv_precision_mean": 0.7542389829237868,
+          "cv_precision_std": 0.02177868656593176,
+          "cv_recall_mean": 0.7838047762578253,
+          "cv_recall_std": 0.03734218190011082,
+          "cv_f1_dropout_mean": 0.7683319019534762,
+          "cv_f1_dropout_std": 0.024498897348841614,
+          "cv_balanced_accuracy_mean": 0.8313670450935696,
+          "cv_balanced_accuracy_std": 0.01928484220374313,
+          "cv_roc_auc_mean": 0.9000116311367904,
+          "cv_roc_auc_std": 0.013688565959304838,
+          "cv_pr_auc_mean": 0.8540920559316975,
+          "cv_pr_auc_std": 0.01901830478128794,
+          "cv_brier_mean": 0.11458283349497572,
+          "cv_brier_std": 0.006483208312248109,
+          "cv_accuracy_mean": 0.8483729293026155,
+          "cv_accuracy_std": 0.014429934584195588,
+          "cv_train_f1_dropout_mean": 0.826563592232385,
+          "f1_generalization_gap": 0.05823169027890873,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.7525337837837838,
+            "recall_dropout": 0.783641160949868,
+            "f1_dropout": 0.7677725118483413,
+            "precision_not_dropout": 0.8955414012738854,
+            "recall_not_dropout": 0.8780183180682765,
+            "f1_not_dropout": 0.8866932940929158,
+            "f1_macro": 0.8272329029706285,
+            "balanced_accuracy": 0.8308297395090722,
+            "accuracy": 0.8476970895733258,
+            "roc_auc": 0.8987423995102294,
+            "pr_auc": 0.8534166349198128,
+            "brier": 0.11464794568313469,
+            "confusion_matrix": [
+              [
+                2109,
+                293
+              ],
+              [
+                246,
+                891
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 2109,
+            "false_positive": 293,
+            "false_negative": 246,
+            "true_positive": 891,
+            "false_negative_rate": 0.21635883905013192,
+            "false_positive_rate": 0.12198168193172357,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.03837471783295711,
+                0.07692307692307693,
+                0.05656108597285068,
+                0.09480812641083522,
+                0.19909502262443438,
+                0.38687782805429866,
+                0.7647058823529411,
+                0.9525959367945824
+              ],
+              "mean_predicted": [
+                0.07548369634085081,
+                0.10417418930981043,
+                0.14408837476293054,
+                0.21379846951074702,
+                0.3383168678947593,
+                0.5549701636655022,
+                0.8322505428233351,
+                0.958199795625376
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 211,
+              "Graduate": 82
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.7287581699346405,
+            "recall_dropout": 0.7852112676056338,
+            "f1_dropout": 0.7559322033898305,
+            "precision_not_dropout": 0.8946459412780656,
+            "recall_not_dropout": 0.8618968386023295,
+            "f1_not_dropout": 0.8779661016949153,
+            "f1_macro": 0.8169491525423729,
+            "balanced_accuracy": 0.8235540531039816,
+            "accuracy": 0.8372881355932204,
+            "roc_auc": 0.9005765039488177,
+            "pr_auc": 0.8551833830955803,
+            "brier": 0.11953908422496971,
+            "confusion_matrix": [
+              [
+                518,
+                83
+              ],
+              [
+                61,
+                223
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 518,
+            "false_positive": 83,
+            "false_negative": 61,
+            "true_positive": 223,
+            "false_negative_rate": 0.2147887323943662,
+            "false_positive_rate": 0.13810316139767054,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.02702702702702703,
+                0.05405405405405406,
+                0.05454545454545454,
+                0.13513513513513514,
+                0.2,
+                0.43243243243243246,
+                0.6727272727272727,
+                0.990990990990991
+              ],
+              "mean_predicted": [
+                0.08117407086673496,
+                0.11352673771912931,
+                0.15015304399975551,
+                0.21563925787454766,
+                0.3513048765651045,
+                0.5626102365467484,
+                0.8256603962796961,
+                0.9559299774139264
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 61,
+              "Graduate": 22
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Majority baseline",
+          "selectable": false,
+          "cv_precision_mean": 0.0,
+          "cv_precision_std": 0.0,
+          "cv_recall_mean": 0.0,
+          "cv_recall_std": 0.0,
+          "cv_f1_dropout_mean": 0.0,
+          "cv_f1_dropout_std": 0.0,
+          "cv_balanced_accuracy_mean": 0.5,
+          "cv_balanced_accuracy_std": 0.0,
+          "cv_roc_auc_mean": null,
+          "cv_roc_auc_std": null,
+          "cv_pr_auc_mean": 0.3212771398205196,
+          "cv_pr_auc_std": 0.0006528862608645576,
+          "cv_brier_mean": 0.3212771398205196,
+          "cv_brier_std": 0.0006528862608645576,
+          "cv_accuracy_mean": 0.6787228601794805,
+          "cv_accuracy_std": 0.0006528862608646077,
+          "cv_train_f1_dropout_mean": 0.0,
+          "f1_generalization_gap": 0.0,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.0,
+            "recall_dropout": 0.0,
+            "f1_dropout": 0.0,
+            "precision_not_dropout": 0.6787228030517095,
+            "recall_not_dropout": 1.0,
+            "f1_not_dropout": 0.8086180777646861,
+            "f1_macro": 0.40430903888234304,
+            "balanced_accuracy": 0.5,
+            "accuracy": 0.6787228030517095,
+            "roc_auc": null,
+            "pr_auc": 0.3212771969482905,
+            "brier": 0.3212771969482905,
+            "confusion_matrix": [
+              [
+                2402,
+                0
+              ],
+              [
+                1137,
+                0
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 2402,
+            "false_positive": 0,
+            "false_negative": 1137,
+            "true_positive": 0,
+            "false_negative_rate": 1.0,
+            "false_positive_rate": 0.0,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.3212771969482905
+              ],
+              "mean_predicted": [
+                0.0
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 0,
+              "Graduate": 0
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.0,
+            "recall_dropout": 0.0,
+            "f1_dropout": 0.0,
+            "precision_not_dropout": 0.6790960451977401,
+            "recall_not_dropout": 1.0,
+            "f1_not_dropout": 0.8088829071332436,
+            "f1_macro": 0.4044414535666218,
+            "balanced_accuracy": 0.5,
+            "accuracy": 0.6790960451977401,
+            "roc_auc": null,
+            "pr_auc": 0.32090395480225986,
+            "brier": 0.32090395480225986,
+            "confusion_matrix": [
+              [
+                601,
+                0
+              ],
+              [
+                284,
+                0
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 601,
+            "false_positive": 0,
+            "false_negative": 284,
+            "true_positive": 0,
+            "false_negative_rate": 1.0,
+            "false_positive_rate": 0.0,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.32090395480225986
+              ],
+              "mean_predicted": [
+                0.0
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 0,
+              "Graduate": 0
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        }
+      ],
+      "decision": {
+        "algorithm": "Logistic Regression",
+        "metric": "cv_f1_dropout_mean",
+        "higher_is_better": true,
+        "margin": 0.01,
+        "preference": [
+          "Logistic Regression",
+          "Random Forest Classifier",
+          "Gradient Boosting Classifier"
+        ],
+        "contenders": [
+          "Logistic Regression",
+          "Gradient Boosting Classifier"
+        ],
+        "best_metric_value": 0.7716864065248934,
+        "accuracy_not_used": true,
+        "holdout_not_used": true
+      },
+      "accuracy_leaders": [
+        "Random Forest Classifier"
+      ],
+      "balanced_accuracy_leaders": [
+        "Logistic Regression"
+      ],
+      "pr_auc_leaders": [
+        "Logistic Regression"
+      ],
+      "training_rows_fit": 3539
+    },
+    {
+      "name": "at_enrollment",
+      "role": "timing_sensitivity",
+      "timing_note": "Drops all twelve curricular-unit columns. Debtor and tuition fees up to date stay in this cut, matching the M25 timing definition, but their snapshot date is unverified and they may not be known at enrollment. Macroeconomic fields and demographic codes remain. They are UCI source fields. No UCC mapping was added.",
+      "columns": [
+        "Marital status",
+        "Application mode",
+        "Application order",
+        "Course",
+        "Daytime/evening attendance",
+        "Previous qualification",
+        "Previous qualification (grade)",
+        "Nacionality",
+        "Mother's qualification",
+        "Father's qualification",
+        "Mother's occupation",
+        "Father's occupation",
+        "Admission grade",
+        "Displaced",
+        "Educational special needs",
+        "Debtor",
+        "Tuition fees up to date",
+        "Gender",
+        "Scholarship holder",
+        "Age at enrollment",
+        "International",
+        "Unemployment rate",
+        "Inflation rate",
+        "GDP"
+      ],
+      "removed_columns": [
+        "Curricular units 1st sem (credited)",
+        "Curricular units 1st sem (enrolled)",
+        "Curricular units 1st sem (evaluations)",
+        "Curricular units 1st sem (approved)",
+        "Curricular units 1st sem (grade)",
+        "Curricular units 1st sem (without evaluations)",
+        "Curricular units 2nd sem (credited)",
+        "Curricular units 2nd sem (enrolled)",
+        "Curricular units 2nd sem (evaluations)",
+        "Curricular units 2nd sem (approved)",
+        "Curricular units 2nd sem (grade)",
+        "Curricular units 2nd sem (without evaluations)"
+      ],
+      "n_columns": 24,
+      "rows": [
+        {
+          "algorithm": "Logistic Regression",
+          "selectable": true,
+          "cv_precision_mean": 0.6122638746446176,
+          "cv_precision_std": 0.02251457125186606,
+          "cv_recall_mean": 0.7032545018935004,
+          "cv_recall_std": 0.03412568960281263,
+          "cv_f1_dropout_mean": 0.6541889379777523,
+          "cv_f1_dropout_std": 0.02232994362936433,
+          "cv_balanced_accuracy_mean": 0.7460067554512547,
+          "cv_balanced_accuracy_std": 0.01749064279055825,
+          "cv_roc_auc_mean": 0.8236079541124174,
+          "cv_roc_auc_std": 0.01647963250600403,
+          "cv_pr_auc_mean": 0.7371679837442349,
+          "cv_pr_auc_std": 0.024205244689098165,
+          "cv_brier_mean": 0.16441911127687045,
+          "cv_brier_std": 0.0062661426830062745,
+          "cv_accuracy_mean": 0.7612872086240101,
+          "cv_accuracy_std": 0.015077660298850843,
+          "cv_train_f1_dropout_mean": 0.6877491254146701,
+          "f1_generalization_gap": 0.0335601874369178,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.6097934200459066,
+            "recall_dropout": 0.7009674582233949,
+            "f1_dropout": 0.6522094926350246,
+            "precision_not_dropout": 0.8476702508960573,
+            "recall_not_dropout": 0.787676935886761,
+            "f1_not_dropout": 0.816573154941735,
+            "f1_macro": 0.7343913237883798,
+            "balanced_accuracy": 0.744322197055078,
+            "accuracy": 0.7598191579542244,
+            "roc_auc": 0.8233482505417282,
+            "pr_auc": 0.7375126257602294,
+            "brier": 0.16421342778219092,
+            "confusion_matrix": [
+              [
+                1892,
+                510
+              ],
+              [
+                340,
+                797
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 1892,
+            "false_positive": 510,
+            "false_negative": 340,
+            "true_positive": 797,
+            "false_negative_rate": 0.2990325417766051,
+            "false_positive_rate": 0.21232306411323898,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.05417607223476298,
+                0.10633484162895927,
+                0.13574660633484162,
+                0.18961625282167044,
+                0.27601809954751133,
+                0.36425339366515835,
+                0.5610859728506787,
+                0.8826185101580135
+              ],
+              "mean_predicted": [
+                0.07831376551352473,
+                0.15706491491016816,
+                0.2299895493805127,
+                0.31558777320094705,
+                0.42586748698487364,
+                0.5670398137198176,
+                0.746707252500302,
+                0.9496640263976984
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 216,
+              "Graduate": 294
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.6030769230769231,
+            "recall_dropout": 0.6901408450704225,
+            "f1_dropout": 0.6436781609195402,
+            "precision_not_dropout": 0.8428571428571429,
+            "recall_not_dropout": 0.7853577371048253,
+            "f1_not_dropout": 0.8130921619293713,
+            "f1_macro": 0.7283851614244558,
+            "balanced_accuracy": 0.7377492910876239,
+            "accuracy": 0.7548022598870057,
+            "roc_auc": 0.8157413700171077,
+            "pr_auc": 0.7298481683739587,
+            "brier": 0.16831480449079156,
+            "confusion_matrix": [
+              [
+                472,
+                129
+              ],
+              [
+                88,
+                196
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 472,
+            "false_positive": 129,
+            "false_negative": 88,
+            "true_positive": 196,
+            "false_negative_rate": 0.30985915492957744,
+            "false_positive_rate": 0.2146422628951747,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.06306306306306306,
+                0.10810810810810811,
+                0.17272727272727273,
+                0.15315315315315314,
+                0.2636363636363636,
+                0.36036036036036034,
+                0.5545454545454546,
+                0.8918918918918919
+              ],
+              "mean_predicted": [
+                0.08473716767751359,
+                0.1613530981993402,
+                0.24564239376580727,
+                0.3351881296595597,
+                0.43655293871893036,
+                0.5623871566557525,
+                0.7392839558825951,
+                0.9489930637877411
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 49,
+              "Graduate": 80
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Random Forest Classifier",
+          "selectable": true,
+          "cv_precision_mean": 0.7851926608869917,
+          "cv_precision_std": 0.03126336764879409,
+          "cv_recall_mean": 0.4724646417806631,
+          "cv_recall_std": 0.03601260762116559,
+          "cv_f1_dropout_mean": 0.5892176104056529,
+          "cv_f1_dropout_std": 0.031444509409210716,
+          "cv_balanced_accuracy_mean": 0.7055505814585922,
+          "cv_balanced_accuracy_std": 0.018242517712371658,
+          "cv_roc_auc_mean": 0.8155555104153092,
+          "cv_roc_auc_std": 0.01387617887726488,
+          "cv_pr_auc_mean": 0.7235235206944942,
+          "cv_pr_auc_std": 0.019268233365648077,
+          "cv_brier_mean": 0.15353672884552377,
+          "cv_brier_std": 0.0046444119729281905,
+          "cv_accuracy_mean": 0.7888682185409824,
+          "cv_accuracy_std": 0.012941041710848726,
+          "cv_train_f1_dropout_mean": 1.0,
+          "f1_generalization_gap": 0.4107823895943471,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.7807807807807807,
+            "recall_dropout": 0.4573438874230431,
+            "f1_dropout": 0.5768164170826401,
+            "precision_not_dropout": 0.7852419074138531,
+            "recall_not_dropout": 0.9392173189009159,
+            "f1_not_dropout": 0.8553554502369668,
+            "f1_macro": 0.7160859336598034,
+            "balanced_accuracy": 0.6982806031619795,
+            "accuracy": 0.7844023735518508,
+            "roc_auc": 0.8152611390244277,
+            "pr_auc": 0.7195502570882916,
+            "brier": 0.15403105397004804,
+            "confusion_matrix": [
+              [
+                2256,
+                146
+              ],
+              [
+                617,
+                520
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 2256,
+            "false_positive": 146,
+            "false_negative": 617,
+            "true_positive": 520,
+            "false_negative_rate": 0.5426561125769569,
+            "false_positive_rate": 0.06078268109908409,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.06048387096774194,
+                0.10084033613445378,
+                0.16625916870415647,
+                0.2246376811594203,
+                0.2582781456953642,
+                0.3804100227790433,
+                0.5574162679425837,
+                0.8778801843317973
+              ],
+              "mean_predicted": [
+                0.060383064516128904,
+                0.12619747899159658,
+                0.17992665036674815,
+                0.23434782608695623,
+                0.30395143487858745,
+                0.3918451025056942,
+                0.5211722488038281,
+                0.7478801843317974
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 62,
+              "Graduate": 84
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.7383720930232558,
+            "recall_dropout": 0.4471830985915493,
+            "f1_dropout": 0.5570175438596491,
+            "precision_not_dropout": 0.7798036465638148,
+            "recall_not_dropout": 0.9251247920133111,
+            "f1_not_dropout": 0.8462709284627092,
+            "f1_macro": 0.7016442361611792,
+            "balanced_accuracy": 0.6861539453024302,
+            "accuracy": 0.7717514124293785,
+            "roc_auc": 0.8000017576339903,
+            "pr_auc": 0.7072869781013568,
+            "brier": 0.15886169491525423,
+            "confusion_matrix": [
+              [
+                556,
+                45
+              ],
+              [
+                157,
+                127
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 556,
+            "false_positive": 45,
+            "false_negative": 157,
+            "true_positive": 127,
+            "false_negative_rate": 0.5528169014084507,
+            "false_positive_rate": 0.07487520798668885,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.07142857142857142,
+                0.07758620689655173,
+                0.19230769230769232,
+                0.21929824561403508,
+                0.31092436974789917,
+                0.3434343434343434,
+                0.504424778761062,
+                0.8703703703703703
+              ],
+              "mean_predicted": [
+                0.05812499999999998,
+                0.12181034482758613,
+                0.17673076923076925,
+                0.23736842105263156,
+                0.3147058823529413,
+                0.4016161616161616,
+                0.523274336283186,
+                0.7425925925925929
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 19,
+              "Graduate": 26
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Gradient Boosting Classifier",
+          "selectable": true,
+          "cv_precision_mean": 0.6175255197645981,
+          "cv_precision_std": 0.02586981847994918,
+          "cv_recall_mean": 0.6788136641162378,
+          "cv_recall_std": 0.02889906475660365,
+          "cv_f1_dropout_mean": 0.6463048793929653,
+          "cv_f1_dropout_std": 0.02176504030650188,
+          "cv_balanced_accuracy_mean": 0.7395727190990058,
+          "cv_balanced_accuracy_std": 0.016661902374749862,
+          "cv_roc_auc_mean": 0.8231495809746593,
+          "cv_roc_auc_std": 0.016936956970831647,
+          "cv_pr_auc_mean": 0.7393511802640829,
+          "cv_pr_auc_std": 0.024614593196534397,
+          "cv_brier_mean": 0.16244676357222268,
+          "cv_brier_std": 0.005924376510269335,
+          "cv_accuracy_mean": 0.7612867291571773,
+          "cv_accuracy_std": 0.016121992510178332,
+          "cv_train_f1_dropout_mean": 0.7286388404558102,
+          "f1_generalization_gap": 0.08233396106284485,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.6120348376880443,
+            "recall_dropout": 0.6798592788038699,
+            "f1_dropout": 0.6441666666666667,
+            "precision_not_dropout": 0.8400702987697716,
+            "recall_not_dropout": 0.7960033305578684,
+            "f1_not_dropout": 0.8174433518597691,
+            "f1_macro": 0.7308050092632179,
+            "balanced_accuracy": 0.7379313046808691,
+            "accuracy": 0.7586888951681265,
+            "roc_auc": 0.8190821632808192,
+            "pr_auc": 0.7330331398760885,
+            "brier": 0.16409024288448568,
+            "confusion_matrix": [
+              [
+                1912,
+                490
+              ],
+              [
+                364,
+                773
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 1912,
+            "false_positive": 490,
+            "false_negative": 364,
+            "true_positive": 773,
+            "false_negative_rate": 0.3201407211961302,
+            "false_positive_rate": 0.20399666944213155,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.04740406320541761,
+                0.11538461538461539,
+                0.1425339366515837,
+                0.1963882618510158,
+                0.2737556561085973,
+                0.38461538461538464,
+                0.504524886877828,
+                0.9051918735891648
+              ],
+              "mean_predicted": [
+                0.11973744284521211,
+                0.19227094352803012,
+                0.2637498232860527,
+                0.3356975956933398,
+                0.4287413914012086,
+                0.5370327782261938,
+                0.6861742656177071,
+                0.9174325060816437
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 212,
+              "Graduate": 278
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.5891238670694864,
+            "recall_dropout": 0.6866197183098591,
+            "f1_dropout": 0.6341463414634146,
+            "precision_not_dropout": 0.8393501805054152,
+            "recall_not_dropout": 0.7737104825291181,
+            "f1_not_dropout": 0.8051948051948052,
+            "f1_macro": 0.71967057332911,
+            "balanced_accuracy": 0.7301651004194887,
+            "accuracy": 0.7457627118644068,
+            "roc_auc": 0.8148625530219586,
+            "pr_auc": 0.7362695655013624,
+            "brier": 0.16911855636335926,
+            "confusion_matrix": [
+              [
+                465,
+                136
+              ],
+              [
+                89,
+                195
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 465,
+            "false_positive": 136,
+            "false_negative": 89,
+            "true_positive": 195,
+            "false_negative_rate": 0.31338028169014087,
+            "false_positive_rate": 0.22628951747088186,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.07142857142857142,
+                0.11818181818181818,
+                0.1,
+                0.21621621621621623,
+                0.3,
+                0.36936936936936937,
+                0.509090909090909,
+                0.8828828828828829
+              ],
+              "mean_predicted": [
+                0.12445974588426063,
+                0.1977484525570979,
+                0.2816863806051558,
+                0.35879691998716123,
+                0.44909768288708546,
+                0.5540578935675609,
+                0.6776869068366952,
+                0.9248043034752654
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 57,
+              "Graduate": 79
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Majority baseline",
+          "selectable": false,
+          "cv_precision_mean": 0.0,
+          "cv_precision_std": 0.0,
+          "cv_recall_mean": 0.0,
+          "cv_recall_std": 0.0,
+          "cv_f1_dropout_mean": 0.0,
+          "cv_f1_dropout_std": 0.0,
+          "cv_balanced_accuracy_mean": 0.5,
+          "cv_balanced_accuracy_std": 0.0,
+          "cv_roc_auc_mean": null,
+          "cv_roc_auc_std": null,
+          "cv_pr_auc_mean": 0.3212771398205196,
+          "cv_pr_auc_std": 0.0006528862608645576,
+          "cv_brier_mean": 0.3212771398205196,
+          "cv_brier_std": 0.0006528862608645576,
+          "cv_accuracy_mean": 0.6787228601794805,
+          "cv_accuracy_std": 0.0006528862608646077,
+          "cv_train_f1_dropout_mean": 0.0,
+          "f1_generalization_gap": 0.0,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.0,
+            "recall_dropout": 0.0,
+            "f1_dropout": 0.0,
+            "precision_not_dropout": 0.6787228030517095,
+            "recall_not_dropout": 1.0,
+            "f1_not_dropout": 0.8086180777646861,
+            "f1_macro": 0.40430903888234304,
+            "balanced_accuracy": 0.5,
+            "accuracy": 0.6787228030517095,
+            "roc_auc": null,
+            "pr_auc": 0.3212771969482905,
+            "brier": 0.3212771969482905,
+            "confusion_matrix": [
+              [
+                2402,
+                0
+              ],
+              [
+                1137,
+                0
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 2402,
+            "false_positive": 0,
+            "false_negative": 1137,
+            "true_positive": 0,
+            "false_negative_rate": 1.0,
+            "false_positive_rate": 0.0,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.3212771969482905
+              ],
+              "mean_predicted": [
+                0.0
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 0,
+              "Graduate": 0
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.0,
+            "recall_dropout": 0.0,
+            "f1_dropout": 0.0,
+            "precision_not_dropout": 0.6790960451977401,
+            "recall_not_dropout": 1.0,
+            "f1_not_dropout": 0.8088829071332436,
+            "f1_macro": 0.4044414535666218,
+            "balanced_accuracy": 0.5,
+            "accuracy": 0.6790960451977401,
+            "roc_auc": null,
+            "pr_auc": 0.32090395480225986,
+            "brier": 0.32090395480225986,
+            "confusion_matrix": [
+              [
+                601,
+                0
+              ],
+              [
+                284,
+                0
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 601,
+            "false_positive": 0,
+            "false_negative": 284,
+            "true_positive": 0,
+            "false_negative_rate": 1.0,
+            "false_positive_rate": 0.0,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.32090395480225986
+              ],
+              "mean_predicted": [
+                0.0
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 0,
+              "Graduate": 0
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        }
+      ],
+      "decision": {
+        "algorithm": "Logistic Regression",
+        "metric": "cv_f1_dropout_mean",
+        "higher_is_better": true,
+        "margin": 0.01,
+        "preference": [
+          "Logistic Regression",
+          "Random Forest Classifier",
+          "Gradient Boosting Classifier"
+        ],
+        "contenders": [
+          "Logistic Regression",
+          "Gradient Boosting Classifier"
+        ],
+        "best_metric_value": 0.6541889379777523,
+        "accuracy_not_used": true,
+        "holdout_not_used": true
+      },
+      "accuracy_leaders": [
+        "Random Forest Classifier"
+      ],
+      "balanced_accuracy_leaders": [
+        "Logistic Regression"
+      ],
+      "pr_auc_leaders": [
+        "Gradient Boosting Classifier"
+      ],
+      "training_rows_fit": 3539
+    },
+    {
+      "name": "scholarship_only",
+      "role": "weak_compatibility_baseline",
+      "timing_note": "Uses only the UCI Scholarship holder column coded 0 or 1 in the source file. This is a weak compatibility baseline. It is not a model of the five EduPredict scholarship statuses, and a missing UCC profile is not recoded to 0.",
+      "columns": [
+        "Scholarship holder"
+      ],
+      "removed_columns": [],
+      "n_columns": 1,
+      "rows": [
+        {
+          "algorithm": "Logistic Regression",
+          "selectable": true,
+          "cv_precision_mean": 0.38646819926316495,
+          "cv_precision_std": 0.007358603815863072,
+          "cv_recall_mean": 0.8988638998377,
+          "cv_recall_std": 0.01418799466852499,
+          "cv_f1_dropout_mean": 0.5404996428148515,
+          "cv_f1_dropout_std": 0.008769858504350752,
+          "cv_balanced_accuracy_mean": 0.611588827950728,
+          "cv_balanced_accuracy_std": 0.011502220768036338,
+          "cv_roc_auc_mean": 0.611588827950728,
+          "cv_roc_auc_std": 0.011502220768036342,
+          "cv_pr_auc_mean": 0.3799272378223105,
+          "cv_pr_auc_std": 0.007141018173600167,
+          "cv_brier_mean": 0.23406849193609272,
+          "cv_brier_std": 0.0039647515160264775,
+          "cv_accuracy_mean": 0.5089023405972558,
+          "cv_accuracy_std": 0.013032375570315783,
+          "cv_train_f1_dropout_mean": 0.5404575660480038,
+          "f1_generalization_gap": -4.2076766847753966e-05,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.38638941398865784,
+            "recall_dropout": 0.8988566402814424,
+            "f1_dropout": 0.5404547858276044,
+            "precision_not_dropout": 0.8713646532438478,
+            "recall_not_dropout": 0.32431307243963364,
+            "f1_not_dropout": 0.47269417475728154,
+            "f1_macro": 0.506574480292443,
+            "balanced_accuracy": 0.611584856360538,
+            "accuracy": 0.5089008194405199,
+            "roc_auc": 0.6066662785409696,
+            "pr_auc": 0.3788842382129221,
+            "brier": 0.23404687641944819,
+            "confusion_matrix": [
+              [
+                779,
+                1623
+              ],
+              [
+                115,
+                1022
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 779,
+            "false_positive": 1623,
+            "false_negative": 115,
+            "true_positive": 1022,
+            "false_negative_rate": 0.1011433597185576,
+            "false_positive_rate": 0.6756869275603664,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.13812154696132597,
+                0.11396011396011396,
+                0.39697542533081287,
+                0.38666666666666666,
+                0.38446969696969696,
+                0.38317757009345793,
+                0.3806818181818182
+              ],
+              "mean_predicted": [
+                0.23429146294703082,
+                0.24409791074289716,
+                0.5683205387395377,
+                0.5705848358967202,
+                0.5711477915589284,
+                0.5716215358827353,
+                0.5725071260059224
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 531,
+              "Graduate": 1092
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.3897058823529412,
+            "recall_dropout": 0.9330985915492958,
+            "f1_dropout": 0.549792531120332,
+            "precision_not_dropout": 0.9073170731707317,
+            "recall_not_dropout": 0.30948419301164726,
+            "f1_not_dropout": 0.46153846153846156,
+            "f1_macro": 0.5056654963293967,
+            "balanced_accuracy": 0.6212913922804715,
+            "accuracy": 0.5096045197740113,
+            "roc_auc": 0.6212913922804715,
+            "pr_auc": 0.3851029364956773,
+            "brier": 0.232337151549939,
+            "confusion_matrix": [
+              [
+                186,
+                415
+              ],
+              [
+                19,
+                265
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 186,
+            "false_positive": 415,
+            "false_negative": 19,
+            "true_positive": 265,
+            "false_negative_rate": 0.06690140845070422,
+            "false_positive_rate": 0.6905158069883528,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.09268292682926829,
+                0.3897058823529412
+              ],
+              "mean_predicted": [
+                0.23809995372531081,
+                0.5708641680906403
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 133,
+              "Graduate": 282
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Random Forest Classifier",
+          "selectable": true,
+          "cv_precision_mean": 0.38646819926316495,
+          "cv_precision_std": 0.007358603815863072,
+          "cv_recall_mean": 0.8988638998377,
+          "cv_recall_std": 0.01418799466852499,
+          "cv_f1_dropout_mean": 0.5404996428148515,
+          "cv_f1_dropout_std": 0.008769858504350752,
+          "cv_balanced_accuracy_mean": 0.611588827950728,
+          "cv_balanced_accuracy_std": 0.011502220768036338,
+          "cv_roc_auc_mean": 0.611588827950728,
+          "cv_roc_auc_std": 0.011502220768036342,
+          "cv_pr_auc_mean": 0.3799272378223105,
+          "cv_pr_auc_std": 0.007141018173600167,
+          "cv_brier_mean": 0.23393181031826848,
+          "cv_brier_std": 0.003975389919682411,
+          "cv_accuracy_mean": 0.5089023405972558,
+          "cv_accuracy_std": 0.013032375570315783,
+          "cv_train_f1_dropout_mean": 0.5404575660480038,
+          "f1_generalization_gap": -4.2076766847753966e-05,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.38638941398865784,
+            "recall_dropout": 0.8988566402814424,
+            "f1_dropout": 0.5404547858276044,
+            "precision_not_dropout": 0.8713646532438478,
+            "recall_not_dropout": 0.32431307243963364,
+            "f1_not_dropout": 0.47269417475728154,
+            "f1_macro": 0.506574480292443,
+            "balanced_accuracy": 0.611584856360538,
+            "accuracy": 0.5089008194405199,
+            "roc_auc": 0.6075648261453186,
+            "pr_auc": 0.37972351113119474,
+            "brier": 0.2338806075961129,
+            "confusion_matrix": [
+              [
+                779,
+                1623
+              ],
+              [
+                115,
+                1022
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 779,
+            "false_positive": 1623,
+            "false_negative": 115,
+            "true_positive": 1022,
+            "false_negative_rate": 0.1011433597185576,
+            "false_positive_rate": 0.6756869275603664,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.13812154696132597,
+                0.11396011396011396,
+                0.39697542533081287,
+                0.38666666666666666,
+                0.3806818181818182,
+                0.38446969696969696,
+                0.38317757009345793
+              ],
+              "mean_predicted": [
+                0.2342016358169067,
+                0.24352368346317363,
+                0.5664125076923722,
+                0.570694684652187,
+                0.5709183447510157,
+                0.5710538140631105,
+                0.5724847578233371
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 531,
+              "Graduate": 1092
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.3897058823529412,
+            "recall_dropout": 0.9330985915492958,
+            "f1_dropout": 0.549792531120332,
+            "precision_not_dropout": 0.9073170731707317,
+            "recall_not_dropout": 0.30948419301164726,
+            "f1_not_dropout": 0.46153846153846156,
+            "f1_macro": 0.5056654963293967,
+            "balanced_accuracy": 0.6212913922804715,
+            "accuracy": 0.5096045197740113,
+            "roc_auc": 0.6212913922804715,
+            "pr_auc": 0.3851029364956773,
+            "brier": 0.23261535149869667,
+            "confusion_matrix": [
+              [
+                186,
+                415
+              ],
+              [
+                19,
+                265
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 186,
+            "false_positive": 415,
+            "false_negative": 19,
+            "true_positive": 265,
+            "false_negative_rate": 0.06690140845070422,
+            "false_positive_rate": 0.6905158069883528,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.09268292682926829,
+                0.3897058823529412
+              ],
+              "mean_predicted": [
+                0.23814405134972993,
+                0.5718501289501169
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 133,
+              "Graduate": 282
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Gradient Boosting Classifier",
+          "selectable": true,
+          "cv_precision_mean": 0.38646819926316495,
+          "cv_precision_std": 0.007358603815863072,
+          "cv_recall_mean": 0.8988638998377,
+          "cv_recall_std": 0.01418799466852499,
+          "cv_f1_dropout_mean": 0.5404996428148515,
+          "cv_f1_dropout_std": 0.008769858504350752,
+          "cv_balanced_accuracy_mean": 0.611588827950728,
+          "cv_balanced_accuracy_std": 0.011502220768036338,
+          "cv_roc_auc_mean": 0.611588827950728,
+          "cv_roc_auc_std": 0.011502220768036342,
+          "cv_pr_auc_mean": 0.3799272378223105,
+          "cv_pr_auc_std": 0.007141018173600167,
+          "cv_brier_mean": 0.23405225124792775,
+          "cv_brier_std": 0.003969634101428303,
+          "cv_accuracy_mean": 0.5089023405972558,
+          "cv_accuracy_std": 0.013032375570315783,
+          "cv_train_f1_dropout_mean": 0.5404575660480038,
+          "f1_generalization_gap": -4.2076766847753966e-05,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.38638941398865784,
+            "recall_dropout": 0.8988566402814424,
+            "f1_dropout": 0.5404547858276044,
+            "precision_not_dropout": 0.8713646532438478,
+            "recall_not_dropout": 0.32431307243963364,
+            "f1_not_dropout": 0.47269417475728154,
+            "f1_macro": 0.506574480292443,
+            "balanced_accuracy": 0.611584856360538,
+            "accuracy": 0.5089008194405199,
+            "roc_auc": 0.6066662785409696,
+            "pr_auc": 0.3788842382129221,
+            "brier": 0.2340303741818233,
+            "confusion_matrix": [
+              [
+                779,
+                1623
+              ],
+              [
+                115,
+                1022
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 779,
+            "false_positive": 1623,
+            "false_negative": 115,
+            "true_positive": 1022,
+            "false_negative_rate": 0.1011433597185576,
+            "false_positive_rate": 0.6756869275603664,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.13812154696132597,
+                0.11396011396011396,
+                0.39697542533081287,
+                0.38666666666666666,
+                0.38446969696969696,
+                0.38317757009345793,
+                0.3806818181818182
+              ],
+              "mean_predicted": [
+                0.23380667185471754,
+                0.24369149829139114,
+                0.5683390423339836,
+                0.5706110138742375,
+                0.571176540668438,
+                0.5716503984883506,
+                0.5725478217202113
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 531,
+              "Graduate": 1092
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.3897058823529412,
+            "recall_dropout": 0.9330985915492958,
+            "f1_dropout": 0.549792531120332,
+            "precision_not_dropout": 0.9073170731707317,
+            "recall_not_dropout": 0.30948419301164726,
+            "f1_not_dropout": 0.46153846153846156,
+            "f1_macro": 0.5056654963293967,
+            "balanced_accuracy": 0.6212913922804715,
+            "accuracy": 0.5096045197740113,
+            "roc_auc": 0.6212913922804715,
+            "pr_auc": 0.3851029364956773,
+            "brier": 0.23231323397405781,
+            "confusion_matrix": [
+              [
+                186,
+                415
+              ],
+              [
+                19,
+                265
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 186,
+            "false_positive": 415,
+            "false_negative": 19,
+            "true_positive": 265,
+            "false_negative_rate": 0.06690140845070422,
+            "false_positive_rate": 0.6905158069883528,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.09268292682926829,
+                0.3897058823529412
+              ],
+              "mean_predicted": [
+                0.23773615424365374,
+                0.5708661808446936
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 133,
+              "Graduate": 282
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        },
+        {
+          "algorithm": "Majority baseline",
+          "selectable": false,
+          "cv_precision_mean": 0.0,
+          "cv_precision_std": 0.0,
+          "cv_recall_mean": 0.0,
+          "cv_recall_std": 0.0,
+          "cv_f1_dropout_mean": 0.0,
+          "cv_f1_dropout_std": 0.0,
+          "cv_balanced_accuracy_mean": 0.5,
+          "cv_balanced_accuracy_std": 0.0,
+          "cv_roc_auc_mean": null,
+          "cv_roc_auc_std": null,
+          "cv_pr_auc_mean": 0.3212771398205196,
+          "cv_pr_auc_std": 0.0006528862608645576,
+          "cv_brier_mean": 0.3212771398205196,
+          "cv_brier_std": 0.0006528862608645576,
+          "cv_accuracy_mean": 0.6787228601794805,
+          "cv_accuracy_std": 0.0006528862608646077,
+          "cv_train_f1_dropout_mean": 0.0,
+          "f1_generalization_gap": 0.0,
+          "n_folds": 25,
+          "training_oof": {
+            "precision_dropout": 0.0,
+            "recall_dropout": 0.0,
+            "f1_dropout": 0.0,
+            "precision_not_dropout": 0.6787228030517095,
+            "recall_not_dropout": 1.0,
+            "f1_not_dropout": 0.8086180777646861,
+            "f1_macro": 0.40430903888234304,
+            "balanced_accuracy": 0.5,
+            "accuracy": 0.6787228030517095,
+            "roc_auc": null,
+            "pr_auc": 0.3212771969482905,
+            "brier": 0.3212771969482905,
+            "confusion_matrix": [
+              [
+                2402,
+                0
+              ],
+              [
+                1137,
+                0
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 2402,
+            "false_positive": 0,
+            "false_negative": 1137,
+            "true_positive": 0,
+            "false_negative_rate": 1.0,
+            "false_positive_rate": 0.0,
+            "support_dropout": 1137,
+            "support_not_dropout": 2402,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.3212771969482905
+              ],
+              "mean_predicted": [
+                0.0
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 0,
+              "Graduate": 0
+            }
+          },
+          "exploratory_holdout": {
+            "precision_dropout": 0.0,
+            "recall_dropout": 0.0,
+            "f1_dropout": 0.0,
+            "precision_not_dropout": 0.6790960451977401,
+            "recall_not_dropout": 1.0,
+            "f1_not_dropout": 0.8088829071332436,
+            "f1_macro": 0.4044414535666218,
+            "balanced_accuracy": 0.5,
+            "accuracy": 0.6790960451977401,
+            "roc_auc": null,
+            "pr_auc": 0.32090395480225986,
+            "brier": 0.32090395480225986,
+            "confusion_matrix": [
+              [
+                601,
+                0
+              ],
+              [
+                284,
+                0
+              ]
+            ],
+            "labels": [
+              "Not Dropout",
+              "Dropout"
+            ],
+            "true_negative": 601,
+            "false_positive": 0,
+            "false_negative": 284,
+            "true_positive": 0,
+            "false_negative_rate": 1.0,
+            "false_positive_rate": 0.0,
+            "support_dropout": 284,
+            "support_not_dropout": 601,
+            "calibration_quantile": {
+              "fraction_positive": [
+                0.32090395480225986
+              ],
+              "mean_predicted": [
+                0.0
+              ]
+            },
+            "decision_rule": "The predicted class comes from the estimator's predict method. For these models that is a 0.5 cut on the positive probability. It is not a Low, Moderate, or High threshold.",
+            "false_positive_source_counts": {
+              "Enrolled": 0,
+              "Graduate": 0
+            },
+            "role": "exploratory_reuse_of_m25_partition",
+            "independent_final_validation": false
+          }
+        }
+      ],
+      "decision": {
+        "algorithm": "Logistic Regression",
+        "metric": "cv_f1_dropout_mean",
+        "higher_is_better": true,
+        "margin": 0.01,
+        "preference": [
+          "Logistic Regression",
+          "Random Forest Classifier",
+          "Gradient Boosting Classifier"
+        ],
+        "contenders": [
+          "Logistic Regression",
+          "Random Forest Classifier",
+          "Gradient Boosting Classifier"
+        ],
+        "best_metric_value": 0.5404996428148515,
+        "accuracy_not_used": true,
+        "holdout_not_used": true
+      },
+      "accuracy_leaders": [
+        "Majority baseline"
+      ],
+      "balanced_accuracy_leaders": [
+        "Logistic Regression",
+        "Random Forest Classifier",
+        "Gradient Boosting Classifier"
+      ],
+      "pr_auc_leaders": [
+        "Logistic Regression",
+        "Random Forest Classifier",
+        "Gradient Boosting Classifier"
+      ],
+      "training_rows_fit": 3539
+    }
+  ],
+  "reproducibility": {
+    "scholarship_all_algorithms_cv": true,
+    "full_selected_algorithm_cv": true,
+    "full_selected_algorithm": "Logistic Regression"
+  },
+  "warnings": [],
+  "artifacts": [
+    {
+      "feature_set": "full",
+      "algorithm": "Logistic Regression",
+      "model_version": "m27-binary-dropout-full-logistic_regression-2026-10-22T00:15:50+08:00",
+      "path": "ml/models/dropout_binary_full_exploratory_m27.joblib",
+      "preprocessor_rows_seen": 3539,
+      "training_rows_fit": 3539
+    },
+    {
+      "feature_set": "after_first_semester",
+      "algorithm": "Logistic Regression",
+      "model_version": "m27-binary-dropout-after_first_semester-logistic_regression-2026-10-22T00:15:50+08:00",
+      "path": "ml/models/dropout_binary_after_first_semester_m27.joblib",
+      "preprocessor_rows_seen": 3539,
+      "training_rows_fit": 3539
+    },
+    {
+      "feature_set": "at_enrollment",
+      "algorithm": "Logistic Regression",
+      "model_version": "m27-binary-dropout-at_enrollment-logistic_regression-2026-10-22T00:15:50+08:00",
+      "path": "ml/models/dropout_binary_at_enrollment_m27.joblib",
+      "preprocessor_rows_seen": 3539,
+      "training_rows_fit": 3539
+    },
+    {
+      "feature_set": "scholarship_only",
+      "algorithm": "Logistic Regression",
+      "model_version": "m27-binary-dropout-scholarship_only-logistic_regression-2026-10-22T00:15:50+08:00",
+      "path": "ml/models/dropout_binary_scholarship_baseline_m27.joblib",
+      "preprocessor_rows_seen": 3539,
+      "training_rows_fit": 3539
+    }
+  ],
+  "unchanged_m25": {
+    "dropout_candidate_sha256": "24a9505b241fa6587a44c2a572f64470aee00f3d6dd2cecd0168fe940250c95f",
+    "employability_candidate_sha256": "e8e30ce6ccc5785abc96b6bb896533a1fefcc31cdd4818558908a6d9370fe705"
+  },
+  "employability_benchmark": {
+    "name": "employability_candidate_v1",
+    "algorithm": "Linear Regression",
+    "trained_at": "2026-10-21T22:41:22+08:00",
+    "cv_rmse_mean": 0.3663977762760788,
+    "production_validated": false,
+    "input_columns": [
+      "CompetenceMean",
+      "PsyCapMean"
+    ],
+    "refit_in_m27": false
+  },
+  "report_path": "ml/reports/binary_dropout_model_comparison.md",
+  "metrics_path": "ml/reports/binary_dropout_metrics.json",
+  "selection_metric": "cv_f1_dropout_mean",
+  "production_validated": false,
+  "holdout_role": "exploratory_reuse_of_m25_partition"
+}

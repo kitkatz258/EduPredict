@@ -15,7 +15,7 @@ Place the unchanged source files here before training:
 
 Those files are gitignored. The dropout CSV is semicolon-separated and is read with the leading byte-order mark removed in memory. Training uses the loose workbook only. The RAR archive is checked for duplicates and is not merged into the table.
 
-The approved UCC PDFs expected at `src/cursor/reference/approved-questionnaire/` are the inference reference. If they are absent, item-level mapping and UCC section scoring stop. The source-data experiments still use the Pianda and UCI variables that can be verified from their own files.
+The approved UCC PDFs are in `src/cursor/reference/approved-questionnaire/`. Their presence does not establish item equivalence with Pianda or a mapping onto UCI fields. A, S, B, and E stay out of the predictors. C and P are not substitutes for the Pianda means. M27 does not score UCC section means.
 
 ## Setup
 
@@ -57,6 +57,30 @@ export PYTHONPATH=.
 - `models/dropout_candidate_v1.joblib`
 
 Load an artifact with `PYTHONPATH` set to `ml/`. Each joblib object is a dictionary with `pipeline` and `metadata`. The pipeline was fit on the training split only.
+
+## M27 binary dropout experiment
+
+Research comparison only. It does not replace `dropout_candidate_v1.joblib` or the employability linear regression, and it does not score UCC students.
+
+Dropout is coded 1. Enrolled and Graduate are coded 0 and called Not Dropout. That negative class is an observed grouping in the UCI file, not proof of future retention. Algorithm choice uses repeated stratified cross-validation on the M25 training partition. Scores on the M25 holdout are an exploratory reuse, not a new final test.
+
+```bash
+.venv/bin/python -m src.run_m27
+.venv/bin/python -m src.demo_m27 dropout --offset 0
+.venv/bin/python -m src.demo_m27 employability --offset 0
+```
+
+`dropout` prints `SOURCE-DATA RESEARCH DEMO`, the model version, the observed UCI label, and P(Dropout) for one held-out source row. The default model uses the full UCI feature set, including second-semester curricular fields. `employability` scores one held-out Pianda row with the existing linear regression and `CompetenceMean` and `PsyCapMean`. It does not read UCC questionnaire answers.
+
+Reports and artifacts:
+
+- `reports/binary_dropout_model_comparison.md`
+- `reports/binary_dropout_metrics.json`
+- `reports/m27_summary.md`
+- `models/dropout_binary_full_exploratory_m27.joblib`
+- `models/dropout_binary_after_first_semester_m27.joblib`
+- `models/dropout_binary_at_enrollment_m27.joblib`
+- `models/dropout_binary_scholarship_baseline_m27.joblib`
 
 ## Candidate inputs
 

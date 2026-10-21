@@ -176,8 +176,15 @@ def test_manifests_keep_context_out_of_predictors():
     dropout_kept = {row["name"] for row in dropout_manifest() if row["decision"] == "KEEP"}
     assert dropout_kept.isdisjoint(forbidden)
     status = approved_pdf_status()
+    # The PDFs are present, so absence no longer blocks reading.
+    # Presence still does not admit A, S, B, C, P, or E as model inputs.
     assert status["directory_exists"] is True
-    assert status["item_mapping_blocked"] is True
+    assert status["missing"] == []
+    assert status["item_mapping_blocked"] is False
+    assert status["section_means_blocked"] is False
+    present = " ".join(status["present"])
+    assert "EduPredict_Questionnaire.pdf" in present
+    assert "EduPredict_Scoring_and_Research_Basis.pdf" in present
 
 
 def test_archive_questionnaire_is_duplicate_and_workbook_is_not_merged():

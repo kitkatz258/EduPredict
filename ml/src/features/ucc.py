@@ -9,8 +9,8 @@ EXPECTED_PDFS = (
     "EduPredict_Scoring_and_Research_Basis.pdf",
 )
 
-# Section inventory stated in the M25 specification. Item text was not readable
-# because the approved PDFs are not in the workspace.
+# Section inventory stated in the M25 specification. PDF presence does not
+# authorize item pairing or use of these sections as UCI predictors.
 SPEC_SECTIONS = (
     {
         "codes": "A1–A6",
@@ -83,19 +83,19 @@ def source_to_ucc_mapping() -> list[dict]:
             "source": "Pianda C1–C10",
             "ucc": "Specified C1–C8",
             "status": "UNMATCHED",
-            "evidence": "Item counts differ (10 vs 8). PDF item text is unavailable, so no item was paired.",
+            "evidence": "Item counts differ (10 vs 8). The approved PDFs are on disk. No item was paired, and measurement equivalence is not claimed.",
         },
         {
             "source": "Pianda PsyCap1–PsyCap14",
             "ucc": "Specified P1–P6",
             "status": "UNMATCHED",
-            "evidence": "Item counts differ (14 vs 6). PDF item text is unavailable, so no item was paired.",
+            "evidence": "Item counts differ (14 vs 6). The approved PDFs are on disk. No item was paired, and measurement equivalence is not claimed.",
         },
         {
             "source": "Pianda EVS1–EVS12",
             "ucc": "Specified E1–E4",
             "status": "UNMATCHED",
-            "evidence": "Item counts differ (12 vs 4). E is not a predictor even if a future crosswalk exists.",
+            "evidence": "Item counts differ (12 vs 4). The approved PDFs are on disk. E is not a predictor, and no crosswalk is claimed.",
         },
         {
             "source": "Pianda SIE1–SIE14",
