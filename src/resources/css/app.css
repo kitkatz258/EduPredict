@@ -37,6 +37,11 @@
     font-family: var(--font-sans);
 }
 
+/* Keep the confirm dim even when the popup animation class is custom. Toasts leave backdrop off. */
+.swal2-container.swal2-backdrop-show {
+    background: rgba(17, 24, 39, 0.55);
+}
+
 @keyframes step-in {
     from {
         opacity: 0;

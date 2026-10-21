@@ -77,8 +77,7 @@ class AdminUxPolishTest extends TestCase
             ->test(InstitutionStudentImport::class)
             ->assertSet('open', false)
             ->call('openImport')
-            ->assertSee('Drop a CSV file here')
-            ->assertSee('or click to browse')
+            ->assertSee('Uploading the file does not add students until you choose Import.')
             ->assertSee('student_number, last_name, first_name, program_code, year_level')
             ->assertSee('dialog-panel', false);
     }

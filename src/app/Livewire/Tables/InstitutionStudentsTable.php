@@ -37,6 +37,13 @@ class InstitutionStudentsTable extends BaseTable
         $this->resetPage();
     }
 
+    public function editEligible(int $recordId): void
+    {
+        $record = InstitutionStudent::query()->findOrFail($recordId);
+        $this->authorize('update', $record);
+        $this->dispatch('edit-eligible-student', recordId: $recordId);
+    }
+
     #[On('eligible-students-imported')]
     public function refreshAfterImport(): void
     {
@@ -56,7 +63,7 @@ class InstitutionStudentsTable extends BaseTable
             $query->where('program_id', (int) $this->programFilter);
         }
 
-        if (in_array($this->yearFilter, ['1', '2', '3', '4'], true)) {
+        if (in_array($this->yearFilter, ['1', '2', '3', '4', '5', '6'], true)) {
             $query->where('year_level', (int) $this->yearFilter);
         }
 

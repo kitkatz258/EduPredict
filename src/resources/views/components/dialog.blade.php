@@ -41,17 +41,29 @@
                 target?.focus();
             });
         },
+        closeMethod() {
+            // $el during a click is the control that fired the listener, not this dialog.
+            // Reading the host here keeps Cancel, Escape, and the backdrop on the real method.
+            const host = this.$el?.closest?.('[data-dialog-close]') ?? this.$el;
+            const method = host?.dataset?.dialogClose ?? '';
+
+            return /^[A-Za-z_][A-Za-z0-9_]*$/.test(method) ? method : '';
+        },
         requestClose() {
             if (this.leaving) {
                 return;
             }
-            const method = this.$el.dataset.dialogClose;
+            const method = this.closeMethod();
+            if (method === '') {
+                return;
+            }
+            const invoke = () => this.$wire.$call(method);
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                this.$wire.call(method);
+                invoke();
                 return;
             }
             this.leaving = true;
-            setTimeout(() => this.$wire.call(method), 150);
+            setTimeout(invoke, 150);
         },
         destroy() {
             document.body.classList.remove('overflow-hidden');

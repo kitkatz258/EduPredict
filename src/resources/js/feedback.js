@@ -6,20 +6,21 @@ function motionOptions() {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) {
         return {
-            showClass: { popup: 'swal2-noanimation', backdrop: 'swal2-noanimation', icon: 'swal2-noanimation' },
-            hideClass: { popup: 'swal2-noanimation', backdrop: 'swal2-noanimation', icon: 'swal2-noanimation' },
+            showClass: { popup: 'swal2-noanimation', backdrop: 'swal2-backdrop-show swal2-noanimation', icon: 'swal2-noanimation' },
+            hideClass: { popup: 'swal2-noanimation', backdrop: 'swal2-backdrop-hide swal2-noanimation', icon: 'swal2-noanimation' },
         };
     }
 
     return {
-        showClass: { popup: 'ed-pop-in', backdrop: 'ed-pop-in' },
-        hideClass: { popup: 'ed-pop-out', backdrop: 'ed-pop-out' },
+        showClass: { popup: 'ed-pop-in', backdrop: 'swal2-backdrop-show ed-pop-in' },
+        hideClass: { popup: 'ed-pop-out', backdrop: 'swal2-backdrop-hide ed-pop-out' },
     };
 }
 
 const toastMixin = Swal.mixin({
     toast: true,
     position: 'top-end',
+    backdrop: false,
     showConfirmButton: false,
     timer: 4000,
     timerProgressBar: true,
@@ -55,6 +56,10 @@ export function confirmAction({ title = 'Are you sure?', text = '', confirmText 
         cancelButtonColor: '#6B7280',
         reverseButtons: true,
         focusCancel: danger,
+        backdrop: true,
+        allowEnterKey: true,
+        heightAuto: false,
+        returnFocus: true,
         ...motionOptions(),
     }).then((result) => result.isConfirmed);
 }

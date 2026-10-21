@@ -22,6 +22,8 @@
                     <option value="2">2nd Year</option>
                     <option value="3">3rd Year</option>
                     <option value="4">4th Year</option>
+                    <option value="5">5th Year</option>
+                    <option value="6">6th Year</option>
                 </select>
             </div>
             <div>
@@ -54,6 +56,7 @@
                             </th>
                         @endforeach
                         <th class="px-4 py-3 text-left font-semibold text-brand-900">Program</th>
+                        <th class="px-4 py-3 text-left font-semibold text-brand-900">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-brand-200">
@@ -65,9 +68,12 @@
                             <td class="px-4 py-3">{{ $row->year_level }}</td>
                             <td class="px-4 py-3">{{ $row->is_registered ? 'Yes' : 'No' }}</td>
                             <td class="px-4 py-3">{{ $row->program?->code }}</td>
+                            <td class="px-4 py-3">
+                                <x-table-action icon="ri-pencil-line" wire:click="editEligible({{ $row->id }})">Edit</x-table-action>
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="px-4 py-12 text-center text-gray-500">{{ $emptyMessage }}</td></tr>
+                        <tr><td colspan="7" class="px-4 py-12 text-center text-gray-500">{{ $emptyMessage }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

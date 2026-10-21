@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Contracts\View\View;
@@ -13,6 +14,7 @@ use Livewire\Component;
 
 class CollegeForm extends Component
 {
+    use DispatchesToasts;
     public bool $show = false;
 
     public ?int $collegeId = null;
@@ -82,6 +84,7 @@ class CollegeForm extends Component
         $this->show = true;
         $audit->record('college_saved', $college, ['code' => $college->code]);
         $this->dispatch('catalog-changed');
+        $this->toast($this->statusMessage);
     }
 
     public function render(): View
