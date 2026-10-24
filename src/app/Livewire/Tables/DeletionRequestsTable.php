@@ -105,11 +105,11 @@ class DeletionRequestsTable extends BaseTable
         }
 
         return $query->where(function (Builder $inner) use ($term): void {
-            $inner->where('reason', 'like', '%'.$term.'%')
-                ->orWhere('status', 'like', '%'.$term.'%')
+            $inner->whereLike('reason', '%'.$term.'%')
+                ->orWhereLike('status', '%'.$term.'%')
                 ->orWhereHas('user', function (Builder $user) use ($term): void {
-                    $user->where('name', 'like', '%'.$term.'%')
-                        ->orWhere('email', 'like', '%'.$term.'%');
+                    $user->whereLike('name', '%'.$term.'%')
+                        ->orWhereLike('email', '%'.$term.'%');
                 });
         });
     }

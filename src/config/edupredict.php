@@ -286,4 +286,14 @@ return [
         'context_flag_at_or_below' => 2.60,
     ],
 
+    /*
+    | Development, PHPUnit, and a future defense copy must stay on different
+    | databases. The application does not connect to the defense database.
+    */
+    'postgres' => [
+        'development_database' => env('PGSQL_DEVELOPMENT_DATABASE', 'edupredict'),
+        'testing_database' => env('PGSQL_TESTING_DATABASE', 'edupredict_testing'),
+        'defense_database' => env('PGSQL_DEFENSE_DATABASE', 'edupredict_defense'),
+    ],
+
 ];

@@ -1,0 +1,66 @@
+# Isolated PostgreSQL 17 stack for M34. It does not attach to the MariaDB
+# volume, container names, or host ports used by the main EduPredict compose file.
+# Start it with: docker compose -f docker-compose.postgres.yml up -d --build
+name: edupredict-m34-pg
+
+services:
+  app:
+    build: .
+    image: edupredict-m34-pg-app:local
+    container_name: edupredict_m34_pg_app
+    ports:
+      - "8017:80"
+    volumes:
+      - ./src:/var/www/html
+    # Database settings stay in src/.env. Putting them in this environment block
+    # would land in PHP's $_SERVER and override phpunit.xml, including the
+    # in-memory SQLite suite and the edupredict_testing database.
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17
+    container_name: edupredict_m34_pg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  # Throwaway MariaDB used only to rehearse the copy. This is not the shared
+  # edupredict_db container and it has its own volume and host port.
+  mariadb:
+    image: mariadb:11.4
+    container_name: edupredict_m34_mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: rootsecret
+      MARIADB_DATABASE: edupredict
+      MARIADB_USER: edupredict
+      MARIADB_PASSWORD: secret
+    ports:
+      - "3308:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+volumes:
+  pg_data:
+    name: edupredict_m34_pg_data
+  mariadb_data:
+    name: edupredict_m34_mariadb_data
