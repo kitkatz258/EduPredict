@@ -190,7 +190,11 @@ docker compose -f docker-compose.postgres.yml up -d --build
 docker compose -f docker-compose.postgres.yml exec app php artisan test --configuration=phpunit.pgsql.xml
 ```
 
-## 13. How to plug in the trained models
+## 13. Free hosting (Render + Supabase)
+
+The thesis demo can run on a Render free web service with a Supabase free PostgreSQL database, using synthetic data only. `render.yaml` and `docker/render/Dockerfile` define it. Follow [`src/docs/M35-RENDER-DEPLOYMENT.md`](src/docs/M35-RENDER-DEPLOYMENT.md) step by step. The free service sleeps when idle, so open it a few minutes before presenting.
+
+## 14. How to plug in the trained models
 
 Do not drop a model file into the app until that work is explicitly approved. The prediction path is already behind one interface.
 
@@ -202,6 +206,6 @@ The research service is separate. `ml/api` loads the saved Pianda linear regress
 
 Career scores, program-shift labels, and institutional-action selection stay deterministic. A future model does not choose those.
 
-## 14. Known gaps
+## 15. Known gaps
 
 Intentionally unfinished work is listed in [`src/docs/KNOWN_GAPS.md`](src/docs/KNOWN_GAPS.md).

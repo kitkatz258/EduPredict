@@ -1,0 +1,25 @@
+# Build context for docker/render/Dockerfile (the development Dockerfile copies nothing).
+.git
+.claude
+state
+ml
+**/.env
+**/.env.*
+!src/.env.example
+src/vendor
+src/node_modules
+src/public/build
+src/public/hot
+src/public/storage
+src/bootstrap/cache/*.php
+src/storage/logs/*
+src/storage/framework/cache/data/*
+src/storage/framework/sessions/*
+src/storage/framework/views/*
+src/storage/app/private/*
+src/storage/app/public/*
+src/storage/pail
+src/cursor
+src/tests
+src/.phpunit.cache
+src/.phpunit.result.cache

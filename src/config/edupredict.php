@@ -62,6 +62,14 @@ return [
     ],
 
     /*
+    | Password for seeded demo and synthetic accounts. Empty keeps the documented
+    | development password; a public deployment sets DEMO_SEED_PASSWORD.
+    */
+    'demo' => [
+        'password' => env('DEMO_SEED_PASSWORD', ''),
+    ],
+
+    /*
     | Qualitative program-shift reading. Philippine scale: a higher GWA is weaker.
     | This is not a model score and must never be shown as a percentage.
     */

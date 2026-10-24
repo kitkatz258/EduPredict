@@ -18,6 +18,24 @@ class DemoUserSeeder extends Seeder
 {
     public const PASSWORD = 'Password123!';
 
+    public static function password(): string
+    {
+        $configured = config('edupredict.demo.password');
+
+        return is_string($configured) && $configured !== '' ? $configured : self::PASSWORD;
+    }
+
+    /** @var array<string, string> */
+    private static array $passwordHashes = [];
+
+    // One bcrypt hash for every seeded account keeps the first boot on small hosts short.
+    public static function passwordHash(): string
+    {
+        $password = self::password();
+
+        return self::$passwordHashes[$password] ??= Hash::make($password);
+    }
+
     public function run(): void
     {
         $clas = College::query()->where('code', ClasStructureSynchronizer::COLLEGE_CODE)->firstOrFail();
@@ -29,7 +47,7 @@ class DemoUserSeeder extends Seeder
             ['email' => 'admin@edupredict.test'],
             [
                 'name' => 'Ada Admin',
-                'password' => Hash::make(self::PASSWORD),
+                'password' => self::passwordHash(),
                 'role' => UserRole::Administrator,
                 'is_active' => true,
                 'email_verified_at' => now(),
@@ -40,7 +58,7 @@ class DemoUserSeeder extends Seeder
             ['email' => 'dean@edupredict.test'],
             [
                 'name' => 'Diego Dean',
-                'password' => Hash::make(self::PASSWORD),
+                'password' => self::passwordHash(),
                 'role' => UserRole::Dean,
                 'college_id' => $clas->id,
                 'department_id' => null,
@@ -54,7 +72,7 @@ class DemoUserSeeder extends Seeder
             ['email' => 'depthead@edupredict.test'],
             [
                 'name' => 'Hana Head',
-                'password' => Hash::make(self::PASSWORD),
+                'password' => self::passwordHash(),
                 'role' => UserRole::DepartmentHead,
                 'college_id' => $clas->id,
                 'department_id' => $computerStudies->id,
@@ -68,7 +86,7 @@ class DemoUserSeeder extends Seeder
             ['email' => 'student@edupredict.test'],
             [
                 'name' => 'Sam Student',
-                'password' => Hash::make(self::PASSWORD),
+                'password' => self::passwordHash(),
                 'role' => UserRole::Student,
                 'is_active' => true,
                 'consented_at' => now(),

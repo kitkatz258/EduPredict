@@ -11,6 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Render terminates HTTPS at its proxy. Local development leaves this unset.
+        $trustedProxies = (string) env('TRUSTED_PROXIES', '');
+        if ($trustedProxies !== '') {
+            $middleware->trustProxies(at: $trustedProxies === '*' ? '*' : array_map('trim', explode(',', $trustedProxies)));
+        }
+
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeaders::class,
         ]);

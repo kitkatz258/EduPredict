@@ -1,0 +1,81 @@
+# Render Blueprint for the EduPredict thesis demo (free plan).
+# Values marked `sync: false` are entered in the Render dashboard when the
+# Blueprint is created; they are never stored in git.
+# Step-by-step guide: src/docs/M35-RENDER-DEPLOYMENT.md
+services:
+  - type: web
+    name: edupredict
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./docker/render/Dockerfile
+    dockerContext: .
+    healthCheckPath: /up
+    autoDeploy: true
+    envVars:
+      - key: APP_NAME
+        value: EduPredict
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false
+      - key: APP_TIMEZONE
+        value: Asia/Manila
+      - key: TRUSTED_PROXIES
+        value: "*"
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+
+      # Supabase session pooler (IPv4, port 5432). The direct db.<ref>.supabase.co
+      # host is IPv6-only on the free plan and Render cannot reach it.
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        value: postgres
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSLMODE
+        value: require
+      - key: DB_EMULATE_PREPARES
+        value: "false"
+
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: database
+      # Nothing in the app is queued, so jobs and notifications run inline.
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: MAIL_MAILER
+        value: log
+      - key: BCRYPT_ROUNDS
+        value: "12"
+
+      - key: PREDICTOR_DRIVER
+        value: heuristic
+
+      # First boot on an empty database loads the synthetic demo cohort.
+      - key: SEED_DEMO_DATA
+        value: "true"
+      - key: DEMO_SEED_PASSWORD
+        sync: false
+
+      # Optional OpenRouter phrasing. Leave the key empty to use the rule-based fallbacks.
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        sync: false

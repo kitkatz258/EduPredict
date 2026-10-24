@@ -16,7 +16,6 @@ use App\Models\SubjectGrade;
 use App\Models\User;
 use App\Services\Interventions\RecommendedActionBuilder;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class SyntheticStudentSeeder extends Seeder
 {
@@ -53,7 +52,7 @@ class SyntheticStudentSeeder extends Seeder
                 ['email' => "synthetic{$i}@edupredict.test"],
                 [
                     'name' => trim($firstName.' '.$lastName),
-                    'password' => Hash::make(DemoUserSeeder::PASSWORD),
+                    'password' => DemoUserSeeder::passwordHash(),
                     'role' => UserRole::Student,
                     'is_active' => true,
                     'consented_at' => now(),
