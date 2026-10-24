@@ -5,6 +5,11 @@ services:
     ports:
       - "8000:80"          # Laravel -> http://localhost:8000
       - "5173:5173"        # Vite dev server
+    environment:
+      ML_API_BASE_URL: http://ml:8000
+      ML_API_TOKEN: ${ML_API_TOKEN:-local-dev-ml-token}
+      ML_API_TIMEOUT: "5"
+      ML_API_CONNECT_TIMEOUT: "2"
     volumes:
       - ./src:/var/www/html
     depends_on:
@@ -41,6 +46,34 @@ services:
       - "8080:80"
     depends_on:
       - db
+
+  # Research inference on the Compose network only. No host port is published.
+  ml:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    container_name: edupredict_ml
+    environment:
+      ML_API_TOKEN: ${ML_API_TOKEN:-local-dev-ml-token}
+      ML_HOST: 0.0.0.0
+      PORT: "8000"
+      ML_ENV: local
+      ML_INFERENCE_TIMEOUT_SECONDS: "2"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+      PYTHONUNBUFFERED: "1"
+    expose:
+      - "8000"
+    mem_limit: 1g
+    cpus: 1.0
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=2)"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
 
 volumes:
   db_data:

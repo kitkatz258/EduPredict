@@ -49,8 +49,14 @@ final class PredictionRequester
         return $latest->created_at->copy()->addHours((int) config('edupredict.prediction.cooldown_hours', 24));
     }
 
+    public const RESEARCH_ENGINE_BLOCK = 'Student predictions stay on the rule-based placeholder. The research inference service does not score this assessment.';
+
     public function blockMessage(Student $student): ?string
     {
+        if ((string) config('edupredict.predictor.driver', 'heuristic') !== 'heuristic') {
+            return self::RESEARCH_ENGINE_BLOCK;
+        }
+
         $student->loadMissing('user');
         if ($student->user?->consented_at === null) {
             return 'Consent is required before a new prediction.';

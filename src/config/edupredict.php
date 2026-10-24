@@ -7,13 +7,22 @@ return [
     | Predictor driver
     |--------------------------------------------------------------------------
     |
-    | heuristic = placeholder weighted rules (this build).
-    | http / onnx are reserved for the trained models in a later phase.
+    | heuristic = placeholder weighted rules for student predictions.
+    | http = research adapter. It does not score student FeatureSets.
+    | onnx remains reserved.
     |
     */
     'predictor' => [
         'driver' => env('PREDICTOR_DRIVER', 'heuristic'),
         'placeholder_version' => 'placeholder-heuristic-v0',
+        'http' => [
+            'base_url' => rtrim((string) env('ML_API_BASE_URL', 'http://ml:8000'), '/'),
+            'token' => env('ML_API_TOKEN', ''),
+            'timeout' => max(1, (int) env('ML_API_TIMEOUT', 5)),
+            'connect_timeout' => max(1, (int) env('ML_API_CONNECT_TIMEOUT', 2)),
+            // Student FeatureSet scoring stays off. There is no validity gate for UCC inputs.
+            'student_scoring_enabled' => false,
+        ],
         'employability_base' => 50,
         'dropout_base' => 0.20,
         'dropout_moderate_at' => 0.30,

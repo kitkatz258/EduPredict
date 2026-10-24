@@ -2,7 +2,7 @@
 
 These items are unfinished on purpose or are limits of this build. They are not open defects in the milestones through M21.
 
-- The employability and dropout models are still the deterministic placeholder `HeuristicPredictor` (`placeholder-heuristic-v0`). `http` and `onnx` drivers throw until a trained model is approved. Do not describe placeholder output as a trained result.
+- Student predictions remain the deterministic placeholder `HeuristicPredictor` (`placeholder-heuristic-v0`). The FastAPI service scores saved Pianda and UCI research artifacts only. `PREDICTOR_DRIVER=http` does not score a student assessment, and `onnx` still throws. Do not describe placeholder output or research-demo output as a validated UCC result.
 - The PSOC table is a starter set. Verify it against the official PSA PSOC 2012 before a final submission.
 - INC is left out of the GWA, which is then marked provisional. The UCC portal appears to count INC as 4.00, so its GPA can differ; confirm the official rule with the registrar. NSTP codes are excluded from GPA.
 - Predictions made before grade snapshots existed have no stored grade version; history should show "Not available for this attempt" for them.

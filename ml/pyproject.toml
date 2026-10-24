@@ -1,7 +1,7 @@
 [project]
 name = "edupredict-ml"
-version = "0.27.0"
-description = "EduPredict M25 and M27 research experiments. Not a production predictor."
+version = "0.33.0"
+description = "EduPredict research experiments and the M33 source-schema inference service. Not a UCC predictor."
 requires-python = ">=3.11"
 
 [tool.pytest.ini_options]

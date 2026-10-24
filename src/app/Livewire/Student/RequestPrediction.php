@@ -7,6 +7,7 @@ namespace App\Livewire\Student;
 use App\Models\Prediction;
 use App\Services\Prediction\PredictionBlockedException;
 use App\Services\Prediction\PredictionRequester;
+use App\Services\Prediction\ResearchInferenceException;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -25,7 +26,7 @@ class RequestPrediction extends Component
 
         try {
             $requester->request($student, auth()->user());
-        } catch (PredictionBlockedException $exception) {
+        } catch (PredictionBlockedException|ResearchInferenceException $exception) {
             $this->addError('request', $exception->getMessage());
 
             return;

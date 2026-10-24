@@ -3,16 +3,18 @@
 This document is the single source of truth for features passed to `PredictorInterface`.
 `App\Services\Prediction\FeatureBuilder` is the only class that maps student records into a `FeatureSet`.
 
-The trained models are **not** implemented in this build. The bound predictor is the placeholder
-`HeuristicPredictor` (`model_version = placeholder-heuristic-v0`). Do not mirror public dataset
-column names until the adviser-approved training datasets are chosen.
+Student predictions use the placeholder `HeuristicPredictor` (`model_version = placeholder-heuristic-v0`).
+The FastAPI service scores saved Pianda and UCI research artifacts. It does not accept this `FeatureSet`.
+UCC section means and Philippine grades are not mapped onto those artifacts.
 
 ## Binding
 
 - Config: `config('edupredict.predictor.driver')` from `.env` `PREDICTOR_DRIVER` (default `heuristic`).
-- Drivers reserved: `heuristic` (now), `http`, `onnx` (later). `http` and `onnx` throw until a later phase.
+- `heuristic` is the student workflow. `http` resolves `HttpPredictor`, which refuses a `FeatureSet`.
+- `onnx` still throws. There is no automatic fallback from a research error to the placeholder.
+- Research calls use `HttpResearchInferenceClient` with explicit `pianda-v1` or `uci-697` payloads.
 - Binding: `App\Providers\AppServiceProvider` binds `App\Contracts\PredictorInterface`.
-- Swap the trained model by implementing `PredictorInterface` and changing the driver binding. Do not rewrite `FeatureBuilder` or the request flow.
+- Do not rewrite `FeatureBuilder` to feed questionnaire means or grades into the research models.
 
 ## Placeholder rules
 

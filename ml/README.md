@@ -1,6 +1,6 @@
 # EduPredict ML research candidates (M25)
 
-This folder trains and evaluates research candidates. It does not replace the Laravel placeholder predictor, and it does not serve a model.
+This folder trains and evaluates research candidates and, from M33, serves those saved artifacts for source-schema demos. It does not replace the Laravel placeholder predictor and it does not score UCC students.
 
 The saved files are not production-validated. Approval of the UCC questionnaire is not psychometric validation or evidence that the candidates work for UCC students.
 
@@ -87,3 +87,22 @@ Reports and artifacts:
 Employability v1 accepts `CompetenceMean` and `PsyCapMean`, the verified unweighted Pianda item means on the 1–5 scale. The target is the EVS mean. EVS items are not inputs. A later display index is `((score - 1) / 4) * 100` inside that range. It is not a probability of employment.
 
 Dropout v1 accepts `Scholarship holder` as 0 or 1. It returns the original labels Dropout, Enrolled, and Graduate, plus `P(Dropout)`. It does not apply Low, Moderate, or High cut points. The full UCI feature model is an exploratory reference and is not the saved candidate, because most of its fields have no verified UCC equivalent and the grade scales are not converted.
+
+## M33 research service
+
+`ml/api` loads the saved joblib files at startup. It does not call `fit`. The Compose service is `ml`, reachable by Laravel as `http://ml:8000`, with no host port published.
+
+Authenticated routes:
+
+- `POST /v1/research/employability` with `schema_id=pianda-v1` and `CompetenceMean`, `PsyCapMean`
+- `POST /v1/research/dropout` with `schema_id=uci-697`, a `feature_set` of `full`, `after_first_semester`, `at_enrollment`, or `scholarship_only`, and that artifact's exact UCI columns
+- `GET /v1/research/models`
+
+`GET /health/live` and `GET /health/ready` do not require the token. Inference requires `Authorization: Bearer $ML_API_TOKEN`. `dropout_candidate_v1.joblib` is not served. UCC item codes, section means, and student fields are rejected. The three-class scholarship candidate remains unloaded.
+
+Local API dependencies are pinned in `requirements-api.txt`. From `ml/`:
+
+```bash
+.venv/bin/python -m pip install -r requirements-api.txt
+ML_API_TOKEN=local-dev-ml-token .venv/bin/python -m api.main
+```
