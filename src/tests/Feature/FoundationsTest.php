@@ -48,6 +48,9 @@ class FoundationsTest extends TestCase
             ->set('search', 'Beta User')
             ->assertSee('Beta User')
             ->assertDontSee('Alpha User')
+            ->set('search', 'beta user')
+            ->assertSee('Beta User')
+            ->assertDontSee('Alpha User')
             ->set('search', '')
             ->call('sortBy', 'name')
             ->assertSet('sortField', 'name');

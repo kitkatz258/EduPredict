@@ -3,6 +3,16 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+$activeConnection = env('DB_CONNECTION', 'sqlite');
+$usingMysql = in_array($activeConnection, ['mysql', 'mariadb'], true);
+$usingPgsql = $activeConnection === 'pgsql';
+$emulatePrepares = filter_var(env('DB_EMULATE_PREPARES', false), FILTER_VALIDATE_BOOLEAN);
+$pgsqlOptions = extension_loaded('pdo_pgsql') && $emulatePrepares
+    ? [PDO::ATTR_EMULATE_PREPARES => true]
+    : [];
+$sslRootCert = env('DB_SSLROOTCERT');
+$sslRootCert = is_string($sslRootCert) && $sslRootCert !== '' ? $sslRootCert : null;
+
 return [
 
     /*
@@ -46,12 +56,12 @@ return [
 
         'mysql' => [
             'driver' => 'mysql',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'url' => $usingMysql ? env('DB_URL') : env('MYSQL_URL'),
+            'host' => $usingMysql ? env('DB_HOST', '127.0.0.1') : env('MYSQL_HOST', '127.0.0.1'),
+            'port' => $usingMysql ? env('DB_PORT', '3306') : env('MYSQL_PORT', '3306'),
+            'database' => $usingMysql ? env('DB_DATABASE', 'laravel') : env('MYSQL_DATABASE', 'edupredict'),
+            'username' => $usingMysql ? env('DB_USERNAME', 'root') : env('MYSQL_USERNAME', 'edupredict'),
+            'password' => $usingMysql ? env('DB_PASSWORD', '') : env('MYSQL_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
@@ -66,12 +76,12 @@ return [
 
         'mariadb' => [
             'driver' => 'mariadb',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'url' => $usingMysql ? env('DB_URL') : env('MYSQL_URL'),
+            'host' => $usingMysql ? env('DB_HOST', '127.0.0.1') : env('MYSQL_HOST', '127.0.0.1'),
+            'port' => $usingMysql ? env('DB_PORT', '3306') : env('MYSQL_PORT', '3306'),
+            'database' => $usingMysql ? env('DB_DATABASE', 'laravel') : env('MYSQL_DATABASE', 'edupredict'),
+            'username' => $usingMysql ? env('DB_USERNAME', 'root') : env('MYSQL_USERNAME', 'edupredict'),
+            'password' => $usingMysql ? env('DB_PASSWORD', '') : env('MYSQL_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
@@ -86,17 +96,24 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset' => env('DB_CHARSET', 'utf8'),
+            'url' => $usingPgsql ? env('DB_URL') : env('PGSQL_URL'),
+            'host' => $usingPgsql ? env('DB_HOST', '127.0.0.1') : env('PGSQL_HOST', '127.0.0.1'),
+            'port' => $usingPgsql ? env('DB_PORT', '5432') : env('PGSQL_PORT', '5432'),
+            'database' => $usingPgsql ? env('DB_DATABASE', 'edupredict') : env('PGSQL_DATABASE', 'edupredict'),
+            'username' => $usingPgsql ? env('DB_USERNAME', 'edupredict') : env('PGSQL_USERNAME', 'edupredict'),
+            'password' => $usingPgsql ? env('DB_PASSWORD', '') : env('PGSQL_PASSWORD', ''),
+            // PostgreSQL rejects MySQL's utf8mb4 client encoding. Keep this utf8.
+            'charset' => env('PGSQL_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'public',
+            'search_path' => env('DB_SCHEMA', 'public'),
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'sslrootcert' => $sslRootCert,
+            'application_name' => env('DB_APPLICATION_NAME', 'edupredict'),
+            'connect_via_database' => env('DB_CONNECT_VIA_DATABASE'),
+            'connect_via_port' => env('DB_CONNECT_VIA_PORT'),
+            // Supabase's transaction pooler (port 6543) cannot use server-side prepares.
+            'options' => $pgsqlOptions,
         ],
 
         'sqlsrv' => [

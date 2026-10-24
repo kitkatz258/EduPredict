@@ -40,8 +40,8 @@ class ClasStructureTest extends TestCase
         $this->assertSame('College of Liberal Arts and Sciences', $clas->name);
         $this->assertSame(1, College::query()->count());
 
-        $programs = Program::query()->with('department')->orderBy('name')->get();
-        $this->assertSame(self::CLAS_PROGRAMS, $programs->pluck('name')->all());
+        $programs = Program::query()->with('department')->orderBy('id')->get();
+        $this->assertEqualsCanonicalizing(self::CLAS_PROGRAMS, $programs->pluck('name')->all());
 
         foreach ($programs as $program) {
             $this->assertTrue($program->is_active);

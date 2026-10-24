@@ -50,10 +50,10 @@ class AuditLogsTable extends BaseTable
         }
 
         return $query->where(function (Builder $inner) use ($term): void {
-            $inner->where('action', 'like', '%'.$term.'%')
-                ->orWhere('ip', 'like', '%'.$term.'%')
+            $inner->whereLike('action', '%'.$term.'%')
+                ->orWhereLike('ip', '%'.$term.'%')
                 ->orWhereHas('user', function (Builder $user) use ($term): void {
-                    $user->where('name', 'like', '%'.$term.'%');
+                    $user->whereLike('name', '%'.$term.'%');
                 });
         });
     }

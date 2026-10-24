@@ -142,9 +142,9 @@ class ScopedStudentsTable extends BaseTable
         }
 
         return $query->where(function (Builder $inner) use ($term): void {
-            $inner->where('student_number', 'like', '%'.$term.'%')
-                ->orWhereHas('user', fn (Builder $users) => $users->where('name', 'like', '%'.$term.'%'))
-                ->orWhereHas('program', fn (Builder $programs) => $programs->where('name', 'like', '%'.$term.'%'));
+            $inner->whereLike('student_number', '%'.$term.'%')
+                ->orWhereHas('user', fn (Builder $users) => $users->whereLike('name', '%'.$term.'%'))
+                ->orWhereHas('program', fn (Builder $programs) => $programs->whereLike('name', '%'.$term.'%'));
         });
     }
 

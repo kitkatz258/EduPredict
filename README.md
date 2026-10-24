@@ -7,7 +7,7 @@ It analyzes academic, socioeconomic, behavioral, and skills/experience data to e
 | | |
 |---|---|
 | Backend / UI | Laravel 12, PHP 8.3, Blade, Tailwind CSS, Livewire, Chart.js |
-| Database | MariaDB 11.4 (MySQL-compatible) |
+| Database | MariaDB 11.4 by default. PostgreSQL 17 is an isolated option (`docker-compose.postgres.yml`). |
 | Runs in | Docker (2 core containers: `app`, `db` + optional phpMyAdmin) |
 | AI | OpenRouter (free-tier models) for text phrasing; the app works without a key |
 | ML | Python/scikit-learn models are trained separately and plugged in later (`PredictorInterface`) |
@@ -181,7 +181,16 @@ docker compose exec app php artisan test
 
 PHPUnit uses an in-memory SQLite database. It does not call OpenRouter. Grade OCR tests run when `src/cursor/samples/` contains the portal samples and the container has Python and Tesseract; otherwise those cases skip with a message.
 
-## 12. How to plug in the trained models
+## 12. PostgreSQL and Supabase
+
+MariaDB remains the default. The PostgreSQL 17 stack is a separate Compose project with its own containers, ports (`8017`, `5433`, `3308`), and volumes. It does not reset the shared MariaDB database. Development (`edupredict`), PHPUnit (`edupredict_testing`), and the reserved defense database (`edupredict_defense`) are separate. Supabase settings, the MariaDB-to-PostgreSQL copy, and rollback steps are in [`src/docs/M34-POSTGRESQL-SUPABASE.md`](src/docs/M34-POSTGRESQL-SUPABASE.md). No real Supabase project is connected.
+
+```powershell
+docker compose -f docker-compose.postgres.yml up -d --build
+docker compose -f docker-compose.postgres.yml exec app php artisan test --configuration=phpunit.pgsql.xml
+```
+
+## 13. How to plug in the trained models
 
 Do not drop a model file into the app until that work is explicitly approved. The prediction path is already behind one interface.
 
@@ -192,6 +201,6 @@ Do not drop a model file into the app until that work is explicitly approved. Th
 
 Career scores, program-shift labels, and institutional-action selection stay deterministic. A future model does not choose those.
 
-## 13. Known gaps
+## 14. Known gaps
 
 Intentionally unfinished work is listed in [`src/docs/KNOWN_GAPS.md`](src/docs/KNOWN_GAPS.md).

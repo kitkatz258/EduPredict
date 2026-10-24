@@ -1,3 +1,6 @@
+# MariaDB development stack. From this worktree, do not start this file while
+# the main EduPredict containers are running: the container names and host ports
+# 8000, 3307, and 8080 are the same. PostgreSQL uses docker-compose.postgres.yml.
 services:
   app:
     build: .

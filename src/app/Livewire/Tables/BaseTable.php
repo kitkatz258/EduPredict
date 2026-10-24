@@ -101,9 +101,9 @@ abstract class BaseTable extends Component
         return $query->where(function (Builder $inner) use ($columns, $term): void {
             foreach ($columns as $index => $column) {
                 if ($index === 0) {
-                    $inner->where($column, 'like', '%'.$term.'%');
+                    $inner->whereLike($column, '%'.$term.'%');
                 } else {
-                    $inner->orWhere($column, 'like', '%'.$term.'%');
+                    $inner->orWhereLike($column, '%'.$term.'%');
                 }
             }
         });
