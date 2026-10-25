@@ -58,6 +58,7 @@
 }
 
 .dialog-scroll {
+    overflow-anchor: none;
     scrollbar-width: thin;
     scrollbar-color: #9aa0ad #f6f7f9;
 }

@@ -22,14 +22,14 @@ class HeuristicPredictorTest extends TestCase
         $firstDropout = $predictor->predictDropout($features);
         $secondDropout = $predictor->predictDropout($features);
 
-        $this->assertSame(45.0, $firstEmployability->score);
+        $this->assertSame(47.0, $firstEmployability->score);
         $this->assertSame($firstEmployability->score, $secondEmployability->score);
         $this->assertEquals($firstDropout->probability, $secondDropout->probability);
-        $this->assertSame('placeholder-heuristic-v0', $firstEmployability->modelVersion);
-        $this->assertSame('placeholder-heuristic-v0', $firstDropout->modelVersion);
+        $this->assertSame('placeholder-heuristic-v1', $firstEmployability->modelVersion);
+        $this->assertSame('placeholder-heuristic-v1', $firstDropout->modelVersion);
         $this->assertNull($firstEmployability->riskLevel);
         $this->assertSame('moderate', $firstDropout->riskLevel);
-        $this->assertEqualsWithDelta(0.4408, $firstDropout->probability, 0.0001);
+        $this->assertEqualsWithDelta(0.4008, $firstDropout->probability, 0.0001);
         $this->assertSame('normal', $firstEmployability->confidence);
     }
 
@@ -129,6 +129,95 @@ class HeuristicPredictorTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $dropout->probability);
         $this->assertLessThanOrEqual(1, $dropout->probability);
         $this->assertSame('high', $dropout->riskLevel);
+    }
+
+    public function test_incomplete_and_dropped_subjects_are_not_treated_as_a_clean_or_failed_record(): void
+    {
+        $predictor = new HeuristicPredictor;
+        $clean = $predictor->predictEmployability($this->features([
+            'gwa' => 2.00,
+            'failedSubjects' => 0,
+            'scholarshipStatus' => null,
+        ]));
+        $incomplete = $predictor->predictEmployability($this->features([
+            'gwa' => 2.00,
+            'failedSubjects' => 0,
+            'incompleteSubjects' => 2,
+            'scholarshipStatus' => null,
+        ]));
+        $dropped = $predictor->predictEmployability($this->features([
+            'gwa' => 2.00,
+            'failedSubjects' => 0,
+            'droppedSubjects' => 1,
+            'scholarshipStatus' => null,
+        ]));
+        $failed = $predictor->predictEmployability($this->features([
+            'gwa' => 2.00,
+            'failedSubjects' => 1,
+            'scholarshipStatus' => null,
+        ]));
+
+        $cleanFactors = collect($clean->factors)->keyBy(fn ($factor) => $factor->feature);
+        $this->assertSame('+', $cleanFactors['failed_subjects']->direction);
+        $this->assertEquals(4.0, $cleanFactors['failed_subjects']->magnitude);
+        $this->assertArrayNotHasKey('incomplete_subjects', $cleanFactors);
+
+        $incompleteFactors = collect($incomplete->factors)->keyBy(fn ($factor) => $factor->feature);
+        $this->assertArrayNotHasKey('failed_subjects', $incompleteFactors);
+        $this->assertSame('-', $incompleteFactors['incomplete_subjects']->direction);
+        $this->assertEquals(4.0, $incompleteFactors['incomplete_subjects']->magnitude);
+        $this->assertLessThan($clean->score, $incomplete->score);
+
+        $droppedFactors = collect($dropped->factors)->keyBy(fn ($factor) => $factor->feature);
+        $this->assertSame('-', $droppedFactors['dropped_subjects']->direction);
+        $this->assertEquals(2.0, $droppedFactors['dropped_subjects']->magnitude);
+        $this->assertGreaterThan($failed->score, $dropped->score);
+
+        $incompleteRisk = $predictor->predictDropout($this->features([
+            'gwa' => 2.00,
+            'failedSubjects' => 0,
+            'incompleteSubjects' => 2,
+        ]));
+        $droppedRisk = $predictor->predictDropout($this->features([
+            'gwa' => 2.00,
+            'failedSubjects' => 0,
+            'droppedSubjects' => 1,
+        ]));
+        $failedRisk = $predictor->predictDropout($this->features([
+            'gwa' => 2.00,
+            'failedSubjects' => 1,
+        ]));
+        $this->assertGreaterThan($droppedRisk->probability, $failedRisk->probability);
+        $this->assertGreaterThan(
+            $predictor->predictDropout($this->features(['gwa' => 2.00, 'failedSubjects' => 0]))->probability,
+            $incompleteRisk->probability,
+        );
+    }
+
+    public function test_household_fields_do_not_change_a_new_score(): void
+    {
+        $predictor = new HeuristicPredictor;
+        $plain = $this->features(['scholarshipStatus' => null, 'hasScholarship' => false]);
+        $household = $this->features([
+            'scholarshipStatus' => 'full',
+            'hasScholarship' => true,
+            'incomeBracket' => 'below_10k',
+            'internetAccess' => 'no',
+            'deviceAccess' => 'no',
+            'studySpace' => 'no',
+            'employmentStatus' => 'full_time',
+        ]);
+
+        $plainScore = $predictor->predictEmployability($plain);
+        $householdScore = $predictor->predictEmployability($household);
+        $this->assertSame($plainScore->score, $householdScore->score);
+        $this->assertSame(
+            $predictor->predictDropout($plain)->probability,
+            $predictor->predictDropout($household)->probability,
+        );
+        $labels = collect($householdScore->factors)->pluck('label');
+        $this->assertFalse($labels->contains('Scholarship'));
+        $this->assertFalse($labels->contains('Household income band'));
     }
 
     public function test_the_heuristic_driver_is_bound_and_reserved_drivers_are_rejected(): void

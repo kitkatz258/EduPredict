@@ -224,12 +224,6 @@ final class PredictionRequester
             }
         }
 
-        foreach ([$features->scholarshipStatus, $features->incomeBracket, $features->internetAccess, $features->deviceAccess, $features->studySpace, $features->employmentStatus] as $value) {
-            if ($value !== null) {
-                return null;
-            }
-        }
-
         if ($features->technicalSkillCount > 0 || $features->certificationCount > 0 || $features->internshipCount > 0 || $features->workExperienceCount > 0) {
             return null;
         }
@@ -270,20 +264,22 @@ final class PredictionRequester
         }
 
         foreach ([
-            'scholarship_status' => $features->scholarshipStatus,
-            'income_bracket' => $features->incomeBracket,
-            'internet_access' => $features->internetAccess,
-            'device_access' => $features->deviceAccess,
-            'study_space' => $features->studySpace,
-            'employment_status' => $features->employmentStatus,
-        ] as $key => $value) {
-            if ($value === null) {
-                $unavailable[] = $key;
-            }
+            'scholarship_status',
+            'has_scholarship',
+            'income_bracket',
+            'household_size',
+            'living_arrangement',
+            'internet_access',
+            'device_access',
+            'study_space',
+            'employment_status',
+        ] as $key) {
+            $snapshot[$key] = null;
+            $unavailable[] = $key;
         }
 
         $snapshot['unavailable_inputs'] = $unavailable;
-        $snapshot['estimate_note'] = 'Workflow completeness is separate from placeholder confidence and from the risk classification. Missing grades and unmapped questionnaire section means are omitted. They are not scored as zero. Skills that were not logged are not treated as zero ability. Household fields that were not collected are omitted. They are not treated as poverty, as no scholarship, or as zero.';
+        $snapshot['estimate_note'] = 'Workflow completeness is separate from placeholder confidence and from the risk classification. Missing grades and unmapped questionnaire section means are omitted. They are not scored as zero. Skills that were not logged are not treated as zero ability. Discontinued household profile fields are not used in a new prediction, even when an older encrypted profile is still on file. They are not treated as poverty, as no scholarship, or as zero.';
 
         return $snapshot;
     }

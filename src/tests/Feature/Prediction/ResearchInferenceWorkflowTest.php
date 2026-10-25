@@ -73,7 +73,7 @@ class ResearchInferenceWorkflowTest extends TestCase
             ->assertHasNoErrors();
 
         $prediction = Prediction::query()->sole();
-        $this->assertSame('placeholder-heuristic-v0', $prediction->model_version);
+        $this->assertSame('placeholder-heuristic-v1', $prediction->model_version);
         $this->assertNotNull($prediction->dropout_risk);
         Http::assertNothingSent();
     }

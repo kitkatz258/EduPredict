@@ -50,6 +50,9 @@ final class GradeScale
         if ($this->isIncomplete($compact)) {
             return 'INC';
         }
+        if ($this->isUnofficialDrop($compact)) {
+            return 'UD';
+        }
         if ($this->isDropped($compact)) {
             return in_array($compact, ['W', 'WITHDRAWN'], true) ? 'W' : 'DRP';
         }
@@ -78,7 +81,12 @@ final class GradeScale
     {
         $token = $this->compactToken($token);
 
-        return in_array($token, array_map('strtoupper', config('edupredict.grades.dropped_tokens', ['DRP', 'W', 'WITHDRAWN', 'DROPPED'])), true);
+        return in_array($token, array_map(fn (string $item): string => $this->compactToken($item), config('edupredict.grades.dropped_tokens', ['DRP', 'W', 'WITHDRAWN', 'DROPPED'])), true);
+    }
+
+    public function isUnofficialDrop(string $token): bool
+    {
+        return in_array($this->compactToken($token), ['UD', 'UNOFFICIAL', 'UNOFFICIALLYDROPPED'], true);
     }
 
     /**
@@ -94,6 +102,9 @@ final class GradeScale
         if ($this->isIncomplete($compact)) {
             return 'INCOMPLETE';
         }
+        if ($this->isUnofficialDrop($compact)) {
+            return 'UNOFFICIAL';
+        }
         if ($this->isDropped($compact)) {
             return in_array($compact, ['W', 'WITHDRAWN'], true) ? 'WITHDRAWN' : 'DROPPED';
         }
@@ -102,6 +113,22 @@ final class GradeScale
         }
 
         return null;
+    }
+
+    /**
+     * Words shown in the grade form. Stored rows stay canonical.
+     */
+    public function displayRemark(?string $token): string
+    {
+        return match ($this->statusRemark($token)) {
+            'INCOMPLETE' => 'Incomplete',
+            'DROPPED' => 'Dropped',
+            'WITHDRAWN' => 'Withdrawn',
+            'UNOFFICIAL' => 'Unofficially Dropped',
+            'FAILED' => 'Failed',
+            'PASSED' => 'Passed',
+            default => trim((string) $token),
+        };
     }
 
     private function compactToken(string $token): string
@@ -146,22 +173,17 @@ final class GradeScale
 
     public function remarksFor(?string $finalGrade, ?string $existing = null): string
     {
-        $existing = strtoupper(trim((string) $existing));
-        if ($existing !== '') {
-            if ($this->isIncomplete($existing)) {
-                return 'INCOMPLETE';
-            }
-            if ($this->isDropped($existing)) {
-                return $existing === 'W' || $existing === 'WITHDRAWN' ? 'WITHDRAWN' : 'DROPPED';
-            }
-            if (in_array($existing, ['PASSED', 'FAILED', 'INCOMPLETE', 'DROPPED', 'WITHDRAWN'], true)) {
-                return $existing;
-            }
+        $existingStatus = $this->statusRemark($existing);
+        if ($existingStatus !== null) {
+            return $existingStatus;
         }
 
         $grade = $this->normalizeGradeToken($finalGrade) ?? '';
         if ($this->isIncomplete($grade)) {
             return 'INCOMPLETE';
+        }
+        if ($this->isUnofficialDrop($grade)) {
+            return 'UNOFFICIAL';
         }
         if ($this->isDropped($grade)) {
             return $grade === 'W' ? 'WITHDRAWN' : 'DROPPED';
@@ -173,7 +195,7 @@ final class GradeScale
             return 'PASSED';
         }
 
-        return $existing !== '' ? $existing : '';
+        return trim((string) $existing);
     }
 
     public function excludesFromGpa(string $subjectCode): bool

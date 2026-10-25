@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Prediction;
 
-use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Services\Grades\AcademicSummary;
 use App\Services\Profile\SkillsExperienceRecords;
@@ -12,7 +11,7 @@ use App\Services\Profile\SkillsExperienceRecords;
 /**
  * The only place student records become a FeatureSet.
  * Draft profiles, archived skill entries, and unconfirmed grade reports are ignored.
- * Projects are no longer collected, so `projectCount` is always 0.
+ * Household profile fields are not read. Projects are no longer collected, so `projectCount` is always 0.
  */
 final class FeatureBuilder
 {
@@ -24,27 +23,23 @@ final class FeatureBuilder
     public function build(Student $student): FeatureSet
     {
         $summary = $this->academic->for($student);
-        $profile = $this->publishedProfile($student);
         $skills = $this->skillRecords->counts($student);
         $scores = $this->latestConstructScores($student);
-
-        $scholarship = $profile?->scholarship_status;
-        $householdSize = $profile?->household_size;
 
         return new FeatureSet(
             gwa: $summary['rounded_gwa'],
             failedSubjects: $summary['failed_subjects'],
             semestersCompleted: $summary['semesters_completed'],
             limitedHistory: $summary['limited_history'],
-            scholarshipStatus: $this->nullableString($scholarship),
-            hasScholarship: is_string($scholarship) && $scholarship !== '' && $scholarship !== 'none',
-            employmentStatus: $this->nullableString($profile?->employment_status),
-            incomeBracket: $this->nullableString($profile?->household_income_bracket),
-            householdSize: is_numeric($householdSize) ? (int) $householdSize : null,
-            livingArrangement: $this->nullableString($profile?->living_arrangement),
-            internetAccess: $this->nullableString($profile?->has_internet),
-            deviceAccess: $this->nullableString($profile?->has_device),
-            studySpace: $this->nullableString($profile?->has_study_space),
+            scholarshipStatus: null,
+            hasScholarship: false,
+            employmentStatus: null,
+            incomeBracket: null,
+            householdSize: null,
+            livingArrangement: null,
+            internetAccess: null,
+            deviceAccess: null,
+            studySpace: null,
             technicalSkillCount: $skills['technical_skills'],
             certificationCount: $skills['certifications'],
             internshipCount: $skills['internships'],
@@ -61,14 +56,9 @@ final class FeatureBuilder
             otherFailedSubjects: $summary['other_failed_subjects'],
             majorUnits: $summary['major_units'],
             otherUnits: $summary['other_units'],
+            incompleteSubjects: $summary['incomplete_subjects'],
+            droppedSubjects: $summary['dropped_subjects'],
         );
-    }
-
-    private function publishedProfile(Student $student): ?SocioeconomicProfile
-    {
-        $profile = $student->socioeconomicProfile()->first();
-
-        return $profile !== null && ! $profile->is_draft ? $profile : null;
     }
 
     /**
@@ -100,14 +90,5 @@ final class FeatureBuilder
         }
 
         return (float) $scores[$construct];
-    }
-
-    private function nullableString(mixed $value): ?string
-    {
-        if (! is_string($value) || $value === '') {
-            return null;
-        }
-
-        return $value;
     }
 }

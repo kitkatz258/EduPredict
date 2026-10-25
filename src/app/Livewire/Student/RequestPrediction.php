@@ -13,6 +13,8 @@ use Livewire\Component;
 
 class RequestPrediction extends Component
 {
+    public bool $submitting = false;
+
     public function mount(): void
     {
         $this->authorize('create', Prediction::class);
@@ -21,12 +23,18 @@ class RequestPrediction extends Component
     public function request(PredictionRequester $requester): void
     {
         $this->authorize('create', Prediction::class);
+        if ($this->submitting) {
+            return;
+        }
+
+        $this->submitting = true;
         $student = auth()->user()?->student;
         abort_unless($student, 403);
 
         try {
             $requester->request($student, auth()->user());
         } catch (PredictionBlockedException|ResearchInferenceException $exception) {
+            $this->submitting = false;
             $this->addError('request', $exception->getMessage());
 
             return;

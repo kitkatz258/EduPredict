@@ -237,10 +237,76 @@ function bindStaffSidebar() {
     });
 }
 
+const gradeRemarkLabels = {
+    INC: 'Incomplete',
+    INCOMPLETE: 'Incomplete',
+    '5.00': 'Failed',
+    5: 'Failed',
+    DROPPED: 'Dropped',
+    DROP: 'Dropped',
+    DRP: 'Dropped',
+    W: 'Withdrawn',
+    WITHDRAWN: 'Withdrawn',
+    UNOFFICIALLYDROPPED: 'Unofficially Dropped',
+    UNOFFICIAL: 'Unofficially Dropped',
+    UD: 'Unofficially Dropped',
+};
+
+const automaticGradeRemarks = ['Incomplete', 'Failed', 'Dropped', 'Withdrawn', 'Unofficially Dropped'];
+
+export function gradeRemark(raw) {
+    const compact = String(raw ?? '').replace(/\s+/g, '').toUpperCase();
+
+    return Object.prototype.hasOwnProperty.call(gradeRemarkLabels, compact) ? gradeRemarkLabels[compact] : null;
+}
+
+export function applyGradeRemark(event) {
+    const remarks = event.target.closest('li, tr')?.querySelector('[data-remarks]');
+    if (!remarks) {
+        return;
+    }
+
+    const label = gradeRemark(event.target.value);
+    const next = label ?? (automaticGradeRemarks.includes(remarks.value) ? '' : remarks.value);
+    if (remarks.value === next) {
+        return;
+    }
+
+    remarks.value = next;
+    remarks.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function resetQuestionnaireScroll() {
+    document.querySelectorAll('.dialog-scroll').forEach((el) => {
+        el.style.overflowAnchor = 'none';
+        el.scrollTop = 0;
+    });
+}
+
+function installQuestionnaireScroll() {
+    if (window.__edupredictQuestionnaireScroll) {
+        return;
+    }
+    window.__edupredictQuestionnaireScroll = true;
+    window.addEventListener('questionnaire-section-changed', () => {
+        const started = performance.now();
+        const hold = () => {
+            resetQuestionnaireScroll();
+            if (performance.now() - started < 1200) {
+                requestAnimationFrame(hold);
+            }
+        };
+        hold();
+    });
+}
+
 export function installFeedback() {
     window.toast = toast;
     window.confirmAction = confirmAction;
     window.pageProgress = progress;
+    window.edupredictGradeRemark = gradeRemark;
+    window.edupredictApplyGradeRemark = applyGradeRemark;
+    installQuestionnaireScroll();
 
     // Confirm before destructive clicks: <button data-confirm="Delete this?" wire:click="...">
     document.addEventListener('click', (event) => {

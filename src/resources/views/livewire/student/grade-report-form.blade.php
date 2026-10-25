@@ -118,7 +118,7 @@
                 <div class="flex flex-col gap-4 border-b border-brand-200 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
                     <div>
                         <h3 class="text-base font-semibold text-brand-900">Manual grade entry</h3>
-                        <p class="mt-1 max-w-prose text-sm text-gray-600">Enter the final grade as a number, INC, or Dropped. 5.00 is marked Failed, INC is Incomplete, and Dropped is Dropped. Those three are not the same. Dropped and INC stay out of the GWA.</p>
+                        <p class="mt-1 max-w-prose text-sm text-gray-600">Enter the final grade as a number, INC, Dropped, or Unofficially Dropped. 5.00 is marked Failed. INC is Incomplete. Dropped and Unofficially Dropped stay out of the GWA and are not failures.</p>
                     </div>
                     <div class="flex gap-2">
                         <div>
@@ -151,12 +151,19 @@
                                 <input aria-label="Subject code, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.subject_code" placeholder="CCS 106" class="{{ $cellInput }}">
                                 <input aria-label="Subject name, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.subject_name" placeholder="Subject name" class="{{ $cellInput }} col-span-2 md:col-span-1 order-first md:order-none">
                                 <input aria-label="Units, row {{ $index + 1 }}" type="text" inputmode="decimal" wire:model.blur="rows.{{ $index }}.units" placeholder="3" class="{{ $cellInput }}">
-                                <input aria-label="Final grade, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.final_grade" placeholder="1.00, 5.00, INC, Dropped" class="{{ $cellInput }} {{ $gradeTone($row) }} font-semibold">
-                                <input aria-label="Remarks, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.remarks" placeholder="Auto" class="{{ $cellInput }}">
-                                <button type="button" wire:click="removeRow({{ $index }})" class="justify-self-end rounded-md p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-800" aria-label="Remove row {{ $index + 1 }}"><i class="ri-close-line" aria-hidden="true"></i></button>
+                                <input aria-label="Final grade, row {{ $index + 1 }}" type="text" wire:model.live.debounce.300ms="rows.{{ $index }}.final_grade" placeholder="1.00, 5.00, INC, Dropped" class="{{ $cellInput }} {{ $gradeTone($row) }} font-semibold" x-on:input="window.edupredictApplyGradeRemark && window.edupredictApplyGradeRemark($event)">
+                                <input data-remarks aria-label="Remarks, row {{ $index + 1 }}" type="text" wire:model.live.debounce.300ms="rows.{{ $index }}.remarks" placeholder="Auto" class="{{ $cellInput }}">
+                                <button type="button" wire:click="removeRow({{ $index }})" class="justify-self-end cursor-pointer rounded-md p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-800" aria-label="Remove row {{ $index + 1 }}"><i class="ri-close-line" aria-hidden="true"></i></button>
+                                @php
+                                    $rowScale = app(\App\Services\Grades\GradeScale::class);
+                                    $rowGrade = (string) ($row['final_grade'] ?? '');
+                                    $rowRemark = (string) ($row['remarks'] ?? '');
+                                @endphp
                                 @if (! empty($row['is_incomplete']))
                                     <p class="col-span-full text-xs text-amber-800">Incomplete: left out of the GWA and not counted as failed. Update this term when the final grade is out.</p>
-                                @elseif (in_array(strtoupper(trim((string) ($row['final_grade'] ?? ''))), ['DRP', 'W'], true))
+                                @elseif ($rowScale->isUnofficialDrop($rowGrade) || $rowScale->isUnofficialDrop($rowRemark))
+                                    <p class="col-span-full text-xs text-gray-700">Unofficially Dropped: left out of the GWA. It is not scored as 5.00 and it is not a failure.</p>
+                                @elseif ($rowScale->isDropped($rowGrade) || $rowScale->isDropped($rowRemark))
                                     <p class="col-span-full text-xs text-gray-700">Dropped: left out of the GWA. It is not scored as 5.00.</p>
                                 @endif
                             </li>
@@ -256,18 +263,12 @@
                                         <td class="px-3 py-3 font-mono font-semibold {{ $gradeTone($row) }}">{{ $row['final_grade'] !== '' ? $row['final_grade'] : '—' }}</td>
                                         <td class="px-3 py-3 text-gray-700">
                                             @php
-                                                $remarkKey = strtoupper(trim((string) ($row['remarks'] ?? '')));
-                                                $remarkLabel = match ($remarkKey) {
-                                                    'FAILED' => 'Failed',
-                                                    'INCOMPLETE' => 'Incomplete',
-                                                    'DROPPED' => 'Dropped',
-                                                    'WITHDRAWN' => 'Withdrawn',
-                                                    'PASSED' => 'Passed',
-                                                    default => $row['remarks'] ?? '',
-                                                };
+                                                $remarkScale = app(\App\Services\Grades\GradeScale::class);
+                                                $remarkStatus = $remarkScale->statusRemark($row['remarks'] ?? '');
+                                                $remarkLabel = $remarkScale->displayRemark($row['remarks'] ?? '');
                                             @endphp
                                             @if ($remarkLabel !== '')
-                                                <span class="inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold {{ $remarkKey === 'FAILED' ? 'border-red-200 bg-red-50 text-red-900' : ($remarkKey === 'INCOMPLETE' ? 'border-amber-200 bg-amber-50 text-amber-950' : 'border-brand-200 bg-white text-brand-900') }}">{{ $remarkLabel }}</span>
+                                                <span class="inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold {{ $remarkStatus === 'FAILED' ? 'border-red-200 bg-red-50 text-red-900' : ($remarkStatus === 'INCOMPLETE' ? 'border-amber-200 bg-amber-50 text-amber-950' : 'border-brand-200 bg-white text-brand-900') }}">{{ $remarkLabel }}</span>
                                             @else
                                                 —
                                             @endif

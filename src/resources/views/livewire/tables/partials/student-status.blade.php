@@ -49,7 +49,7 @@
                 @endif
                 <p class="mt-3 text-xs text-gray-500">
                     Model: {{ $model !== '' ? $model : 'not recorded' }}.
-                    @if ($model === 'placeholder-heuristic-v0')
+                    @if (str_starts_with($model, 'placeholder-heuristic'))
                         This is a placeholder rule-based estimate, not a trained model or a validated probability.
                     @endif
                 </p>

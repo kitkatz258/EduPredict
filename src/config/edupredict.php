@@ -14,7 +14,7 @@ return [
     */
     'predictor' => [
         'driver' => env('PREDICTOR_DRIVER', 'heuristic'),
-        'placeholder_version' => 'placeholder-heuristic-v0',
+        'placeholder_version' => 'placeholder-heuristic-v1',
         'http' => [
             'base_url' => rtrim((string) env('ML_API_BASE_URL', 'http://ml:8000'), '/'),
             'token' => env('ML_API_TOKEN', ''),
@@ -50,7 +50,7 @@ return [
         'failing' => 5.00,
         'numeric_scale' => [1.00, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00, 5.00],
         'incomplete_tokens' => ['INC', 'INCOMPLETE'],
-        'dropped_tokens' => ['DRP', 'W', 'WITHDRAWN', 'DROPPED', 'DROP'],
+        'dropped_tokens' => ['DRP', 'W', 'WITHDRAWN', 'DROPPED', 'DROP', 'UD', 'UNOFFICIAL', 'UNOFFICIALLYDROPPED'],
         'gpa_excluded_prefixes' => ['NSTP'],
         'subject_code_pattern' => '/^[A-Z]{2,8}\s?\d{1,3}[A-Z]?$/',
         'upload_max_kb' => 10240,

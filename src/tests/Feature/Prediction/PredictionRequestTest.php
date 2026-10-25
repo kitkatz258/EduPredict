@@ -71,18 +71,19 @@ class PredictionRequestTest extends TestCase
             ->assertRedirect(route('student.dashboard'));
 
         $first = Prediction::query()->sole();
-        $this->assertSame('placeholder-heuristic-v0', $first->model_version);
+        $this->assertSame('placeholder-heuristic-v1', $first->model_version);
         $this->assertSame('none', $first->program_shift_flag);
         $this->assertSame('normal', $first->confidence);
         $this->assertArrayHasKey('employability', $first->factors);
         $this->assertArrayHasKey('dropout', $first->factors);
         $this->assertArrayNotHasKey('student_number', $first->feature_snapshot);
         $this->assertArrayNotHasKey('email', $first->feature_snapshot);
-        $this->assertSame('below_10k', $first->feature_snapshot['income_bracket']);
+        $this->assertNull($first->feature_snapshot['income_bracket']);
+        $this->assertContains('income_bracket', $first->feature_snapshot['unavailable_inputs']);
 
         $requested = AuditLog::query()->where('action', 'prediction_requested')->sole();
         $this->assertSame($first->id, $requested->subject_id);
-        $this->assertSame('placeholder-heuristic-v0', $requested->meta['model_version']);
+        $this->assertSame('placeholder-heuristic-v1', $requested->meta['model_version']);
         $this->assertArrayNotHasKey('income_bracket', $requested->meta);
         $this->assertArrayNotHasKey('email', $requested->meta);
 
@@ -100,7 +101,7 @@ class PredictionRequestTest extends TestCase
         $this->actingAs($student->user)
             ->get(route('student.dashboard'))
             ->assertOk()
-            ->assertSee('placeholder-heuristic-v0')
+            ->assertSee('placeholder-heuristic-v1')
             ->assertSee('These results are estimates, not guarantees')
             ->assertSee('What this means')
             ->assertDontSee('below_10k');
@@ -200,7 +201,7 @@ class PredictionRequestTest extends TestCase
         $this->actingAs($head)->get(route('student.dashboard'))->assertForbidden();
         $this->actingAs($head)->get(route('department.dashboard'))->assertOk()->assertDontSee('HIST-10001')->assertDontSee('HIST-20002');
         $this->actingAs($head)->get(route('department.students'))->assertOk()->assertSee('HIST-10001')->assertDontSee('HIST-20002');
-        $this->actingAs($head)->get(route('students.show', $insider))->assertOk()->assertSee($insiderScore)->assertSee('placeholder-heuristic-v0')->assertSee('History')->assertDontSee('above_70k');
+        $this->actingAs($head)->get(route('students.show', $insider))->assertOk()->assertSee($insiderScore)->assertSee('placeholder-heuristic-v1')->assertSee('History')->assertDontSee('above_70k');
         $this->actingAs($head)->get(route('students.show', $outsider))->assertForbidden();
 
         Livewire::actingAs($head)->test(PredictionHistoryTable::class, ['studentId' => $outsider->id])->assertForbidden();
@@ -379,6 +380,38 @@ class PredictionRequestTest extends TestCase
         }
     }
 
+    public function test_a_published_household_profile_is_kept_and_left_out_of_a_new_prediction(): void
+    {
+        $student = $this->makeStudent(semesters: 2);
+        $this->completeProfile($student, 'below_10k');
+        $historical = Prediction::factory()->create([
+            'student_id' => $student->id,
+            'requested_by' => $student->user_id,
+            'model_version' => 'placeholder-heuristic-v0',
+            'employability_score' => 41,
+            'feature_snapshot' => ['income_bracket' => 'below_10k', 'scholarship_status' => 'none'],
+            'factors' => ['employability' => [['feature' => 'income_bracket', 'label' => 'Household income band', 'direction' => '-', 'magnitude' => 3]]],
+        ]);
+        $historical->forceFill(['created_at' => now()->subDay()])->save();
+
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
+
+        $freshHistorical = $historical->fresh();
+        $this->assertSame('placeholder-heuristic-v0', $freshHistorical->model_version);
+        $this->assertSame(41.0, (float) $freshHistorical->employability_score);
+        $this->assertSame('below_10k', $freshHistorical->feature_snapshot['income_bracket']);
+        $this->assertSame('below_10k', $student->fresh()->socioeconomicProfile->household_income_bracket);
+
+        $latest = Prediction::query()->whereKeyNot($historical->id)->sole();
+        $this->assertSame('placeholder-heuristic-v1', $latest->model_version);
+        $this->assertNull($latest->feature_snapshot['income_bracket']);
+        $this->assertNull($latest->feature_snapshot['scholarship_status']);
+        $labels = collect($latest->factors['employability'])->pluck('label')
+            ->merge(collect($latest->factors['dropout'])->pluck('label'));
+        $this->assertFalse($labels->contains('Household income band'));
+        $this->assertFalse($labels->contains('Scholarship'));
+    }
+
     public function test_a_new_prediction_without_a_household_profile_omits_those_factors(): void
     {
         $student = $this->makeStudent(semesters: 2);
@@ -396,7 +429,7 @@ class PredictionRequestTest extends TestCase
         $this->assertContains('scholarship_status', $prediction->feature_snapshot['unavailable_inputs']);
         $this->assertContains('income_bracket', $prediction->feature_snapshot['unavailable_inputs']);
         $this->assertNull($prediction->feature_snapshot['income_bracket']);
-        $this->assertSame('placeholder-heuristic-v0', $prediction->model_version);
+        $this->assertSame('placeholder-heuristic-v1', $prediction->model_version);
     }
 
     public function test_missing_consent_blocks_a_new_prediction(): void

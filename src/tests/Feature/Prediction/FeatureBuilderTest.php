@@ -8,11 +8,11 @@ use App\Contracts\PredictorInterface;
 use App\Models\GradeReport;
 use App\Models\QuestionnaireResponse;
 use App\Models\SkillsExperience;
+use App\Models\SocioeconomicProfile;
+use App\Models\Student;
 use App\Models\StudentCertification;
 use App\Models\StudentSkill;
 use App\Models\StudentWorkExperience;
-use App\Models\SocioeconomicProfile;
-use App\Models\Student;
 use App\Models\SubjectGrade;
 use App\Services\Prediction\FeatureBuilder;
 use App\Services\Prediction\HeuristicPredictor;
@@ -72,11 +72,14 @@ class FeatureBuilderTest extends TestCase
         $this->assertSame(1, $features->failedSubjects);
         $this->assertSame(2, $features->semestersCompleted);
         $this->assertFalse($features->limitedHistory);
-        $this->assertSame('partial', $features->scholarshipStatus);
-        $this->assertTrue($features->hasScholarship);
-        $this->assertSame('part_time', $features->employmentStatus);
-        $this->assertSame('20k_40k', $features->incomeBracket);
-        $this->assertSame(5, $features->householdSize);
+        $this->assertNull($features->scholarshipStatus);
+        $this->assertFalse($features->hasScholarship);
+        $this->assertNull($features->employmentStatus);
+        $this->assertNull($features->incomeBracket);
+        $this->assertNull($features->householdSize);
+        $this->assertSame(0, $features->incompleteSubjects);
+        $this->assertSame(0, $features->droppedSubjects);
+        $this->assertSame('20k_40k', $student->fresh()->socioeconomicProfile->household_income_bracket);
         $this->assertSame(2, $features->technicalSkillCount);
         $this->assertSame(1, $features->certificationCount);
         $this->assertSame(1, $features->internshipCount);
@@ -141,7 +144,7 @@ class FeatureBuilderTest extends TestCase
         $this->assertNotEmpty($employability->factors);
         $this->assertNotEmpty($dropout->factors);
         $this->assertSame('low', $dropout->confidence);
-        $this->assertSame('placeholder-heuristic-v0', $dropout->modelVersion);
+        $this->assertSame('placeholder-heuristic-v1', $dropout->modelVersion);
         $this->assertSame($employability->score, $predictor->predictEmployability($features)->score);
     }
 

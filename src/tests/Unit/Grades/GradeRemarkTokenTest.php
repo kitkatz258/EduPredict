@@ -54,6 +54,31 @@ class GradeRemarkTokenTest extends TestCase
         $this->assertSame(3.0, $gwa->roundedGpa);
         $this->assertSame(1, $gwa->failedCount);
         $this->assertSame(1, $gwa->incompleteCount);
+        $this->assertSame(1, $gwa->droppedCount);
+
+        $unofficial = $normalizer->normalize([
+            'subject_code' => 'CCS 105',
+            'subject_name' => 'Capstone',
+            'units' => '3',
+            'final_grade' => 'Unofficially Dropped',
+            'remarks' => '',
+        ]);
+        $this->assertSame('UD', $unofficial->finalGrade);
+        $this->assertSame('UNOFFICIAL', $unofficial->remarks);
+        $this->assertFalse($unofficial->isFailed);
+        $this->assertFalse($unofficial->isIncomplete);
+
+        $withUnofficial = (new GwaCalculator(new GradeScale))->compute([
+            ['subject_code' => 'CCS 104', 'units' => 3, 'final_grade' => '1.00', 'remarks' => 'PASSED'],
+            ['subject_code' => 'CCS 105', 'units' => 3, 'final_grade' => 'UD', 'remarks' => 'UNOFFICIAL'],
+        ]);
+        $this->assertSame(1.0, $withUnofficial->roundedGpa);
+        $this->assertSame(0, $withUnofficial->failedCount);
+        $this->assertSame(1, $withUnofficial->droppedCount);
+        $this->assertSame('Unofficially Dropped', (new GradeScale)->displayRemark('UNOFFICIAL'));
+        $this->assertSame('Incomplete', (new GradeScale)->displayRemark('INCOMPLETE'));
+        $this->assertSame('Failed', (new GradeScale)->displayRemark('FAILED'));
+        $this->assertSame('Dropped', (new GradeScale)->displayRemark('DROPPED'));
     }
 
     public function test_a_justified_note_is_kept_and_a_conflicting_status_word_follows_the_grade(): void

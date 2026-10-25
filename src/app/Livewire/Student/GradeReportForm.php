@@ -393,8 +393,14 @@ class GradeReportForm extends Component
     private function renormalizeRows(): void
     {
         $normalizer = app(GradeRowNormalizer::class);
+        $scale = app(GradeScale::class);
         $codes = array_map(fn (array $row): string => $normalizer->normalizeCode((string) ($row['subject_code'] ?? '')), $this->rows);
-        $this->rows = array_map(fn (array $row): array => $normalizer->normalize($row, $codes)->toArray(), $this->rows);
+        $this->rows = array_map(function (array $row) use ($normalizer, $codes, $scale): array {
+            $normalized = $normalizer->normalize($row, $codes)->toArray();
+            $normalized['remarks'] = $scale->displayRemark($normalized['remarks']);
+
+            return $normalized;
+        }, $this->rows);
     }
 
     private function validateTerm(): void

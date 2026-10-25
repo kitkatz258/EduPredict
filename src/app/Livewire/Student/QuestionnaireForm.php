@@ -97,6 +97,7 @@ class QuestionnaireForm extends Component
         $this->statusMessage = 'Your answers are saved.';
         $this->usesConstructNavigation() ? $this->nextConstruct() : $this->nextSection();
         $this->toast('Questionnaire progress saved.');
+        $this->dispatch('questionnaire-section-changed');
     }
 
     public function previousPart(): void
@@ -104,12 +105,14 @@ class QuestionnaireForm extends Component
         if ($this->reviewing) {
             $this->reviewing = false;
             $this->resetValidation();
+            $this->dispatch('questionnaire-section-changed');
 
             return;
         }
 
         $this->persist($this->student(), submit: false);
         $this->usesConstructNavigation() ? $this->previousConstruct() : $this->previousSection();
+        $this->dispatch('questionnaire-section-changed');
     }
 
     public function openReview(): void
@@ -118,6 +121,7 @@ class QuestionnaireForm extends Component
         $this->reviewing = true;
         $this->resetValidation();
         $this->statusMessage = 'Saved. Review the sections, then submit.';
+        $this->dispatch('questionnaire-section-changed');
     }
 
     public function selectPart(string $part): void
@@ -134,6 +138,7 @@ class QuestionnaireForm extends Component
             $this->section = $part;
         }
         $this->resetValidation();
+        $this->dispatch('questionnaire-section-changed');
     }
 
     public function selectConstruct(string $construct): void
@@ -241,14 +246,14 @@ class QuestionnaireForm extends Component
     }
 
     /**
-     * An unfinished legacy draft is not a submission. Discarding it does not
-     * change submitted responses or prediction history.
+     * An unfinished draft is not a submission. Discarding it does not change
+     * submitted responses or prediction history.
      */
     public function discardDraft(): void
     {
         $student = $this->student();
         $draft = $this->openDraft($student);
-        if ($draft === null || $draft->definition_version === config('edupredict.questionnaire.current_version')) {
+        if ($draft === null) {
             return;
         }
 
@@ -260,6 +265,8 @@ class QuestionnaireForm extends Component
         $this->answers = [];
         $this->construct = $this->firstConstruct();
         $this->section = $this->firstIncompleteSection();
+        $this->reviewing = false;
+        $this->wizardOpen = false;
         $this->statusMessage = 'The unfinished draft was discarded. Submitted responses were kept.';
         $this->toast($this->statusMessage);
     }

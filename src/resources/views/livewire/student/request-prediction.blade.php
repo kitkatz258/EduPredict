@@ -1,4 +1,11 @@
-<div>
+<div class="relative">
+    <div wire:loading.flex wire:target="request" class="fixed inset-0 z-[70] items-center justify-center bg-white/70 backdrop-blur-sm" role="status" aria-live="assertive">
+        <div class="rounded-2xl border border-brand-200 bg-white px-6 py-5 text-center shadow-lg">
+            <p class="text-sm font-semibold text-brand-900">Preparing your estimate…</p>
+            <p class="mt-1 max-w-xs text-xs text-gray-600">This request is in progress. Wait until it finishes before requesting again.</p>
+        </div>
+    </div>
+
     @error('request')
         <p class="mb-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950" role="alert">{{ $message }}</p>
     @enderror
@@ -21,7 +28,7 @@
         wire:click="request"
         wire:loading.attr="disabled"
         wire:target="request"
-        @disabled($blocked)
+        @disabled($blocked || $submitting)
         data-confirm="This saves a new attempt and uses one of today's predictions. Earlier attempts stay in History."
         data-confirm-title="Request a prediction?"
         data-confirm-button="Request prediction"

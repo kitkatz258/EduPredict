@@ -147,7 +147,7 @@
                 <i class="ri-close-line text-xl" aria-hidden="true"></i>
             </button>
         </div>
-        <div class="dialog-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain" tabindex="0" role="region" aria-label="Dialog content">
+        <div class="dialog-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain" style="overflow-anchor: none" tabindex="0" role="region" aria-label="Dialog content">
             {{ $slot }}
         </div>
         @isset($footer)

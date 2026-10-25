@@ -20,7 +20,8 @@ class DemoReadinessTest extends TestCase
 
         $this->get(route('privacy'))
             ->assertOk()
-            ->assertSee('placeholder-heuristic-v0')
+            ->assertSee('placeholder-heuristic-v1')
+            ->assertSee('Earlier attempts keep the version stored with them.')
             ->assertSee('not a final trained machine-learning model')
             ->assertSee('no percentage')
             ->assertSee('not a clinical or diagnostic assessment')

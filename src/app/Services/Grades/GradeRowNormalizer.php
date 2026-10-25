@@ -24,6 +24,8 @@ final class GradeRowNormalizer
             $finalGrade = 'INC';
         } elseif ($finalGrade === '' && $remarkStatus === 'WITHDRAWN') {
             $finalGrade = 'W';
+        } elseif ($finalGrade === '' && $remarkStatus === 'UNOFFICIAL') {
+            $finalGrade = 'UD';
         } elseif ($finalGrade === '' && $remarkStatus === 'DROPPED') {
             $finalGrade = 'DRP';
         }

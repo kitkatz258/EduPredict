@@ -7,7 +7,7 @@
                 · Last updated {{ $latest->created_at?->timezone(config('app.timezone'))->format('M j, Y') }}
             @endif
         </p>
-        <p class="mt-1 text-xs text-gray-500">Model: {{ $latest->model_version ?? 'placeholder-heuristic-v0' }}</p>
+        <p class="mt-1 text-xs text-gray-500">Model: {{ $latest->model_version ?? config('edupredict.predictor.placeholder_version') }}</p>
     </div>
 
     @if ($latest === null)

@@ -127,7 +127,7 @@
                             $storedLabels = collect($latest->factors['employability'] ?? [])->merge($latest->factors['dropout'] ?? [])->pluck('label');
                         @endphp
                         @if ($storedLabels->intersect($householdLabels)->isNotEmpty())
-                            <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-xs leading-5 text-gray-700">A household factor is listed because that profile was already stored with this attempt. The placeholder rule is not a UCC-wide scholarship finding, and it does not measure free tuition. When a household profile was not collected, those factors are left off the new result. Missing is not read as poverty or as no scholarship.</p>
+                            <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-xs leading-5 text-gray-700">A household factor is listed because that profile was already stored with this attempt. New predictions do not use household profile fields. The encrypted profile stays on file, and this attempt is not rewritten. The placeholder rule is not a UCC-wide scholarship finding, and it does not measure free tuition.</p>
                         @endif
                         <div class="rounded-xl border border-brand-200 p-4">
                             <h3 class="text-sm font-semibold text-brand-900">Self-report category summary</h3>

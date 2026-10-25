@@ -36,7 +36,7 @@
         </div>
         <p class="sr-only">This counts saved sections. It is not a prediction-accuracy score.</p>
 
-        <nav class="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Assessment sections">
+        <nav class="relative mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Assessment sections">
             @foreach ($steps as $key => $label)
                 @php [$state, $icon, $stateLabel] = $statusFor($key); @endphp
                 <button
@@ -205,7 +205,7 @@
                 </div>
 
                 <div class="border-t border-brand-200 bg-brand-50 px-5 py-4 sm:px-6">
-                    <p class="text-sm text-gray-700">Running a prediction creates a new saved attempt. Existing prediction history is never overwritten. Output comes from <span class="font-medium">placeholder-heuristic-v0</span>, not a final trained model. Section means from the panel-approved questionnaire are not sent to that predictor.</p>
+                    <p class="text-sm text-gray-700">Running a prediction creates a new saved attempt. Existing prediction history is never overwritten. Output comes from <span class="font-medium">placeholder-heuristic-v1</span>, not a final trained model. Section means from the panel-approved questionnaire are not sent to that predictor.</p>
                     <div class="mt-4"><livewire:student.request-prediction /></div>
                 </div>
             </section>

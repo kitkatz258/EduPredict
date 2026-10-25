@@ -480,6 +480,35 @@ class QuestionnaireTest extends TestCase
         }
     }
 
+    public function test_a_current_version_draft_can_be_discarded_without_deleting_a_submission(): void
+    {
+        $this->seed(QuestionnaireItemSeeder::class);
+        $student = $this->makeStudent();
+        $item = QuestionnaireItem::query()->where('definition_version', ApprovedInstrumentCatalog::VERSION)->firstOrFail();
+        $submitted = $student->questionnaireResponses()->create([
+            'definition_version' => ApprovedInstrumentCatalog::VERSION,
+            'submitted_at' => now()->subDay(),
+            'construct_scores' => ['academic' => ['mean' => 4]],
+        ]);
+        $submitted->answers()->create(['questionnaire_item_id' => $item->id, 'value' => 4]);
+        $draft = $student->questionnaireResponses()->create([
+            'definition_version' => ApprovedInstrumentCatalog::VERSION,
+            'submitted_at' => null,
+        ]);
+        $draft->answers()->create(['questionnaire_item_id' => $item->id, 'value' => 2]);
+
+        Livewire::actingAs($student->user)
+            ->test(QuestionnaireForm::class)
+            ->assertSee('Discard draft')
+            ->assertSee('Section 1 of 6')
+            ->call('discardDraft')
+            ->assertSet('wizardOpen', false);
+
+        $this->assertDatabaseMissing('questionnaire_responses', ['id' => $draft->id]);
+        $this->assertNotNull($submitted->fresh()->submitted_at);
+        $this->assertSame(4, (int) $submitted->fresh()->answers()->value('value'));
+    }
+
     public function test_the_approved_instrument_stays_at_36_items_without_a_seventh_behavioral_item(): void
     {
         $items = ApprovedInstrumentCatalog::items();

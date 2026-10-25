@@ -24,6 +24,7 @@ final class AcademicSummary
      *     major_units: float,
      *     other_units: float,
      *     incomplete_subjects: int,
+     *     dropped_subjects: int,
      *     gwa_provisional: bool
      * }
      */
@@ -51,6 +52,7 @@ final class AcademicSummary
             'major_units' => $major->gpaUnits,
             'other_units' => $other->gpaUnits,
             'incomplete_subjects' => $gwa->incompleteCount,
+            'dropped_subjects' => $gwa->droppedCount,
             'gwa_provisional' => $gwa->isProvisional(),
         ];
     }
