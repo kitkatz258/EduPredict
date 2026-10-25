@@ -1,5 +1,5 @@
 @php
-    $sectionFor = ['questionnaire' => 'questionnaire', 'socioeconomic' => 'socioeconomic', 'skills' => 'skills', 'grades' => 'academic'];
+    $sectionFor = ['questionnaire' => 'questionnaire', 'skills' => 'skills', 'grades' => 'academic'];
     $savedCount = count(array_filter($progress['sections']));
     $sectionCount = count($progress['sections']);
     $stepKeys = array_keys($steps);
@@ -18,8 +18,6 @@
     };
     $primary = 'inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:opacity-60';
     $secondary = 'inline-flex items-center justify-center gap-1.5 rounded-lg border border-brand-200 bg-white px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:opacity-60';
-    $outline = 'inline-flex items-center justify-center gap-1.5 rounded-lg border border-brand-900 bg-white px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:opacity-60';
-    $select = 'w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm focus:border-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-200';
     $tz = config('app.timezone');
 @endphp
 
@@ -72,89 +70,6 @@
     >
         @if ($step === 'questionnaire')
             <livewire:student.questionnaire-form />
-        @elseif ($step === 'socioeconomic')
-            <form class="relative rounded-2xl border border-brand-200 bg-white shadow-sm" wire:submit="saveSocioeconomic">
-                <x-loading-overlay target="saveSocioeconomic" label="Saving private context…" />
-                <div class="flex flex-wrap items-start justify-between gap-3 border-b border-brand-200 bg-brand-50/40 px-5 py-4 sm:px-6">
-                    <div>
-                        <h2 class="text-lg font-semibold text-brand-900">Household profile</h2>
-                        <p class="mt-1 text-sm text-gray-600">This private household record is separate from questionnaire section S. These values are encrypted. Department Heads, Deans, and Administrators cannot open the raw answers.</p>
-                    </div>
-                    <span class="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-medium text-brand-900"><i class="ri-lock-line" aria-hidden="true"></i>Private to you</span>
-                </div>
-
-                <div class="grid gap-4 px-5 py-5 sm:grid-cols-2 sm:px-6">
-                    <div>
-                        <label for="household_income_bracket" class="mb-1 block text-sm font-medium">Household income bracket</label>
-                        <select id="household_income_bracket" wire:model="household_income_bracket" class="{{ $select }}">
-                            <option value="">Select</option>
-                            @foreach ($incomeOptions as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
-                        </select>
-                        @error('household_income_bracket') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="household_size" class="mb-1 block text-sm font-medium">Household size</label>
-                        <input id="household_size" type="number" min="1" max="20" wire:model="household_size" class="{{ $select }}">
-                        @error('household_size') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="scholarship_status" class="mb-1 block text-sm font-medium">Scholarship status</label>
-                        <select id="scholarship_status" wire:model="scholarship_status" class="{{ $select }}">
-                            <option value="">Select</option>
-                            @foreach ($scholarshipOptions as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
-                        </select>
-                        @error('scholarship_status') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="employment_status" class="mb-1 block text-sm font-medium">Employment status</label>
-                        <select id="employment_status" wire:model="employment_status" class="{{ $select }}">
-                            <option value="">Select</option>
-                            @foreach ($employmentOptions as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
-                        </select>
-                        @error('employment_status') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="living_arrangement" class="mb-1 block text-sm font-medium">Living arrangement</label>
-                        <select id="living_arrangement" wire:model="living_arrangement" class="{{ $select }}">
-                            <option value="">Select</option>
-                            @foreach ($livingOptions as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
-                        </select>
-                        @error('living_arrangement') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="has_internet" class="mb-1 block text-sm font-medium">Internet access</label>
-                        <select id="has_internet" wire:model="has_internet" class="{{ $select }}">
-                            <option value="">Select</option>
-                            @foreach ($internetOptions as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
-                        </select>
-                        @error('has_internet') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="has_device" class="mb-1 block text-sm font-medium">Device access</label>
-                        <select id="has_device" wire:model="has_device" class="{{ $select }}">
-                            <option value="">Select</option>
-                            @foreach ($deviceOptions as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
-                        </select>
-                        @error('has_device') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label for="has_study_space" class="mb-1 block text-sm font-medium">Study space</label>
-                        <select id="has_study_space" wire:model="has_study_space" class="{{ $select }}">
-                            <option value="">Select</option>
-                            @foreach ($studySpaceOptions as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
-                        </select>
-                        @error('has_study_space') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap items-center justify-between gap-3 border-t border-brand-200 px-5 py-4 sm:px-6">
-                    <div class="flex flex-wrap gap-2">
-                        <button type="button" wire:click="back" wire:loading.attr="disabled" wire:target="back" class="{{ $secondary }}"><i class="ri-arrow-left-line" aria-hidden="true"></i>Back</button>
-                        <button type="button" wire:click="saveSocioeconomic(true)" wire:loading.attr="disabled" wire:target="saveSocioeconomic" class="{{ $outline }}"><x-spinner wire:loading wire:target="saveSocioeconomic" />Save draft</button>
-                    </div>
-                    <button type="submit" wire:loading.attr="disabled" wire:target="saveSocioeconomic" class="{{ $primary }}"><x-spinner wire:loading wire:target="saveSocioeconomic" />Save &amp; continue<i class="ri-arrow-right-line" wire:loading.remove wire:target="saveSocioeconomic" aria-hidden="true"></i></button>
-                </div>
-            </form>
         @elseif ($step === 'skills')
             <livewire:student.skills-experience-section />
         @elseif ($step === 'grades')
@@ -237,7 +152,7 @@
             <section class="rounded-2xl border border-brand-200 bg-white shadow-sm">
                 <div class="border-b border-brand-200 bg-brand-50/40 px-5 py-4 sm:px-6">
                     <h2 class="text-lg font-semibold text-brand-900">Review and run prediction</h2>
-                    <p class="mt-1 text-sm text-gray-600">Check what is saved. Edit any section without restarting the others.</p>
+                    <p class="mt-1 max-w-prose text-sm text-gray-600">Check what is saved. Edit any section without restarting the others. Earlier household records stay encrypted and are not collected on this assessment. Questionnaire section S is unchanged.</p>
                 </div>
 
                 <ul class="divide-y divide-brand-200/70 px-5 sm:px-6">

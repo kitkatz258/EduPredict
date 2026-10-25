@@ -8,7 +8,7 @@
 @endphp
 
 <header class="sticky top-0 z-30 border-b border-[#e8eaee] bg-white" x-data="{ open: false }" @keydown.escape.window="open = false">
-    <div class="mx-auto flex h-[68px] max-w-6xl items-center gap-3 px-4 sm:px-6">
+    <div class="mx-auto flex h-[68px] w-full items-center gap-3 px-4 sm:px-6 lg:px-8">
         <a href="{{ route('student.dashboard') }}" class="flex shrink-0 items-center gap-2.5 font-semibold text-[#111827]">
             <span class="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-gradient-to-br from-[#6366f1] to-[#4338ca] text-[11px] font-bold text-white">UCC</span>
             <span class="hidden sm:inline">EduPredict</span>

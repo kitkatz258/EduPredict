@@ -30,6 +30,10 @@ class QuestionnaireForm extends Component
     /** Selected approved section. */
     public string $section = 'academic';
 
+    public bool $wizardOpen = false;
+
+    public bool $reviewing = false;
+
     public function mount(): void
     {
         $student = $this->student();
@@ -48,6 +52,36 @@ class QuestionnaireForm extends Component
 
         $this->construct = $this->firstConstruct();
         $this->section = $this->firstIncompleteSection();
+        $submitted = $student->questionnaireResponses()->whereNotNull('submitted_at')->exists();
+        $this->wizardOpen = $draft !== null || ! $submitted;
+    }
+
+    public function openWizard(): void
+    {
+        $this->student();
+        $this->wizardOpen = true;
+    }
+
+    public function closeWizard(): void
+    {
+        if ($this->unsavedChanges()) {
+            $this->dispatch('confirm-discard-questionnaire');
+
+            return;
+        }
+
+        $this->wizardOpen = false;
+        $this->reviewing = false;
+    }
+
+    public function discardUnsavedAndClose(): void
+    {
+        $student = $this->student();
+        $this->answers = $this->savedAnswerMap($student);
+        $this->wizardOpen = false;
+        $this->reviewing = false;
+        $this->resetValidation();
+        $this->statusMessage = 'Unsaved answers were discarded. The saved draft is unchanged.';
     }
 
     public function saveDraft(): void
@@ -67,8 +101,23 @@ class QuestionnaireForm extends Component
 
     public function previousPart(): void
     {
+        if ($this->reviewing) {
+            $this->reviewing = false;
+            $this->resetValidation();
+
+            return;
+        }
+
         $this->persist($this->student(), submit: false);
         $this->usesConstructNavigation() ? $this->previousConstruct() : $this->previousSection();
+    }
+
+    public function openReview(): void
+    {
+        $this->persist($this->student(), submit: false);
+        $this->reviewing = true;
+        $this->resetValidation();
+        $this->statusMessage = 'Saved. Review the sections, then submit.';
     }
 
     public function selectPart(string $part): void
@@ -78,6 +127,7 @@ class QuestionnaireForm extends Component
         }
 
         $this->persist($this->student(), submit: false);
+        $this->reviewing = false;
         if ($this->usesConstructNavigation()) {
             $this->construct = $part;
         } else {
@@ -144,6 +194,7 @@ class QuestionnaireForm extends Component
         $items = $this->activeItems();
         $missing = $items->first(fn (QuestionnaireItem $item): bool => ! isset($this->answers[$item->id]) || $this->answers[$item->id] === '');
         if ($missing !== null) {
+            $this->reviewing = false;
             $this->focusItem($missing);
             $this->addError('answers.'.$missing->id, 'Choose a response for this statement.');
             $this->statusMessage = 'Answer every statement before submitting.';
@@ -158,6 +209,8 @@ class QuestionnaireForm extends Component
         $this->validate($rules);
 
         $this->persist($student, submit: true, scorer: $scorer);
+        $this->wizardOpen = false;
+        $this->reviewing = false;
         $this->statusMessage = 'Thank you for answering this questionnaire. Section results are saved with this submission.';
         $this->toast('Questionnaire submitted.');
         $this->dispatch('questionnaire-submitted');
@@ -181,6 +234,8 @@ class QuestionnaireForm extends Component
         $this->answers = [];
         $this->construct = $this->firstConstruct();
         $this->section = $this->firstIncompleteSection();
+        $this->reviewing = false;
+        $this->wizardOpen = true;
         $this->statusMessage = 'A new questionnaire response is ready. Earlier submissions stay on their original versions.';
         $this->toast($this->statusMessage);
     }
@@ -244,7 +299,9 @@ class QuestionnaireForm extends Component
             'partHeadings' => $this->partHeadings(),
             'currentPart' => $current,
             'navigation' => $this->usesConstructNavigation() ? 'construct' : 'section',
-            'likert' => config('edupredict.questionnaire.likert', []),
+            'likert' => $this->likertChoices(),
+            'answeredCount' => $this->answeredCount($allItems),
+            'unsaved' => $this->unsavedChanges($student),
             'version' => config('edupredict.questionnaire.versions.'.$this->definitionVersion, []),
             'savedCount' => $answered,
             'totalCount' => $allItems->count(),
@@ -499,6 +556,63 @@ class QuestionnaireForm extends Component
         $keys = $this->sectionKeys($items);
 
         return $keys === [] ? 'academic' : $keys[array_key_last($keys)];
+    }
+
+    /**
+     * Display order is agreement-first. Stored values stay 5 down to 1.
+     *
+     * @return array<int, string>
+     */
+    private function likertChoices(): array
+    {
+        $labels = config('edupredict.questionnaire.likert', []);
+        $choices = [];
+        foreach ([5, 4, 3, 2, 1] as $value) {
+            if (isset($labels[$value])) {
+                $choices[$value] = $labels[$value];
+            }
+        }
+        foreach ($labels as $value => $label) {
+            if (! array_key_exists((int) $value, $choices)) {
+                $choices[(int) $value] = $label;
+            }
+        }
+
+        return $choices;
+    }
+
+    /**
+     * @param  Collection<int, QuestionnaireItem>  $items
+     */
+    private function answeredCount(Collection $items): int
+    {
+        $answered = 0;
+        foreach ($items as $item) {
+            $value = $this->answers[$item->id] ?? $this->answers[(string) $item->id] ?? null;
+            if ($value !== null && $value !== '') {
+                $answered++;
+            }
+        }
+
+        return $answered;
+    }
+
+    private function unsavedChanges(?Student $student = null): bool
+    {
+        $student ??= $this->student();
+        $saved = $this->savedAnswerMap($student);
+        $current = [];
+        foreach ($this->activeItems() as $item) {
+            $value = $this->answers[$item->id] ?? $this->answers[(string) $item->id] ?? null;
+            if ($value === null || $value === '') {
+                continue;
+            }
+            $current[$item->id] = (int) $value;
+        }
+        ksort($saved);
+        ksort($current);
+
+        return $current !== $saved;
     }
 
     private function focusItem(QuestionnaireItem $item): void

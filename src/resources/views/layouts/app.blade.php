@@ -21,7 +21,7 @@
     @if ($shell === 'student')
         @include('layouts.partials.student-nav')
 
-        <main id="main-content" class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+        <main id="main-content" class="mx-auto w-full px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             @isset($header)
                 <div class="mb-6">{{ $header }}</div>
             @endisset
@@ -29,7 +29,7 @@
             @yield('content')
         </main>
 
-        <footer class="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-4 pb-8 text-xs text-gray-500 sm:px-6">
+        <footer class="mx-auto flex w-full flex-wrap items-center justify-between gap-2 px-4 pb-8 text-xs text-gray-500 sm:px-6 lg:px-8">
             <p>These results are estimates, not guarantees.</p>
             <a href="{{ route('privacy') }}" class="font-medium text-[#4f46e5] hover:underline">Privacy</a>
         </footer>

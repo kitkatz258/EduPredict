@@ -37,16 +37,38 @@ final class PredictionRequester
         private SkillsExperienceRecords $skillRecords,
         private GradeSnapshot $grades,
         private QuestionnaireSnapshot $questionnaire,
+        private PredictionAttemptPolicy $attempts,
     ) {}
 
-    public function cooldownEndsAt(Student $student): ?CarbonInterface
+    /**
+     * Successful predictions already stored for the Philippine day of $instant.
+     * Rejected requests are not rows, so they are not counted.
+     *
+     * @return array{used: int, base_limit: int, extra: int, limit: int, remaining: int, resets_at: CarbonInterface, timezone: string}
+     */
+    public function quota(Student $student, ?CarbonInterface $instant = null): array
     {
-        $latest = $student->predictions()->latest('created_at')->latest('id')->first();
-        if ($latest?->created_at === null) {
-            return null;
-        }
+        $instant ??= now();
+        $timezone = $this->attempts->timezone();
+        $local = $instant->copy()->timezone($timezone);
+        [$start, $end] = $this->attempts->storedWindow($instant);
+        $used = $student->predictions()
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<', $end)
+            ->count();
+        $extra = $this->attempts->extraAttempts($student, $instant);
+        $base = $this->attempts->dailyLimit();
+        $limit = $base + $extra;
 
-        return $latest->created_at->copy()->addHours((int) config('edupredict.prediction.cooldown_hours', 24));
+        return [
+            'used' => $used,
+            'base_limit' => $base,
+            'extra' => $extra,
+            'limit' => $limit,
+            'remaining' => max(0, $limit - $used),
+            'resets_at' => $local->copy()->startOfDay()->addDay(),
+            'timezone' => $timezone,
+        ];
     }
 
     public const RESEARCH_ENGINE_BLOCK = 'Student predictions stay on the rule-based placeholder. The research inference service does not score this assessment.';
@@ -66,9 +88,9 @@ final class PredictionRequester
             return 'Complete the required Assessment sections before requesting a prediction. Still needed: a completed submission of the current questionnaire.';
         }
 
-        $ends = $this->cooldownEndsAt($student);
-        if ($ends !== null && $ends->isFuture()) {
-            return 'You can request another prediction after '.$ends->timezone((string) config('app.timezone'))->format('M j, Y g:i A').'.';
+        $quota = $this->quota($student);
+        if ($quota['remaining'] < 1) {
+            return $this->quotaMessage($quota);
         }
 
         return $this->unsupportedEstimateMessage($this->features->build($student));
@@ -104,6 +126,12 @@ final class PredictionRequester
         $programShift = $this->programShift->evaluate($featureSet, $dropout->factors);
 
         $prediction = DB::transaction(function () use ($student, $actor, $featureSet, $assessment, $employability, $dropout, $programShift): Prediction {
+            Student::query()->whereKey($student->id)->lockForUpdate()->first();
+            $quota = $this->quota($student);
+            if ($quota['remaining'] < 1) {
+                throw new PredictionBlockedException($this->quotaMessage($quota));
+            }
+
             $prediction = Prediction::query()->create([
                 'student_id' => $student->id,
                 'requested_by' => $actor->id,
@@ -241,9 +269,32 @@ final class PredictionRequester
             $unavailable[] = 'skills_experience';
         }
 
+        foreach ([
+            'scholarship_status' => $features->scholarshipStatus,
+            'income_bracket' => $features->incomeBracket,
+            'internet_access' => $features->internetAccess,
+            'device_access' => $features->deviceAccess,
+            'study_space' => $features->studySpace,
+            'employment_status' => $features->employmentStatus,
+        ] as $key => $value) {
+            if ($value === null) {
+                $unavailable[] = $key;
+            }
+        }
+
         $snapshot['unavailable_inputs'] = $unavailable;
-        $snapshot['estimate_note'] = 'Workflow completeness is separate from placeholder confidence and from the risk classification. Missing grades and unmapped questionnaire section means are omitted. They are not scored as zero. Skills that were not logged are not treated as zero ability.';
+        $snapshot['estimate_note'] = 'Workflow completeness is separate from placeholder confidence and from the risk classification. Missing grades and unmapped questionnaire section means are omitted. They are not scored as zero. Skills that were not logged are not treated as zero ability. Household fields that were not collected are omitted. They are not treated as poverty, as no scholarship, or as zero.';
 
         return $snapshot;
+    }
+
+    /**
+     * @param  array{used: int, limit: int, resets_at: CarbonInterface, timezone: string}  $quota
+     */
+    private function quotaMessage(array $quota): string
+    {
+        $reset = $quota['resets_at']->timezone($quota['timezone'])->format('M j, Y g:i A');
+
+        return 'You have used '.$quota['used'].' of '.$quota['limit'].' predictions for this Philippine calendar day. You can request another after '.$reset.'.';
     }
 }

@@ -15,12 +15,12 @@ final class AssessmentProgress
      */
     public function for(Student $student): array
     {
-        $socioeconomic = $student->socioeconomicProfile()->first();
         $skills = $student->skillsExperience()->first();
 
+        // Household profile is no longer an active assessment step. Stored
+        // socioeconomic rows stay encrypted and are not part of this meter.
         $sections = [
             'academic' => $student->gradeReports()->current()->exists(),
-            'socioeconomic' => $socioeconomic !== null && ! $socioeconomic->is_draft,
             'skills' => $skills !== null && ! $skills->is_draft,
             'questionnaire' => $student->questionnaireResponses()->whereNotNull('submitted_at')->exists(),
         ];

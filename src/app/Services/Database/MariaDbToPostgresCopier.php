@@ -47,6 +47,7 @@ final class MariaDbToPostgresCopier
         'questionnaire_responses',
         'questionnaire_answers',
         'predictions',
+        'prediction_attempt_grants',
         'psoc_occupations',
         'career_matches',
         'interventions',

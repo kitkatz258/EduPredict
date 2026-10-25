@@ -40,7 +40,7 @@ technical skills up to 4 × +1.5 employability;
 work experience up to 2 × +3 employability (projects are no longer collected and have no weight);
 each positive construct `((score - 50) / 50) * 8` employability and `((100 - score) / 100) * 0.08` dropout;
 procrastination is reversed, `((50 - score) / 50) * 8` employability and `(score / 100) * 0.12` dropout;
-reliable internet, device, or study space is +2 employability (missing is −3);
+reliable internet, device, or study space (`yes`) is +2 employability and explicit `no` is −3; a null household field is 0 and is omitted from factors, and it is not read as poverty, no scholarship, or zero. M37 no longer shows the household form. A published `socioeconomic_profiles` row is still scored. New assessments that have no published row leave those fields null.
 income bands and employment shift the score by a few points only.
 
 Household size and living arrangement are stored in the snapshot and are not scored by the placeholder.

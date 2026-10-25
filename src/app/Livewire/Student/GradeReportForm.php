@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Services\Grades\GradeReportParser;
 use App\Services\Grades\GradeReportWriter;
 use App\Services\Grades\GradeRowNormalizer;
+use App\Services\Grades\GradeScale;
 use App\Services\Grades\GwaCalculator;
 use App\Services\Grades\ParsedGradeReport;
 use App\Services\Grades\ParsedGradeRow;
@@ -243,16 +244,25 @@ class GradeReportForm extends Component
     }
 
     /**
-     * @return array{rounded: ?float, failed: int, incomplete: int, provisional: bool, mismatch: bool}
+     * @return array{rounded: ?float, failed: int, incomplete: int, dropped: int, provisional: bool, mismatch: bool}
      */
     public function computedGwa(): array
     {
         $result = app(GwaCalculator::class)->compute($this->rows);
 
+        $scale = app(GradeScale::class);
+        $dropped = 0;
+        foreach ($this->rows as $row) {
+            if ($scale->isDropped((string) ($row['final_grade'] ?? '')) || $scale->isDropped((string) ($row['remarks'] ?? ''))) {
+                $dropped++;
+            }
+        }
+
         return [
             'rounded' => $result->roundedGpa,
             'failed' => $result->failedCount,
             'incomplete' => $result->incompleteCount,
+            'dropped' => $dropped,
             'provisional' => $result->isProvisional(),
             'mismatch' => $this->detected_gpa !== null
                 && $this->detected_gpa !== ''

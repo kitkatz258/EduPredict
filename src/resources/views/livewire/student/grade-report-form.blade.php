@@ -118,7 +118,7 @@
                 <div class="flex flex-col gap-4 border-b border-brand-200 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
                     <div>
                         <h3 class="text-base font-semibold text-brand-900">Manual grade entry</h3>
-                        <p class="mt-1 text-sm text-gray-600">Enter your grades from your grade sheet or portal. Use INC for an incomplete subject.</p>
+                        <p class="mt-1 max-w-prose text-sm text-gray-600">Enter the final grade as a number, INC, or Dropped. 5.00 is marked Failed, INC is Incomplete, and Dropped is Dropped. Those three are not the same. Dropped and INC stay out of the GWA.</p>
                     </div>
                     <div class="flex gap-2">
                         <div>
@@ -142,19 +142,22 @@
 
                 <div class="p-5 sm:p-6">
                     @error('rows') <p class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">{{ $message }}</p> @enderror
-                    <div class="hidden grid-cols-[8rem_1fr_5rem_7rem_2rem] gap-3 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 md:grid">
-                        <span>Subject code</span><span>Subject name</span><span>Units</span><span>Final grade</span><span class="sr-only">Remove</span>
+                    <div class="hidden grid-cols-[7rem_1fr_4rem_6rem_8rem_2rem] gap-3 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 md:grid">
+                        <span>Subject code</span><span>Subject name</span><span>Units</span><span>Final grade</span><span>Remarks</span><span class="sr-only">Remove</span>
                     </div>
                     <ul class="space-y-3">
                         @foreach ($rows as $index => $row)
-                            <li wire:key="manual-row-{{ $index }}" class="grid grid-cols-2 gap-2 rounded-xl border border-brand-200 p-3 md:grid-cols-[8rem_1fr_5rem_7rem_2rem] md:items-start md:gap-3 md:border-0 md:p-0">
+                            <li wire:key="manual-row-{{ $index }}" class="grid grid-cols-2 gap-2 rounded-xl border border-brand-200 p-3 md:grid-cols-[7rem_1fr_4rem_6rem_8rem_2rem] md:items-start md:gap-3 md:border-0 md:p-0">
                                 <input aria-label="Subject code, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.subject_code" placeholder="CCS 106" class="{{ $cellInput }}">
                                 <input aria-label="Subject name, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.subject_name" placeholder="Subject name" class="{{ $cellInput }} col-span-2 md:col-span-1 order-first md:order-none">
                                 <input aria-label="Units, row {{ $index + 1 }}" type="text" inputmode="decimal" wire:model.blur="rows.{{ $index }}.units" placeholder="3" class="{{ $cellInput }}">
-                                <input aria-label="Final grade, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.final_grade" placeholder="1.00–5.00 or INC" class="{{ $cellInput }} {{ $gradeTone($row) }} font-semibold">
+                                <input aria-label="Final grade, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.final_grade" placeholder="1.00, 5.00, INC, Dropped" class="{{ $cellInput }} {{ $gradeTone($row) }} font-semibold">
+                                <input aria-label="Remarks, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.remarks" placeholder="Auto" class="{{ $cellInput }}">
                                 <button type="button" wire:click="removeRow({{ $index }})" class="justify-self-end rounded-md p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-800" aria-label="Remove row {{ $index + 1 }}"><i class="ri-close-line" aria-hidden="true"></i></button>
                                 @if (! empty($row['is_incomplete']))
                                     <p class="col-span-full text-xs text-amber-800">Incomplete: left out of the GWA and not counted as failed. Update this term when the final grade is out.</p>
+                                @elseif (in_array(strtoupper(trim((string) ($row['final_grade'] ?? ''))), ['DRP', 'W'], true))
+                                    <p class="col-span-full text-xs text-gray-700">Dropped: left out of the GWA. It is not scored as 5.00.</p>
                                 @endif
                             </li>
                         @endforeach
@@ -163,7 +166,7 @@
                     @include('livewire.student.partials.grade-gwa-summary')
                 </div>
 
-                <div class="flex flex-col gap-3 border-t border-brand-200 bg-gray-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div class="sticky bottom-0 z-10 flex flex-col gap-3 border-t border-brand-200 bg-white/95 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6">
                     <p class="text-xs text-gray-600">Saved grades become your academic record and are used in your next prediction.</p>
                     <div class="flex items-center gap-3">
                         <button type="button" wire:click="saveDraft" wire:loading.attr="disabled" wire:target="saveDraft,confirm" class="text-sm font-medium text-brand-900 hover:underline disabled:opacity-60">Save draft</button>
@@ -251,7 +254,24 @@
                                         </td>
                                         <td class="px-3 py-3 text-gray-700">{{ $row['units'] !== '' ? $row['units'] : '—' }}</td>
                                         <td class="px-3 py-3 font-mono font-semibold {{ $gradeTone($row) }}">{{ $row['final_grade'] !== '' ? $row['final_grade'] : '—' }}</td>
-                                        <td class="px-3 py-3 text-gray-700">{{ $row['remarks'] !== '' ? ucfirst(strtolower($row['remarks'])) : '—' }}</td>
+                                        <td class="px-3 py-3 text-gray-700">
+                                            @php
+                                                $remarkKey = strtoupper(trim((string) ($row['remarks'] ?? '')));
+                                                $remarkLabel = match ($remarkKey) {
+                                                    'FAILED' => 'Failed',
+                                                    'INCOMPLETE' => 'Incomplete',
+                                                    'DROPPED' => 'Dropped',
+                                                    'WITHDRAWN' => 'Withdrawn',
+                                                    'PASSED' => 'Passed',
+                                                    default => $row['remarks'] ?? '',
+                                                };
+                                            @endphp
+                                            @if ($remarkLabel !== '')
+                                                <span class="inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold {{ $remarkKey === 'FAILED' ? 'border-red-200 bg-red-50 text-red-900' : ($remarkKey === 'INCOMPLETE' ? 'border-amber-200 bg-amber-50 text-amber-950' : 'border-brand-200 bg-white text-brand-900') }}">{{ $remarkLabel }}</span>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
                                         <td class="px-5 py-3 text-right sm:px-6">
                                             <button type="button" wire:click="editRow({{ $index }})" class="rounded-md p-1.5 text-gray-500 hover:bg-brand-50 hover:text-brand-900" aria-label="Edit row {{ $index + 1 }} ({{ $row['subject_code'] !== '' ? $row['subject_code'] : 'blank' }})"><i class="ri-pencil-line" aria-hidden="true"></i></button>
                                         </td>
@@ -267,7 +287,7 @@
                     @include('livewire.student.partials.grade-gwa-summary')
                 </div>
 
-                <div class="flex flex-col gap-3 border-t border-brand-200 bg-gray-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div class="sticky bottom-0 z-10 flex flex-col gap-3 border-t border-brand-200 bg-white/95 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6">
                     <div class="flex items-center gap-4 text-sm">
                         <button type="button" wire:click="startOver" class="inline-flex items-center gap-1 font-medium text-gray-700 hover:text-brand-900"><i class="ri-arrow-left-line" aria-hidden="true"></i>{{ $mode === 'upload' ? 'Re-upload' : 'Paste again' }}</button>
                         <span class="text-gray-500">{{ count($editedRows) }} {{ \Illuminate\Support\Str::plural('row', count($editedRows)) }} edited</span>

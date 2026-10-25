@@ -69,10 +69,10 @@ class StudentFlowPolishTest extends TestCase
         $this->assertAuthenticatedAs($student->user);
     }
 
-    public function test_assessment_continue_and_back_follow_the_six_section_sequence(): void
+    public function test_assessment_continue_and_back_follow_the_section_sequence(): void
     {
         $student = Student::factory()->create();
-        $sequence = ['questionnaire', 'socioeconomic', 'skills', 'grades', 'review'];
+        $sequence = ['questionnaire', 'skills', 'grades', 'review'];
 
         $wizard = Livewire::actingAs($student->user)->test(AssessmentWizard::class)->assertSet('step', 'questionnaire');
         foreach (array_slice($sequence, 1) as $expected) {
@@ -85,7 +85,8 @@ class StudentFlowPolishTest extends TestCase
         $wizard->call('back')->assertSet('step', 'questionnaire')
             ->call('goTo', 'nonsense')->assertSet('step', 'questionnaire')
             ->call('goTo', 'academic_behavior')->assertSet('step', 'questionnaire')
-            ->dispatch('questionnaire-submitted')->assertSet('step', 'socioeconomic');
+            ->call('goTo', 'socioeconomic')->assertSet('step', 'skills')
+            ->dispatch('questionnaire-submitted')->assertSet('step', 'skills');
 
         Livewire::actingAs($student->user)
             ->withQueryParams(['step' => 'employability'])
@@ -125,9 +126,10 @@ class StudentFlowPolishTest extends TestCase
         $this->actingAs($student->user)
             ->get(route('student.assessment'))
             ->assertOk()
-            ->assertSee('Step 1 of 5')
+            ->assertSee('Step 1 of 4')
             ->assertSee('aria-label="Assessment sections"', false)
-            ->assertSeeInOrder(['Questionnaire', 'Household profile', 'Skills &amp; Experience', 'Grades', 'Review &amp; Run'], false)
+            ->assertSeeInOrder(['Questionnaire', 'Skills &amp; Experience', 'Grades', 'Review &amp; Run'], false)
+            ->assertDontSee('Household profile')
             ->assertSee('Questionnaire submitted')
             ->assertDontSee('Assessment workflow progress')
             ->assertDontSee('aria-label="Assessment steps"', false)

@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Your past estimates</p>
-            <h2 class="text-2xl font-semibold text-brand-900">History</h2>
+            <h2 class="text-2xl font-bold text-brand-900">History</h2>
             <p class="mt-1 text-sm text-gray-600">Each row is a saved prediction attempt. Saved attempts are kept as they were and are not recalculated. Select View to see exactly what an attempt used.</p>
         </div>
     </x-slot>

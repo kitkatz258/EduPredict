@@ -20,16 +20,15 @@ class StudentProfileTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_student_can_save_edit_and_reopen_both_sections(): void
+    public function test_student_can_save_skills_without_a_household_step(): void
     {
         $student = $this->makeStudent();
-
-        Livewire::actingAs($student->user)
-            ->test(AssessmentWizard::class)
-            ->set($this->socioPayload())
-            ->call('saveSocioeconomic')
-            ->assertHasNoErrors()
-            ->assertSet('step', 'skills');
+        $profile = SocioeconomicProfile::factory()->create([
+            'student_id' => $student->id,
+            'household_income_bracket' => '20k_40k',
+            'household_size' => '4',
+            'is_draft' => false,
+        ]);
 
         Livewire::actingAs($student->user)
             ->test(SkillsExperienceSection::class)
@@ -40,35 +39,28 @@ class StudentProfileTest extends TestCase
             ->call('completeSection')
             ->assertDispatched('skills-section-saved');
 
-        $student->refresh();
-        $this->assertFalse($student->socioeconomicProfile->is_draft);
-        $this->assertSame('20k_40k', $student->socioeconomicProfile->household_income_bracket);
-        $this->assertSame('4', $student->socioeconomicProfile->household_size);
         $this->assertSame(['SQL'], $student->skills()->pluck('name')->all());
-        $this->assertFalse($student->skillsExperience->is_draft);
+        $this->assertFalse($student->fresh()->skillsExperience->is_draft);
+        $this->assertSame('20k_40k', $profile->fresh()->household_income_bracket);
+        $this->assertSame('4', $profile->fresh()->household_size);
 
-        Livewire::actingAs($student->user)
-            ->test(AssessmentWizard::class)
-            ->assertSet('household_income_bracket', '20k_40k')
-            ->set('employment_status', 'part_time')
-            ->call('saveSocioeconomic', true)
-            ->assertHasNoErrors();
-
-        $this->assertSame('part_time', $student->socioeconomicProfile()->first()->employment_status);
-        $this->assertTrue($student->socioeconomicProfile()->first()->is_draft);
+        $this->actingAs($student->user)
+            ->get(route('student.assessment'))
+            ->assertOk()
+            ->assertDontSee('Household profile')
+            ->assertDontSee('Household income bracket');
     }
 
     public function test_sensitive_socioeconomic_values_are_encrypted_at_rest(): void
     {
         $student = $this->makeStudent();
+        $profile = SocioeconomicProfile::factory()->create([
+            'student_id' => $student->id,
+            'household_income_bracket' => '20k_40k',
+            'scholarship_status' => 'partial',
+        ]);
 
-        Livewire::actingAs($student->user)
-            ->test(AssessmentWizard::class)
-            ->set($this->socioPayload())
-            ->call('saveSocioeconomic')
-            ->assertHasNoErrors();
-
-        $raw = DB::table('socioeconomic_profiles')->where('student_id', $student->id)->first();
+        $raw = DB::table('socioeconomic_profiles')->where('id', $profile->id)->first();
         $this->assertIsString($raw->household_income_bracket);
         $this->assertStringNotContainsString('20k_40k', $raw->household_income_bracket);
         $this->assertStringNotContainsString('partial', $raw->scholarship_status);
@@ -81,32 +73,17 @@ class StudentProfileTest extends TestCase
         $progress = app(AssessmentProgress::class);
 
         $this->assertSame(0, $progress->for($student)['percent']);
-        $this->assertFalse($progress->for($student)['sections']['socioeconomic']);
+        $this->assertArrayNotHasKey('socioeconomic', $progress->for($student)['sections']);
 
-        Livewire::actingAs($student->user)
-            ->test(AssessmentWizard::class)
-            ->set('household_income_bracket', 'below_10k')
-            ->call('saveSocioeconomic', true)
-            ->assertHasNoErrors();
-
-        $afterDraft = $progress->for($student->fresh());
-        $this->assertFalse($afterDraft['sections']['socioeconomic']);
-        $this->assertSame(0, $afterDraft['percent']);
-
-        Livewire::actingAs($student->user)
-            ->test(AssessmentWizard::class)
-            ->set($this->socioPayload())
-            ->call('saveSocioeconomic');
         Livewire::actingAs($student->user)
             ->test(SkillsExperienceSection::class)
             ->call('completeSection');
 
         $done = $progress->for($student->fresh());
-        $this->assertTrue($done['sections']['socioeconomic']);
         $this->assertTrue($done['sections']['skills']);
         $this->assertFalse($done['sections']['academic']);
         $this->assertFalse($done['sections']['questionnaire']);
-        $this->assertSame(50, $done['percent']);
+        $this->assertSame(33, $done['percent']);
 
         $this->actingAs($student->user)
             ->get(route('student.dashboard'))
@@ -117,8 +94,8 @@ class StudentProfileTest extends TestCase
         $this->actingAs($student->user)
             ->get(route('student.assessment'))
             ->assertOk()
-            ->assertSee('Step 1 of 5')
-            ->assertSee('2/4 sections saved')
+            ->assertSee('Step 1 of 4')
+            ->assertSee('1/3 sections saved')
             ->assertSee('Assessment');
     }
 
@@ -143,43 +120,26 @@ class StudentProfileTest extends TestCase
             Livewire::actingAs($staff)->test(AssessmentWizard::class)->assertForbidden();
         }
 
-        Livewire::actingAs($other->user)
-            ->test(AssessmentWizard::class)
-            ->set($this->socioPayload(['household_income_bracket' => 'above_70k']))
-            ->call('saveSocioeconomic')
-            ->assertHasNoErrors();
+        $this->actingAs($other->user)
+            ->get(route('student.assessment'))
+            ->assertOk()
+            ->assertDontSee('below_10k')
+            ->assertDontSee('Household income bracket');
 
         $this->assertSame('below_10k', $profile->fresh()->household_income_bracket);
-        $this->assertSame('above_70k', $other->fresh()->socioeconomicProfile->household_income_bracket);
+        $this->assertNull($other->fresh()->socioeconomicProfile);
     }
 
-    public function test_completing_socioeconomic_requires_the_fields(): void
+    public function test_the_active_assessment_does_not_require_household_fields(): void
     {
         $student = $this->makeStudent();
 
         Livewire::actingAs($student->user)
             ->test(AssessmentWizard::class)
-            ->set('household_income_bracket', 'below_10k')
-            ->call('saveSocioeconomic')
-            ->assertHasErrors(['household_size', 'scholarship_status']);
-    }
-
-    /**
-     * @param  array<string, string>  $overrides
-     * @return array<string, string>
-     */
-    private function socioPayload(array $overrides = []): array
-    {
-        return array_merge([
-            'household_income_bracket' => '20k_40k',
-            'household_size' => '4',
-            'scholarship_status' => 'partial',
-            'employment_status' => 'unemployed',
-            'living_arrangement' => 'with_family',
-            'has_internet' => 'yes',
-            'has_device' => 'shared',
-            'has_study_space' => 'yes',
-        ], $overrides);
+            ->call('goTo', 'skills')
+            ->assertSet('step', 'skills')
+            ->assertDontSee('Household income bracket')
+            ->assertDontSee('Scholarship status');
     }
 
     private function makeStudent(?Program $program = null, string $number = '2024-71000'): Student

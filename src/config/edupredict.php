@@ -50,14 +50,15 @@ return [
         'failing' => 5.00,
         'numeric_scale' => [1.00, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00, 5.00],
         'incomplete_tokens' => ['INC', 'INCOMPLETE'],
-        'dropped_tokens' => ['DRP', 'W', 'WITHDRAWN'],
+        'dropped_tokens' => ['DRP', 'W', 'WITHDRAWN', 'DROPPED', 'DROP'],
         'gpa_excluded_prefixes' => ['NSTP'],
         'subject_code_pattern' => '/^[A-Z]{2,8}\s?\d{1,3}[A-Z]?$/',
         'upload_max_kb' => 10240,
     ],
 
     'prediction' => [
-        'cooldown_hours' => 24,
+        'daily_limit' => 2,
+        'timezone' => 'Asia/Manila',
         'limited_history_semesters' => 2,
     ],
 

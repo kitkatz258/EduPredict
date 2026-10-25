@@ -21,9 +21,9 @@ use App\Services\Questionnaire\QuestionnaireScorer;
 use App\Services\Questionnaire\QuestionnaireSnapshot;
 use App\Services\Questionnaire\SectionScorePresenter;
 use Database\Seeders\QuestionnaireItemSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -172,7 +172,8 @@ class QuestionnaireTest extends TestCase
             ->assertSee('0 / 36 saved')
             ->assertSee('Section 1 of 6')
             ->assertSee('I am satisfied with my current academic performance.')
-            ->assertSee('Strongly Disagree');
+            ->assertSee('Strongly Disagree')
+            ->assertSeeInOrder(['Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree']);
 
         foreach ($studyItems as $item) {
             $component->set('answers.'.$item->id, 4);
@@ -477,6 +478,24 @@ class QuestionnaireTest extends TestCase
                 'sort_order' => $item['sort_order'],
             ]);
         }
+    }
+
+    public function test_the_approved_instrument_stays_at_36_items_without_a_seventh_behavioral_item(): void
+    {
+        $items = ApprovedInstrumentCatalog::items();
+        $codes = array_column($items, 'code');
+
+        $this->assertCount(36, $items);
+        $this->assertNotContains('B7', $codes);
+        $this->assertCount(6, array_filter($codes, fn (string $code): bool => str_starts_with($code, 'B')));
+        $this->assertSame(['A' => 6, 'S' => 6, 'B' => 6, 'C' => 8, 'P' => 6, 'E' => 4], [
+            'A' => count(array_filter($codes, fn (string $code): bool => str_starts_with($code, 'A'))),
+            'S' => count(array_filter($codes, fn (string $code): bool => str_starts_with($code, 'S'))),
+            'B' => count(array_filter($codes, fn (string $code): bool => str_starts_with($code, 'B'))),
+            'C' => count(array_filter($codes, fn (string $code): bool => str_starts_with($code, 'C'))),
+            'P' => count(array_filter($codes, fn (string $code): bool => str_starts_with($code, 'P'))),
+            'E' => count(array_filter($codes, fn (string $code): bool => str_starts_with($code, 'E'))),
+        ]);
     }
 
     /**

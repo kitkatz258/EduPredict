@@ -12,15 +12,18 @@ use App\Livewire\Tables\ScopedStudentsTable;
 use App\Models\AuditLog;
 use App\Models\GradeReport;
 use App\Models\Prediction;
+use App\Models\PredictionAttemptGrant;
 use App\Models\Program;
 use App\Models\QuestionnaireResponse;
 use App\Models\SkillsExperience;
-use App\Models\StudentSkill;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
+use App\Models\StudentSkill;
 use App\Models\SubjectGrade;
 use App\Models\User;
 use App\Notifications\StudentPredictionReady;
+use Carbon\Carbon;
+use Database\Seeders\QuestionnaireItemSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -59,7 +62,7 @@ class PredictionRequestTest extends TestCase
         $student->forceFill(['adviser_id' => $legacyFaculty->id])->save();
         $dean = User::factory()->dean($program->college)->create();
         $this->completeProfile($student, 'below_10k');
-        $start = now()->copy();
+        $this->travelTo(Carbon::parse('2026-10-25 10:00:00', 'Asia/Manila'));
 
         Livewire::actingAs($student->user)
             ->test(RequestPrediction::class)
@@ -107,21 +110,17 @@ class PredictionRequestTest extends TestCase
             ->assertOk()
             ->assertSee(number_format((float) $first->employability_score, 0));
 
-        $this->travelTo($start->copy()->addHour());
+        Livewire::actingAs($student->user)
+            ->test(RequestPrediction::class)
+            ->call('request')
+            ->assertHasNoErrors();
+
+        $this->assertSame(2, Prediction::query()->count());
 
         Livewire::actingAs($student->user)
             ->test(RequestPrediction::class)
             ->call('request')
             ->assertHasErrors('request');
-
-        $this->assertSame(1, Prediction::query()->count());
-
-        $this->travelTo($start->copy()->addHours(25));
-
-        Livewire::actingAs($student->user)
-            ->test(RequestPrediction::class)
-            ->call('request')
-            ->assertHasNoErrors();
 
         $this->assertSame(2, Prediction::query()->count());
         $this->assertEquals($first->employability_score, $first->fresh()->employability_score);
@@ -304,7 +303,7 @@ class PredictionRequestTest extends TestCase
 
     public function test_a_legacy_submission_does_not_satisfy_the_current_instrument(): void
     {
-        $this->seed(\Database\Seeders\QuestionnaireItemSeeder::class);
+        $this->seed(QuestionnaireItemSeeder::class);
         $student = $this->makeStudent(semesters: 2);
         $this->completeProfile($student, '20k_40k');
         QuestionnaireResponse::query()->where('student_id', $student->id)->update([
@@ -317,6 +316,87 @@ class PredictionRequestTest extends TestCase
             ->assertHasErrors('request');
 
         $this->assertSame(0, Prediction::query()->count());
+    }
+
+    public function test_two_predictions_are_allowed_per_philippine_day_and_midnight_resets_the_count(): void
+    {
+        $student = $this->makeStudent(semesters: 2);
+        $this->completeProfile($student, '20k_40k');
+        $this->travelTo(Carbon::parse('2026-10-25 23:59:59', 'Asia/Manila'));
+
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasErrors('request');
+        $this->assertSame(2, Prediction::query()->count());
+
+        $this->travelTo(Carbon::parse('2026-10-26 00:00:00', 'Asia/Manila'));
+
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
+        $this->assertSame(3, Prediction::query()->count());
+        $this->assertSame(
+            2,
+            $student->predictions()->where('created_at', '<', Carbon::parse('2026-10-26 00:00:00', 'Asia/Manila'))->count(),
+        );
+    }
+
+    public function test_a_rejected_request_does_not_consume_a_daily_prediction(): void
+    {
+        $student = $this->makeStudent();
+        $this->travelTo(Carbon::parse('2026-10-25 09:00:00', 'Asia/Manila'));
+
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasErrors('request');
+        $this->assertSame(0, Prediction::query()->count());
+
+        $this->completeProfile($student, '20k_40k');
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
+        $this->assertSame(2, Prediction::query()->count());
+    }
+
+    public function test_an_extra_attempt_grant_adds_to_the_daily_limit_without_changing_saved_predictions(): void
+    {
+        $student = $this->makeStudent(semesters: 2);
+        $this->completeProfile($student, '20k_40k');
+        $this->travelTo(Carbon::parse('2026-10-25 12:00:00', 'Asia/Manila'));
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
+        $before = Prediction::query()->orderBy('id')->get();
+
+        PredictionAttemptGrant::query()->create([
+            'student_id' => $student->id,
+            'manila_date' => '2026-10-25',
+            'extra_attempts' => 1,
+            'reason' => 'Defense demonstration',
+        ]);
+
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
+        $this->assertSame(3, Prediction::query()->count());
+        foreach ($before as $saved) {
+            $fresh = $saved->fresh();
+            $this->assertSame($saved->employability_score, $fresh->employability_score);
+            $this->assertSame($saved->model_version, $fresh->model_version);
+            $this->assertSame($saved->factors, $fresh->factors);
+        }
+    }
+
+    public function test_a_new_prediction_without_a_household_profile_omits_those_factors(): void
+    {
+        $student = $this->makeStudent(semesters: 2);
+        $this->completeProfile($student, '20k_40k');
+        $student->socioeconomicProfile()->delete();
+
+        Livewire::actingAs($student->user)->test(RequestPrediction::class)->call('request')->assertHasNoErrors();
+
+        $prediction = Prediction::query()->sole();
+        $labels = collect($prediction->factors['employability'])->pluck('label')
+            ->merge(collect($prediction->factors['dropout'])->pluck('label'));
+        $this->assertFalse($labels->contains('Scholarship'));
+        $this->assertFalse($labels->contains('Household income band'));
+        $this->assertFalse($labels->contains('Study space'));
+        $this->assertContains('scholarship_status', $prediction->feature_snapshot['unavailable_inputs']);
+        $this->assertContains('income_bracket', $prediction->feature_snapshot['unavailable_inputs']);
+        $this->assertNull($prediction->feature_snapshot['income_bracket']);
+        $this->assertSame('placeholder-heuristic-v0', $prediction->model_version);
     }
 
     public function test_missing_consent_blocks_a_new_prediction(): void

@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Student;
 
-use App\Http\Requests\Student\SocioeconomicProfileRequest;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\GradeReport;
 use App\Models\SocioeconomicProfile;
@@ -22,16 +21,16 @@ class AssessmentWizard extends Component
     /** Wizard order. Continue and Back walk this list. */
     public const STEPS = [
         'questionnaire' => 'Questionnaire',
-        'socioeconomic' => 'Household profile',
         'skills' => 'Skills & Experience',
         'grades' => 'Grades',
         'review' => 'Review & Run',
     ];
 
-    /** Older links used the M15 and M22 step names. */
+    /** Older links used the M15, M22, and household step names. */
     private const ALIASES = [
         'academic_behavior' => 'questionnaire',
         'employability' => 'questionnaire',
+        'socioeconomic' => 'skills',
     ];
 
     #[Url(except: 'questionnaire', history: true)]
@@ -46,28 +45,10 @@ class AssessmentWizard extends Component
 
     public int $gradeFormKey = 0;
 
-    public ?string $household_income_bracket = null;
-
-    public ?string $household_size = null;
-
-    public ?string $scholarship_status = null;
-
-    public ?string $employment_status = null;
-
-    public ?string $living_arrangement = null;
-
-    public ?string $has_internet = null;
-
-    public ?string $has_device = null;
-
-    public ?string $has_study_space = null;
-
     public function mount(): void
     {
         $this->authorizeStudent();
         $this->step = $this->normalizeStep($this->step) ?? 'questionnaire';
-        $student = $this->student();
-        $this->fillSocioeconomic($student->socioeconomicProfile);
     }
 
     public function goTo(string $step): void
@@ -96,7 +77,7 @@ class AssessmentWizard extends Component
     public function questionnaireSubmitted(): void
     {
         $this->authorizeStudent();
-        $this->step = 'socioeconomic';
+        $this->step = 'skills';
     }
 
     #[On('skills-section-saved')]
@@ -163,52 +144,10 @@ class AssessmentWizard extends Component
         $this->gradeFormKey++;
     }
 
-    public function saveSocioeconomic(bool $asDraft = false): void
-    {
-        $student = $this->authorizeStudent();
-        $existing = $student->socioeconomicProfile;
-        $existing
-            ? $this->authorize('update', $existing)
-            : $this->authorize('create', SocioeconomicProfile::class);
-
-        $this->blankSocioeconomicToNull();
-        $rules = $asDraft
-            ? SocioeconomicProfileRequest::draftRules()
-            : SocioeconomicProfileRequest::fieldRules(required: true);
-        $validated = $this->validate($rules);
-
-        $profile = $student->socioeconomicProfile()->updateOrCreate(
-            ['student_id' => $student->id],
-            [
-                'household_income_bracket' => $this->blankToNull($validated['household_income_bracket'] ?? null),
-                'household_size' => isset($validated['household_size']) && $validated['household_size'] !== null && $validated['household_size'] !== ''
-                    ? (string) $validated['household_size']
-                    : null,
-                'scholarship_status' => $this->blankToNull($validated['scholarship_status'] ?? null),
-                'employment_status' => $this->blankToNull($validated['employment_status'] ?? null),
-                'living_arrangement' => $this->blankToNull($validated['living_arrangement'] ?? null),
-                'has_internet' => $this->blankToNull($validated['has_internet'] ?? null),
-                'has_device' => $this->blankToNull($validated['has_device'] ?? null),
-                'has_study_space' => $this->blankToNull($validated['has_study_space'] ?? null),
-                'is_draft' => $asDraft,
-            ],
-        );
-
-        $this->authorize('update', $profile);
-        $this->toast($asDraft
-            ? 'Socioeconomic draft saved. It stays private to you.'
-            : 'Socioeconomic section saved.');
-
-        if (! $asDraft) {
-            $this->step = 'skills';
-        }
-    }
-
     public function render(AcademicSummary $academic, AssessmentProgress $progress, SectionScorePresenter $sectionScores): View
     {
         $student = $this->authorizeStudent();
         $questionnaireDraft = $student->questionnaireResponses()->whereNull('submitted_at')->exists();
-        $socioeconomic = $student->socioeconomicProfile()->first();
         $latestSubmission = $student->questionnaireResponses()
             ->whereNotNull('submitted_at')
             ->latest('submitted_at')
@@ -222,18 +161,10 @@ class AssessmentWizard extends Component
             'progress' => $progress->for($student),
             'drafts' => [
                 'questionnaire' => $questionnaireDraft,
-                'socioeconomic' => $socioeconomic !== null && $socioeconomic->is_draft,
             ],
             'submissions' => $student->questionnaireResponses()->latest('id')->limit(8)->get(),
             'sectionScores' => $sectionScores->rows(is_array($latestSubmission?->construct_scores) ? $latestSubmission->construct_scores : null),
             'questionnaireSections' => config('edupredict.questionnaire.sections', []),
-            'incomeOptions' => config('edupredict.profile.income_brackets', []),
-            'scholarshipOptions' => config('edupredict.profile.scholarship_statuses', []),
-            'employmentOptions' => config('edupredict.profile.employment_statuses', []),
-            'livingOptions' => config('edupredict.profile.living_arrangements', []),
-            'internetOptions' => config('edupredict.profile.internet_access', []),
-            'deviceOptions' => config('edupredict.profile.device_access', []),
-            'studySpaceOptions' => config('edupredict.profile.study_space', []),
             'currentGradeReports' => $student->gradeReports()->current()->latest('confirmed_at')->latest('id')->get(),
             'draftGradeReports' => $student->gradeReports()->where('status', 'draft')->latest('updated_at')->latest('id')->get(),
         ]);
@@ -265,59 +196,5 @@ class AssessmentWizard extends Component
         abort_unless($student instanceof Student, 403);
 
         return $student;
-    }
-
-    private function student(): Student
-    {
-        $student = auth()->user()?->student;
-        abort_unless($student instanceof Student, 403);
-
-        return $student->load(['socioeconomicProfile', 'program']);
-    }
-
-    private function fillSocioeconomic(?SocioeconomicProfile $profile): void
-    {
-        if ($profile === null) {
-            return;
-        }
-
-        $this->authorize('view', $profile);
-        $this->household_income_bracket = $profile->household_income_bracket;
-        $this->household_size = $profile->household_size;
-        $this->scholarship_status = $profile->scholarship_status;
-        $this->employment_status = $profile->employment_status;
-        $this->living_arrangement = $profile->living_arrangement;
-        $this->has_internet = $profile->has_internet;
-        $this->has_device = $profile->has_device;
-        $this->has_study_space = $profile->has_study_space;
-    }
-
-    private function blankSocioeconomicToNull(): void
-    {
-        foreach ([
-            'household_income_bracket',
-            'household_size',
-            'scholarship_status',
-            'employment_status',
-            'living_arrangement',
-            'has_internet',
-            'has_device',
-            'has_study_space',
-        ] as $field) {
-            if (trim((string) $this->{$field}) === '') {
-                $this->{$field} = null;
-            }
-        }
-    }
-
-    private function blankToNull(mixed $value): ?string
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        $value = trim((string) $value);
-
-        return $value === '' ? null : $value;
     }
 }

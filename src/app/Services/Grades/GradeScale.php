@@ -46,11 +46,12 @@ final class GradeScale
             return null;
         }
 
-        if ($this->isIncomplete($token)) {
+        $compact = strtoupper((string) preg_replace('/\s+/', '', $token));
+        if ($this->isIncomplete($compact)) {
             return 'INC';
         }
-        if ($this->isDropped($token)) {
-            return $token === 'W' || $token === 'WITHDRAWN' ? 'W' : 'DRP';
+        if ($this->isDropped($compact)) {
+            return in_array($compact, ['W', 'WITHDRAWN'], true) ? 'W' : 'DRP';
         }
 
         $token = str_replace([',', ' '], ['.', ''], $token);
@@ -68,16 +69,44 @@ final class GradeScale
 
     public function isIncomplete(string $token): bool
     {
-        $token = strtoupper(trim($token));
+        $token = $this->compactToken($token);
 
         return in_array($token, array_map('strtoupper', config('edupredict.grades.incomplete_tokens', ['INC', 'INCOMPLETE'])), true);
     }
 
     public function isDropped(string $token): bool
     {
-        $token = strtoupper(trim($token));
+        $token = $this->compactToken($token);
 
-        return in_array($token, array_map('strtoupper', config('edupredict.grades.dropped_tokens', ['DRP', 'W', 'WITHDRAWN'])), true);
+        return in_array($token, array_map('strtoupper', config('edupredict.grades.dropped_tokens', ['DRP', 'W', 'WITHDRAWN', 'DROPPED'])), true);
+    }
+
+    /**
+     * Canonical status remark for a grade token or a remarks cell.
+     * Free-text notes return null so a justified remark can be kept.
+     */
+    public function statusRemark(?string $token): ?string
+    {
+        $compact = $this->compactToken((string) $token);
+        if ($compact === '') {
+            return null;
+        }
+        if ($this->isIncomplete($compact)) {
+            return 'INCOMPLETE';
+        }
+        if ($this->isDropped($compact)) {
+            return in_array($compact, ['W', 'WITHDRAWN'], true) ? 'WITHDRAWN' : 'DROPPED';
+        }
+        if (in_array($compact, ['PASSED', 'FAILED'], true)) {
+            return $compact;
+        }
+
+        return null;
+    }
+
+    private function compactToken(string $token): string
+    {
+        return strtoupper((string) preg_replace('/\s+/', '', trim($token)));
     }
 
     public function isNumericGrade(string $token): bool

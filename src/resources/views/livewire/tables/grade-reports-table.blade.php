@@ -110,7 +110,31 @@
                                     <td class="px-3 py-2 text-gray-900">{{ $subjectName($grade->subject_name) }}</td>
                                     <td class="px-3 py-2">{{ rtrim(rtrim(number_format($grade->units, 2), '0'), '.') }}</td>
                                     <td class="px-3 py-2 font-mono font-semibold {{ $grade->is_incomplete ? 'text-amber-700' : ($grade->is_failed ? 'text-red-700' : 'text-brand-900') }}">{{ $grade->final_grade !== '' ? $grade->final_grade : '—' }}</td>
-                                    <td class="px-3 py-2 text-gray-700">{{ $grade->remarks !== '' ? ucfirst(strtolower($grade->remarks)) : '—' }}</td>
+                                    <td class="px-3 py-2 text-gray-700">
+                                        @php
+                                            $remarkKey = strtoupper(trim((string) $grade->remarks));
+                                            $remarkLabel = match ($remarkKey) {
+                                                'FAILED' => 'Failed',
+                                                'INCOMPLETE' => 'Incomplete',
+                                                'DROPPED' => 'Dropped',
+                                                'WITHDRAWN' => 'Withdrawn',
+                                                'PASSED' => 'Passed',
+                                                default => $grade->remarks,
+                                            };
+                                            $remarkClass = match ($remarkKey) {
+                                                'FAILED' => 'border-red-200 bg-red-50 text-red-900',
+                                                'INCOMPLETE' => 'border-amber-200 bg-amber-50 text-amber-950',
+                                                'DROPPED', 'WITHDRAWN' => 'border-gray-300 bg-gray-100 text-gray-800',
+                                                'PASSED' => 'border-brand-200 bg-brand-50 text-brand-900',
+                                                default => 'border-gray-200 bg-white text-gray-800',
+                                            };
+                                        @endphp
+                                        @if ($grade->remarks !== '')
+                                            <span class="inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold {{ $remarkClass }}">{{ $remarkLabel }}</span>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
                                 </tr>
                             @empty
                                 <tr><td colspan="5" class="px-3 py-6 text-center text-gray-500">No subjects recorded.</td></tr>
@@ -126,9 +150,11 @@
                     @endif
                 </p>
             </div>
-            <div class="flex justify-end border-t border-brand-200 px-5 py-3 sm:px-6">
-                <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Close</button>
-            </div>
+            <x-slot:footer>
+                <div class="flex justify-end">
+                    <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Close</button>
+                </div>
+            </x-slot:footer>
         </x-dialog>
     @endif
 </div>

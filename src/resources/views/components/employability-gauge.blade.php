@@ -29,7 +29,7 @@
             />
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <span class="{{ $compact ? 'text-2xl' : 'text-3xl' }} font-semibold text-brand-900">{{ $value === null ? '—' : number_format($value, 0) }}</span>
+            <span class="{{ $compact ? 'text-3xl' : 'text-4xl' }} font-bold text-brand-900">{{ $value === null ? '—' : number_format($value, 0) }}</span>
             <span class="text-xs text-gray-500">out of 100</span>
         </div>
     </div>

@@ -43,6 +43,7 @@ class RequestPrediction extends Component
 
         return view('livewire.student.request-prediction', [
             'blocked' => $requester->blockMessage($student),
+            'quota' => $requester->quota($student),
         ]);
     }
 }
