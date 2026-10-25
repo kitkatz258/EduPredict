@@ -16,7 +16,7 @@
                 <p class="mt-1 max-w-xs text-xs text-gray-500">Moderate applies to Moderate and High. High applies only to High. The rule engine still chooses from relevant factors.</p>
             </div>
         </div>
-        <button type="button" wire:click="$dispatch('add-intervention')" class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">
+        <button type="button" wire:click="$dispatch('add-intervention')" class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937]">
             <i class="ri-add-line" aria-hidden="true"></i>Add intervention
         </button>
     </div>

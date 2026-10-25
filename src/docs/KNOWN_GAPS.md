@@ -16,3 +16,4 @@ These items are unfinished on purpose or are limits of this build. They are not 
 - OCR integration tests skip when `src/cursor/samples/` is missing the portal files or when Python or Tesseract is not available. Parser tests against the expected JSON still run.
 - Real grade-report images are gitignored. Do not commit personal grade documents.
 - phpMyAdmin can be used to confirm socioeconomic ciphertext. The automated suite already asserts those columns are not stored as plaintext.
+- M36 restyles the shared shell, the administrator dashboard, and the administrator Users list. Other lists still use their earlier table markup. There is no dark mode and no global search. Khamba's store pages, demo login, and Bootstrap widgets are not part of the app.

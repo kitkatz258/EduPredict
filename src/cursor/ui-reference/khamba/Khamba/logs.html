@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activity Logs – Khamba Admin</title>
+<!-- Google Fonts used by the live customizer's font picker -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Bootstrap 5 (layout, modals, offcanvas, dropdowns) -->
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<!-- Khamba's own stylesheet (design tokens + every component) -->
+<link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR NAVIGATION
+     Fixed left sidebar: logo, six nav groups, and a store/Logout
+     footer. This exact block is repeated at the top of every
+     dashboard page — edit the logo here, then use your editor's
+     "Replace in all files" to repeat the change everywhere.
+     ============================================================ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <a class="brand-link" href="index.html"><span class="logo"><i data-lucide="shopping-bag"></i></span><span class="brand">Khamba</span></a>
+    <button class="sb-toggle d-none d-lg-grid" id="sbToggle" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button>
+  </div>
+  <nav class="sb-scroll">
+    <div class="sb-group">General</div>
+    <a class="sb-link sb-parent collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#dashGroup" aria-expanded="false" title="Dashboards">
+      <i data-lucide="layout-dashboard"></i><span>Dashboards</span><i data-lucide="chevron-down" class="sb-chevron"></i>
+    </a>
+    <div class="collapse" id="dashGroup">
+      <a class="sb-link sb-sub" href="index.html" title="Dashboard 1"><span>Dashboard 1</span></a>
+      <a class="sb-link sb-sub" href="dashboard-2.html" title="Dashboard 2"><span>Dashboard 2</span></a>
+      <a class="sb-link sb-sub" href="dashboard-3.html" title="Dashboard 3"><span>Dashboard 3</span></a>
+    </div>
+    <a class="sb-link" href="orders.html" title="Orders"><i data-lucide="shopping-bag"></i><span>Orders</span><em class="sb-badge">8</em></a>
+    <a class="sb-link" href="products.html" title="Products"><i data-lucide="package"></i><span>Products</span></a>
+    <a class="sb-link" href="categories.html" title="Categories"><i data-lucide="layers"></i><span>Categories</span></a>
+    <a class="sb-link" href="inventory.html" title="Inventory"><i data-lucide="warehouse"></i><span>Inventory</span></a>
+    <a class="sb-link" href="customers.html" title="Customers"><i data-lucide="users"></i><span>Customers</span></a>
+    <a class="sb-link" href="reviews.html" title="Reviews"><i data-lucide="star"></i><span>Reviews</span><em class="sb-badge">12</em></a>
+    <a class="sb-link" href="discounts.html" title="Discounts"><i data-lucide="percent"></i><span>Discounts</span></a>
+    <a class="sb-link" href="payments.html" title="Payments"><i data-lucide="credit-card"></i><span>Payments</span></a>
+    <a class="sb-link" href="analytics.html" title="Analytics"><i data-lucide="chart-no-axes-combined"></i><span>Analytics</span></a>
+    <div class="sb-group">Operations</div>
+    <a class="sb-link" href="shipments.html" title="Shipments"><i data-lucide="truck"></i><span>Shipments</span></a>
+    <a class="sb-link" href="returns.html" title="Returns"><i data-lucide="undo-2"></i><span>Returns</span></a>
+    <a class="sb-link" href="abandoned-carts.html" title="Abandoned Carts"><i data-lucide="shopping-cart"></i><span>Abandoned Carts</span></a>
+    <a class="sb-link" href="gift-cards.html" title="Gift Cards"><i data-lucide="gift"></i><span>Gift Cards</span></a>
+    <div class="sb-group">Marketing</div>
+    <a class="sb-link" href="campaigns.html" title="Campaigns"><i data-lucide="megaphone"></i><span>Campaigns</span></a>
+    <a class="sb-link" href="coupons.html" title="Coupons"><i data-lucide="ticket"></i><span>Coupons</span></a>
+    <a class="sb-link" href="email.html" title="Email Marketing"><i data-lucide="mail"></i><span>Email Marketing</span></a>
+    <div class="sb-group">Management</div>
+    <a class="sb-link" href="team.html" title="Team Members"><i data-lucide="user-round-cog"></i><span>Team Members</span></a>
+    <a class="sb-link" href="roles.html" title="Roles &amp; Permissions"><i data-lucide="shield-check"></i><span>Roles &amp; Permissions</span></a>
+    <a class="sb-link active" href="logs.html" title="Activity Logs"><i data-lucide="history"></i><span>Activity Logs</span></a>
+    <div class="sb-group">Account</div>
+    <a class="sb-link" href="settings.html" title="Settings"><i data-lucide="settings"></i><span>Settings</span></a>
+    <a class="sb-link" href="integrations.html" title="Integrations"><i data-lucide="plug"></i><span>Integrations</span></a>
+    <a class="sb-link" href="notifications.html" title="Notifications"><i data-lucide="bell"></i><span>Notifications</span></a>
+    <a class="sb-link" href="help.html" title="Help &amp; Support"><i data-lucide="life-buoy"></i><span>Help &amp; Support</span></a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="store-card"><span class="logo"><i data-lucide="store"></i></span><div><b>Khamba Store</b><small>khamba.com</small></div></div>
+    <a class="sb-link" href="login.html" title="Logout"><i data-lucide="log-out"></i><span>Logout</span></a>
+  </div>
+</aside>
+<!-- Dark overlay behind the sidebar when it opens as a mobile drawer -->
+<div class="backdrop" id="backdrop"></div>
+<!-- ============================================================
+     MAIN COLUMN — topbar, page content, footer
+     ============================================================ -->
+<div class="main">
+    <!-- ---------- Topbar: search, store switcher, theme toggle,
+       notifications and the user menu (Profile / Account settings /
+       Billing / Logout) ---------- -->
+<header class="topbar">
+    <button class="icon-btn d-lg-none" id="mobileToggle" aria-label="Open menu"><i data-lucide="menu"></i></button>
+    <div class="search">
+      <i data-lucide="search"></i>
+      <input type="text" id="search" placeholder="Search anything..." autocomplete="off">
+      <kbd>/</kbd>
+      <div class="search-panel" id="searchPanel">
+        <div class="sp-label">Search in</div>
+        <a href="#" data-scope="Products"><i data-lucide="package"></i>Products</a>
+        <a href="#" data-scope="Orders"><i data-lucide="shopping-bag"></i>Orders</a>
+        <a href="#" data-scope="Customers"><i data-lucide="users"></i>Customers</a>
+        <a href="#" data-scope="Pages"><i data-lucide="file-text"></i>Pages</a>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="dropdown d-none d-md-block">
+        <button class="pill-btn" data-bs-toggle="dropdown"><i data-lucide="store"></i>Khamba Store<i data-lucide="chevron-down"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">Khamba Store</a></li><li><a class="dropdown-item" href="#">Khamba Outlet</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#">+ Add new store</a></li></ul>
+      </div>
+      <div class="dropdown d-none d-sm-block">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Language"><i data-lucide="globe"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">English</a></li><li><a class="dropdown-item" href="#">Español</a></li><li><a class="dropdown-item" href="#">Français</a></li></ul>
+      </div>
+      <button class="icon-btn" id="themeToggle" title="Toggle theme"><i data-lucide="moon"></i></button>
+      <div class="dropdown">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <div class="dropdown-menu dropdown-menu-end notif">
+          <div class="notif-head">Notifications <a href="#">Mark all read</a></div>
+          <a class="notif-item unread" href="#"><i data-lucide="shopping-bag"></i><div><b>New order #10482</b><small>2 minutes ago</small></div></a>
+          <a class="notif-item unread" href="#"><i data-lucide="triangle-alert"></i><div><b>Low stock: Ceramic Mug</b><small>1 hour ago</small></div></a>
+          <a class="notif-item" href="#"><i data-lucide="star"></i><div><b>New 5-star review</b><small>Yesterday</small></div></a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="avatar" data-bs-toggle="dropdown"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Alex Johnson" onerror="this.replaceWith('AJ')"></button>
+        <ul class="dropdown-menu dropdown-menu-end user-menu">
+          <li class="um-head"><b>Alex Johnson</b><small>alex@khamba.com</small></li>
+          <li><a class="dropdown-item" href="profile.html"><i data-lucide="user"></i>Profile</a></li>
+          <li><a class="dropdown-item" href="account-settings.html"><i data-lucide="settings"></i>Account settings</a></li>
+          <li><a class="dropdown-item" href="billing.html"><i data-lucide="credit-card"></i>Billing</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="login.html"><i data-lucide="log-out"></i>Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+    <!-- ---------- Page content ---------- -->
+<main class="content">
+    <div class="page-head">
+      <div><h1>Activity Logs</h1><p>A record of admin actions and security events on your store.</p></div>
+      <div class="d-flex gap-2">
+        <button class="btn-soft" id="exportBtn"><i data-lucide="download"></i>Export CSV</button>
+      </div>
+    </div>
+
+    <section class="row g-3 mb-3">
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#eef2fd"><i data-lucide="activity"></i></span>
+        <div><small>Events today</small><b>2</b><span class="ms-note">Logged actions</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#fee2e2"><i data-lucide="shield-alert"></i></span>
+        <div><small>Failed logins</small><b>2</b><span class="ms-note down">Last 7 days</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#ecf6ef"><i data-lucide="user-cog"></i></span>
+        <div><small>Admin actions</small><b>7</b><span class="ms-note">Last 7 days</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#f6eff6"><i data-lucide="monitor-check"></i></span>
+        <div><small>Active sessions</small><b>3</b><span class="ms-note">Right now</span></div></div></div>
+    </section>
+
+    <div class="card-x">
+      <div class="ord-filters" style="margin-top:0">
+        <div class="search flex-grow-1">
+          <i data-lucide="search"></i>
+          <input type="text" id="logSearch" placeholder="Search by actor or action...">
+        </div>
+        <select class="sel-x" id="catFilter">
+          <option value="">All categories</option>
+          <option>Product</option><option>Order</option><option>Return</option><option>Review</option><option>Discount</option><option>Gift card</option><option>Team</option><option>Security</option>
+        </select>
+      </div>
+
+      <div class="table-responsive">
+      <table class="table-x" id="logTable">
+        <thead><tr><th>Actor</th><th>Action</th><th>Category</th><th>Time</th><th>IP address</th></tr></thead>
+        <tbody>
+          <tr data-cat="Product">
+            <td><div class="cust"><span class="mini-av" style="background:#e0e7ff;color:#4338ca">AJ<img src="https://randomuser.me/api/portraits/men/32.jpg" alt="" loading="lazy" onerror="this.remove()"></span><b>Alex Johnson</b></div></td>
+            <td>updated product <span class="text-secondary">— Wireless Headphones</span></td>
+            <td><span class="badge-x s-Delivered">Product</span></td>
+            <td class="text-secondary">2 minutes ago</td>
+            <td class="text-secondary">192.168.1.4</td>
+          </tr>
+          <tr data-cat="Return">
+            <td><div class="cust"><span class="mini-av" style="background:#fce7f3;color:#be185d">PS<img src="https://randomuser.me/api/portraits/women/56.jpg" alt="" loading="lazy" onerror="this.remove()"></span><b>Priya Sharma</b></div></td>
+            <td>approved return <span class="text-secondary">— RMA-2198</span></td>
+            <td><span class="badge-x s-Delivered">Return</span></td>
+            <td class="text-secondary">1 hour ago</td>
+            <td class="text-secondary">203.0.113.5</td>
+          </tr>
+          <tr data-cat="Security">
+            <td><div class="cust"><span class="mini-av" style="background:#fee2e2;color:#b91c1c"><i data-lucide="shield-alert" style="width:14px;height:14px"></i></span><b>System</b></div></td>
+            <td>failed login attempt <span class="text-secondary">— unknown@mail.com</span></td>
+            <td><span class="badge-x s-Critical">Security</span></td>
+            <td class="text-secondary">2 hours ago</td>
+            <td class="text-secondary">198.51.100.2</td>
+          </tr>
+          <tr data-cat="Review">
+            <td><div class="cust"><span class="mini-av" style="background:#d1fae5;color:#047857">DC<img src="https://randomuser.me/api/portraits/men/40.jpg" alt="" loading="lazy" onerror="this.remove()"></span><b>Daniel Cho</b></div></td>
+            <td>replied to review <span class="text-secondary">— Ceramic Mug Set</span></td>
+            <td><span class="badge-x s-Delivered">Review</span></td>
+            <td class="text-secondary">3 hours ago</td>
+            <td class="text-secondary">203.0.113.9</td>
+          </tr>
+          <tr data-cat="Gift card">
+            <td><div class="cust"><span class="mini-av" style="background:#e0e7ff;color:#4338ca">AJ<img src="https://randomuser.me/api/portraits/men/32.jpg" alt="" loading="lazy" onerror="this.remove()"></span><b>Alex Johnson</b></div></td>
+            <td>issued gift card <span class="text-secondary">— GIFT-5D3W7V</span></td>
+            <td><span class="badge-x s-Delivered">Gift card</span></td>
+            <td class="text-secondary">5 hours ago</td>
+            <td class="text-secondary">192.168.1.4</td>
+          </tr>
+          <tr data-cat="Discount">
+            <td><div class="cust"><span class="mini-av" style="background:#dbeafe;color:#1d4ed8">MB<img src="https://randomuser.me/api/portraits/men/29.jpg" alt="" loading="lazy" onerror="this.remove()"></span><b>Marcus Bell</b></div></td>
+            <td>created discount <span class="text-secondary">— BLACKFRI25</span></td>
+            <td><span class="badge-x s-Delivered">Discount</span></td>
+            <td class="text-secondary">Yesterday</td>
+            <td class="text-secondary">203.0.113.11</td>
+          </tr>
+          <tr data-cat="Security">
+            <td><div class="cust"><span class="mini-av" style="background:#fee2e2;color:#b91c1c"><i data-lucide="shield-alert" style="width:14px;height:14px"></i></span><b>System</b></div></td>
+            <td>failed login attempt <span class="text-secondary">— grace@khamba.com</span></td>
+            <td><span class="badge-x s-Critical">Security</span></td>
+            <td class="text-secondary">Yesterday</td>
+            <td class="text-secondary">198.51.100.7</td>
+          </tr>
+          <tr data-cat="Order">
+            <td><div class="cust"><span class="mini-av" style="background:#fce7f3;color:#be185d">PS<img src="https://randomuser.me/api/portraits/women/56.jpg" alt="" loading="lazy" onerror="this.remove()"></span><b>Priya Sharma</b></div></td>
+            <td>marked order shipped <span class="text-secondary">— #10477</span></td>
+            <td><span class="badge-x s-Delivered">Order</span></td>
+            <td class="text-secondary">2 days ago</td>
+            <td class="text-secondary">203.0.113.5</td>
+          </tr>
+          <tr data-cat="Team">
+            <td><div class="cust"><span class="mini-av" style="background:#e0e7ff;color:#4338ca">AJ<img src="https://randomuser.me/api/portraits/men/32.jpg" alt="" loading="lazy" onerror="this.remove()"></span><b>Alex Johnson</b></div></td>
+            <td>invited team member <span class="text-secondary">— grace@khamba.com</span></td>
+            <td><span class="badge-x s-Delivered">Team</span></td>
+            <td class="text-secondary">3 days ago</td>
+            <td class="text-secondary">192.168.1.4</td>
+          </tr>
+          <tr data-cat="Security">
+            <td><div class="cust"><span class="mini-av" style="background:#ede9fe;color:#6d28d9">HS<img src="https://randomuser.me/api/portraits/women/71.jpg" alt="" loading="lazy" onerror="this.remove()"></span><b>Hana Sato</b></div></td>
+            <td>logged in <span class="text-secondary">— —</span></td>
+            <td><span class="badge-x s-Delivered">Security</span></td>
+            <td class="text-secondary">2 weeks ago</td>
+            <td class="text-secondary">203.0.113.20</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <small class="text-secondary d-block mt-2" id="logInfo">Showing 10 of 10 events</small>
+    </div>
+  </main>
+
+    <!-- ---------- Footer: copyright + legal links (same on every page) ---------- -->
+<footer class="footer-x">
+    <span>© 2026 Khamba Inc. All rights reserved.</span>
+    <div class="d-flex gap-3">
+      <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="help.html">Help &amp; Support</a>
+      <span class="d-none d-sm-inline text-secondary">v1.0.0</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     LIVE CUSTOMIZER — lets the user try a different sidebar
+     colour / font without touching any code (see app.js).
+     ============================================================ -->
+<button class="sw-fab" id="swFab" title="Customize"><i data-lucide="palette"></i></button>
+<div class="sw-panel" id="swPanel">
+  <div class="sw-head"><b>Customize</b><button id="swClose" aria-label="Close"><i data-lucide="x"></i></button></div>
+  <div class="sw-label">Sidebar color</div><div class="sw-colors" id="swColors"></div>
+  <div class="sw-label">Font family</div><div id="swFonts"></div>
+  <button class="btn-reorder w-100 mt-4" id="swReset">Reset to default</button>
+</div>
+
+
+<!-- Shared toast notification, triggered from app.js via window.showToast() -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+  <div class="toast" id="toastHost" role="status"><div class="toast-body d-flex align-items-center gap-2"><i data-lucide="check-circle" id="toastIcon"></i><span id="toastMsg"></span></div></div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS — jQuery, Bootstrap, (Chart.js on chart pages),
+     Lucide icons, then our own app.js last.
+     ============================================================ -->
+<script src="assets/js/jquery-3.7.1.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Khamba Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --surface: #fff;
+        --border: #e8eaee;
+        --text: #111827;
+        --muted: #6b7280;
+        --primary: #4f46e5;
+        --soft: #eef2fd;
+        --code: #0f1115
+      }
+
+      [data-theme=dark] {
+        --bg: #0b0d11;
+        --surface: #14171d;
+        --border: #242832;
+        --text: #f3f4f6;
+        --muted: #9aa1ae;
+        --soft: #1b1f3a
+      }
+
+      * { box-sizing: border-box }
+
+      html { scroll-behavior: smooth; scroll-padding-top: 24px }
+
+      body {
+        margin: 0;
+        font: 16px/1.65 'Plus Jakarta Sans', system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text)
+      }
+
+      a { color: var(--primary) }
+
+      code {
+        font: 13px ui-monospace, Menlo, Consolas, monospace;
+        background: var(--soft);
+        padding: 2px 6px;
+        border-radius: 6px
+      }
+
+      .side {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 290px;
+        background: #0f1115;
+        color: #a3a9b5;
+        display: flex;
+        flex-direction: column;
+        z-index: 20;
+        transition: transform .2s
+      }
+
+      .side-h { padding: 20px 20px 14px; border-bottom: 1px solid rgba(255,255,255,.08) }
+      .side-h b { display: block; color: #fff; font-size: 18px }
+      .side-h span { font-size: 12px; color: #7d8492 }
+
+      .side input {
+        margin: 14px 16px 6px;
+        padding: 9px 12px;
+        border-radius: 9px;
+        border: 1px solid rgba(255,255,255,.12);
+        background: rgba(255,255,255,.06);
+        color: #fff;
+        font: inherit;
+        font-size: 14px;
+        width: calc(100% - 32px)
+      }
+      .side input::placeholder { color: #7d8492 }
+
+      .side nav { overflow-y: auto; padding: 8px 10px 24px; flex: 1 }
+
+      .side a {
+        display: block;
+        color: #a3a9b5;
+        text-decoration: none;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 1.4
+      }
+
+      .side a:hover { background: rgba(255,255,255,.07); color: #fff }
+      .side a.on { background: var(--primary); color: #fff }
+      .side .t2 { font-weight: 600; margin-top: 8px; color: #dbe4f7 }
+      .side .t3 { padding-left: 26px; font-size: 13px }
+
+      main { margin-left: 290px; padding: 40px 24px 80px }
+      .wrap { max-width: 900px; margin: auto }
+
+      .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 28px; flex-wrap: wrap }
+      .top h1 { margin: 0; font-size: 34px; letter-spacing: -.02em }
+      .top p { margin: 4px 0 0; color: var(--muted) }
+
+      .btn {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font: inherit;
+        font-size: 14px
+      }
+
+      section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 24px }
+      h2 { margin: 0 0 16px; font-size: 26px }
+      h3 { margin: 32px 0 10px; font-size: 20px }
+      h4 { margin: 24px 0 8px; font-size: 16px }
+
+      figure { margin: 18px 0 }
+      figure img { max-width: 100%; border: 1px solid var(--border); border-radius: 12px; display: block; cursor: zoom-in }
+      figcaption { color: var(--muted); font-size: 13.5px; margin-top: 8px }
+
+      .code { position: relative; margin: 10px 0 16px }
+      .code pre { margin: 0; background: var(--code); color: #d6e2ff; padding: 16px; border-radius: 12px; overflow-x: auto; font: 13px/1.6 ui-monospace, Menlo, Consolas, monospace }
+      .code code { background: none; padding: 0; color: inherit; font: inherit }
+      .copy { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,.12); color: #fff; border: 0; border-radius: 6px; padding: 3px 9px; font-size: 12px; cursor: pointer }
+
+      .note { display: flex; gap: 12px; border-radius: 12px; padding: 14px 16px; margin: 16px 0; font-size: 15px }
+      .note b { flex: none }
+      .note.info { background: #eef2fd; color: #312e81 }
+      .note.tip { background: #eafaf1; color: #065f46 }
+      .note.warn { background: #fef3e8; color: #7c4a03 }
+      [data-theme=dark] .note { filter: brightness(.92) saturate(.9) }
+
+      .tw { overflow-x: auto; margin: 12px 0 }
+      table { width: 100%; border-collapse: collapse; font-size: 14.5px }
+      th { text-align: left; font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em }
+      th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top }
+      ul, ol { padding-left: 22px }
+      li { margin: 4px 0 }
+
+      .badge { display: inline-block; font-size: 11.5px; font-weight: 700; background: var(--soft); color: var(--primary); border-radius: 20px; padding: 2px 10px; margin-left: 8px; vertical-align: middle }
+
+      .menu-btn { display: none }
+
+      .lb { position: fixed; inset: 0; background: rgba(2,6,23,.85); display: none; place-items: center; z-index: 50; padding: 20px; overflow: auto }
+      .lb.on { display: grid }
+      .lb img { max-width: 100%; border-radius: 10px; background: #fff }
+
+      @media(max-width:991px) {
+        .side { transform: translateX(-100%) }
+        .side.open { transform: none }
+        main { margin-left: 0; padding: 20px 14px 60px }
+        .menu-btn { display: inline-block }
+        section { padding: 20px }
+        .top h1 { font-size: 26px }
+      }
+    </style>
+  </head>
+
+  <body>
+    <aside class="side" aria-label="Documentation navigation">
+      <div class="side-h"><b>Khamba</b><span>E-commerce Admin Dashboard &middot; Documentation v1.0.0</span></div>
+      <input id="q" placeholder="Filter topics..." aria-label="Filter topics">
+      <nav><a class="t2" href="#intro">1. Introduction</a><a class="t2" href="#start">2. Getting started</a><a class="t3" href="#contents">What is included</a><a class="t3" href="#requirements">Requirements</a><a class="t3" href="#quick">Quick start</a><a class="t3" href="#structure">File structure</a><a class="t2" href="#pages">3. All pages</a><a class="t3" href="#grp-general">General</a><a class="t3" href="#grp-operations">Operations</a><a class="t3" href="#grp-marketing">Marketing</a><a class="t3" href="#grp-management">Management</a><a class="t3" href="#grp-account">Account</a><a class="t3" href="#grp-user-menu">User menu</a><a class="t3" href="#grp-auth-and-legal">Auth &amp; legal</a><a class="t2" href="#shots">4. Screenshots</a><a class="t2" href="#auth">5. Login and Register</a><a class="t2" href="#layout">6. Layout components</a><a class="t3" href="#sidebar">Sidebar</a><a class="t3" href="#topbar">Topbar</a><a class="t3" href="#footer">Footer</a><a class="t2" href="#brand">7. Branding and customization</a><a class="t3" href="#logo">Change the logo</a><a class="t3" href="#colors">Colours (design tokens)</a><a class="t3" href="#fonts">Fonts</a><a class="t3" href="#customizer">Live customizer</a><a class="t3" href="#dark">Dark mode</a><a class="t2" href="#components">8. Components and JavaScript</a><a class="t3" href="#ui">UI building blocks</a><a class="t3" href="#charts">Charts</a><a class="t3" href="#modals">Modals, drawers and toasts</a><a class="t3" href="#js">JavaScript reference</a><a class="t2" href="#responsive">9. Responsive behaviour</a><a class="t2" href="#howto">10. How to</a><a class="t3" href="#newpage">Add a new page</a><a class="t3" href="#removepage">Remove a page or menu item</a><a class="t3" href="#offline">Going offline and production</a><a class="t3" href="#backend">Connect a backend</a><a class="t2" href="#a11y">11. Accessibility</a><a class="t2" href="#faq">12. Troubleshooting and FAQ</a><a class="t2" href="#credits">13. Credits, sources and changelog</a></nav>
+    </aside>
+
+    <main>
+      <div class="wrap">
+        <div class="top">
+          <div>
+            <h1>Documentation</h1>
+            <p>Khamba: E-commerce Admin Dashboard Template &middot; Version 1.0.0 &middot; 2026</p>
+          </div>
+          <div><button class="btn menu-btn" id="menu" aria-label="Toggle menu">Menu</button> <button class="btn" id="theme">Light / Dark</button></div>
+        </div>
+
+        <section id="intro">
+          <h2>1. Introduction</h2>
+          <p><b>Khamba</b> is a premium admin dashboard template for e-commerce stores. It is built with plain <b>HTML5, CSS3 and vanilla JavaScript</b> plus Bootstrap 5, jQuery, Chart.js and Lucide icons &mdash; no build step required. Open a file in the browser and it works.</p>
+          <figure><a href="images/index.png" class="zoom"><img src="images/index.png" alt="The Dashboard (index.html) in light mode." loading="lazy"></a>
+            <figcaption>The Dashboard (index.html) in light mode.</figcaption>
+          </figure>
+          <h3 id="features">Key features</h3>
+          <ul>
+            <li><b>33 HTML pages</b>: a dashboard, login and register, and 28 application pages covering orders, products, customers, marketing, team management and account settings.</li>
+            <li>Fixed, collapsible <b>sidebar</b> with 6 navigation groups and badges. It becomes an off-canvas drawer on tablet and mobile.</li>
+            <li>Clean <b>topbar</b> with global search, store switcher, theme toggle, notifications and a working user menu (Profile, Account Settings, Billing, Logout).</li>
+            <li><b>Light and dark mode</b>, remembered between visits.</li>
+            <li>Built-in <b>live customizer</b> for the sidebar colour and site-wide font family.</li>
+            <li>Real <b>Chart.js</b> charts: revenue/orders trend, customer growth, sales-by-category donut.</li>
+            <li>Working demos: order/product/customer detail drawers, bulk actions, CSV export, modal forms with validation, toast confirmations, an FAQ accordion.</li>
+            <li>A small <b>design system</b> driven by CSS variables (colours, radius, shadow, sidebar width, font).</li>
+            <li>Responsive layout with light/dark mode support throughout.</li>
+          </ul>
+        </section>
+
+        <section id="start">
+          <h2>2. Getting started</h2>
+          <h3 id="contents">2.1 What is included</h3>
+          <div class="tw"><table><thead><tr><th>Item</th><th>Description</th></tr></thead><tbody>
+            <tr><td><code>index.html</code> &hellip; <code>terms.html</code></td><td>All 31 template pages (see section 3).</td></tr>
+            <tr><td><code>documentation/</code></td><td>This documentation (open <code>documentation/index.html</code>).</td></tr>
+            <tr><td><code>assets/css/style.css</code></td><td>All styles and design tokens for every page.</td></tr>
+            <tr><td><code>assets/js/app.js</code></td><td>All interactivity for every page, in one file, organised into numbered page-guarded sections.</td></tr>
+          </tbody></table></div>
+
+          <h3 id="requirements">2.2 Requirements</h3>
+          <ul>
+            <li>Any modern browser: latest Chrome, Edge, Firefox or Safari.</li>
+            <li>A code editor for customising, for example VS Code.</li>
+            <li>An internet connection for Bootstrap, jQuery, Chart.js, Lucide icons and Google Fonts, which load from public CDNs (see <a href="#offline">Going offline</a> to self-host them).</li>
+            <li>Node.js, npm or a bundler are <b>not</b> required.</li>
+          </ul>
+
+          <h3 id="quick">2.3 Quick start</h3>
+          <ol>
+            <li>Unzip the package.</li>
+            <li>Open <code>index.html</code> in your browser to see the Dashboard, or open <code>login.html</code> first to see the sign-in screen (demo login: <code>admin</code> / <code>admin</code>).</li>
+            <li>Optional: serve the folder with any static server for a closer-to-production experience, for example <code>npx serve</code> or <code>python -m http.server</code> inside the template folder.</li>
+          </ol>
+
+          <h3 id="structure">2.4 File structure</h3>
+          <div class="code"><button class="copy" type="button">Copy</button>
+            <pre><code>khamba/
+&#9500;&#9472;&#9472; index.html                 Dashboard (home page)
+&#9500;&#9472;&#9472; login.html &middot; register.html  Authentication pages (demo)
+&#9500;&#9472;&#9472; orders.html &hellip; terms.html    28 application pages (see section 3)
+&#9500;&#9472;&#9472; documentation/             This documentation
+&#9500;&#9472;&#9472; assets/
+&#9474;   &#9500;&#9472;&#9472; css/style.css           Styles + design tokens for every page
+&#9474;   &#9492;&#9472;&#9472; js/app.js               All application logic, in page-guarded sections</code></pre>
+          </div>
+          <div class="note info"><b>Note&nbsp;</b>
+            <div>Every page is a static HTML file that contains its own copy of the sidebar, topbar and footer. To change something in the sidebar for all pages, use your editor's <b>Find and Replace in Files</b> (Ctrl+Shift+H, or Cmd+Shift+H on macOS). The guides below give you the exact strings to search for.</div>
+          </div>
+        </section>
+
+        <section id="pages">
+          <h2>3. All pages</h2>
+          <p>The sidebar links to the pages below, grouped exactly as they appear in the navigation. Data on every page is realistic demo content that you replace with your own.</p>
+          <h3 id="grp-general">General</h3>
+<div class="tw"><table><thead><tr><th>File</th><th>Page</th><th>What it shows</th></tr></thead><tbody>
+<tr><td><code>index.html</code></td><td>Dashboard</td><td>Revenue, orders, customers and low-stock KPIs, a revenue/orders chart, recent orders and top products.</td></tr>
+<tr><td><code>orders.html</code></td><td>Orders</td><td>Filterable, sortable order table with bulk ship/cancel actions, CSV export and a per-order detail drawer.</td></tr>
+<tr><td><code>products.html</code></td><td>Products</td><td>Product catalog with stock bars, category/status filters, bulk actions and a detail drawer.</td></tr>
+<tr><td><code>categories.html</code></td><td>Categories</td><td>Visual category cards with product counts, status and quick edit/delete.</td></tr>
+<tr><td><code>inventory.html</code></td><td>Inventory</td><td>Stock, reserved and available quantities with reorder points and low-stock tabs.</td></tr>
+<tr><td><code>customers.html</code></td><td>Customers</td><td>Customer list with VIP/Active/At-risk segments, sort by spend, and a profile drawer.</td></tr>
+<tr><td><code>reviews.html</code></td><td>Reviews</td><td>Star-rating breakdown, moderation queue and approve/reject/reply actions.</td></tr>
+<tr><td><code>discounts.html</code></td><td>Discounts</td><td>Coupon codes with usage bars, type/status filters and a creation form.</td></tr>
+<tr><td><code>payments.html</code></td><td>Payments</td><td>Transactions, payment-method breakdown, payout schedule and a per-transaction drawer.</td></tr>
+<tr><td><code>analytics.html</code></td><td>Analytics</td><td>Traffic sources, sales-by-category chart, top products and a conversion funnel.</td></tr>
+</tbody></table></div>
+<h3 id="grp-operations">Operations</h3>
+<div class="tw"><table><thead><tr><th>File</th><th>Page</th><th>What it shows</th></tr></thead><tbody>
+<tr><td><code>shipments.html</code></td><td>Shipments</td><td>Tracking numbers, carriers, ETAs and a per-shipment tracking timeline.</td></tr>
+<tr><td><code>returns.html</code></td><td>Returns</td><td>Return requests with one-click approve / reject / mark-refunded actions.</td></tr>
+<tr><td><code>abandoned-carts.html</code></td><td>Abandoned Carts</td><td>Carts left at checkout, with a one-click recovery-email action.</td></tr>
+<tr><td><code>gift-cards.html</code></td><td>Gift Cards</td><td>Issued gift-card balances, expiry dates and redemption status.</td></tr>
+</tbody></table></div>
+<h3 id="grp-marketing">Marketing</h3>
+<div class="tw"><table><thead><tr><th>File</th><th>Page</th><th>What it shows</th></tr></thead><tbody>
+<tr><td><code>campaigns.html</code></td><td>Campaigns</td><td>Marketing campaigns across email, social and ad channels, with reach and revenue.</td></tr>
+<tr><td><code>coupons.html</code></td><td>Coupons</td><td>One-off coupon codes issued to individual customers.</td></tr>
+<tr><td><code>email.html</code></td><td>Email Marketing</td><td>Newsletter and automation sequences with open/click rates.</td></tr>
+</tbody></table></div>
+<h3 id="grp-management">Management</h3>
+<div class="tw"><table><thead><tr><th>File</th><th>Page</th><th>What it shows</th></tr></thead><tbody>
+<tr><td><code>team.html</code></td><td>Team Members</td><td>Admin team list with roles, status and an invite form.</td></tr>
+<tr><td><code>roles.html</code></td><td>Roles &amp; Permissions</td><td>Role cards and a permission matrix across the team.</td></tr>
+<tr><td><code>logs.html</code></td><td>Activity Logs</td><td>A read-only audit trail of admin actions and security events.</td></tr>
+</tbody></table></div>
+<h3 id="grp-account">Account</h3>
+<div class="tw"><table><thead><tr><th>File</th><th>Page</th><th>What it shows</th></tr></thead><tbody>
+<tr><td><code>settings.html</code></td><td>Settings</td><td>Store information, regional settings and checkout preferences.</td></tr>
+<tr><td><code>integrations.html</code></td><td>Integrations</td><td>Connect / disconnect cards for Stripe, PayPal, Mailchimp and more.</td></tr>
+<tr><td><code>notifications.html</code></td><td>Notifications</td><td>Toggle switches for every notification category and delivery channel.</td></tr>
+<tr><td><code>help.html</code></td><td>Help &amp; Support</td><td>Support channels, an FAQ accordion and a contact form.</td></tr>
+</tbody></table></div>
+<h3 id="grp-user-menu">User menu</h3>
+<div class="tw"><table><thead><tr><th>File</th><th>Page</th><th>What it shows</th></tr></thead><tbody>
+<tr><td><code>profile.html</code></td><td>Profile</td><td>The signed-in user's own profile and recent activity.</td></tr>
+<tr><td><code>account-settings.html</code></td><td>Account Settings</td><td>Personal info, password change and security toggles.</td></tr>
+<tr><td><code>billing.html</code></td><td>Billing</td><td>Current plan, payment method and invoice history.</td></tr>
+</tbody></table></div>
+<h3 id="grp-auth-and-legal">Auth &amp; legal</h3>
+<div class="tw"><table><thead><tr><th>File</th><th>Page</th><th>What it shows</th></tr></thead><tbody>
+<tr><td><code>login.html</code></td><td>Sign In</td><td>The login screen. Demo credentials: admin / admin.</td></tr>
+<tr><td><code>register.html</code></td><td>Create Account</td><td>The sign-up screen for new admin accounts.</td></tr>
+<tr><td><code>privacy.html</code></td><td>Privacy Policy</td><td>A standalone legal page, linked from every footer.</td></tr>
+<tr><td><code>terms.html</code></td><td>Terms of Service</td><td>A standalone legal page, linked from every footer.</td></tr>
+</tbody></table></div>
+
+        </section>
+
+        <section id="shots">
+          <h2>4. Screenshots</h2>
+          <figure><a href="images/orders.png" class="zoom"><img src="images/orders.png" alt="Orders: filterable table, bulk actions and a detail drawer." loading="lazy"></a>
+            <figcaption>Orders: filterable table, bulk actions and a detail drawer.</figcaption>
+          </figure>
+          <figure><a href="images/products.png" class="zoom"><img src="images/products.png" alt="Products: catalog with stock bars and bulk actions." loading="lazy"></a>
+            <figcaption>Products: catalog with stock bars and bulk actions.</figcaption>
+          </figure>
+          <figure><a href="images/customers.png" class="zoom"><img src="images/customers.png" alt="Customers: segments, sort by spend, and a profile drawer." loading="lazy"></a>
+            <figcaption>Customers: segments, sort by spend, and a profile drawer.</figcaption>
+          </figure>
+        </section>
+
+        <section id="auth">
+          <h2>5. Login and Register</h2>
+          <p>Files: <code>login.html</code>, <code>register.html</code>.</p>
+          <figure><a href="images/login.png" class="zoom"><img src="images/login.png" alt="Login page." loading="lazy"></a>
+            <figcaption>Login page.</figcaption>
+          </figure>
+          <ul>
+            <li>The login form is validated in the browser. Submitting <code>admin</code> / <code>admin</code> redirects to <code>index.html</code>; anything else shows an inline error.</li>
+            <li><code>register.html</code> validates required fields and that the two passwords match, then redirects to <code>login.html?registered=1</code>, which shows a success message.</li>
+            <li>The sidebar and user-menu <b>Logout</b> links open <code>login.html</code>.</li>
+          </ul>
+          <div class="note warn"><b>Important&nbsp;</b>
+            <div>The login is a <b>front-end demo</b>: it checks for the hard-coded <code>admin</code>/<code>admin</code> pair in <code>app.js</code> and does not protect other pages. Connect it to your own authentication API before going to production &mdash; see <a href="#backend">Connect a backend</a>.</div>
+          </div>
+        </section>
+
+        <section id="layout">
+          <h2>6. Layout components</h2>
+          <h3 id="sidebar">6.1 Sidebar</h3>
+          <figure><a href="images/_logo-annotated.png" class="zoom"><img src="images/_logo-annotated.png" alt="Sidebar header: logo icon, store name, and the collapse button." loading="lazy" style="max-width:420px"></a>
+            <figcaption>Sidebar header: logo icon, store name, and the collapse button.</figcaption>
+          </figure>
+          <p>The sidebar is a fixed, scrollable column (264&nbsp;px wide, 76&nbsp;px collapsed). It contains the logo, six navigation groups, and a store card with Logout at the bottom.</p>
+          <h4>Add a menu item</h4>
+          <div class="code"><button class="copy" type="button">Copy</button>
+            <pre><code>&lt;a class=&quot;sb-link&quot; href=&quot;my-page.html&quot; title=&quot;My Page&quot;&gt;
+  &lt;i data-lucide=&quot;star&quot;&gt;&lt;/i&gt;
+  &lt;span&gt;My Page&lt;/span&gt;
+  &lt;em class=&quot;sb-badge&quot;&gt;NEW&lt;/em&gt;   &lt;!-- optional badge --&gt;
+&lt;/a&gt;</code></pre>
+          </div>
+          <p>Place it under a group label, or start a new group with:</p>
+          <div class="code"><button class="copy" type="button">Copy</button>
+            <pre><code>&lt;div class=&quot;sb-group&quot;&gt;MY GROUP&lt;/div&gt;</code></pre>
+          </div>
+          <p>Icons come from <a href="https://lucide.dev/icons" target="_blank" rel="noopener">Lucide</a>. Use the icon name after <code>data-lucide=</code>. The <code>title</code> attribute shows as a tooltip when the sidebar is collapsed.</p>
+          <h4>Active page</h4>
+          <p>Add <code>active</code> to the <code>sb-link</code> of the current page:</p>
+          <div class="code"><button class="copy" type="button">Copy</button>
+            <pre><code>&lt;a class=&quot;sb-link active&quot; href=&quot;orders.html&quot; title=&quot;Orders&quot;&gt;...&lt;/a&gt;</code></pre>
+          </div>
+          <h4>Collapse and mobile</h4>
+          <ul>
+            <li>The collapse button in the sidebar header (<code>#sbToggle</code>) shrinks the sidebar to icons only. The choice is saved to <code>localStorage</code> as <code>khamba-collapsed</code>.</li>
+            <li>Below 992&nbsp;px the sidebar becomes an off-canvas drawer opened by the hamburger button in the topbar (<code>#mobileToggle</code>) and closed by tapping the dark overlay (<code>#backdrop</code>).</li>
+            <li>Change the widths with the CSS variables <code>--sb-w</code> and <code>--sb-w-c</code> (collapsed).</li>
+          </ul>
+
+          <h3 id="topbar">6.2 Topbar</h3>
+          <div class="tw"><table><thead><tr><th>Element</th><th>Notes</th></tr></thead><tbody>
+            <tr><td>Global search</td><td><code>#search</code>. Press <code>/</code> anywhere on the page to focus it; clicking a scope (Products / Orders / Customers / Pages) fills the input.</td></tr>
+            <tr><td>Store selector</td><td>Dropdown with a sample second store and an "Add new store" action.</td></tr>
+            <tr><td>Theme toggle</td><td><code>#themeToggle</code>. Switches light and dark mode, saved as <code>khamba-theme</code>.</td></tr>
+            <tr><td>Notifications</td><td>Dropdown with an unread dot and sample alerts.</td></tr>
+            <tr><td>User menu</td><td>Profile, Account Settings, Billing and Logout &mdash; each a real page (see sections 3 and 5).</td></tr>
+          </tbody></table></div>
+
+          <h3 id="footer">6.3 Footer</h3>
+          <p>The footer (<code>&lt;footer class="footer-x"&gt;</code>) sits at the bottom of every page via a sticky-footer flex layout, so it stays at the bottom even when a page has little content. Edit the copyright text and the Privacy/Terms/Help links with Find and Replace in Files.</p>
+        </section>
+
+        <section id="brand">
+          <h2>7. Branding and customization</h2>
+          <h3 id="logo">7.1 Change the logo <span class="badge">most asked</span></h3>
+          <p>The logo appears in the <b>sidebar header</b> of every dashboard page, and again in the <b>left panel</b> of the login and register pages. It has two parts: an icon in a colour square, and the store name text next to it.</p>
+          <figure><a href="images/_logo-annotated.png" class="zoom"><img src="images/_logo-annotated.png" alt="Sidebar logo, highlighted." loading="lazy" style="max-width:420px"></a>
+            <figcaption>The logo block, highlighted in the sidebar.</figcaption>
+          </figure>
+          <figure><a href="images/_code-logo.png" class="zoom"><img src="images/_code-logo.png" alt="The exact HTML lines to edit for the logo." loading="lazy"></a>
+            <figcaption>The exact lines in index.html (identical at the top of every page).</figcaption>
+          </figure>
+
+          <h4>Step 1 &mdash; change the store name (text)</h4>
+          <p>Find the word <code>Khamba</code> inside <code>&lt;span class="brand"&gt;</code> and replace it with your own store name.</p>
+
+          <h4>Step 2 &mdash; replace the icon with your own logo image</h4>
+          <p><b>Find</b></p>
+          <div class="code"><button class="copy" type="button">Copy</button>
+            <pre><code>&lt;span class=&quot;logo&quot;&gt;&lt;i data-lucide=&quot;shopping-bag&quot;&gt;&lt;/i&gt;&lt;/span&gt;</code></pre>
+          </div>
+          <p><b>Replace with</b></p>
+          <div class="code"><button class="copy" type="button">Copy</button>
+            <pre><code>&lt;img src=&quot;your-logo.png&quot; alt=&quot;Logo&quot; style=&quot;width:32px;height:32px;border-radius:9px;object-fit:cover&quot;&gt;</code></pre>
+          </div>
+          <p>A square image around 64&times;64&nbsp;px (PNG with a transparent background) gives the cleanest result. The sidebar has a dark background, so make sure your logo is visible on dark colours.</p>
+
+          <div class="note warn"><b>Important &mdash; repeat on every page&nbsp;</b>
+            <div>Because this is a plain HTML template (not a CMS), the sidebar markup is repeated at the top of all 27 dashboard pages. The fastest way to update every file at once is your code editor's <b>Find and Replace in Files</b> (in VS Code: <code>Ctrl/Cmd + Shift + H</code>) &mdash; search for <code>Khamba</code> and replace with your store name, then search for the <code>&lt;span class="logo"&gt;&hellip;&lt;/span&gt;</code> line and replace it with your <code>&lt;img&gt;</code> tag. Also update the <code>&lt;title&gt;</code> tag in each page's <code>&lt;head&gt;</code> and the "Khamba Store" text in the <code>.store-card</code> block near the bottom of the sidebar.</div>
+          </div>
+
+          <h4>Favicon</h4>
+          <p>The template does not set a favicon by default. Add one by placing this inside <code>&lt;head&gt;</code> on every page:</p>
+          <div class="code"><button class="copy" type="button">Copy</button>
+            <pre><code>&lt;link rel=&quot;icon&quot; href=&quot;favicon.svg&quot; type=&quot;image/svg+xml&quot;&gt;</code></pre>
+          </div>
+
+          <h3 id="colors">7.2 Colours (design tokens)</h3>
+          <p>Almost all colours, radius and shadow values are CSS variables at the top of <code>style.css</code>. Change a value once and it updates the whole template.</p>
+          <div class="code"><button class="copy" type="button">Copy</button>
+            <pre><code>:root{
+  --font:'Plus Jakarta Sans',system-ui,sans-serif;
+  --bg:#f6f7f9;    --card:#fff;      --border:#e8eaee;
+  --text:#111827;  --muted:#6b7280;  --hover:#f3f4f6;
+  --primary:#4f46e5;
+  --sb:#0f1115;    --sb-w:264px;     --sb-w-c:76px;
+  --r:14px;
+  --shadow:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.03);
+}
+[data-bs-theme=dark]{
+  --bg:#0b0d11; --card:#14171d; --border:#242832;
+  --text:#f3f4f6; --muted:#9aa1ae; --hover:#1c2028; --shadow:none
+}</code></pre>
+          </div>
+          <div class="tw"><table><thead><tr><th>Token</th><th>Used for</th></tr></thead><tbody>
+            <tr><td><code>--primary</code></td><td>Links, chart lines, active nav icon, focus rings.</td></tr>
+            <tr><td><code>--bg / --card / --border</code></td><td>Page background, cards/dropdowns, borders.</td></tr>
+            <tr><td><code>--text / --muted</code></td><td>Main text and secondary text.</td></tr>
+            <tr><td><code>--hover</code></td><td>Hover background for rows, buttons and list items.</td></tr>
+            <tr><td><code>--sb</code></td><td>Sidebar background &mdash; also set live by the Customizer (see 7.4).</td></tr>
+            <tr><td><code>--sb-w / --sb-w-c</code></td><td>Sidebar width, expanded and collapsed.</td></tr>
+            <tr><td><code>--r / --shadow</code></td><td>Card corner radius and drop shadow.</td></tr>
+            <tr><td><code>--font</code></td><td>Font family for the whole site &mdash; also set live by the Customizer.</td></tr>
+          </tbody></table></div>
+          <div class="note info"><b>Note&nbsp;</b>
+            <div>Status badge colours (Paid, Pending, Shipped, Cancelled, Low stock, etc.) are defined separately as <code>.s-*</code> classes further down in <code>style.css</code>, with matching dark-mode variants, so you can restyle statuses independently from the main palette.</div>
+          </div>
+
+          <h3 id="fonts">7.3 Fonts</h3>
+          <p>Khamba ships with five Google Fonts already linked in every page's <code>&lt;head&gt;</code>: <b>Plus Jakarta Sans</b> (default), <b>Inter</b>, <b>Poppins</b>, <b>DM Sans</b> and <b>Manrope</b>. Switch between them live with the Customizer (see 7.4), or set one permanently by changing <code>--font</code> in <code>style.css</code> and removing the others from the Google Fonts <code>&lt;link&gt;</code> tag to save a request.</p>
+
+          <h3 id="customizer">7.4 Live customizer</h3>
+          <p>Click the palette icon fixed to the right edge of any dashboard page to try different looks instantly, with no code changes:</p>
+          <figure><a href="images/_customizer-open.png" class="zoom"><img src="images/_customizer-open.png" alt="Customizer panel open, showing sidebar colours and font choices." loading="lazy" style="max-width:420px"></a>
+            <figcaption>Customizer panel open: sidebar colours and font choices.</figcaption>
+          </figure>
+          <ul>
+            <li><b>Sidebar colour</b> &mdash; 6 presets, or pick any custom colour.</li>
+            <li><b>Font family</b> &mdash; all 5 fonts above, applied across the whole dashboard including chart text.</li>
+            <li>Choices are saved per-browser in <code>localStorage</code> (<code>khamba-sb</code>, <code>khamba-font</code>), so they persist on refresh. "Reset to default" clears them.</li>
+          </ul>
+
+          <h3 id="dark">7.5 Dark mode</h3>
+          <p>Toggle with the moon/sun icon in the topbar (<code>#themeToggle</code>). It flips the <code>data-bs-theme</code> attribute on <code>&lt;html&gt;</code> between <code>light</code> and <code>dark</code>, which switches every CSS variable in one go, redraws open charts with dark-mode-aware colours, and is saved to <code>localStorage</code> as <code>khamba-theme</code>.</p>
+        </section>
+
+        <section id="components">
+          <h2>8. Components and JavaScript</h2>
+          <h3 id="ui">8.1 UI building blocks</h3>
+          <p>Reusable classes you'll see throughout <code>style.css</code>: <code>.card-x</code> (panel), <code>.kpi</code> (metric card), <code>.table-x</code> (data table), <code>.badge-x.s-*</code> (status pill), <code>.tabs</code> (status filter tabs), <code>.btn-dark-x</code> / <code>.btn-soft</code> (buttons), <code>.row-item</code> (icon + label + value row), <code>.bar</code> (stock/usage progress bar).</p>
+
+          <h3 id="charts">8.2 Charts</h3>
+          <p>All charts use <a href="https://www.chartjs.org" target="_blank" rel="noopener">Chart.js</a> (loaded from a CDN). Chart data lives directly inside each page's guarded section of <code>app.js</code> &mdash; for example the Dashboard's revenue/orders chart and customer-growth sparkline are defined in section 2 of <code>app.js</code>, and Analytics' funnel/category-donut data is in section 5. Replace the arrays with your own numbers; the chart will redraw automatically, including on theme/font changes.</p>
+
+          <h3 id="modals">8.3 Modals, drawers and toasts</h3>
+          <ul>
+            <li><b>Modals</b> (e.g. "New order", "Add product") use plain Bootstrap 5 modals with HTML5 <code>required</code> validation; submitting shows a confirmation toast and resets the form.</li>
+            <li><b>Detail drawers</b> (order/product/customer/transaction detail) are plain Bootstrap 5 <b>offcanvas</b> panels, written directly in each page's HTML and opened with <code>data-bs-toggle="offcanvas"</code> &mdash; no JavaScript is needed to open them.</li>
+            <li><b>Toasts</b> are triggered from JavaScript with <code>window.showToast('Your message')</code>, defined once in <code>app.js</code> and shared by every page.</li>
+          </ul>
+
+          <h3 id="js">8.4 JavaScript reference</h3>
+          <p><code>app.js</code> is a single file for every page. It is organised into numbered, clearly commented sections; each section only runs when the element it needs is present on the current page (for example, the Orders section is guarded by <code>if (document.getElementById('ordersTable'))</code>), so loading the same file everywhere never causes errors.</p>
+          <div class="tw"><table><thead><tr><th>Section</th><th>Covers</th></tr></thead><tbody>
+            <tr><td>1</td><td>Shared on every page: sidebar collapse/drawer, theme, customizer, search, toast helper.</td></tr>
+            <tr><td>2</td><td>Dashboard charts</td></tr>
+            <tr><td>3&ndash;4</td><td>Orders, Products</td></tr>
+            <tr><td>5</td><td>Analytics charts</td></tr>
+            <tr><td>6&ndash;11</td><td>Categories, Inventory, Customers, Reviews, Discounts, Payments</td></tr>
+            <tr><td>12&ndash;15</td><td>Shipments, Returns, Abandoned Carts, Gift Cards</td></tr>
+            <tr><td>16&ndash;18</td><td>Campaigns, Coupons, Email Marketing</td></tr>
+            <tr><td>19, 22&ndash;24</td><td>(reserved) Team, Roles, Activity Logs</td></tr>
+            <tr><td>27&ndash;31</td><td>Settings, Integrations, Notifications, Help, Account Settings</td></tr>
+            <tr><td>25&ndash;26</td><td>Login, Register</td></tr>
+          </tbody></table></div>
+        </section>
+
+        <section id="responsive">
+          <h2>9. Responsive behaviour</h2>
+          <ul>
+            <li><b>Desktop (&ge;992&nbsp;px):</b> fixed sidebar, full topbar, multi-column KPI and chart grids.</li>
+            <li><b>Tablet/mobile (&lt;992&nbsp;px):</b> the sidebar becomes an off-canvas drawer; KPI cards drop to 2 columns; wide tables scroll horizontally inside their card.</li>
+            <li>All interactive panels (modals, offcanvas drawers, dropdowns) are Bootstrap 5 components and are touch-friendly out of the box.</li>
+          </ul>
+        </section>
+
+        <section id="howto">
+          <h2>10. How to</h2>
+          <h3 id="newpage">10.1 Add a new page</h3>
+          <ol>
+            <li>Duplicate the page that is closest to what you need (for example, duplicate <code>orders.html</code> for another table-based page).</li>
+            <li>Change the <code>&lt;title&gt;</code>, the page <code>&lt;h1&gt;</code> and the subtitle.</li>
+            <li>Remove <code>active</code> from the old sidebar link and add it to the link for your new page (or add a brand-new <code>&lt;a class="sb-link"&gt;</code>, see <a href="#sidebar">Sidebar</a>).</li>
+            <li>Replace the content between <code>&lt;main class="content"&gt;</code> and <code>&lt;/main&gt;</code>. Keep the sidebar, topbar, footer and the <code>&lt;script src="app.js"&gt;</code> tag.</li>
+            <li>Give your page's unique table/grid a unique <code>id</code>, then add a new guarded section at the end of <code>app.js</code> following the pattern of the existing sections (see 8.4).</li>
+          </ol>
+          <h3 id="removepage">10.2 Remove a page or menu item</h3>
+          <p>Delete the HTML file and remove its <code>&lt;a class="sb-link"&gt;</code> element from the sidebar of every other page. Use Find in Files with the file name (for example <code>gift-cards.html</code>) to see every place that links to it.</p>
+          <h3 id="offline">10.3 Going offline and production</h3>
+          <ul>
+            <li><b>Icons:</b> self-host Lucide (<code>npm i lucide</code>) and replace the CDN <code>&lt;script&gt;</code> tag with your local copy of <code>lucide.min.js</code>.</li>
+            <li><b>Bootstrap / jQuery / Chart.js:</b> each page loads these from <code>cdn.jsdelivr.net</code> and <code>code.jquery.com</code>. Install them with npm and swap the <code>&lt;script&gt;</code>/<code>&lt;link&gt;</code> tags for your local copies.</li>
+            <li><b>Fonts:</b> download the Google Fonts you use, add <code>@font-face</code> rules to <code>style.css</code> and remove the Google Fonts <code>&lt;link&gt;</code>.</li>
+            <li><b>Avatars:</b> demo customer/team photos load from <code>randomuser.me</code>. Find <code>randomuser.me</code> and point avatars at your own images.</li>
+            <li><b>Hosting:</b> upload the folder to any static host (Netlify, Vercel, GitHub Pages, S3, shared hosting). No server code is required.</li>
+          </ul>
+          <h3 id="backend">10.4 Connect a backend</h3>
+          <p>The template contains only front-end code and demo data. Typical steps: render table rows and KPI values from your API, submit modal forms with <code>fetch()</code> instead of the demo validation handlers, replace the hard-coded <code>admin</code>/<code>admin</code> check in the login section of <code>app.js</code> with a real auth API call, and generate real invoices/CSV exports on the server. Because every page is a static file with no framework lock-in, you can also convert the shared sidebar, topbar and footer into includes or components in your own stack (PHP, Laravel, Django, Next.js and others).</p>
+        </section>
+
+        <section id="a11y">
+          <h2>11. Accessibility</h2>
+          <ul>
+            <li>Semantic landmarks: <code>aside</code>, <code>nav</code>, <code>header</code>, <code>main</code> and <code>footer</code>.</li>
+            <li>Icon-only buttons carry a <code>title</code> attribute; Bootstrap dropdowns, offcanvas drawers and modals use their built-in ARIA attributes.</li>
+            <li>Visible focus states on inputs, links and buttons throughout.</li>
+            <li>Colours are CSS tokens, so you can adjust contrast globally (see 7.2).</li>
+          </ul>
+        </section>
+
+        <section id="faq">
+          <h2>12. Troubleshooting and FAQ</h2>
+          <h4>Icons show as empty squares</h4>
+          <p>Lucide could not load. Check your internet connection, or self-host it (see <a href="#offline">Going offline</a>).</p>
+          <h4>Avatars do not show</h4>
+          <p>Demo avatars come from an external service (<code>randomuser.me</code>). This is expected and falls back to initials automatically &mdash; replace them with your own images for production.</p>
+          <h4>My CSS or JS changes do not appear</h4>
+          <p>Hard refresh with Ctrl+F5 (Cmd+Shift+R on macOS).</p>
+          <h4>Charts are empty or buttons do nothing</h4>
+          <p>A JavaScript error stops the page script. Open the browser console (F12), fix the error, and make sure <code>app.js</code> is loaded with the correct relative path and <i>after</i> jQuery, Bootstrap and Chart.js.</p>
+          <h4>Is this a real, working store?</h4>
+          <p>No &mdash; all data (orders, customers, products, numbers) is realistic placeholder content. Buttons like "New order", "Add product" and "Export CSV" work as real front-end interactions (forms validate, files download, toasts confirm actions), but there is no database behind them.</p>
+          <h4>Can I use it with React, Vue, Laravel or Django?</h4>
+          <p>Yes. Copy <code>style.css</code>, reuse the markup, and adapt the small pieces of logic in <code>app.js</code> to your framework (see <a href="#backend">Connect a backend</a>).</p>
+        </section>
+
+        <section id="credits">
+          <h2>13. Credits, sources and changelog</h2>
+          <div class="tw"><table><thead><tr><th>Resource</th><th>Use</th><th>License</th></tr></thead><tbody>
+            <tr><td>Bootstrap 5</td><td>Layout, modals, offcanvas, dropdowns</td><td>MIT</td></tr>
+            <tr><td>jQuery</td><td>DOM helpers used across <code>app.js</code></td><td>MIT</td></tr>
+            <tr><td>Chart.js</td><td>Revenue, growth and category charts</td><td>MIT</td></tr>
+            <tr><td>Lucide</td><td>Icon set</td><td>ISC</td></tr>
+            <tr><td>Plus Jakarta Sans, Inter, Poppins, DM Sans, Manrope (Google Fonts)</td><td>Typefaces, switchable in the customizer</td><td>SIL Open Font License</td></tr>
+            <tr><td>randomuser.me</td><td>Demo avatars only</td><td>Not included &mdash; replace before release</td></tr>
+          </tbody></table></div>
+          <p>All names, numbers and emails in the demo are fictional.</p>
+          <h4>Changelog</h4>
+          <p><b>1.0.0</b> (2026): initial release with the Dashboard, 28 application pages, login and register, light and dark mode, live customizer and a responsive layout.</p>
+          <h4>Support</h4>
+          <p>For help, please use the support channel of the marketplace where you purchased the template, and include the page name and browser you are using.</p>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const $ = s => document.querySelector(s),
+        $$ = s => [...document.querySelectorAll(s)];
+      const r = document.documentElement;
+      r.dataset.theme = localStorage.getItem('khamba-doc-theme') || 'light';
+      $('#theme').onclick = () => {
+        r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('khamba-doc-theme', r.dataset.theme)
+      };
+      $('#menu').onclick = () => $('.side').classList.toggle('open');
+      $$('.side a').forEach(a => a.addEventListener('click', () => $('.side').classList.remove('open')));
+      $$('.copy').forEach(b => b.onclick = () => {
+        navigator.clipboard && navigator.clipboard.writeText(b.nextElementSibling.innerText);
+        b.textContent = 'Copied';
+        setTimeout(() => b.textContent = 'Copy', 1400)
+      });
+      const lb = document.createElement('div');
+      lb.className = 'lb';
+      document.body.appendChild(lb);
+      lb.onclick = () => lb.classList.remove('on');
+      $$('a.zoom').forEach(a => a.onclick = e => {
+        e.preventDefault();
+        lb.innerHTML = '<img src="' + a.href + '" alt="">';
+        lb.classList.add('on')
+      });
+      document.onkeydown = e => {
+        if (e.key === 'Escape') lb.classList.remove('on')
+      };
+      $('#q').oninput = e => {
+        const v = e.target.value.toLowerCase();
+        $$('.side nav a').forEach(a => a.style.display = a.textContent.toLowerCase().includes(v) ? '' : 'none')
+      };
+      const links = $$('.side nav a'),
+        io = new IntersectionObserver(es => es.forEach(en => {
+          if (en.isIntersecting) {
+            links.forEach(l => l.classList.toggle('on', l.getAttribute('href') === '#' + en.target.id))
+          }
+        }), { rootMargin: '-20% 0px -70% 0px' });
+      $$('main [id]').forEach(s => io.observe(s));
+    </script>
+  </body>
+
+</html>

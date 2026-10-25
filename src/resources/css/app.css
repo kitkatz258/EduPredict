@@ -7,13 +7,29 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: Inter, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Plus Jakarta Sans', Inter, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
-    --color-brand-50: #E8F5E9;
-    --color-brand-200: #A5D6A7;
-    --color-brand-400: #66BB6A;
-    --color-brand-900: #1B5E20;
+    /* Remapped from the old UCC green so existing brand-* markup follows Khamba neutrals. */
+    --color-brand-50: #f6f7f9;
+    --color-brand-200: #e8eaee;
+    --color-brand-400: #818cf8;
+    --color-brand-900: #111827;
+
+    --color-canvas: #f6f7f9;
+    --color-surface: #ffffff;
+    --color-line: #e8eaee;
+    --color-ink: #111827;
+    --color-muted: #6b7280;
+    --color-accent: #4f46e5;
+    --color-sidebar: #0f1115;
+    --color-kpi-sand: #fdf3ea;
+    --color-kpi-mint: #ecf6ef;
+    --color-kpi-indigo: #eef2fd;
+    --color-kpi-lilac: #f6eff6;
+
+    --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.03);
+    --shadow-pop: 0 12px 32px rgba(16, 24, 40, 0.12);
 }
 
 [x-cloak] {
@@ -28,8 +44,8 @@
     height: 3px;
     width: 0;
     opacity: 0;
-    background: var(--color-brand-400);
-    box-shadow: 0 0 6px var(--color-brand-400);
+    background: var(--color-accent);
+    box-shadow: 0 0 6px var(--color-accent);
     pointer-events: none;
 }
 
@@ -114,6 +130,140 @@
 
 [wire\:loading\.class="opacity-60"] {
     transition: opacity 0.18s ease;
+}
+
+/* Khamba field, table, and collapsible sidebar. Width lives here so a saved collapse state applies before Alpine. */
+.ui-field {
+    height: 40px;
+    width: 100%;
+    border-radius: 11px;
+    border: 1px solid var(--color-line);
+    background: var(--color-canvas);
+    padding: 0 12px;
+    color: var(--color-ink);
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+
+.ui-field:focus {
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+
+.ui-field.has-icon {
+    padding-right: 2.75rem;
+}
+
+.ui-field.has-search {
+    padding-left: 2.25rem;
+}
+
+.ui-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.ui-table th {
+    background: var(--color-canvas);
+    color: var(--color-muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 10px 12px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.ui-table th:first-child {
+    border-radius: 8px 0 0 8px;
+}
+
+.ui-table th:last-child {
+    border-radius: 0 8px 8px 0;
+}
+
+.ui-table td {
+    border-bottom: 1px solid var(--color-line);
+    padding: 13px 12px;
+    vertical-align: middle;
+}
+
+.ui-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.ui-table tbody tr:hover {
+    background: #f3f4f6;
+}
+
+#staff-sidebar {
+    width: 264px;
+    scrollbar-width: thin;
+    scrollbar-color: #2a2e37 transparent;
+    transition: width 0.25s, transform 0.25s;
+}
+
+#staff-main {
+    transition: padding-left 0.25s;
+}
+
+@media (min-width: 1024px) {
+    html.sidebar-collapsed #staff-sidebar {
+        width: 76px;
+    }
+
+    html.sidebar-collapsed #staff-main {
+        padding-left: 76px;
+    }
+
+    html.sidebar-collapsed .sb-label,
+    html.sidebar-collapsed .sb-brand-text,
+    html.sidebar-collapsed .sb-account-copy {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    html.sidebar-collapsed .sb-top {
+        flex-direction: column;
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    html.sidebar-collapsed .sb-link,
+    html.sidebar-collapsed .sb-account {
+        justify-content: center;
+        gap: 0;
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    html.sidebar-collapsed .sb-group-label {
+        height: 1px;
+        margin: 12px 8px;
+        padding: 0;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.08);
+        color: transparent;
+        font-size: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #staff-sidebar,
+    #staff-main {
+        transition: none;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

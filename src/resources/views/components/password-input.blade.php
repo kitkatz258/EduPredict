@@ -8,7 +8,7 @@
         type="password"
         autocomplete="{{ $autocomplete }}"
         @if ($invalid) aria-invalid="true" aria-describedby="{{ $id }}-error" @endif
-        {{ $attributes->merge(['class' => 'block w-full rounded-lg border border-gray-300 px-3 py-2.5 pr-11 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-200']) }}
+        {{ $attributes->merge(['class' => 'ui-field has-icon']) }}
     >
     <button
         type="button"

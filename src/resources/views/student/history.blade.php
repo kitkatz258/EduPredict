@@ -50,14 +50,14 @@
                     data: {
                         labels: data.labels,
                         datasets: [
-                            { label: 'Employability', data: data.employability, borderColor: '#1B5E20', backgroundColor: '#1B5E20', tension: 0.2 },
+                            { label: 'Employability', data: data.employability, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.14)', tension: 0.35, fill: true, pointRadius: 0, borderWidth: 2 },
                             { label: 'Dropout-risk index', data: data.dropout, borderColor: '#B45309', backgroundColor: '#B45309', tension: 0.2 },
                         ],
                     },
                     options: {
                         maintainAspectRatio: false,
                         scales: { y: { min: 0, max: 100 } },
-                        plugins: { legend: { labels: { color: '#1B5E20' } } },
+                        plugins: { legend: { labels: { color: '#6b7280', boxWidth: 8, usePointStyle: true } } },
                     },
                 });
             };

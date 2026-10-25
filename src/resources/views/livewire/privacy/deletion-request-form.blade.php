@@ -13,5 +13,5 @@
         <textarea id="deletion-reason" wire:model="reason" rows="3" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm" @disabled($pending)></textarea>
         @error('reason') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
     </div>
-    <button type="submit" wire:loading.attr="disabled" wire:target="submit" @disabled($pending) data-confirm="Your login stays active until an administrator approves this request. Prediction history is kept." data-confirm-title="Request account deletion?" data-confirm-button="Submit request" data-confirm-tone="neutral" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-50"><x-spinner wire:loading wire:target="submit" />Submit request</button>
+    <button type="submit" wire:loading.attr="disabled" wire:target="submit" @disabled($pending) data-confirm="Your login stays active until an administrator approves this request. Prediction history is kept." data-confirm-title="Request account deletion?" data-confirm-button="Submit request" data-confirm-tone="neutral" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-50"><x-spinner wire:loading wire:target="submit" />Submit request</button>
 </form>

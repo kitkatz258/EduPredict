@@ -1,5 +1,5 @@
 @php
-    $field = 'block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-200';
+    $field = 'ui-field';
     // Validation redirects return to the previously rendered URL, so the posted form decides which panel reopens.
     $mode = in_array(old('_auth_form'), ['login', 'register'], true) ? old('_auth_form') : $mode;
     $loginErrors = $mode === 'login' ? $errors : new \Illuminate\Support\ViewErrorBag;
@@ -137,11 +137,11 @@
 
                     <div class="flex items-center justify-between gap-3 text-sm">
                         <label for="remember_me" class="inline-flex items-center gap-2 text-gray-600">
-                            <input id="remember_me" type="checkbox" name="remember" class="rounded border-gray-300 text-brand-900 focus:ring-brand-200">
+                            <input id="remember_me" type="checkbox" name="remember" class="rounded border-gray-300 text-[#4f46e5] focus:ring-[#4f46e5]/30">
                             Remember me
                         </label>
                         @if (Route::has('password.request'))
-                            <a class="font-medium text-brand-900 hover:underline" href="{{ route('password.request') }}">Forgot password?</a>
+                            <a class="font-medium text-[#4f46e5] hover:underline" href="{{ route('password.request') }}">Forgot password?</a>
                         @endif
                     </div>
 

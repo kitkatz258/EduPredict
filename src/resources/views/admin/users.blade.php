@@ -1,11 +1,9 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Admin console</p>
-            <h2 class="text-lg font-semibold text-brand-900">Users</h2>
-        </div>
-    </x-slot>
     <div class="space-y-6">
+        <x-page-header
+            title="Users"
+            description="Staff and student accounts that can sign in. Search, filters, and row actions stay on this list."
+        />
         <livewire:admin.create-staff-form />
         <livewire:admin.edit-user-form />
         <livewire:tables.users-table />

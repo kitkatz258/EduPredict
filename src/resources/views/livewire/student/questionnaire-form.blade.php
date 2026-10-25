@@ -1,6 +1,6 @@
 @php
     $partCount = max(1, count($partKeys));
-    $primary = 'inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:opacity-60 sm:w-auto';
+    $primary = 'inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:opacity-60 sm:w-auto';
     $secondary = 'inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-brand-200 bg-white px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:opacity-60 sm:w-auto';
     $outline = 'inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-brand-900 bg-white px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:opacity-60 sm:w-auto';
     $displayVersionKey = (! $hasDraft && $latestSubmission) ? $latestSubmission->definition_version : $definitionVersion;

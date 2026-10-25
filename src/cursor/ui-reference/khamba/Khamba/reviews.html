@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reviews – Khamba Admin</title>
+<!-- Google Fonts used by the live customizer's font picker -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Bootstrap 5 (layout, modals, offcanvas, dropdowns) -->
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<!-- Khamba's own stylesheet (design tokens + every component) -->
+<link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR NAVIGATION
+     Fixed left sidebar: logo, six nav groups, and a store/Logout
+     footer. This exact block is repeated at the top of every
+     dashboard page — edit the logo here, then use your editor's
+     "Replace in all files" to repeat the change everywhere.
+     ============================================================ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <a class="brand-link" href="index.html"><span class="logo"><i data-lucide="shopping-bag"></i></span><span class="brand">Khamba</span></a>
+    <button class="sb-toggle d-none d-lg-grid" id="sbToggle" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button>
+  </div>
+  <nav class="sb-scroll">
+    <div class="sb-group">General</div>
+    <a class="sb-link sb-parent collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#dashGroup" aria-expanded="false" title="Dashboards">
+      <i data-lucide="layout-dashboard"></i><span>Dashboards</span><i data-lucide="chevron-down" class="sb-chevron"></i>
+    </a>
+    <div class="collapse" id="dashGroup">
+      <a class="sb-link sb-sub" href="index.html" title="Dashboard 1"><span>Dashboard 1</span></a>
+      <a class="sb-link sb-sub" href="dashboard-2.html" title="Dashboard 2"><span>Dashboard 2</span></a>
+      <a class="sb-link sb-sub" href="dashboard-3.html" title="Dashboard 3"><span>Dashboard 3</span></a>
+    </div>
+    <a class="sb-link" href="orders.html" title="Orders"><i data-lucide="shopping-bag"></i><span>Orders</span><em class="sb-badge">8</em></a>
+    <a class="sb-link" href="products.html" title="Products"><i data-lucide="package"></i><span>Products</span></a>
+    <a class="sb-link" href="categories.html" title="Categories"><i data-lucide="layers"></i><span>Categories</span></a>
+    <a class="sb-link" href="inventory.html" title="Inventory"><i data-lucide="warehouse"></i><span>Inventory</span></a>
+    <a class="sb-link" href="customers.html" title="Customers"><i data-lucide="users"></i><span>Customers</span></a>
+    <a class="sb-link active" href="reviews.html" title="Reviews"><i data-lucide="star"></i><span>Reviews</span><em class="sb-badge">12</em></a>
+    <a class="sb-link" href="discounts.html" title="Discounts"><i data-lucide="percent"></i><span>Discounts</span></a>
+    <a class="sb-link" href="payments.html" title="Payments"><i data-lucide="credit-card"></i><span>Payments</span></a>
+    <a class="sb-link" href="analytics.html" title="Analytics"><i data-lucide="chart-no-axes-combined"></i><span>Analytics</span></a>
+    <div class="sb-group">Operations</div>
+    <a class="sb-link" href="shipments.html" title="Shipments"><i data-lucide="truck"></i><span>Shipments</span></a>
+    <a class="sb-link" href="returns.html" title="Returns"><i data-lucide="undo-2"></i><span>Returns</span></a>
+    <a class="sb-link" href="abandoned-carts.html" title="Abandoned Carts"><i data-lucide="shopping-cart"></i><span>Abandoned Carts</span></a>
+    <a class="sb-link" href="gift-cards.html" title="Gift Cards"><i data-lucide="gift"></i><span>Gift Cards</span></a>
+    <div class="sb-group">Marketing</div>
+    <a class="sb-link" href="campaigns.html" title="Campaigns"><i data-lucide="megaphone"></i><span>Campaigns</span></a>
+    <a class="sb-link" href="coupons.html" title="Coupons"><i data-lucide="ticket"></i><span>Coupons</span></a>
+    <a class="sb-link" href="email.html" title="Email Marketing"><i data-lucide="mail"></i><span>Email Marketing</span></a>
+    <div class="sb-group">Management</div>
+    <a class="sb-link" href="team.html" title="Team Members"><i data-lucide="user-round-cog"></i><span>Team Members</span></a>
+    <a class="sb-link" href="roles.html" title="Roles &amp; Permissions"><i data-lucide="shield-check"></i><span>Roles &amp; Permissions</span></a>
+    <a class="sb-link" href="logs.html" title="Activity Logs"><i data-lucide="history"></i><span>Activity Logs</span></a>
+    <div class="sb-group">Account</div>
+    <a class="sb-link" href="settings.html" title="Settings"><i data-lucide="settings"></i><span>Settings</span></a>
+    <a class="sb-link" href="integrations.html" title="Integrations"><i data-lucide="plug"></i><span>Integrations</span></a>
+    <a class="sb-link" href="notifications.html" title="Notifications"><i data-lucide="bell"></i><span>Notifications</span></a>
+    <a class="sb-link" href="help.html" title="Help &amp; Support"><i data-lucide="life-buoy"></i><span>Help &amp; Support</span></a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="store-card"><span class="logo"><i data-lucide="store"></i></span><div><b>Khamba Store</b><small>khamba.com</small></div></div>
+    <a class="sb-link" href="login.html" title="Logout"><i data-lucide="log-out"></i><span>Logout</span></a>
+  </div>
+</aside>
+<!-- Dark overlay behind the sidebar when it opens as a mobile drawer -->
+<div class="backdrop" id="backdrop"></div>
+<!-- ============================================================
+     MAIN COLUMN — topbar, page content, footer
+     ============================================================ -->
+<div class="main">
+    <!-- ---------- Topbar: search, store switcher, theme toggle,
+       notifications and the user menu (Profile / Account settings /
+       Billing / Logout) ---------- -->
+<header class="topbar">
+    <button class="icon-btn d-lg-none" id="mobileToggle" aria-label="Open menu"><i data-lucide="menu"></i></button>
+    <div class="search">
+      <i data-lucide="search"></i>
+      <input type="text" id="search" placeholder="Search anything..." autocomplete="off">
+      <kbd>/</kbd>
+      <div class="search-panel" id="searchPanel">
+        <div class="sp-label">Search in</div>
+        <a href="#" data-scope="Products"><i data-lucide="package"></i>Products</a>
+        <a href="#" data-scope="Orders"><i data-lucide="shopping-bag"></i>Orders</a>
+        <a href="#" data-scope="Customers"><i data-lucide="users"></i>Customers</a>
+        <a href="#" data-scope="Pages"><i data-lucide="file-text"></i>Pages</a>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="dropdown d-none d-md-block">
+        <button class="pill-btn" data-bs-toggle="dropdown"><i data-lucide="store"></i>Khamba Store<i data-lucide="chevron-down"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">Khamba Store</a></li><li><a class="dropdown-item" href="#">Khamba Outlet</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#">+ Add new store</a></li></ul>
+      </div>
+      <div class="dropdown d-none d-sm-block">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Language"><i data-lucide="globe"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">English</a></li><li><a class="dropdown-item" href="#">Español</a></li><li><a class="dropdown-item" href="#">Français</a></li></ul>
+      </div>
+      <button class="icon-btn" id="themeToggle" title="Toggle theme"><i data-lucide="moon"></i></button>
+      <div class="dropdown">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <div class="dropdown-menu dropdown-menu-end notif">
+          <div class="notif-head">Notifications <a href="#">Mark all read</a></div>
+          <a class="notif-item unread" href="#"><i data-lucide="shopping-bag"></i><div><b>New order #10482</b><small>2 minutes ago</small></div></a>
+          <a class="notif-item unread" href="#"><i data-lucide="triangle-alert"></i><div><b>Low stock: Ceramic Mug</b><small>1 hour ago</small></div></a>
+          <a class="notif-item" href="#"><i data-lucide="star"></i><div><b>New 5-star review</b><small>Yesterday</small></div></a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="avatar" data-bs-toggle="dropdown"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Alex Johnson" onerror="this.replaceWith('AJ')"></button>
+        <ul class="dropdown-menu dropdown-menu-end user-menu">
+          <li class="um-head"><b>Alex Johnson</b><small>alex@khamba.com</small></li>
+          <li><a class="dropdown-item" href="profile.html"><i data-lucide="user"></i>Profile</a></li>
+          <li><a class="dropdown-item" href="account-settings.html"><i data-lucide="settings"></i>Account settings</a></li>
+          <li><a class="dropdown-item" href="billing.html"><i data-lucide="credit-card"></i>Billing</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="login.html"><i data-lucide="log-out"></i>Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+    <!-- ---------- Page content ---------- -->
+<main class="content">
+    <div class="page-head">
+      <div><h1>Reviews</h1><p>Moderate customer feedback and keep an eye on product ratings.</p></div>
+      <div class="d-flex gap-2">
+        <button class="btn-soft" id="exportBtn"><i data-lucide="download"></i>Export CSV</button>
+      </div>
+    </div>
+
+    <section class="row g-3 mb-3">
+      <div class="col-xl-4"><div class="card-x h-100">
+        <div class="card-head"><h5>Overall rating</h5></div>
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div class="rv-avg">4.6</div>
+          <div>
+            <div class="rating"><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i></div>
+            <small class="text-secondary">Based on 1,042 reviews</small>
+          </div>
+        </div>
+        <div class="rv-dist">
+          <div class="rv-dist-row"><span>5</span><div class="bar"><i style="width:68%;background:#10b981"></i></div><small>68%</small></div>
+          <div class="rv-dist-row"><span>4</span><div class="bar"><i style="width:19%;background:#84cc16"></i></div><small>19%</small></div>
+          <div class="rv-dist-row"><span>3</span><div class="bar"><i style="width:7%;background:#f59e0b"></i></div><small>7%</small></div>
+          <div class="rv-dist-row"><span>2</span><div class="bar"><i style="width:4%;background:#f97316"></i></div><small>4%</small></div>
+          <div class="rv-dist-row"><span>1</span><div class="bar"><i style="width:2%;background:#ef4444"></i></div><small>2%</small></div>
+        </div>
+      </div></div>
+      <div class="col-6 col-xl-4"><div class="card-x ms-card"><span class="ico" style="background:#fdf3ea"><i data-lucide="hourglass"></i></span>
+        <div><small>Pending moderation</small><b>12</b><span class="ms-note">Needs review</span></div></div></div>
+      <div class="col-6 col-xl-4"><div class="card-x ms-card"><span class="ico" style="background:#fee2e2"><i data-lucide="flag"></i></span>
+        <div><small>Reported reviews</small><b>3</b><span class="ms-note down">Flagged by filter</span></div></div></div>
+      <div class="col-6 col-xl-4"><div class="card-x ms-card"><span class="ico" style="background:#ecf6ef"><i data-lucide="trending-up"></i></span>
+        <div><small>This week</small><b>+68</b><span class="ms-note up">New reviews</span></div></div></div>
+      <div class="col-6 col-xl-4"><div class="card-x ms-card"><span class="ico" style="background:#eef2fd"><i data-lucide="reply"></i></span>
+        <div><small>Response rate</small><b>91%</b><span class="ms-note up">Avg. reply in 6h</span></div></div></div>
+    </section>
+
+    <div class="card-x">
+      <div class="tabs" id="tabs">
+        <button class="on" data-t="all">All<em>8</em></button>
+        <button data-t="Pending">Pending<em>3</em></button>
+        <button data-t="Published">Published<em>4</em></button>
+        <button data-t="Reported">Reported<em>1</em></button>
+      </div>
+
+      <div class="ord-filters">
+        <div class="search flex-grow-1">
+          <i data-lucide="search"></i>
+          <input type="text" id="rvSearch" placeholder="Search by customer or product...">
+        </div>
+        <select class="sel-x" id="ratingFilter">
+          <option value="">All ratings</option>
+          <option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option>
+        </select>
+      </div>
+
+      <div class="rv-list" id="rvList">
+      <div class="rv-card" data-status="Pending" data-rating="5">
+        <div class="rv-top">
+          <div class="cust"><span class="mini-av" style="background:#e0e7ff;color:#4338ca">OM<img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" loading="lazy" onerror="this.remove()"></span>
+            <div><b>Olivia Martin</b><small class="d-block text-secondary">Sep 28, 2026</small></div></div>
+          <span class="badge-x s-Pending">Pending</span>
+        </div>
+        <div class="rv-rating"><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><span class="rv-product"><span class="thumb sm" style="background:#eef2fd;color:#374151"><i data-lucide="headphones"></i></span>Wireless Headphones</span></div>
+        <p class="rv-text">Sound quality is incredible for the price and the noise cancellation actually works on flights. Battery easily lasts my whole work week.</p>
+        <div class="rv-actions"><button class="btn-soft sm-btn" data-approve><i data-lucide="check"></i>Approve</button><button class="btn-soft text-danger sm-btn" data-reject><i data-lucide="x"></i>Reject</button></div>
+      </div>
+      <div class="rv-card" data-status="Pending" data-rating="2">
+        <div class="rv-top">
+          <div class="cust"><span class="mini-av" style="background:#eef2fd;color:#4338ca">EK<img src="https://randomuser.me/api/portraits/men/22.jpg" alt="" loading="lazy" onerror="this.remove()"></span>
+            <div><b>Ethan Kim</b><small class="d-block text-secondary">Sep 27, 2026</small></div></div>
+          <span class="badge-x s-Pending">Pending</span>
+        </div>
+        <div class="rv-rating"><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-off"></i><i data-lucide="star" class="star-off"></i><i data-lucide="star" class="star-off"></i><span class="rv-product"><span class="thumb sm" style="background:#eef2fd;color:#374151"><i data-lucide="shopping-bag"></i></span>Canvas Tote</span></div>
+        <p class="rv-text">Stitching came loose after two weeks of light use. Expected better quality for the price point, might return it.</p>
+        <div class="rv-actions"><button class="btn-soft sm-btn" data-approve><i data-lucide="check"></i>Approve</button><button class="btn-soft text-danger sm-btn" data-reject><i data-lucide="x"></i>Reject</button></div>
+      </div>
+      <div class="rv-card" data-status="Published" data-rating="5">
+        <div class="rv-top">
+          <div class="cust"><span class="mini-av" style="background:#d1fae5;color:#047857">SN<img src="https://randomuser.me/api/portraits/women/68.jpg" alt="" loading="lazy" onerror="this.remove()"></span>
+            <div><b>Sophia Nguyen</b><small class="d-block text-secondary">Sep 26, 2026</small></div></div>
+          <span class="badge-x s-Delivered">Published</span>
+        </div>
+        <div class="rv-rating"><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><span class="rv-product"><span class="thumb sm" style="background:#ecf6ef;color:#374151"><i data-lucide="footprints"></i></span>Running Sneakers</span></div>
+        <p class="rv-text">Best running shoes I have owned. Lightweight, great arch support, and true to size. Already ordered a second pair.</p>
+        <div class="rv-actions"><button class="btn-soft sm-btn" data-reply><i data-lucide="reply"></i>Reply</button><button class="btn-soft text-danger sm-btn" data-reject><i data-lucide="flag"></i>Unpublish</button></div>
+      </div>
+      <div class="rv-card" data-status="Published" data-rating="4">
+        <div class="rv-top">
+          <div class="cust"><span class="mini-av" style="background:#ede9fe;color:#6d28d9">LR<img src="https://randomuser.me/api/portraits/men/52.jpg" alt="" loading="lazy" onerror="this.remove()"></span>
+            <div><b>Lucas Rivera</b><small class="d-block text-secondary">Sep 25, 2026</small></div></div>
+          <span class="badge-x s-Delivered">Published</span>
+        </div>
+        <div class="rv-rating"><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-off"></i><span class="rv-product"><span class="thumb sm" style="background:#fef3c7;color:#374151"><i data-lucide="lamp-desk"></i></span>Desk Lamp Pro</span></div>
+        <p class="rv-text">Nice warm and cool light modes, very sturdy base. Wish the USB-C cable was a bit longer, otherwise great.</p>
+        <div class="rv-actions"><button class="btn-soft sm-btn" data-reply><i data-lucide="reply"></i>Reply</button><button class="btn-soft text-danger sm-btn" data-reject><i data-lucide="flag"></i>Unpublish</button></div>
+      </div>
+      <div class="rv-card" data-status="Reported" data-rating="1">
+        <div class="rv-top">
+          <div class="cust"><span class="mini-av" style="background:#fef3c7;color:#b45309">NP<img src="https://randomuser.me/api/portraits/men/75.jpg" alt="" loading="lazy" onerror="this.remove()"></span>
+            <div><b>Noah Patel</b><small class="d-block text-secondary">Sep 24, 2026</small></div></div>
+          <span class="badge-x s-Critical">Reported</span>
+        </div>
+        <div class="rv-rating"><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-off"></i><i data-lucide="star" class="star-off"></i><i data-lucide="star" class="star-off"></i><i data-lucide="star" class="star-off"></i><span class="rv-product"><span class="thumb sm" style="background:#f6eff6;color:#374151"><i data-lucide="watch"></i></span>Smart Watch S2</span></div>
+        <p class="rv-text">This review contains language flagged by our automatic filter and is awaiting moderator review before staying live.</p>
+        <div class="rv-actions"><button class="btn-soft sm-btn" data-approve><i data-lucide="check"></i>Keep published</button><button class="btn-soft text-danger sm-btn" data-reject><i data-lucide="trash-2"></i>Remove</button></div>
+      </div>
+      <div class="rv-card" data-status="Published" data-rating="5">
+        <div class="rv-top">
+          <div class="cust"><span class="mini-av" style="background:#fee2e2;color:#b91c1c">AT<img src="https://randomuser.me/api/portraits/women/12.jpg" alt="" loading="lazy" onerror="this.remove()"></span>
+            <div><b>Ava Thompson</b><small class="d-block text-secondary">Sep 23, 2026</small></div></div>
+          <span class="badge-x s-Delivered">Published</span>
+        </div>
+        <div class="rv-rating"><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><span class="rv-product"><span class="thumb sm" style="background:#fdf3ea;color:#374151"><i data-lucide="backpack"></i></span>Leather Backpack</span></div>
+        <p class="rv-text">Gorgeous leather, fits my 15" laptop perfectly and the brass hardware still looks new after daily commuting.</p>
+        <div class="rv-actions"><button class="btn-soft sm-btn" data-reply><i data-lucide="reply"></i>Reply</button><button class="btn-soft text-danger sm-btn" data-reject><i data-lucide="flag"></i>Unpublish</button></div>
+      </div>
+      <div class="rv-card" data-status="Pending" data-rating="3">
+        <div class="rv-top">
+          <div class="cust"><span class="mini-av" style="background:#d1fae5;color:#047857">MR<img src="https://randomuser.me/api/portraits/women/90.jpg" alt="" loading="lazy" onerror="this.remove()"></span>
+            <div><b>Mia Rossi</b><small class="d-block text-secondary">Sep 22, 2026</small></div></div>
+          <span class="badge-x s-Pending">Pending</span>
+        </div>
+        <div class="rv-rating"><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-off"></i><i data-lucide="star" class="star-off"></i><span class="rv-product"><span class="thumb sm" style="background:#fef3c7;color:#374151"><i data-lucide="coffee"></i></span>Ceramic Mug Set</span></div>
+        <p class="rv-text">Mugs are nice looking but two of the four arrived with small chips on the handle. Packaging could be better.</p>
+        <div class="rv-actions"><button class="btn-soft sm-btn" data-approve><i data-lucide="check"></i>Approve</button><button class="btn-soft text-danger sm-btn" data-reject><i data-lucide="x"></i>Reject</button></div>
+      </div>
+      <div class="rv-card" data-status="Published" data-rating="5">
+        <div class="rv-top">
+          <div class="cust"><span class="mini-av" style="background:#fdf3ea;color:#b45309">JW<img src="https://randomuser.me/api/portraits/men/61.jpg" alt="" loading="lazy" onerror="this.remove()"></span>
+            <div><b>James Walker</b><small class="d-block text-secondary">Sep 20, 2026</small></div></div>
+          <span class="badge-x s-Delivered">Published</span>
+        </div>
+        <div class="rv-rating"><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><i data-lucide="star" class="star-on"></i><span class="rv-product"><span class="thumb sm" style="background:#ecf6ef;color:#374151"><i data-lucide="footprints"></i></span>Trail Hiking Boots</span></div>
+        <p class="rv-text">Waterproofing held up through a rainy weekend hike. Ankle support is excellent, no blisters even on day one.</p>
+        <div class="rv-actions"><button class="btn-soft sm-btn" data-reply><i data-lucide="reply"></i>Reply</button><button class="btn-soft text-danger sm-btn" data-reject><i data-lucide="flag"></i>Unpublish</button></div>
+      </div>
+      </div>
+      <small class="text-secondary d-block mt-2" id="rvInfo">Showing 8 of 8 reviews</small>
+    </div>
+  </main>
+
+    <!-- ---------- Footer: copyright + legal links (same on every page) ---------- -->
+<footer class="footer-x">
+    <span>© 2026 Khamba Inc. All rights reserved.</span>
+    <div class="d-flex gap-3">
+      <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="help.html">Help &amp; Support</a>
+      <span class="d-none d-sm-inline text-secondary">v1.0.0</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     LIVE CUSTOMIZER — lets the user try a different sidebar
+     colour / font without touching any code (see app.js).
+     ============================================================ -->
+<button class="sw-fab" id="swFab" title="Customize"><i data-lucide="palette"></i></button>
+<div class="sw-panel" id="swPanel">
+  <div class="sw-head"><b>Customize</b><button id="swClose" aria-label="Close"><i data-lucide="x"></i></button></div>
+  <div class="sw-label">Sidebar color</div><div class="sw-colors" id="swColors"></div>
+  <div class="sw-label">Font family</div><div id="swFonts"></div>
+  <button class="btn-reorder w-100 mt-4" id="swReset">Reset to default</button>
+</div>
+
+
+<!-- Shared toast notification, triggered from app.js via window.showToast() -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+  <div class="toast" id="toastHost" role="status"><div class="toast-body d-flex align-items-center gap-2"><i data-lucide="check-circle" id="toastIcon"></i><span id="toastMsg"></span></div></div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS — jQuery, Bootstrap, (Chart.js on chart pages),
+     Lucide icons, then our own app.js last.
+     ============================================================ -->
+<script src="assets/js/jquery-3.7.1.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

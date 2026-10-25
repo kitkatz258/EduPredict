@@ -1,7 +1,5 @@
 @php
     $user = auth()->user();
-    $student = $user->student?->loadMissing('program');
-    $initials = collect(preg_split('/\s+/', trim($user->name)))->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('');
     $items = [
         ['route' => 'student.dashboard', 'label' => 'Dashboard', 'icon' => 'ri-dashboard-line', 'active' => ['student.dashboard']],
         ['route' => 'student.assessment', 'label' => 'Assessment', 'icon' => 'ri-survey-line', 'active' => ['student.assessment', 'student.profile', 'student.questionnaire', 'student.grades']],
@@ -9,10 +7,10 @@
     ];
 @endphp
 
-<header class="sticky top-0 z-30 border-b border-brand-200 bg-white/95 backdrop-blur" x-data="{ open: false }" @keydown.escape.window="open = false">
-    <div class="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
-        <a href="{{ route('student.dashboard') }}" class="flex shrink-0 items-center gap-2 font-semibold text-brand-900">
-            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-900 text-xs font-bold text-white">UCC</span>
+<header class="sticky top-0 z-30 border-b border-[#e8eaee] bg-white" x-data="{ open: false }" @keydown.escape.window="open = false">
+    <div class="mx-auto flex h-[68px] max-w-6xl items-center gap-3 px-4 sm:px-6">
+        <a href="{{ route('student.dashboard') }}" class="flex shrink-0 items-center gap-2.5 font-semibold text-[#111827]">
+            <span class="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-gradient-to-br from-[#6366f1] to-[#4338ca] text-[11px] font-bold text-white">UCC</span>
             <span class="hidden sm:inline">EduPredict</span>
         </a>
 
@@ -21,7 +19,7 @@
                 @php $isActive = request()->routeIs(...$item['active']); @endphp
                 <a
                     href="{{ route($item['route']) }}"
-                    class="{{ $isActive ? 'bg-brand-50 text-brand-900' : 'text-gray-600 hover:bg-brand-50/60 hover:text-brand-900' }} inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium"
+                    class="{{ $isActive ? 'bg-[#eef2ff] text-[#4338ca]' : 'text-gray-600 hover:bg-[#f3f4f6] hover:text-[#111827]' }} inline-flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm font-medium"
                     @if ($isActive) aria-current="page" @endif
                 >
                     <i class="{{ $item['icon'] }} text-base" aria-hidden="true"></i>{{ $item['label'] }}
@@ -29,33 +27,11 @@
             @endforeach
         </nav>
 
-        <div class="ml-auto flex items-center gap-1 sm:gap-2">
-            <div class="hidden items-center gap-2 pl-1 lg:flex">
-                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-900 text-sm font-semibold text-white" aria-hidden="true">{{ $initials }}</span>
-                <span class="leading-tight">
-                    <span class="block text-sm font-medium text-gray-900">{{ $user->name }}</span>
-                    @if ($student)
-                        <span class="block text-xs text-gray-500">{{ $student->program?->code }} · Year {{ $student->year_level }}</span>
-                    @endif
-                </span>
-            </div>
-            <a
-                href="{{ route('profile.edit') }}"
-                class="{{ request()->routeIs('profile.edit') ? 'bg-brand-50 text-brand-900' : 'text-gray-600 hover:bg-brand-50 hover:text-brand-900' }} hidden rounded-lg p-2 md:inline-flex"
-                aria-label="Profile and settings"
-                title="Profile and settings"
-            >
-                <i class="ri-settings-3-line text-xl" aria-hidden="true"></i>
-            </a>
-            <form method="POST" action="{{ route('logout') }}" class="hidden md:block">
-                @csrf
-                <button type="submit" class="rounded-lg p-2 text-gray-600 hover:bg-brand-50 hover:text-brand-900" aria-label="Log out" title="Log out">
-                    <i class="ri-logout-box-r-line text-xl" aria-hidden="true"></i>
-                </button>
-            </form>
+        <div class="ml-auto flex items-center gap-2">
+            <x-user-menu />
             <button
                 type="button"
-                class="rounded-lg p-2 text-brand-900 hover:bg-brand-50 md:hidden"
+                class="grid h-10 w-10 place-items-center rounded-[11px] border border-[#e8eaee] text-[#111827] hover:bg-[#f3f4f6] md:hidden"
                 @click="open = ! open"
                 :aria-expanded="open.toString()"
                 aria-controls="student-mobile-nav"
@@ -67,30 +43,13 @@
         </div>
     </div>
 
-    <nav id="student-mobile-nav" x-show="open" x-cloak x-transition.origin.top class="border-t border-brand-200 bg-white px-4 py-3 motion-reduce:transition-none md:hidden" aria-label="Student mobile">
-        <div class="mb-3 flex items-center gap-3 px-2">
-            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-900 text-sm font-semibold text-white" aria-hidden="true">{{ $initials }}</span>
-            <span class="leading-tight">
-                <span class="block text-sm font-medium text-gray-900">{{ $user->name }}</span>
-                @if ($student)
-                    <span class="block text-xs text-gray-500">{{ $student->program?->code }} · Year {{ $student->year_level }}</span>
-                @endif
-            </span>
-        </div>
+    <nav id="student-mobile-nav" x-show="open" x-cloak x-transition.origin.top class="border-t border-[#e8eaee] bg-white px-4 py-3 motion-reduce:transition-none md:hidden" aria-label="Student mobile">
+        <p class="mb-2 truncate px-3 text-sm font-semibold text-gray-900">{{ $user->name }}</p>
         @foreach ($items as $item)
             @php $isActive = request()->routeIs(...$item['active']); @endphp
-            <a href="{{ route($item['route']) }}" class="{{ $isActive ? 'bg-brand-50 text-brand-900' : 'text-gray-700' }} flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium" @if ($isActive) aria-current="page" @endif>
+            <a href="{{ route($item['route']) }}" class="{{ $isActive ? 'bg-[#eef2ff] text-[#4338ca]' : 'text-gray-700' }} flex items-center gap-3 rounded-[10px] px-3 py-2 text-sm font-medium" @if ($isActive) aria-current="page" @endif>
                 <i class="{{ $item['icon'] }} text-lg" aria-hidden="true"></i>{{ $item['label'] }}
             </a>
         @endforeach
-        <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700">
-            <i class="ri-settings-3-line text-lg" aria-hidden="true"></i>Profile and settings
-        </a>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-700">
-                <i class="ri-logout-box-r-line text-lg" aria-hidden="true"></i>Log out
-            </button>
-        </form>
     </nav>
 </header>

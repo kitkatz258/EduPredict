@@ -35,7 +35,7 @@
                 @if (! ($progress['sections']['questionnaire'] ?? false))
                     <p class="text-sm text-gray-700">A new prediction needs a completed current questionnaire and consent. Grades and skills are optional.</p>
                 @endif
-                <a href="{{ route('student.assessment') }}" class="inline-flex items-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">
+                <a href="{{ route('student.assessment') }}" class="inline-flex items-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937]">
                     {{ ($progress['sections']['questionnaire'] ?? false) ? 'Update Assessment' : 'Complete Assessment' }}
                     <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
                 </a>
@@ -264,7 +264,7 @@
                                 maintainAspectRatio: false,
                                 indexAxis: 'y',
                                 plugins: { legend: { display: false } },
-                                scales: { x: { beginAtZero: true, ticks: { color: '#374151' } }, y: { ticks: { color: '#1B5E20' } } },
+                                scales: { x: { beginAtZero: true, ticks: { color: '#6b7280' } }, y: { ticks: { color: '#6b7280' } } },
                             },
                         });
                     };

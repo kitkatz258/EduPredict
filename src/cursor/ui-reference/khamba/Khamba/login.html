@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in – Khamba Admin</title>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Bootstrap 5 (CDN) -->
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<!-- Khamba's own stylesheet -->
+<link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body class="auth-body">
+
+<!-- ============================================================
+     AUTH SCREEN — left brand panel + right form card.
+     ============================================================ -->
+<div class="auth-wrap">
+    <!-- Left: brand panel (hidden on small screens) -->
+<div class="auth-art">
+    <a class="brand-link" href="index.html" style="width:fit-content"><span class="logo"><i data-lucide="shopping-bag"></i></span><span class="brand">Khamba</span></a>
+    <div>
+      <h2>Run your entire store from one clean dashboard.</h2>
+      <p>Orders, products, customers, payments and analytics — everything you need, nothing you don't.</p>
+      <div class="auth-stats">
+        <div><small>Total revenue</small><b>$245,450</b></div>
+        <div><small>Orders</small><b>1,284</b></div>
+        <div><small>Customers</small><b>3,214</b></div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Right: the actual form -->
+<div class="auth-form-wrap">
+    <div class="auth-card">
+      <a class="brand-link d-lg-none" href="index.html"><span class="logo"><i data-lucide="shopping-bag"></i></span><span class="brand">Khamba</span></a>
+      <h1>Welcome back</h1>
+      <p>Sign in to your Khamba admin dashboard.</p>
+
+      <div class="auth-alert err" id="authError" hidden><i data-lucide="circle-alert"></i><span>Invalid username or password.</span></div>
+      <div class="auth-alert ok" id="authSuccess" hidden><i data-lucide="check-circle"></i><span>Account created — please sign in.</span></div>
+
+      <form id="loginForm" novalidate>
+        <label for="loginUser">Username</label>
+        <input type="text" class="form-control" id="loginUser" value="admin" autocomplete="username" required>
+        <label for="loginPass">Password</label>
+        <input type="password" class="form-control" id="loginPass" value="admin" autocomplete="current-password" required>
+        <div class="auth-row">
+          <label class="d-flex align-items-center gap-2 mb-0"><input type="checkbox" checked> Remember me</label>
+          <a href="#">Forgot password?</a>
+        </div>
+        <button type="submit" class="auth-submit"><i data-lucide="log-in"></i> Sign in</button>
+      </form>
+
+      <p class="auth-foot">Don't have an account? <a href="register.html">Create one</a></p>
+      <div class="auth-demo">Demo credentials — Username: <b>admin</b> &nbsp; Password: <b>admin</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS — jQuery, Bootstrap, Lucide icons, then app.js
+     ============================================================ -->
+<script src="assets/js/jquery-3.7.1.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

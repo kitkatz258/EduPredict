@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customers – Khamba Admin</title>
+<!-- Google Fonts used by the live customizer's font picker -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Bootstrap 5 (layout, modals, offcanvas, dropdowns) -->
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<!-- Khamba's own stylesheet (design tokens + every component) -->
+<link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR NAVIGATION
+     Fixed left sidebar: logo, six nav groups, and a store/Logout
+     footer. This exact block is repeated at the top of every
+     dashboard page — edit the logo here, then use your editor's
+     "Replace in all files" to repeat the change everywhere.
+     ============================================================ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <a class="brand-link" href="index.html"><span class="logo"><i data-lucide="shopping-bag"></i></span><span class="brand">Khamba</span></a>
+    <button class="sb-toggle d-none d-lg-grid" id="sbToggle" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button>
+  </div>
+  <nav class="sb-scroll">
+    <div class="sb-group">General</div>
+    <a class="sb-link sb-parent collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#dashGroup" aria-expanded="false" title="Dashboards">
+      <i data-lucide="layout-dashboard"></i><span>Dashboards</span><i data-lucide="chevron-down" class="sb-chevron"></i>
+    </a>
+    <div class="collapse" id="dashGroup">
+      <a class="sb-link sb-sub" href="index.html" title="Dashboard 1"><span>Dashboard 1</span></a>
+      <a class="sb-link sb-sub" href="dashboard-2.html" title="Dashboard 2"><span>Dashboard 2</span></a>
+      <a class="sb-link sb-sub" href="dashboard-3.html" title="Dashboard 3"><span>Dashboard 3</span></a>
+    </div>
+    <a class="sb-link" href="orders.html" title="Orders"><i data-lucide="shopping-bag"></i><span>Orders</span><em class="sb-badge">8</em></a>
+    <a class="sb-link" href="products.html" title="Products"><i data-lucide="package"></i><span>Products</span></a>
+    <a class="sb-link" href="categories.html" title="Categories"><i data-lucide="layers"></i><span>Categories</span></a>
+    <a class="sb-link" href="inventory.html" title="Inventory"><i data-lucide="warehouse"></i><span>Inventory</span></a>
+    <a class="sb-link active" href="customers.html" title="Customers"><i data-lucide="users"></i><span>Customers</span></a>
+    <a class="sb-link" href="reviews.html" title="Reviews"><i data-lucide="star"></i><span>Reviews</span><em class="sb-badge">12</em></a>
+    <a class="sb-link" href="discounts.html" title="Discounts"><i data-lucide="percent"></i><span>Discounts</span></a>
+    <a class="sb-link" href="payments.html" title="Payments"><i data-lucide="credit-card"></i><span>Payments</span></a>
+    <a class="sb-link" href="analytics.html" title="Analytics"><i data-lucide="chart-no-axes-combined"></i><span>Analytics</span></a>
+    <div class="sb-group">Operations</div>
+    <a class="sb-link" href="shipments.html" title="Shipments"><i data-lucide="truck"></i><span>Shipments</span></a>
+    <a class="sb-link" href="returns.html" title="Returns"><i data-lucide="undo-2"></i><span>Returns</span></a>
+    <a class="sb-link" href="abandoned-carts.html" title="Abandoned Carts"><i data-lucide="shopping-cart"></i><span>Abandoned Carts</span></a>
+    <a class="sb-link" href="gift-cards.html" title="Gift Cards"><i data-lucide="gift"></i><span>Gift Cards</span></a>
+    <div class="sb-group">Marketing</div>
+    <a class="sb-link" href="campaigns.html" title="Campaigns"><i data-lucide="megaphone"></i><span>Campaigns</span></a>
+    <a class="sb-link" href="coupons.html" title="Coupons"><i data-lucide="ticket"></i><span>Coupons</span></a>
+    <a class="sb-link" href="email.html" title="Email Marketing"><i data-lucide="mail"></i><span>Email Marketing</span></a>
+    <div class="sb-group">Management</div>
+    <a class="sb-link" href="team.html" title="Team Members"><i data-lucide="user-round-cog"></i><span>Team Members</span></a>
+    <a class="sb-link" href="roles.html" title="Roles &amp; Permissions"><i data-lucide="shield-check"></i><span>Roles &amp; Permissions</span></a>
+    <a class="sb-link" href="logs.html" title="Activity Logs"><i data-lucide="history"></i><span>Activity Logs</span></a>
+    <div class="sb-group">Account</div>
+    <a class="sb-link" href="settings.html" title="Settings"><i data-lucide="settings"></i><span>Settings</span></a>
+    <a class="sb-link" href="integrations.html" title="Integrations"><i data-lucide="plug"></i><span>Integrations</span></a>
+    <a class="sb-link" href="notifications.html" title="Notifications"><i data-lucide="bell"></i><span>Notifications</span></a>
+    <a class="sb-link" href="help.html" title="Help &amp; Support"><i data-lucide="life-buoy"></i><span>Help &amp; Support</span></a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="store-card"><span class="logo"><i data-lucide="store"></i></span><div><b>Khamba Store</b><small>khamba.com</small></div></div>
+    <a class="sb-link" href="login.html" title="Logout"><i data-lucide="log-out"></i><span>Logout</span></a>
+  </div>
+</aside>
+<!-- Dark overlay behind the sidebar when it opens as a mobile drawer -->
+<div class="backdrop" id="backdrop"></div>
+<!-- ============================================================
+     MAIN COLUMN — topbar, page content, footer
+     ============================================================ -->
+<div class="main">
+    <!-- ---------- Topbar: search, store switcher, theme toggle,
+       notifications and the user menu (Profile / Account settings /
+       Billing / Logout) ---------- -->
+<header class="topbar">
+    <button class="icon-btn d-lg-none" id="mobileToggle" aria-label="Open menu"><i data-lucide="menu"></i></button>
+    <div class="search">
+      <i data-lucide="search"></i>
+      <input type="text" id="search" placeholder="Search anything..." autocomplete="off">
+      <kbd>/</kbd>
+      <div class="search-panel" id="searchPanel">
+        <div class="sp-label">Search in</div>
+        <a href="#" data-scope="Products"><i data-lucide="package"></i>Products</a>
+        <a href="#" data-scope="Orders"><i data-lucide="shopping-bag"></i>Orders</a>
+        <a href="#" data-scope="Customers"><i data-lucide="users"></i>Customers</a>
+        <a href="#" data-scope="Pages"><i data-lucide="file-text"></i>Pages</a>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="dropdown d-none d-md-block">
+        <button class="pill-btn" data-bs-toggle="dropdown"><i data-lucide="store"></i>Khamba Store<i data-lucide="chevron-down"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">Khamba Store</a></li><li><a class="dropdown-item" href="#">Khamba Outlet</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#">+ Add new store</a></li></ul>
+      </div>
+      <div class="dropdown d-none d-sm-block">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Language"><i data-lucide="globe"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">English</a></li><li><a class="dropdown-item" href="#">Español</a></li><li><a class="dropdown-item" href="#">Français</a></li></ul>
+      </div>
+      <button class="icon-btn" id="themeToggle" title="Toggle theme"><i data-lucide="moon"></i></button>
+      <div class="dropdown">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <div class="dropdown-menu dropdown-menu-end notif">
+          <div class="notif-head">Notifications <a href="#">Mark all read</a></div>
+          <a class="notif-item unread" href="#"><i data-lucide="shopping-bag"></i><div><b>New order #10482</b><small>2 minutes ago</small></div></a>
+          <a class="notif-item unread" href="#"><i data-lucide="triangle-alert"></i><div><b>Low stock: Ceramic Mug</b><small>1 hour ago</small></div></a>
+          <a class="notif-item" href="#"><i data-lucide="star"></i><div><b>New 5-star review</b><small>Yesterday</small></div></a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="avatar" data-bs-toggle="dropdown"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Alex Johnson" onerror="this.replaceWith('AJ')"></button>
+        <ul class="dropdown-menu dropdown-menu-end user-menu">
+          <li class="um-head"><b>Alex Johnson</b><small>alex@khamba.com</small></li>
+          <li><a class="dropdown-item" href="profile.html"><i data-lucide="user"></i>Profile</a></li>
+          <li><a class="dropdown-item" href="account-settings.html"><i data-lucide="settings"></i>Account settings</a></li>
+          <li><a class="dropdown-item" href="billing.html"><i data-lucide="credit-card"></i>Billing</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="login.html"><i data-lucide="log-out"></i>Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+    <!-- ---------- Page content ---------- -->
+<main class="content">
+    <div class="page-head">
+      <div><h1>Customers</h1><p>See who's buying, and how much they're worth to your store.</p></div>
+      <div class="d-flex gap-2">
+        <button class="btn-soft" id="exportBtn"><i data-lucide="download"></i>Export CSV</button>
+        <button class="btn-dark-x" data-bs-toggle="modal" data-bs-target="#newCustomerModal"><i data-lucide="plus"></i>Add customer</button>
+      </div>
+    </div>
+
+    <section class="row g-3 mb-3">
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#eef2fd"><i data-lucide="users"></i></span>
+        <div><small>Total customers</small><b>3,214</b><span class="ms-note up">+684 this month</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#ecf6ef"><i data-lucide="user-plus"></i></span>
+        <div><small>New customers</small><b>684</b><span class="ms-note up">+12.4%</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#fdf3ea"><i data-lucide="repeat-2"></i></span>
+        <div><small>Returning rate</small><b>75.1%</small></small><span class="ms-note up">+25.4%</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#f6eff6"><i data-lucide="wallet"></i></span>
+        <div><small>Avg. lifetime value</small><b>$312.40</b><span class="ms-note up">+8.9%</span></div></div></div>
+    </section>
+
+    <div class="card-x">
+      <div class="tabs" id="tabs">
+        <button class="on" data-t="all">All<em>10</em></button>
+        <button data-t="VIP">VIP<em>3</em></button>
+        <button data-t="Active">Active<em>5</em></button>
+        <button data-t="At risk">At risk<em>2</em></button>
+      </div>
+
+      <div class="ord-filters">
+        <div class="search flex-grow-1">
+          <i data-lucide="search"></i>
+          <input type="text" id="custSearch" placeholder="Search by name or email...">
+        </div>
+        <select class="sel-x" id="sortFilter">
+          <option value="new">Newest first</option>
+          <option value="spend">Total spent: high to low</option>
+          <option value="orders">Orders: high to low</option>
+        </select>
+      </div>
+
+      <div class="table-responsive">
+      <table class="table-x" id="custTable">
+        <thead><tr><th>Customer</th><th>Location</th><th>Orders</th><th>Total spent</th><th>Last order</th><th>Segment</th><th></th></tr></thead>
+        <tbody>
+
+          <tr data-status="VIP" data-spend="4820.00" data-orders="34">
+            <td><div class="cust"><span class="mini-av" style="background:#e0e7ff;color:#4338ca">OM<img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><a href="#cust-1" class="oid" data-bs-toggle="offcanvas"><b>Olivia Martin</b></a><small class="d-block text-secondary">olivia.martin@mail.com</small></div></div></td>
+            <td>New York, US</td><td>34</td><td><b>$4,820.00</b></td><td class="text-secondary">Sep 28, 2026</td>
+            <td><span class="badge-x s-Delivered">VIP</span></td><td class="text-end"><a class="icon-btn sm" href="#cust-1" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Active" data-spend="1290.50" data-orders="9">
+            <td><div class="cust"><span class="mini-av" style="background:#fce7f3;color:#be185d">LC<img src="https://randomuser.me/api/portraits/men/46.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><a href="#cust-2" class="oid" data-bs-toggle="offcanvas"><b>Liam Carter</b></a><small class="d-block text-secondary">liam.carter@mail.com</small></div></div></td>
+            <td>London, UK</td><td>9</td><td><b>$1,290.50</b></td><td class="text-secondary">Sep 28, 2026</td>
+            <td><span class="badge-x s-Paid">Active</span></td><td class="text-end"><a class="icon-btn sm" href="#cust-2" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="VIP" data-spend="6104.00" data-orders="41">
+            <td><div class="cust"><span class="mini-av" style="background:#d1fae5;color:#047857">SN<img src="https://randomuser.me/api/portraits/women/68.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><a href="#cust-3" class="oid" data-bs-toggle="offcanvas"><b>Sophia Nguyen</b></a><small class="d-block text-secondary">sophia.nguyen@mail.com</small></div></div></td>
+            <td>Toronto, CA</td><td>41</td><td><b>$6,104.00</b></td><td class="text-secondary">Sep 27, 2026</td>
+            <td><span class="badge-x s-Delivered">VIP</span></td><td class="text-end"><a class="icon-btn sm" href="#cust-3" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="At risk" data-spend="380.00" data-orders="3">
+            <td><div class="cust"><span class="mini-av" style="background:#fef3c7;color:#b45309">NP<img src="https://randomuser.me/api/portraits/men/75.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><a href="#cust-4" class="oid" data-bs-toggle="offcanvas"><b>Noah Patel</b></a><small class="d-block text-secondary">noah.patel@mail.com</small></div></div></td>
+            <td>Austin, US</td><td>3</td><td><b>$380.00</b></td><td class="text-secondary">Jul 02, 2026</td>
+            <td><span class="badge-x s-Unpaid">At risk</span></td><td class="text-end"><a class="icon-btn sm" href="#cust-4" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Active" data-spend="215.00" data-orders="2">
+            <td><div class="cust"><span class="mini-av" style="background:#dbeafe;color:#1d4ed8">EB<img src="https://randomuser.me/api/portraits/women/26.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><a href="#cust-5" class="oid" data-bs-toggle="offcanvas"><b>Emma Brooks</b></a><small class="d-block text-secondary">emma.brooks@mail.com</small></div></div></td>
+            <td>Berlin, DE</td><td>2</td><td><b>$215.00</b></td><td class="text-secondary">Sep 26, 2026</td>
+            <td><span class="badge-x s-Paid">Active</span></td><td class="text-end"><a class="icon-btn sm" href="#cust-5" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Active" data-spend="890.90" data-orders="7">
+            <td><div class="cust"><span class="mini-av" style="background:#ede9fe;color:#6d28d9">LR<img src="https://randomuser.me/api/portraits/men/52.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><a href="#cust-6" class="oid" data-bs-toggle="offcanvas"><b>Lucas Rivera</b></a><small class="d-block text-secondary">lucas.rivera@mail.com</small></div></div></td>
+            <td>New York, US</td><td>7</td><td><b>$890.90</b></td><td class="text-secondary">Sep 26, 2026</td>
+            <td><span class="badge-x s-Paid">Active</span></td><td class="text-end"><a class="icon-btn sm" href="#cust-6" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Active" data-spend="512.00" data-orders="4">
+            <td><div class="cust"><span class="mini-av" style="background:#fee2e2;color:#b91c1c">AT<img src="https://randomuser.me/api/portraits/women/12.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><a href="#cust-7" class="oid" data-bs-toggle="offcanvas"><b>Ava Thompson</b></a><small class="d-block text-secondary">ava.thompson@mail.com</small></div></div></td>
+            <td>Austin, US</td><td>4</td><td><b>$512.00</b></td><td class="text-secondary">Sep 25, 2026</td>
+            <td><span class="badge-x s-Paid">Active</span></td><td class="text-end"><a class="icon-btn sm" href="#cust-7" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="At risk" data-spend="76.00" data-orders="1">
+            <td><div class="cust"><span class="mini-av" style="background:#eef2fd;color:#4338ca">EK<img src="https://randomuser.me/api/portraits/men/22.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><a href="#cust-8" class="oid" data-bs-toggle="offcanvas"><b>Ethan Kim</b></a><small class="d-block text-secondary">ethan.kim@mail.com</small></div></div></td>
+            <td>London, UK</td><td>1</td><td><b>$76.00</b></td><td class="text-secondary">Jun 14, 2026</td>
+            <td><span class="badge-x s-Unpaid">At risk</span></td><td class="text-end"><a class="icon-btn sm" href="#cust-8" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Active" data-spend="329.80" data-orders="3">
+            <td><div class="cust"><span class="mini-av" style="background:#d1fae5;color:#047857">MR<img src="https://randomuser.me/api/portraits/women/90.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><a href="#cust-9" class="oid" data-bs-toggle="offcanvas"><b>Mia Rossi</b></a><small class="d-block text-secondary">mia.rossi@mail.com</small></div></div></td>
+            <td>Berlin, DE</td><td>3</td><td><b>$329.80</b></td><td class="text-secondary">Sep 24, 2026</td>
+            <td><span class="badge-x s-Paid">Active</span></td><td class="text-end"><a class="icon-btn sm" href="#cust-9" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="VIP" data-spend="3990.00" data-orders="26">
+            <td><div class="cust"><span class="mini-av" style="background:#fdf3ea;color:#b45309">JW<img src="https://randomuser.me/api/portraits/men/61.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><a href="#cust-10" class="oid" data-bs-toggle="offcanvas"><b>James Walker</b></a><small class="d-block text-secondary">james.walker@mail.com</small></div></div></td>
+            <td>Toronto, CA</td><td>26</td><td><b>$3,990.00</b></td><td class="text-secondary">Sep 24, 2026</td>
+            <td><span class="badge-x s-Delivered">VIP</span></td><td class="text-end"><a class="icon-btn sm" href="#cust-10" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+
+        </tbody>
+      </table>
+      </div>
+      <small class="text-secondary d-block mt-2" id="custInfo">Showing 10 of 10 customers</small>
+    </div>
+  </main>
+
+    <!-- ---------- Footer: copyright + legal links (same on every page) ---------- -->
+<footer class="footer-x">
+    <span>© 2026 Khamba Inc. All rights reserved.</span>
+    <div class="d-flex gap-3">
+      <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="help.html">Help &amp; Support</a>
+      <span class="d-none d-sm-inline text-secondary">v1.0.0</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     LIVE CUSTOMIZER — lets the user try a different sidebar
+     colour / font without touching any code (see app.js).
+     ============================================================ -->
+<button class="sw-fab" id="swFab" title="Customize"><i data-lucide="palette"></i></button>
+<div class="sw-panel" id="swPanel">
+  <div class="sw-head"><b>Customize</b><button id="swClose" aria-label="Close"><i data-lucide="x"></i></button></div>
+  <div class="sw-label">Sidebar color</div><div class="sw-colors" id="swColors"></div>
+  <div class="sw-label">Font family</div><div id="swFonts"></div>
+  <button class="btn-reorder w-100 mt-4" id="swReset">Reset to default</button>
+</div>
+
+<!-- ============================================================
+     DETAIL DRAWERS — one per row (10 total on this page).
+     Each is a plain Bootstrap 5 offcanvas; opened via
+     data-bs-toggle="offcanvas" in the table/card above, no JS needed.
+     ============================================================ -->
+<div class="offcanvas offcanvas-end od" id="cust-1">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Olivia Martin</h5><small class="text-secondary">olivia.martin@mail.com</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex align-items-center gap-3">
+        <span class="mini-av" style="width:52px;height:52px;font-size:15px;background:#e0e7ff;color:#4338ca">OM<img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" onerror="this.remove()"></span>
+        <div><span class="badge-x s-Delivered">VIP</span><small class="d-block text-secondary mt-1">New York, US</small></div>
+      </div>
+      <div class="od-sec"><h6>Customer stats</h6>
+        <div class="stat-grid"><div class="stat"><small>Total orders</small><b>34</b></div><div class="stat"><small>Total spent</small><b>$4,820.00</b></div></div>
+        <div class="sum"><span>Last order</span><span>Sep 28, 2026</span></div>
+        <div class="sum"><span>Shipping address</span><span>12 Maple Avenue, New York, US</span></div>
+      </div>
+      <div class="od-sec border-0"><h6>Contact</h6>
+        <div class="sum"><span>Email</span><span>olivia.martin@mail.com</span></div>
+        <div class="sum"><span>Phone</span><span>+1 (555) 010-0142</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="mail"></i>Email</button><button class="btn-dark-x"><i data-lucide="shopping-bag"></i>View orders</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="cust-2">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Liam Carter</h5><small class="text-secondary">liam.carter@mail.com</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex align-items-center gap-3">
+        <span class="mini-av" style="width:52px;height:52px;font-size:15px;background:#fce7f3;color:#be185d">LC<img src="https://randomuser.me/api/portraits/men/46.jpg" alt="" onerror="this.remove()"></span>
+        <div><span class="badge-x s-Paid">Active</span><small class="d-block text-secondary mt-1">London, UK</small></div>
+      </div>
+      <div class="od-sec"><h6>Customer stats</h6>
+        <div class="stat-grid"><div class="stat"><small>Total orders</small><b>9</b></div><div class="stat"><small>Total spent</small><b>$1,290.50</b></div></div>
+        <div class="sum"><span>Last order</span><span>Sep 28, 2026</span></div>
+        <div class="sum"><span>Shipping address</span><span>48 Baker Street, London, UK</span></div>
+      </div>
+      <div class="od-sec border-0"><h6>Contact</h6>
+        <div class="sum"><span>Email</span><span>liam.carter@mail.com</span></div>
+        <div class="sum"><span>Phone</span><span>+1 (555) 010-0242</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="mail"></i>Email</button><button class="btn-dark-x"><i data-lucide="shopping-bag"></i>View orders</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="cust-3">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Sophia Nguyen</h5><small class="text-secondary">sophia.nguyen@mail.com</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex align-items-center gap-3">
+        <span class="mini-av" style="width:52px;height:52px;font-size:15px;background:#d1fae5;color:#047857">SN<img src="https://randomuser.me/api/portraits/women/68.jpg" alt="" onerror="this.remove()"></span>
+        <div><span class="badge-x s-Delivered">VIP</span><small class="d-block text-secondary mt-1">Toronto, CA</small></div>
+      </div>
+      <div class="od-sec"><h6>Customer stats</h6>
+        <div class="stat-grid"><div class="stat"><small>Total orders</small><b>41</b></div><div class="stat"><small>Total spent</small><b>$6,104.00</b></div></div>
+        <div class="sum"><span>Last order</span><span>Sep 27, 2026</span></div>
+        <div class="sum"><span>Shipping address</span><span>9 Queen Street, Toronto, CA</span></div>
+      </div>
+      <div class="od-sec border-0"><h6>Contact</h6>
+        <div class="sum"><span>Email</span><span>sophia.nguyen@mail.com</span></div>
+        <div class="sum"><span>Phone</span><span>+1 (555) 010-0342</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="mail"></i>Email</button><button class="btn-dark-x"><i data-lucide="shopping-bag"></i>View orders</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="cust-4">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Noah Patel</h5><small class="text-secondary">noah.patel@mail.com</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex align-items-center gap-3">
+        <span class="mini-av" style="width:52px;height:52px;font-size:15px;background:#fef3c7;color:#b45309">NP<img src="https://randomuser.me/api/portraits/men/75.jpg" alt="" onerror="this.remove()"></span>
+        <div><span class="badge-x s-Unpaid">At risk</span><small class="d-block text-secondary mt-1">Austin, US</small></div>
+      </div>
+      <div class="od-sec"><h6>Customer stats</h6>
+        <div class="stat-grid"><div class="stat"><small>Total orders</small><b>3</b></div><div class="stat"><small>Total spent</small><b>$380.00</b></div></div>
+        <div class="sum"><span>Last order</span><span>Jul 02, 2026</span></div>
+        <div class="sum"><span>Shipping address</span><span>210 Fifth Ave, Austin, US</span></div>
+      </div>
+      <div class="od-sec border-0"><h6>Contact</h6>
+        <div class="sum"><span>Email</span><span>noah.patel@mail.com</span></div>
+        <div class="sum"><span>Phone</span><span>+1 (555) 010-0442</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="mail"></i>Email</button><button class="btn-dark-x"><i data-lucide="shopping-bag"></i>View orders</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="cust-5">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Emma Brooks</h5><small class="text-secondary">emma.brooks@mail.com</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex align-items-center gap-3">
+        <span class="mini-av" style="width:52px;height:52px;font-size:15px;background:#dbeafe;color:#1d4ed8">EB<img src="https://randomuser.me/api/portraits/women/26.jpg" alt="" onerror="this.remove()"></span>
+        <div><span class="badge-x s-Paid">Active</span><small class="d-block text-secondary mt-1">Berlin, DE</small></div>
+      </div>
+      <div class="od-sec"><h6>Customer stats</h6>
+        <div class="stat-grid"><div class="stat"><small>Total orders</small><b>2</b></div><div class="stat"><small>Total spent</small><b>$215.00</b></div></div>
+        <div class="sum"><span>Last order</span><span>Sep 26, 2026</span></div>
+        <div class="sum"><span>Shipping address</span><span>77 Unter den Linden, Berlin, DE</span></div>
+      </div>
+      <div class="od-sec border-0"><h6>Contact</h6>
+        <div class="sum"><span>Email</span><span>emma.brooks@mail.com</span></div>
+        <div class="sum"><span>Phone</span><span>+1 (555) 010-0542</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="mail"></i>Email</button><button class="btn-dark-x"><i data-lucide="shopping-bag"></i>View orders</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="cust-6">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Lucas Rivera</h5><small class="text-secondary">lucas.rivera@mail.com</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex align-items-center gap-3">
+        <span class="mini-av" style="width:52px;height:52px;font-size:15px;background:#ede9fe;color:#6d28d9">LR<img src="https://randomuser.me/api/portraits/men/52.jpg" alt="" onerror="this.remove()"></span>
+        <div><span class="badge-x s-Paid">Active</span><small class="d-block text-secondary mt-1">New York, US</small></div>
+      </div>
+      <div class="od-sec"><h6>Customer stats</h6>
+        <div class="stat-grid"><div class="stat"><small>Total orders</small><b>7</b></div><div class="stat"><small>Total spent</small><b>$890.90</b></div></div>
+        <div class="sum"><span>Last order</span><span>Sep 26, 2026</span></div>
+        <div class="sum"><span>Shipping address</span><span>5 River Road, New York, US</span></div>
+      </div>
+      <div class="od-sec border-0"><h6>Contact</h6>
+        <div class="sum"><span>Email</span><span>lucas.rivera@mail.com</span></div>
+        <div class="sum"><span>Phone</span><span>+1 (555) 010-0642</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="mail"></i>Email</button><button class="btn-dark-x"><i data-lucide="shopping-bag"></i>View orders</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="cust-7">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Ava Thompson</h5><small class="text-secondary">ava.thompson@mail.com</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex align-items-center gap-3">
+        <span class="mini-av" style="width:52px;height:52px;font-size:15px;background:#fee2e2;color:#b91c1c">AT<img src="https://randomuser.me/api/portraits/women/12.jpg" alt="" onerror="this.remove()"></span>
+        <div><span class="badge-x s-Paid">Active</span><small class="d-block text-secondary mt-1">Austin, US</small></div>
+      </div>
+      <div class="od-sec"><h6>Customer stats</h6>
+        <div class="stat-grid"><div class="stat"><small>Total orders</small><b>4</b></div><div class="stat"><small>Total spent</small><b>$512.00</b></div></div>
+        <div class="sum"><span>Last order</span><span>Sep 25, 2026</span></div>
+        <div class="sum"><span>Shipping address</span><span>33 Elm Street, Austin, US</span></div>
+      </div>
+      <div class="od-sec border-0"><h6>Contact</h6>
+        <div class="sum"><span>Email</span><span>ava.thompson@mail.com</span></div>
+        <div class="sum"><span>Phone</span><span>+1 (555) 010-0742</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="mail"></i>Email</button><button class="btn-dark-x"><i data-lucide="shopping-bag"></i>View orders</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="cust-8">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Ethan Kim</h5><small class="text-secondary">ethan.kim@mail.com</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex align-items-center gap-3">
+        <span class="mini-av" style="width:52px;height:52px;font-size:15px;background:#eef2fd;color:#4338ca">EK<img src="https://randomuser.me/api/portraits/men/22.jpg" alt="" onerror="this.remove()"></span>
+        <div><span class="badge-x s-Unpaid">At risk</span><small class="d-block text-secondary mt-1">London, UK</small></div>
+      </div>
+      <div class="od-sec"><h6>Customer stats</h6>
+        <div class="stat-grid"><div class="stat"><small>Total orders</small><b>1</b></div><div class="stat"><small>Total spent</small><b>$76.00</b></div></div>
+        <div class="sum"><span>Last order</span><span>Jun 14, 2026</span></div>
+        <div class="sum"><span>Shipping address</span><span>18 King's Road, London, UK</span></div>
+      </div>
+      <div class="od-sec border-0"><h6>Contact</h6>
+        <div class="sum"><span>Email</span><span>ethan.kim@mail.com</span></div>
+        <div class="sum"><span>Phone</span><span>+1 (555) 010-0842</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="mail"></i>Email</button><button class="btn-dark-x"><i data-lucide="shopping-bag"></i>View orders</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="cust-9">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Mia Rossi</h5><small class="text-secondary">mia.rossi@mail.com</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex align-items-center gap-3">
+        <span class="mini-av" style="width:52px;height:52px;font-size:15px;background:#d1fae5;color:#047857">MR<img src="https://randomuser.me/api/portraits/women/90.jpg" alt="" onerror="this.remove()"></span>
+        <div><span class="badge-x s-Paid">Active</span><small class="d-block text-secondary mt-1">Berlin, DE</small></div>
+      </div>
+      <div class="od-sec"><h6>Customer stats</h6>
+        <div class="stat-grid"><div class="stat"><small>Total orders</small><b>3</b></div><div class="stat"><small>Total spent</small><b>$329.80</b></div></div>
+        <div class="sum"><span>Last order</span><span>Sep 24, 2026</span></div>
+        <div class="sum"><span>Shipping address</span><span>4 Via Roma, Berlin, DE</span></div>
+      </div>
+      <div class="od-sec border-0"><h6>Contact</h6>
+        <div class="sum"><span>Email</span><span>mia.rossi@mail.com</span></div>
+        <div class="sum"><span>Phone</span><span>+1 (555) 010-0942</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="mail"></i>Email</button><button class="btn-dark-x"><i data-lucide="shopping-bag"></i>View orders</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="cust-10">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">James Walker</h5><small class="text-secondary">james.walker@mail.com</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex align-items-center gap-3">
+        <span class="mini-av" style="width:52px;height:52px;font-size:15px;background:#fdf3ea;color:#b45309">JW<img src="https://randomuser.me/api/portraits/men/61.jpg" alt="" onerror="this.remove()"></span>
+        <div><span class="badge-x s-Delivered">VIP</span><small class="d-block text-secondary mt-1">Toronto, CA</small></div>
+      </div>
+      <div class="od-sec"><h6>Customer stats</h6>
+        <div class="stat-grid"><div class="stat"><small>Total orders</small><b>26</b></div><div class="stat"><small>Total spent</small><b>$3,990.00</b></div></div>
+        <div class="sum"><span>Last order</span><span>Sep 24, 2026</span></div>
+        <div class="sum"><span>Shipping address</span><span>221 Oxford Road, Toronto, CA</span></div>
+      </div>
+      <div class="od-sec border-0"><h6>Contact</h6>
+        <div class="sum"><span>Email</span><span>james.walker@mail.com</span></div>
+        <div class="sum"><span>Phone</span><span>+1 (555) 010-1042</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="mail"></i>Email</button><button class="btn-dark-x"><i data-lucide="shopping-bag"></i>View orders</button></div>
+  </div>
+</div>
+
+<!-- Modal: new Customer Modal -->
+<div class="modal fade" id="newCustomerModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="newCustomerForm" novalidate>
+        <div class="modal-header"><h5 class="modal-title">Add customer</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="row g-3 mb-3">
+            <div class="col-6"><label class="form-label">Full name</label><input type="text" class="form-control" required></div>
+            <div class="col-6"><label class="form-label">Email</label><input type="email" class="form-control" required></div>
+          </div>
+          <div class="mb-0"><label class="form-label">Location</label><input type="text" class="form-control" placeholder="City, country" required></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-soft" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn-dark-x"><i data-lucide="plus"></i>Add customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- Shared toast notification, triggered from app.js via window.showToast() -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+  <div class="toast" id="toastHost" role="status"><div class="toast-body d-flex align-items-center gap-2"><i data-lucide="check-circle" id="toastIcon"></i><span id="toastMsg"></span></div></div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS — jQuery, Bootstrap, (Chart.js on chart pages),
+     Lucide icons, then our own app.js last.
+     ============================================================ -->
+<script src="assets/js/jquery-3.7.1.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

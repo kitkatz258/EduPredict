@@ -52,7 +52,7 @@
                                 wire:click="markReviewed({{ $action->id }})"
                                 wire:loading.attr="disabled"
                                 wire:target="markReviewed({{ $action->id }})"
-                                class="mt-2 inline-flex items-center gap-2 rounded-lg bg-brand-900 px-3 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"
+                                class="mt-2 inline-flex items-center gap-2 rounded-lg bg-brand-900 px-3 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60"
                             >
                                 <x-spinner wire:loading wire:target="markReviewed({{ $action->id }})" />
                                 Mark reviewed

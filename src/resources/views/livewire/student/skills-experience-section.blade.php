@@ -139,7 +139,7 @@
         <p class="mb-3 text-sm text-gray-600">When the list looks right, save the section. An empty list is allowed.</p>
         <div class="flex flex-wrap items-center justify-between gap-3">
             <button type="button" wire:click="$parent.back" class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-brand-200 bg-white px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"><i class="ri-arrow-left-line" aria-hidden="true"></i>Back</button>
-            <button type="button" wire:click="completeSection" wire:loading.attr="disabled" wire:target="completeSection" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:opacity-60"><x-spinner wire:loading wire:target="completeSection" />Save section &amp; continue<i class="ri-arrow-right-line" wire:loading.remove wire:target="completeSection" aria-hidden="true"></i></button>
+            <button type="button" wire:click="completeSection" wire:loading.attr="disabled" wire:target="completeSection" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:opacity-60"><x-spinner wire:loading wire:target="completeSection" />Save section &amp; continue<i class="ri-arrow-right-line" wire:loading.remove wire:target="completeSection" aria-hidden="true"></i></button>
         </div>
     </div>
 
@@ -154,7 +154,7 @@
                 </div>
                 <div class="flex justify-end gap-2 border-t border-brand-200 pt-4">
                     <button type="button" x-on:click="requestClose()" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save skill</button>
+                    <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save skill</button>
                 </div>
             </form>
         </x-dialog>
@@ -203,10 +203,10 @@
                 <div class="flex justify-end gap-2 border-t border-brand-200 pt-4">
                     @if ($viewOnly)
                         <button type="button" wire:click="openEdit('certification', {{ $editingId }})" class="rounded-lg border border-brand-900 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Edit</button>
-                        <button type="button" x-on:click="requestClose()" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">Close</button>
+                        <button type="button" x-on:click="requestClose()" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937]">Close</button>
                     @else
                         <button type="button" x-on:click="requestClose()" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                        <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save certification</button>
+                        <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save certification</button>
                     @endif
                 </div>
             </form>
@@ -256,10 +256,10 @@
                 <div class="flex justify-end gap-2 border-t border-brand-200 pt-4">
                     @if ($viewOnly)
                         <button type="button" wire:click="openEdit('experience', {{ $editingId }})" class="rounded-lg border border-brand-900 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Edit</button>
-                        <button type="button" x-on:click="requestClose()" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">Close</button>
+                        <button type="button" x-on:click="requestClose()" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937]">Close</button>
                     @else
                         <button type="button" x-on:click="requestClose()" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                        <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save experience</button>
+                        <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save experience</button>
                     @endif
                 </div>
             </form>

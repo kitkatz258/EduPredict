@@ -1,4 +1,4 @@
-<section>
+<section id="account-settings">
     <header>
         <h2 class="text-lg font-semibold text-brand-900">
             {{ __('Update password') }}

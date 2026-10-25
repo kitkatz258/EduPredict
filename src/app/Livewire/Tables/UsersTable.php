@@ -91,7 +91,7 @@ class UsersTable extends BaseTable
             ['key' => 'name', 'label' => 'Name', 'sortable' => true],
             ['key' => 'email', 'label' => 'Email', 'sortable' => true],
             ['key' => 'role', 'label' => 'Role', 'sortable' => true],
-            ['key' => 'is_active', 'label' => 'Active', 'sortable' => true],
+            ['key' => 'is_active', 'label' => 'Status', 'sortable' => true],
         ];
     }
 

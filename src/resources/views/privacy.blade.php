@@ -50,7 +50,7 @@
                     <h3 class="text-base font-semibold text-brand-900">Download my data</h3>
                     <p class="mt-1 text-sm text-gray-600">The file contains your account, grades, profile, questionnaire, and prediction history, including the model version stored on each request.</p>
                     <div class="mt-4 flex flex-wrap gap-3">
-                        <a href="{{ route('privacy.download.json') }}" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">Download JSON</a>
+                        <a href="{{ route('privacy.download.json') }}" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937]">Download JSON</a>
                         <a href="{{ route('privacy.download.pdf') }}" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900">Download PDF</a>
                     </div>
                 </section>

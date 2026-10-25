@@ -20,7 +20,7 @@
                 cy="60"
                 r="{{ $radius }}"
                 fill="none"
-                stroke="#1B5E20"
+                stroke="#4f46e5"
                 stroke-width="10"
                 stroke-linecap="round"
                 stroke-dasharray="{{ $circumference }}"

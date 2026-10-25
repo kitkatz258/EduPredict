@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytics – Khamba Admin</title>
+<!-- Google Fonts used by the live customizer's font picker -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Bootstrap 5 (layout, modals, offcanvas, dropdowns) -->
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<!-- Khamba's own stylesheet (design tokens + every component) -->
+<link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR NAVIGATION
+     Fixed left sidebar: logo, six nav groups, and a store/Logout
+     footer. This exact block is repeated at the top of every
+     dashboard page — edit the logo here, then use your editor's
+     "Replace in all files" to repeat the change everywhere.
+     ============================================================ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <a class="brand-link" href="index.html"><span class="logo"><i data-lucide="shopping-bag"></i></span><span class="brand">Khamba</span></a>
+    <button class="sb-toggle d-none d-lg-grid" id="sbToggle" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button>
+  </div>
+  <nav class="sb-scroll">
+    <div class="sb-group">General</div>
+    <a class="sb-link sb-parent collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#dashGroup" aria-expanded="false" title="Dashboards">
+      <i data-lucide="layout-dashboard"></i><span>Dashboards</span><i data-lucide="chevron-down" class="sb-chevron"></i>
+    </a>
+    <div class="collapse" id="dashGroup">
+      <a class="sb-link sb-sub" href="index.html" title="Dashboard 1"><span>Dashboard 1</span></a>
+      <a class="sb-link sb-sub" href="dashboard-2.html" title="Dashboard 2"><span>Dashboard 2</span></a>
+      <a class="sb-link sb-sub" href="dashboard-3.html" title="Dashboard 3"><span>Dashboard 3</span></a>
+    </div>
+    <a class="sb-link" href="orders.html" title="Orders"><i data-lucide="shopping-bag"></i><span>Orders</span><em class="sb-badge">8</em></a>
+    <a class="sb-link" href="products.html" title="Products"><i data-lucide="package"></i><span>Products</span></a>
+    <a class="sb-link" href="categories.html" title="Categories"><i data-lucide="layers"></i><span>Categories</span></a>
+    <a class="sb-link" href="inventory.html" title="Inventory"><i data-lucide="warehouse"></i><span>Inventory</span></a>
+    <a class="sb-link" href="customers.html" title="Customers"><i data-lucide="users"></i><span>Customers</span></a>
+    <a class="sb-link" href="reviews.html" title="Reviews"><i data-lucide="star"></i><span>Reviews</span><em class="sb-badge">12</em></a>
+    <a class="sb-link" href="discounts.html" title="Discounts"><i data-lucide="percent"></i><span>Discounts</span></a>
+    <a class="sb-link" href="payments.html" title="Payments"><i data-lucide="credit-card"></i><span>Payments</span></a>
+    <a class="sb-link active" href="analytics.html" title="Analytics"><i data-lucide="chart-no-axes-combined"></i><span>Analytics</span></a>
+
+    <div class="sb-group">Operations</div>
+    <a class="sb-link" href="shipments.html" title="Shipments"><i data-lucide="truck"></i><span>Shipments</span></a>
+    <a class="sb-link" href="returns.html" title="Returns"><i data-lucide="undo-2"></i><span>Returns</span></a>
+    <a class="sb-link" href="abandoned-carts.html" title="Abandoned Carts"><i data-lucide="shopping-cart"></i><span>Abandoned Carts</span></a>
+    <a class="sb-link" href="gift-cards.html" title="Gift Cards"><i data-lucide="gift"></i><span>Gift Cards</span></a>
+
+    <div class="sb-group">Marketing</div>
+    <a class="sb-link" href="campaigns.html" title="Campaigns"><i data-lucide="megaphone"></i><span>Campaigns</span></a>
+    <a class="sb-link" href="coupons.html" title="Coupons"><i data-lucide="ticket"></i><span>Coupons</span></a>
+    <a class="sb-link" href="email.html" title="Email Marketing"><i data-lucide="mail"></i><span>Email Marketing</span></a>
+
+    <div class="sb-group">Management</div>
+    <a class="sb-link" href="team.html" title="Team Members"><i data-lucide="user-round-cog"></i><span>Team Members</span></a>
+    <a class="sb-link" href="roles.html" title="Roles &amp; Permissions"><i data-lucide="shield-check"></i><span>Roles &amp; Permissions</span></a>
+    <a class="sb-link" href="logs.html" title="Activity Logs"><i data-lucide="history"></i><span>Activity Logs</span></a>
+
+    <div class="sb-group">Account</div>
+    <a class="sb-link" href="settings.html" title="Settings"><i data-lucide="settings"></i><span>Settings</span></a>
+    <a class="sb-link" href="integrations.html" title="Integrations"><i data-lucide="plug"></i><span>Integrations</span></a>
+    <a class="sb-link" href="notifications.html" title="Notifications"><i data-lucide="bell"></i><span>Notifications</span></a>
+    <a class="sb-link" href="help.html" title="Help &amp; Support"><i data-lucide="life-buoy"></i><span>Help &amp; Support</span></a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="store-card"><span class="logo"><i data-lucide="store"></i></span><div><b>Khamba Store</b><small>khamba.com</small></div></div>
+    <a class="sb-link" href="login.html" title="Logout"><i data-lucide="log-out"></i><span>Logout</span></a>
+  </div>
+</aside>
+<!-- Dark overlay behind the sidebar when it opens as a mobile drawer -->
+<div class="backdrop" id="backdrop"></div>
+
+<!-- ============================================================
+     MAIN COLUMN — topbar, page content, footer
+     ============================================================ -->
+<div class="main">
+    <!-- ---------- Topbar: search, store switcher, theme toggle,
+       notifications and the user menu (Profile / Account settings /
+       Billing / Logout) ---------- -->
+<header class="topbar">
+    <button class="icon-btn d-lg-none" id="mobileToggle" aria-label="Open menu"><i data-lucide="menu"></i></button>
+    <div class="search">
+      <i data-lucide="search"></i>
+      <input type="text" id="search" placeholder="Search anything..." autocomplete="off">
+      <kbd>/</kbd>
+      <div class="search-panel" id="searchPanel">
+        <div class="sp-label">Search in</div>
+        <a href="#" data-scope="Products"><i data-lucide="package"></i>Products</a>
+        <a href="#" data-scope="Orders"><i data-lucide="shopping-bag"></i>Orders</a>
+        <a href="#" data-scope="Customers"><i data-lucide="users"></i>Customers</a>
+        <a href="#" data-scope="Pages"><i data-lucide="file-text"></i>Pages</a>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="dropdown d-none d-md-block">
+        <button class="pill-btn" data-bs-toggle="dropdown"><i data-lucide="store"></i>Khamba Store<i data-lucide="chevron-down"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">Khamba Store</a></li><li><a class="dropdown-item" href="#">Khamba Outlet</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#">+ Add new store</a></li></ul>
+      </div>
+      <div class="dropdown d-none d-sm-block">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Language"><i data-lucide="globe"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">English</a></li><li><a class="dropdown-item" href="#">Español</a></li><li><a class="dropdown-item" href="#">Français</a></li></ul>
+      </div>
+      <button class="icon-btn" id="themeToggle" title="Toggle theme"><i data-lucide="moon"></i></button>
+      <div class="dropdown">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <div class="dropdown-menu dropdown-menu-end notif">
+          <div class="notif-head">Notifications <a href="#">Mark all read</a></div>
+          <a class="notif-item unread" href="#"><i data-lucide="shopping-bag"></i><div><b>New order #10482</b><small>2 minutes ago</small></div></a>
+          <a class="notif-item unread" href="#"><i data-lucide="triangle-alert"></i><div><b>Low stock: Ceramic Mug</b><small>1 hour ago</small></div></a>
+          <a class="notif-item" href="#"><i data-lucide="star"></i><div><b>New 5-star review</b><small>Yesterday</small></div></a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="avatar" data-bs-toggle="dropdown"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Alex Johnson" onerror="this.replaceWith('AJ')"></button>
+        <ul class="dropdown-menu dropdown-menu-end user-menu">
+          <li class="um-head"><b>Alex Johnson</b><small>alex@khamba.com</small></li>
+          <li><a class="dropdown-item" href="profile.html"><i data-lucide="user"></i>Profile</a></li>
+          <li><a class="dropdown-item" href="account-settings.html"><i data-lucide="settings"></i>Account settings</a></li>
+          <li><a class="dropdown-item" href="billing.html"><i data-lucide="credit-card"></i>Billing</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="login.html"><i data-lucide="log-out"></i>Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+    <!-- ---------- Page content ---------- -->
+<main class="content">
+    <div class="page-head">
+      <div><h1>Analytics</h1><p>See how your store is performing, from traffic down to purchases.</p></div>
+      <div class="d-flex gap-2">
+        <div class="dropdown">
+          <button class="btn-soft" data-bs-toggle="dropdown"><i data-lucide="calendar"></i><span id="rangeLabel">Last 7 days</span><i data-lucide="chevron-down"></i></button>
+          <ul class="dropdown-menu dropdown-menu-end" id="rangeMenu">
+            <li><a class="dropdown-item" href="#">Today</a></li>
+            <li><a class="dropdown-item" href="#">Last 7 days</a></li>
+            <li><a class="dropdown-item" href="#">Last 30 days</a></li>
+            <li><a class="dropdown-item" href="#">This year</a></li>
+          </ul>
+        </div>
+        <button class="btn-dark-x" id="exportBtn"><i data-lucide="download"></i>Export CSV</button>
+      </div>
+    </div>
+
+    <section class="row g-3 mb-3">
+      <div class="col-6 col-xl-3"><div class="kpi k1">
+        <div class="lbl">Total Revenue<span class="ico"><i data-lucide="wallet"></i></span></div>
+        <div class="val">$245,450</div>
+        <div class="foot"><span class="chg up"><i data-lucide="trending-up"></i>+14.9%</span><span>vs. last period</span></div>
+      </div></div>
+      <div class="col-6 col-xl-3"><div class="kpi k2">
+        <div class="lbl">Total Sessions<span class="ico"><i data-lucide="users"></i></span></div>
+        <div class="val">42,860</div>
+        <div class="foot"><span class="chg up"><i data-lucide="trending-up"></i>+9.3%</span><span>+3,650 sessions</span></div>
+      </div></div>
+      <div class="col-6 col-xl-3"><div class="kpi k3">
+        <div class="lbl">Conversion Rate<span class="ico"><i data-lucide="target"></i></span></div>
+        <div class="val">3.0%</div>
+        <div class="foot"><span class="chg up"><i data-lucide="trending-up"></i>+0.4%</span><span>vs. 2.6% last period</span></div>
+      </div></div>
+      <div class="col-6 col-xl-3"><div class="kpi k4">
+        <div class="lbl">Avg. Session Value<span class="ico"><i data-lucide="receipt"></i></span></div>
+        <div class="val">$28.60</div>
+        <div class="foot"><span class="chg up"><i data-lucide="trending-up"></i>+6.1%</span><span>+$1.65</span></div>
+      </div></div>
+    </section>
+
+    <section class="row g-3 mb-3">
+      <div class="col-12"><div class="card-x">
+        <div class="card-head flex-wrap">
+          <h5>Revenue &amp; Orders</h5>
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="legend"><span><i style="background:#4f46e5"></i>Revenue</span><span><i style="background:#c7d2fe"></i>Orders</span></div>
+            <div class="seg" id="chartRange">
+              <button data-r="7 days" class="on">7 days</button>
+              <button data-r="30 days">30 days</button>
+              <button data-r="3 months">3 months</button>
+              <button data-r="12 months">12 months</button>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="analyticsChart"></canvas></div>
+      </div></div>
+    </section>
+
+    <section class="row g-3 mb-3">
+      <div class="col-xl-5"><div class="card-x h-100">
+        <div class="card-head"><h5>Traffic Sources</h5><span class="text-secondary small">Last 7 days</span></div>
+        <div class="row-item"><div class="meta"><b>Organic Search</b><small>15,910 sessions</small></div>
+          <div class="d-none d-sm-block"><div class="bar" style="width:100px"><i style="width:38%;background:#4f46e5"></i></div></div><b>38%</b></div>
+        <div class="row-item"><div class="meta"><b>Direct</b><small>10,290 sessions</small></div>
+          <div class="d-none d-sm-block"><div class="bar" style="width:100px"><i style="width:24%;background:#818cf8"></i></div></div><b>24%</b></div>
+        <div class="row-item"><div class="meta"><b>Social</b><small>7,715 sessions</small></div>
+          <div class="d-none d-sm-block"><div class="bar" style="width:100px"><i style="width:18%;background:#a5b4fc"></i></div></div><b>18%</b></div>
+        <div class="row-item"><div class="meta"><b>Referral</b><small>5,143 sessions</small></div>
+          <div class="d-none d-sm-block"><div class="bar" style="width:100px"><i style="width:12%;background:#c7d2fe"></i></div></div><b>12%</b></div>
+        <div class="row-item"><div class="meta"><b>Email</b><small>3,429 sessions</small></div>
+          <div class="d-none d-sm-block"><div class="bar" style="width:100px"><i style="width:8%;background:#e0e7ff"></i></div></div><b>8%</b></div>
+      </div></div>
+      <div class="col-xl-7"><div class="card-x h-100">
+        <div class="card-head"><h5>Sales by Category</h5><span class="text-secondary small">Share of revenue</span></div>
+        <div class="d-flex align-items-center gap-4 flex-wrap flex-md-nowrap">
+          <div style="width:180px;height:180px;flex-shrink:0" class="mx-auto"><canvas id="categoryChart"></canvas></div>
+          <div class="flex-grow-1 w-100">
+            <div class="d-flex justify-content-between py-2 border-bottom"><span><i class="d-inline-block rounded-circle me-2" style="width:9px;height:9px;background:#4f46e5"></i>Electronics</span><b>34%</b></div>
+            <div class="d-flex justify-content-between py-2 border-bottom"><span><i class="d-inline-block rounded-circle me-2" style="width:9px;height:9px;background:#818cf8"></i>Accessories</span><b>22%</b></div>
+            <div class="d-flex justify-content-between py-2 border-bottom"><span><i class="d-inline-block rounded-circle me-2" style="width:9px;height:9px;background:#f59e0b"></i>Footwear</span><b>18%</b></div>
+            <div class="d-flex justify-content-between py-2 border-bottom"><span><i class="d-inline-block rounded-circle me-2" style="width:9px;height:9px;background:#10b981"></i>Home</span><b>16%</b></div>
+            <div class="d-flex justify-content-between py-2"><span><i class="d-inline-block rounded-circle me-2" style="width:9px;height:9px;background:#ec4899"></i>Fitness</span><b>10%</b></div>
+          </div>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="row g-3 mb-3">
+      <div class="col-12"><div class="card-x">
+        <div class="card-head"><h5>Top Products by Performance</h5><a href="products.html" class="link-x">View all products</a></div>
+        <div class="table-responsive"><table class="table-x">
+          <thead><tr><th>Product</th><th>Views</th><th>Add to cart</th><th>Purchases</th><th>Conversion</th><th>Revenue</th></tr></thead>
+          <tbody>
+            <tr><td><div class="cust"><span class="thumb" style="background:#eef2fd;color:#374151"><i data-lucide="headphones"></i></span><b>Wireless Headphones</b></div></td><td>6,240</td><td>1,180</td><td>482</td><td><span class="badge-x s-Delivered">7.7%</span></td><td><b>$59,760</b></td></tr>
+            <tr><td><div class="cust"><span class="thumb" style="background:#f6eff6;color:#374151"><i data-lucide="watch"></i></span><b>Smart Watch S2</b></div></td><td>5,910</td><td>905</td><td>287</td><td><span class="badge-x s-Delivered">4.9%</span></td><td><b>$91,553</b></td></tr>
+            <tr><td><div class="cust"><span class="thumb" style="background:#ecf6ef;color:#374151"><i data-lucide="footprints"></i></span><b>Running Sneakers</b></div></td><td>4,860</td><td>860</td><td>351</td><td><span class="badge-x s-Delivered">7.2%</span></td><td><b>$57,564</b></td></tr>
+            <tr><td><div class="cust"><span class="thumb" style="background:#fdf3ea;color:#374151"><i data-lucide="backpack"></i></span><b>Leather Backpack</b></div></td><td>4,105</td><td>710</td><td>396</td><td><span class="badge-x s-Delivered">9.7%</span></td><td><b>$45,540</b></td></tr>
+            <tr><td><div class="cust"><span class="thumb" style="background:#fef3c7;color:#374151"><i data-lucide="coffee"></i></span><b>Ceramic Mug Set</b></div></td><td>2,340</td><td>410</td><td>244</td><td><span class="badge-x s-Low">10.4%</span></td><td><b>$11,712</b></td></tr>
+          </tbody>
+        </table></div>
+      </div></div>
+    </section>
+
+    <section class="row g-3">
+      <div class="col-12"><div class="card-x">
+        <div class="card-head"><h5>Conversion Funnel</h5><span class="text-secondary small">Last 7 days</span></div>
+        <div class="funnel">
+          <div class="funnel-row"><div class="funnel-lbl">Visitors</div><div class="funnel-bar"><div class="funnel-fill" style="width:100%;background:#4f46e5">42,860</div></div><b>100%</b></div>
+          <div class="funnel-row"><div class="funnel-lbl">Product views</div><div class="funnel-bar"><div class="funnel-fill" style="width:62%;background:#6366f1">26,400</div></div><b>61.6%</b></div>
+          <div class="funnel-row"><div class="funnel-lbl">Added to cart</div><div class="funnel-bar"><div class="funnel-fill" style="width:19%;background:#818cf8">8,150</div></div><b>19.0%</b></div>
+          <div class="funnel-row"><div class="funnel-lbl">Checkout started</div><div class="funnel-bar"><div class="funnel-fill" style="width:9%;background:#a5b4fc">3,960</div></div><b>9.2%</b></div>
+          <div class="funnel-row"><div class="funnel-lbl">Purchase</div><div class="funnel-bar"><div class="funnel-fill" style="width:3%;background:#10b981">1,284</div></div><b>3.0%</b></div>
+        </div>
+      </div></div>
+    </section>
+  </main>
+
+    <!-- ---------- Footer: copyright + legal links (same on every page) ---------- -->
+<footer class="footer-x">
+    <span>© 2026 Khamba Inc. All rights reserved.</span>
+    <div class="d-flex gap-3">
+      <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="help.html">Help &amp; Support</a>
+      <span class="d-none d-sm-inline text-secondary">v1.0.0</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     LIVE CUSTOMIZER — lets the user try a different sidebar
+     colour / font without touching any code (see app.js).
+     ============================================================ -->
+<button class="sw-fab" id="swFab" title="Customize"><i data-lucide="palette"></i></button>
+<div class="sw-panel" id="swPanel">
+  <div class="sw-head"><b>Customize</b><button id="swClose" aria-label="Close"><i data-lucide="x"></i></button></div>
+  <div class="sw-label">Sidebar color</div><div class="sw-colors" id="swColors"></div>
+  <div class="sw-label">Font family</div><div id="swFonts"></div>
+  <button class="btn-reorder w-100 mt-4" id="swReset">Reset to default</button>
+</div>
+
+<!-- Shared toast notification, triggered from app.js via window.showToast() -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+  <div class="toast" id="toastHost" role="status"><div class="toast-body d-flex align-items-center gap-2"><i data-lucide="check-circle" id="toastIcon"></i><span id="toastMsg"></span></div></div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS — jQuery, Bootstrap, (Chart.js on chart pages),
+     Lucide icons, then our own app.js last.
+     ============================================================ -->
+<script src="assets/js/jquery-3.7.1.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/chart.umd.min.js"></script>
+<script src="assets/js/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

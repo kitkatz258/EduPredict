@@ -85,7 +85,7 @@
                 @if ($upload && ! $errors->has('upload'))
                     <div class="mx-auto mt-5 flex max-w-md flex-col items-center gap-3 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 sm:flex-row sm:justify-between">
                         <p class="truncate text-sm text-brand-900"><i class="ri-file-line mr-1" aria-hidden="true"></i>{{ $upload->getClientOriginalName() }}</p>
-                        <button type="button" wire:click="parseUpload" wire:loading.attr="disabled" wire:target="parseUpload,upload" class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">
+                        <button type="button" wire:click="parseUpload" wire:loading.attr="disabled" wire:target="parseUpload,upload" class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
                             <x-spinner wire:loading wire:target="parseUpload" />Read grades
                         </button>
                     </div>
@@ -107,7 +107,7 @@
                 @error('pastedText') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                 <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
                     <p class="text-xs text-gray-500">Works offline. Instructor names and sections are left out of your record.</p>
-                    <button type="button" wire:click="parsePaste" wire:loading.attr="disabled" wire:target="parsePaste" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">
+                    <button type="button" wire:click="parsePaste" wire:loading.attr="disabled" wire:target="parsePaste" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
                         <x-spinner wire:loading wire:target="parsePaste" />Read pasted table
                     </button>
                 </div>
@@ -167,7 +167,7 @@
                     <p class="text-xs text-gray-600">Saved grades become your academic record and are used in your next prediction.</p>
                     <div class="flex items-center gap-3">
                         <button type="button" wire:click="saveDraft" wire:loading.attr="disabled" wire:target="saveDraft,confirm" class="text-sm font-medium text-brand-900 hover:underline disabled:opacity-60">Save draft</button>
-                        <button type="button" wire:click="confirm" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Save these grades?" data-confirm-button="Save grades" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">
+                        <button type="button" wire:click="confirm" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Save these grades?" data-confirm-button="Save grades" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
                             <x-spinner wire:loading wire:target="confirm" />Save grades<i class="ri-arrow-right-s-line" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -274,7 +274,7 @@
                     </div>
                     <div class="flex items-center gap-3">
                         <button type="button" wire:click="saveDraft" wire:loading.attr="disabled" wire:target="saveDraft,confirm" class="text-sm font-medium text-brand-900 hover:underline disabled:opacity-60">Save draft</button>
-                        <button type="button" wire:click="confirm" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Confirm these grades?" data-confirm-button="Confirm & save" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">
+                        <button type="button" wire:click="confirm" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Confirm these grades?" data-confirm-button="Confirm & save" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
                             <x-spinner wire:loading wire:target="confirm" /><i class="ri-checkbox-circle-line" wire:loading.remove wire:target="confirm" aria-hidden="true"></i>Confirm &amp; Save Grades
                         </button>
                     </div>

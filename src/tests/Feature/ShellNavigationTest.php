@@ -79,14 +79,18 @@ class ShellNavigationTest extends TestCase
             ->get(route('admin.users'))
             ->assertOk()
             ->assertSee('id="staff-sidebar"', false)
-            ->assertSee('lg:pl-64', false)
+            ->assertSee('lg:pl-[264px]', false)
             ->assertSee('Open navigation')
+            ->assertSee('Collapse sidebar', false)
+            ->assertSee('href="'.route('profile.edit').'"', false)
+            ->assertSee('action="'.route('logout').'"', false)
             ->getContent();
 
         $sidebar = $this->between($html, 'id="staff-sidebar"', '</aside>');
-        foreach (['admin.dashboard', 'admin.users', 'admin.colleges', 'admin.questionnaire', 'admin.psoc', 'admin.interventions', 'admin.audit', 'admin.deletion-requests', 'privacy', 'profile.edit'] as $route) {
+        foreach (['admin.dashboard', 'admin.users', 'admin.colleges', 'admin.questionnaire', 'admin.psoc', 'admin.interventions', 'admin.audit', 'admin.deletion-requests', 'privacy'] as $route) {
             $this->assertStringContainsString('href="'.route($route).'"', $sidebar, "sidebar links to {$route}");
         }
+        $this->assertStringNotContainsString('href="'.route('profile.edit').'"', $sidebar);
         $this->assertStringNotContainsString('About', $sidebar);
         $this->assertStringNotContainsString('Faculty', $sidebar);
 
@@ -103,6 +107,17 @@ class ShellNavigationTest extends TestCase
         $this->assertStringContainsString('href="'.route('department.students').'"', $headSidebar);
         $this->assertStringNotContainsString('Faculty', $headSidebar);
         $this->assertStringNotContainsString('Adviser', $headSidebar);
+
+        $dean = User::factory()->role(UserRole::Dean)->create();
+        $deanHtml = $this->actingAs($dean)
+            ->get(route('dean.dashboard'))
+            ->assertOk()
+            ->assertSee('College totals only', false)
+            ->getContent();
+        $deanSidebar = $this->between($deanHtml, 'id="staff-sidebar"', '</aside>');
+        $this->assertStringContainsString('href="'.route('dean.dashboard').'"', $deanSidebar);
+        $this->assertStringNotContainsString(route('department.students'), $deanSidebar);
+        $this->assertStringNotContainsString(route('admin.users'), $deanSidebar);
     }
 
     public function test_guests_on_the_privacy_page_get_a_sign_in_link_instead_of_a_sidebar(): void

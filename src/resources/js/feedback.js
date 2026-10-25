@@ -1,6 +1,6 @@
 import Swal from 'sweetalert2';
 
-const brand = '#1B5E20';
+const brand = '#111827';
 
 function motionOptions() {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

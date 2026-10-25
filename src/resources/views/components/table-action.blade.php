@@ -5,7 +5,7 @@
 
 @php
     $tones = [
-        'neutral' => 'border-brand-200 bg-white text-brand-900 hover:bg-brand-50',
+        'neutral' => 'border-[#e8eaee] bg-white text-[#111827] hover:bg-[#f3f4f6]',
         'danger' => 'border-red-200 bg-white text-red-800 hover:bg-red-50',
     ];
     $toneClass = $tones[$tone] ?? $tones['neutral'];
