@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Analytics;
 
+use App\Enums\UserRole;
 use App\Livewire\Analytics\DashboardAnalytics;
 use App\Livewire\Tables\ScopedStudentsTable;
 use App\Models\AuditLog;
@@ -202,6 +203,7 @@ class DashboardAnalyticsTest extends TestCase
         $content = base64_decode((string) data_get($exported->effects, 'download.content'));
         $this->assertStringContainsString('S-HIGH', $content);
         $this->assertStringContainsString('program_fit', $content);
+        $this->assertStringContainsString('Asia/Manila', $content);
         $this->assertStringNotContainsString('S-LOW', $content);
         $this->assertStringNotContainsString('S-OUT', $content);
         $this->assertStringNotContainsString($high->user->name, (string) AuditLog::query()->sole()->meta['search'] ?? '');
@@ -280,7 +282,7 @@ class DashboardAnalyticsTest extends TestCase
     {
         $user = User::factory()->create([
             'name' => 'Student '.$number,
-            'role' => \App\Enums\UserRole::Student,
+            'role' => UserRole::Student,
         ]);
 
         return Student::factory()->create([

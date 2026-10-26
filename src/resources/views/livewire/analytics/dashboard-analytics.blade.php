@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <div class="space-y-2">
-        <div class="flex flex-wrap items-end gap-3">
+        <div class="flex flex-wrap items-end gap-3 print:hidden">
             @if ($departmentOptions->count() > 1)
                 <div>
                     <label for="analytics-department-{{ $this->getId() }}" class="mb-1 block text-sm text-gray-600">Department</label>

@@ -104,6 +104,8 @@ class DepartmentMonitoringTest extends TestCase
             ->assertSee('scheduled subject tutoring')
             ->assertSee('AI unavailable, using standard text')
             ->assertSee('Mark reviewed')
+            ->assertSee('data-confirm-title="Mark selected recommendations as reviewed?"', false)
+            ->assertSee('const allowFieldFocus = false', false)
             ->assertSee('placeholder-heuristic-v0')
             ->assertSee('not a trained model')
             ->assertDontSee('SOCIO-RAW-TOKEN-M19')

@@ -74,6 +74,8 @@ final class AuditRecordLabel
             'activity_log_exported' => 'Activity log exported',
             'prediction_requested' => 'Prediction requested',
             'students.export' => 'Student list exported',
+            'aggregates.export' => 'Aggregate report exported',
+            'intervention_reviewed' => 'Intervention reviewed',
             'student_record_viewed' => 'Student record viewed',
             'account_deletion_requested' => 'Account deletion requested',
             'account_deletion_processed' => 'Account deletion reviewed',

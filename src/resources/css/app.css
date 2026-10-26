@@ -511,3 +511,45 @@ button:not(:disabled),
         transition: none !important;
     }
 }
+
+@media print {
+    body {
+        background: #fff !important;
+        color: #111827;
+    }
+
+    #page-progress,
+    #staff-sidebar,
+    .swal2-container,
+    .print\:hidden {
+        display: none !important;
+    }
+
+    #staff-main {
+        padding-left: 0 !important;
+    }
+
+    a[href]::after {
+        content: none !important;
+    }
+
+    .ui-table {
+        font-size: 11px;
+    }
+
+    .ui-table th,
+    .ui-table td {
+        padding: 6px 8px;
+        border-bottom: 1px solid #d1d5db;
+        color: #111827;
+        background: #fff !important;
+    }
+
+    .ui-table thead th {
+        background: #f3f4f6 !important;
+    }
+
+    .ui-table tbody tr {
+        break-inside: avoid;
+    }
+}

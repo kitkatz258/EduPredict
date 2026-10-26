@@ -7,6 +7,7 @@
     :title="$viewing->user?->name ?? 'Student status'"
     close="closeView"
     max-width="4xl"
+    :autofocus="false"
     :description="trim(($viewing->student_number ?? '').' · '.($viewing->program?->code ?? 'Program').' · '.($yearOptions[$viewing->year_level] ?? 'Year '.$viewing->year_level))"
 >
     <div class="space-y-6 px-5 py-5 sm:px-6">
@@ -85,9 +86,27 @@
 
             <x-program-shift :prediction="$latest" />
 
-            <livewire:staff.recommended-actions :student-id="$viewing->id" :key="'dept-actions-'.$viewing->id" />
+            <livewire:staff.recommended-actions :student-id="$viewing->id" :key="'dept-actions-'.$viewing->id.'-'.$latest->id" />
         @endif
 
         <p class="text-xs text-gray-500">These results are estimates, not guarantees. They do not decide admission, academic standing, employment, or discipline.</p>
     </div>
+    <x-slot:footer>
+        <div class="flex flex-wrap items-center justify-end gap-2">
+            <button type="button" x-on:click="requestClose()" class="ui-btn ui-btn-secondary">Close</button>
+            @if ($latest)
+                <button
+                    type="button"
+                    wire:click="$dispatch('mark-selected-reviews')"
+                    data-confirm="This records your review for the selected recommendation(s) on this estimate. The student's stored risk and employability figures stay unchanged."
+                    data-confirm-title="Mark selected recommendations as reviewed?"
+                    data-confirm-button="Mark reviewed"
+                    data-confirm-tone="neutral"
+                    class="ui-btn ui-btn-primary"
+                >
+                    Mark reviewed
+                </button>
+            @endif
+        </div>
+    </x-slot:footer>
 </x-dialog>

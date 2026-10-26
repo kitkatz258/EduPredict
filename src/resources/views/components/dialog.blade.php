@@ -5,6 +5,7 @@
     'maxWidth' => '2xl',
     'unsaved' => false,
     'discard' => null,
+    'autofocus' => true,
 ])
 
 @php
@@ -41,9 +42,16 @@
             this.previous = document.activeElement;
             document.body.classList.add('overflow-hidden');
             this.$nextTick(() => {
-                const field = this.$el.querySelector('input:not([type=hidden]):not([disabled]), textarea:not([disabled]), select:not([disabled])');
-                const target = field || this.focusables()[0] || this.$refs.panel;
-                target?.focus();
+                const scroller = this.$el.querySelector('.dialog-scroll');
+                if (scroller) {
+                    scroller.scrollTop = 0;
+                }
+                const allowFieldFocus = {{ $autofocus ? 'true' : 'false' }};
+                const field = allowFieldFocus
+                    ? this.$el.querySelector('input:not([type=hidden]):not([disabled]), textarea:not([disabled]), select:not([disabled])')
+                    : null;
+                const target = field || this.$refs.close || this.$refs.panel;
+                target?.focus({ preventScroll: true });
             });
         },
         closeMethod() {
@@ -143,7 +151,7 @@
                     <div class="mt-3">{{ $subhead }}</div>
                 @endisset
             </div>
-            <button type="button" x-on:click="requestClose()" class="rounded-lg p-1 text-gray-500 hover:bg-brand-50 hover:text-brand-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400" aria-label="Close dialog">
+            <button type="button" x-ref="close" x-on:click="requestClose()" class="rounded-lg p-1 text-gray-500 hover:bg-brand-50 hover:text-brand-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400" aria-label="Close dialog">
                 <i class="ri-close-line text-xl" aria-hidden="true"></i>
             </button>
         </div>

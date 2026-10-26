@@ -5,9 +5,13 @@
             :description="($department?->name ?? 'Your department').($program ? ' · '.$program->name : '')"
         >
             <x-slot:actions>
-                <a href="{{ route('department.students') }}" class="inline-flex h-10 items-center justify-center gap-2 rounded-[11px] bg-[#111827] px-3.5 text-sm font-semibold text-white hover:bg-[#1f2937]">
+                <a href="{{ route('department.students') }}" class="ui-btn ui-btn-secondary print:hidden">
                     <i class="ri-team-line" aria-hidden="true"></i>
                     Students
+                </a>
+                <a href="{{ route('department.reports') }}" class="ui-btn ui-btn-primary print:hidden">
+                    <i class="ri-file-chart-line" aria-hidden="true"></i>
+                    Reports
                 </a>
             </x-slot:actions>
         </x-page-header>

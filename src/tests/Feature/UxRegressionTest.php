@@ -47,11 +47,11 @@ class UxRegressionTest extends TestCase
             'admin.users',
         ]);
 
-        $this->assertRoutesOk($head, ['department.dashboard', 'department.students', 'profile.edit']);
-        $this->assertRoutesForbidden($head, ['student.dashboard', 'dean.dashboard', 'admin.users', 'student.history']);
+        $this->assertRoutesOk($head, ['department.dashboard', 'department.students', 'department.reports', 'profile.edit']);
+        $this->assertRoutesForbidden($head, ['student.dashboard', 'dean.dashboard', 'dean.reports', 'admin.users', 'student.history']);
 
-        $this->assertRoutesOk($dean, ['dean.dashboard', 'profile.edit']);
-        $this->assertRoutesForbidden($dean, ['department.students', 'admin.dashboard', 'student.dashboard', 'students.show']);
+        $this->assertRoutesOk($dean, ['dean.dashboard', 'dean.reports', 'profile.edit']);
+        $this->assertRoutesForbidden($dean, ['department.students', 'department.reports', 'admin.dashboard', 'student.dashboard', 'students.show']);
 
         $this->actingAs($dean)->get(route('students.show', $student))->assertForbidden();
 

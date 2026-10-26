@@ -3,6 +3,7 @@
     $shell = match (true) {
         $user === null => 'guest',
         $user->isRole(\App\Enums\UserRole::Student) => 'student',
+        $user->isRole(\App\Enums\UserRole::DepartmentHead, \App\Enums\UserRole::Dean) => 'academic',
         default => 'staff',
     };
     $initials = $user
@@ -18,18 +19,18 @@
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-[11px] focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-[#111827] focus:shadow">Skip to content</a>
     @include('layouts.partials.flash')
 
-    @if ($shell === 'student')
-        @include('layouts.partials.student-nav')
+    @if (in_array($shell, ['student', 'academic'], true))
+        @include($shell === 'student' ? 'layouts.partials.student-nav' : 'layouts.partials.academic-nav')
 
         <main id="main-content" class="mx-auto w-full px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             @isset($header)
-                <div class="mb-6">{{ $header }}</div>
+                <div class="mb-6 print:hidden">{{ $header }}</div>
             @endisset
             {{ $slot ?? '' }}
             @yield('content')
         </main>
 
-        <footer class="mx-auto flex w-full flex-wrap items-center justify-between gap-2 px-4 pb-8 text-xs text-gray-500 sm:px-6 lg:px-8">
+        <footer class="mx-auto flex w-full flex-wrap items-center justify-between gap-2 px-4 pb-8 text-xs text-gray-500 print:hidden sm:px-6 lg:px-8">
             <p>These results are estimates, not guarantees.</p>
             <a href="{{ route('privacy') }}" class="font-medium text-[#4f46e5] hover:underline">Privacy</a>
         </footer>
@@ -60,7 +61,7 @@
 
             <aside
                 id="staff-sidebar"
-                class="fixed inset-y-0 left-0 z-40 flex h-dvh -translate-x-full flex-col overflow-y-auto overscroll-contain bg-[#0f1115] text-[#a3a9b5] motion-reduce:transition-none lg:translate-x-0"
+                class="fixed inset-y-0 left-0 z-40 flex h-dvh -translate-x-full flex-col overflow-y-auto overscroll-contain bg-[#0f1115] text-[#a3a9b5] motion-reduce:transition-none print:hidden lg:translate-x-0"
                 :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                 x-init="
                     const applySidebar = () => {
@@ -138,8 +139,8 @@
                 </div>
             </aside>
 
-            <div id="staff-main" class="flex min-h-screen min-w-0 flex-col lg:pl-[264px]">
-                <header class="sticky top-0 z-20 flex h-[68px] items-center gap-3 border-b border-[#e8eaee] bg-white px-4 sm:px-7">
+            <div id="staff-main" class="flex min-h-screen min-w-0 flex-col lg:pl-[264px] print:pl-0">
+                <header class="sticky top-0 z-20 flex h-[68px] items-center gap-3 border-b border-[#e8eaee] bg-white px-4 print:hidden sm:px-7">
                     <button
                         type="button"
                         class="grid h-10 w-10 place-items-center rounded-[11px] border border-[#e8eaee] text-[#111827] hover:bg-[#f3f4f6] lg:hidden"

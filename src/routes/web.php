@@ -59,9 +59,17 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         ->middleware('role:department_head')
         ->name('department.students');
 
+    Route::get('/department/reports', [RoleDashboardController::class, 'departmentReports'])
+        ->middleware('role:department_head')
+        ->name('department.reports');
+
     Route::get('/dean/dashboard', [RoleDashboardController::class, 'dean'])
         ->middleware('role:dean')
         ->name('dean.dashboard');
+
+    Route::get('/dean/reports', [RoleDashboardController::class, 'deanReports'])
+        ->middleware('role:dean')
+        ->name('dean.reports');
 
     Route::get('/admin/dashboard', [RoleDashboardController::class, 'admin'])
         ->middleware('role:administrator')
