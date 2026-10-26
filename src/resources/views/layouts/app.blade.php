@@ -11,11 +11,11 @@
         : '';
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="bg-[var(--ed-canvas)]">
 <head>
     @include('layouts.partials.head')
 </head>
-<body class="min-h-screen bg-[#f6f7f9] font-sans text-[#111827] antialiased">
+<body class="min-h-screen bg-[var(--ed-canvas)] font-sans text-[var(--ed-ink)] antialiased">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-[11px] focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-[#111827] focus:shadow">Skip to content</a>
     @include('layouts.partials.flash')
 
@@ -140,7 +140,7 @@
             </aside>
 
             <div id="staff-main" class="flex min-h-screen min-w-0 flex-col lg:pl-[264px] print:pl-0">
-                <header class="sticky top-0 z-20 flex h-[68px] items-center gap-3 border-b border-[#e8eaee] bg-white px-4 print:hidden sm:px-7">
+                <header class="sticky top-0 z-20 flex h-[68px] items-center gap-3 border-b border-[var(--ed-line)] bg-[var(--ed-header)] px-4 print:hidden sm:px-7">
                     <button
                         type="button"
                         class="grid h-10 w-10 place-items-center rounded-[11px] border border-[#e8eaee] text-[#111827] hover:bg-[#f3f4f6] lg:hidden"
@@ -156,6 +156,7 @@
                             {{ $header }}
                         @endisset
                     </div>
+                    <x-theme-toggle class="h-10 w-10 px-0" />
                     <x-user-menu />
                 </header>
 
@@ -166,15 +167,18 @@
             </div>
         </div>
     @else
-        <header class="sticky top-0 z-20 border-b border-[#e8eaee] bg-white">
+        <header class="sticky top-0 z-20 border-b border-[var(--ed-line)] bg-[var(--ed-header)]">
             <div class="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-4 sm:px-6">
-                <a href="{{ route('home') }}" class="flex items-center gap-2.5 font-semibold text-[#111827]">
+                <a href="{{ route('home') }}" class="flex items-center gap-2.5 font-semibold text-[var(--ed-ink)]">
                     <span class="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-gradient-to-br from-[#6366f1] to-[#4338ca] text-[11px] font-bold text-white">UCC</span>
                     EduPredict
                 </a>
-                <a href="{{ route('login') }}" class="inline-flex h-10 items-center gap-2 rounded-[11px] bg-[#111827] px-3.5 text-sm font-semibold text-white hover:bg-[#1f2937]">
-                    <i class="ri-login-box-line" aria-hidden="true"></i> Sign in
-                </a>
+                <div class="flex items-center gap-2">
+                    <x-theme-toggle class="h-10 w-10 px-0" />
+                    <a href="{{ route('login') }}" class="inline-flex h-10 items-center gap-2 rounded-[11px] bg-[var(--ed-btn)] px-3.5 text-sm font-semibold text-[var(--ed-btn-ink)] hover:opacity-90">
+                        <i class="ri-login-box-line" aria-hidden="true"></i> Sign in
+                    </a>
+                </div>
             </div>
         </header>
         <main id="main-content" class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">

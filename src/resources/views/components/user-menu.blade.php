@@ -45,6 +45,12 @@
             <i class="ri-settings-3-line text-base text-gray-500" aria-hidden="true"></i>
             Account settings
         </a>
+        <button type="button" role="menuitem" data-theme-toggle class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-gray-900 hover:bg-[#f3f4f6]">
+            <i class="ri-contrast-2-line text-base text-gray-500 dark:hidden" aria-hidden="true"></i>
+            <i class="ri-sun-line hidden text-base text-gray-500 dark:inline" aria-hidden="true"></i>
+            <span class="dark:hidden">Dark mode</span>
+            <span class="hidden dark:inline">Light mode</span>
+        </button>
         <div class="my-1 border-t border-[#e8eaee]"></div>
         <form method="POST" action="{{ route('logout') }}">
             @csrf

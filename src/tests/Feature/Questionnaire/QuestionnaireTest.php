@@ -169,7 +169,9 @@ class QuestionnaireTest extends TestCase
             ->test(QuestionnaireForm::class)
             ->assertSet('definitionVersion', ApprovedInstrumentCatalog::VERSION)
             ->assertSet('section', 'academic')
-            ->assertSee('0 / 36 saved')
+            ->assertSee('0 / 36 answers saved')
+            ->assertSee('This section · 0 / 6 answered')
+            ->assertSee('Overall · 0 / 6 sections saved')
             ->assertSee('Section 1 of 6')
             ->assertSee('I am satisfied with my current academic performance.')
             ->assertSee('Strongly Disagree')
@@ -196,7 +198,8 @@ class QuestionnaireTest extends TestCase
             ->test(QuestionnaireForm::class)
             ->assertSet('section', 'socioeconomic')
             ->assertSet('answers.'.$studyItems->first()->id, 4)
-            ->assertSee('6 / 36 saved')
+            ->assertSee('6 / 36 answers saved')
+            ->assertSee('Overall · 1 / 6 sections saved')
             ->assertSee('My available budget is sufficient to cover my school-related expenses.');
     }
 

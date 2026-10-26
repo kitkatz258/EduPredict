@@ -1,8 +1,8 @@
 @php
     $partCount = max(1, count($partKeys));
-    $primary = 'inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:opacity-60';
-    $secondary = 'inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-brand-200 bg-white px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:opacity-60';
-    $outline = 'inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-brand-900 bg-white px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:opacity-60';
+    $primary = 'ui-btn ui-btn-primary min-h-11';
+    $secondary = 'ui-btn ui-btn-secondary min-h-11';
+    $outline = 'ui-btn ui-btn-secondary min-h-11';
     $displayVersionKey = (! $hasDraft && $latestSubmission) ? $latestSubmission->definition_version : $definitionVersion;
     $displayVersion = config('edupredict.questionnaire.versions.'.$displayVersionKey, $version);
     $approved = ($displayVersion['status'] ?? '') === 'panel_approved';
@@ -15,16 +15,21 @@
 
         return $value !== null && $value !== '';
     })->count();
-    $savedPercent = $totalCount > 0 ? (int) round(($savedCount / $totalCount) * 100) : 0;
-    $sectionSavedPercent = $sectionItems->count() > 0 ? (int) round(($sectionSaved / $sectionItems->count()) * 100) : 0;
     $sectionItemIds = [];
     $savedPerSection = [];
+    $savedCompleteSections = 0;
     $sectionField = $navigation === 'construct' ? 'construct' : 'section';
     foreach ($partKeys as $progressKey) {
         $ids = $allItems->where($sectionField, $progressKey)->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
         $sectionItemIds[$progressKey] = $ids;
-        $savedPerSection[$progressKey] = count(array_filter($ids, fn (int $id): bool => isset($saved[$id])));
+        $savedHere = count(array_filter($ids, fn (int $id): bool => isset($saved[$id])));
+        $savedPerSection[$progressKey] = $savedHere;
+        if (count($ids) > 0 && $savedHere >= count($ids)) {
+            $savedCompleteSections++;
+        }
     }
+    $sectionAnsweredPercent = $sectionItems->count() > 0 ? (int) round(($sectionAnswered / $sectionItems->count()) * 100) : 0;
+    $overallSavedPercent = $partCount > 0 ? (int) round(($savedCompleteSections / $partCount) * 100) : 0;
 @endphp
 
 <div
@@ -34,6 +39,7 @@
     data-reviewing="{{ $reviewing ? '1' : '0' }}"
     data-sections='@json($sectionItemIds)'
     data-saved='@json($savedPerSection)'
+    data-saved-answers='@json($saved)'
     x-on:confirm-discard-questionnaire.window="window.confirmAction && window.confirmAction({ title: 'Discard unsaved answers?', text: 'Answers already saved in the draft stay on file. Only answers that have not been saved are discarded.', confirmText: 'Discard unsaved answers', danger: true }).then((ok) => { if (ok) $wire.discardUnsavedAndClose() })"
 >
     @if ($statusMessage !== '')
@@ -100,19 +106,14 @@
         >
             <x-slot:subhead>
                 <div
+                    class="space-y-3"
                     x-data="{
                         tick: 0,
-                        init() {
-                            this._progress = () => this.bump();
-                            window.addEventListener('change', this._progress);
-                        },
-                        destroy() {
-                            window.removeEventListener('change', this._progress);
-                        },
                         bump() { this.tick++ },
                         host() { return this.$el.closest('[data-questionnaire-progress]') },
                         sections() { return JSON.parse(this.host()?.dataset.sections || '{}') },
                         savedMap() { return JSON.parse(this.host()?.dataset.saved || '{}') },
+                        savedAnswers() { return JSON.parse(this.host()?.dataset.savedAnswers || '{}') },
                         currentKey() { return this.host()?.dataset.current || '' },
                         reviewingNow() { return this.host()?.dataset.reviewing === '1' },
                         answeredIn(key) {
@@ -128,96 +129,144 @@
                             }
                             return saved;
                         },
+                        savedIn(key) {
+                            this.tick;
+                            const ids = this.sections()[key] || [];
+                            return Number(this.savedMap()[key] || 0);
+                        },
                         status(key) {
                             const ids = this.sections()[key] || [];
-                            const answered = this.answeredIn(key);
+                            const saved = this.savedIn(key);
                             if (key === this.currentKey() && ! this.reviewingNow()) return 'current';
-                            if (ids.length > 0 && answered >= ids.length) return 'complete';
-                            if (answered > 0) return 'incomplete';
+                            if (ids.length > 0 && saved >= ids.length) return 'complete';
+                            if (saved > 0) return 'incomplete';
                             return 'empty';
                         },
-                        totals() {
-                            this.tick;
-                            const keys = Object.keys(this.sections());
-                            let answered = 0;
-                            let total = 0;
-                            keys.forEach((key) => {
-                                const ids = this.sections()[key] || [];
-                                total += ids.length;
-                                answered += this.answeredIn(key);
-                            });
-                            const saved = Object.values(this.savedMap()).reduce((sum, count) => sum + Number(count || 0), 0);
-                            return { answered, saved, total };
+                        sectionTotal() {
+                            return (this.sections()[this.currentKey()] || []).length;
                         },
-                        label() {
-                            const t = this.totals();
-                            return 'Answered ' + t.answered + ' / ' + t.total + ' · ' + t.saved + ' / ' + t.total + ' saved';
+                        sectionAnswered() {
+                            return this.answeredIn(this.currentKey());
                         },
-                        overallPercent() {
-                            const t = this.totals();
-                            return t.total ? Math.round((t.answered / t.total) * 100) : 0;
+                        sectionLabel() {
+                            return 'This section · ' + this.sectionAnswered() + ' / ' + this.sectionTotal() + ' answered';
                         },
                         sectionPercent() {
+                            const total = this.sectionTotal();
+                            return total ? Math.round((this.sectionAnswered() / total) * 100) : 0;
+                        },
+                        savedSections() {
                             this.tick;
+                            const keys = Object.keys(this.sections());
+                            return keys.filter((key) => {
+                                const ids = this.sections()[key] || [];
+                                return ids.length > 0 && this.savedIn(key) >= ids.length;
+                            }).length;
+                        },
+                        overallTotal() {
+                            return Object.keys(this.sections()).length;
+                        },
+                        overallLabel() {
+                            return 'Overall · ' + this.savedSections() + ' / ' + this.overallTotal() + ' sections saved';
+                        },
+                        overallPercent() {
+                            const total = this.overallTotal();
+                            return total ? Math.round((this.savedSections() / total) * 100) : 0;
+                        },
+                        syncUnsaved() {
+                            const dialog = this.host()?.querySelector('[data-dialog-close]');
+                            if (!dialog || this.reviewingNow()) {
+                                return;
+                            }
                             const key = this.currentKey();
                             const ids = this.sections()[key] || [];
-                            return ids.length ? Math.round((this.answeredIn(key) / ids.length) * 100) : 0;
+                            const saved = this.savedAnswers();
+                            const unsaved = ids.some((id) => {
+                                const checked = this.host()?.querySelector('input[name=item-' + id + ']:checked');
+                                const current = checked ? Number(checked.value) : null;
+                                const stored = saved[id] ?? saved[String(id)];
+                                if (current === null) {
+                                    return stored !== undefined && stored !== null && stored !== '';
+                                }
+
+                                return Number(stored) !== current;
+                            });
+                            dialog.dataset.unsaved = unsaved ? '1' : '0';
                         }
                     }"
-                    x-on:questionnaire-section-changed.window="const started = performance.now(); const refresh = () => { this.bump(); if (performance.now() - started < 1200) requestAnimationFrame(refresh) }; this.$nextTick(refresh)"
+                    x-on:change.window="if ($event.target?.matches?.('input[type=radio][name^=item-]')) { bump(); syncUnsaved() }"
+                    x-on:questionnaire-section-changed.window="const started = performance.now(); const refresh = () => { bump(); if (performance.now() - started < 1200) requestAnimationFrame(refresh) }; $nextTick(refresh)"
+                    x-on:questionnaire-progress-updated.window="const started = performance.now(); const refresh = () => { bump(); if (performance.now() - started < 1200) requestAnimationFrame(refresh) }; $nextTick(refresh)"
                 >
-                    <div class="flex flex-col gap-3">
-                        <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
-                            <span class="font-medium text-gray-700">{{ $reviewing ? 'Review' : $partTitle.' '.min($currentIndex + 1, $partCount).' of '.$partCount }}</span>
-                            <span class="sr-only">{{ $savedCount }} / {{ $totalCount }} saved</span>
-                            <span class="font-mono text-xs text-gray-600" aria-live="polite" x-text="label()">Answered {{ $answeredCount }} / {{ $totalCount }} · {{ $savedCount }} / {{ $totalCount }} saved</span>
-                        </div>
-                        <div class="grid gap-2 sm:grid-cols-2">
-                            <div>
-                                <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">Overall</p>
-                                <div class="auth-progress" role="progressbar" aria-label="Overall questionnaire progress" :aria-valuenow="overallPercent()" aria-valuemin="0" aria-valuemax="100">
-                                    <span :style="'width:' + overallPercent() + '%'" style="width: {{ $totalCount > 0 ? (int) round(($answeredCount / $totalCount) * 100) : 0 }}%"></span>
-                                </div>
+                    <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
+                        <span class="font-medium text-[var(--ed-ink)]">{{ $reviewing ? 'Review' : $partTitle.' '.min($currentIndex + 1, $partCount).' of '.$partCount }}</span>
+                        <span class="sr-only">{{ $savedCount }} / {{ $totalCount }} answers saved</span>
+                    </div>
+                    <div class="grid gap-2.5 sm:grid-cols-2">
+                        <div>
+                            <div class="mb-1 flex items-baseline justify-between gap-2">
+                                <p class="text-[11px] font-semibold tracking-wide text-[var(--ed-muted)]" x-text="sectionLabel()">This section · {{ $sectionAnswered }} / {{ $sectionTotal }} answered</p>
+                                @if ($sectionSaved > 0)
+                                    <p class="text-[11px] text-[var(--ed-muted)]">{{ $sectionSaved }} saved</p>
+                                @endif
                             </div>
-                            <div>
-                                <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">This section</p>
-                                <div class="auth-progress" role="progressbar" aria-label="Current section progress" :aria-valuenow="sectionPercent()">
-                                    <span :style="'width:' + sectionPercent() + '%'" style="width: {{ $sectionItems->count() > 0 ? (int) round(($sectionAnswered / $sectionItems->count()) * 100) : 0 }}%"></span>
-                                </div>
-                                <p class="mt-1 text-[11px] text-gray-500">{{ $sectionAnswered }} answered · {{ $sectionSaved }} saved of {{ $sectionTotal }}</p>
+                            <div
+                                class="wizard-progress"
+                                role="progressbar"
+                                aria-label="This section"
+                                :aria-valuenow="sectionPercent()"
+                                :aria-valuetext="sectionLabel()"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                            >
+                                <span :style="'width:' + sectionPercent() + '%'" style="width: {{ $sectionAnsweredPercent }}%"></span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="mb-1 text-[11px] font-semibold tracking-wide text-[var(--ed-muted)]" x-text="overallLabel()">Overall · {{ $savedCompleteSections }} / {{ $partCount }} sections saved</p>
+                            <div
+                                class="wizard-progress"
+                                role="progressbar"
+                                aria-label="Overall"
+                                :aria-valuenow="overallPercent()"
+                                :aria-valuetext="overallLabel()"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                            >
+                                <span :style="'width:' + overallPercent() + '%'" style="width: {{ $overallSavedPercent }}%"></span>
                             </div>
                         </div>
                     </div>
-                    <p class="mt-2 text-xs text-gray-500">Filled is complete. The ring is the current section. Empty still needs answers. Answered updates when you choose; saved updates after the draft is stored.</p>
-                    <div class="mt-3 flex max-w-full flex-wrap gap-2 overflow-x-auto pb-1" role="list" aria-label="Questionnaire sections">
+                    <div class="wizard-dots" role="list" aria-label="Questionnaire sections">
                         @foreach ($partKeys as $key)
                             @php
                                 $dotSaved = $savedPerSection[$key] ?? 0;
                                 $dotTotal = count($sectionItemIds[$key] ?? []);
                                 $dotState = ($key === $currentPart && ! $reviewing) ? 'current' : ($dotTotal > 0 && $dotSaved >= $dotTotal ? 'complete' : ($dotSaved > 0 ? 'incomplete' : 'empty'));
                                 $dotCode = (string) config('edupredict.questionnaire.sections.'.$key.'.code', strtoupper(substr((string) $key, 0, 1)));
+                                $dotName = $partLabels[$key] ?? $key;
                             @endphp
                             <button
                                 type="button"
                                 wire:click="selectPart('{{ $key }}')"
                                 role="listitem"
-                                class="inline-flex cursor-pointer items-center gap-2 rounded-full border px-2 py-1 text-xs font-semibold transition hover:border-brand-900"
-                                :class="status('{{ $key }}') === 'complete' ? 'border-brand-900 bg-brand-900 text-white' : (status('{{ $key }}') === 'current' ? 'border-brand-900 bg-white text-brand-900' : (status('{{ $key }}') === 'incomplete' ? 'border-amber-400 bg-amber-50 text-amber-950' : 'border-brand-200 bg-white text-gray-500'))"
-                                aria-label="{{ $partLabels[$key] ?? $key }} ({{ $dotState }})"
-                                :aria-label="(status('{{ $key }}') === 'complete' ? 'Completed ' : (status('{{ $key }}') === 'current' ? 'Current ' : (status('{{ $key }}') === 'incomplete' ? 'Incomplete ' : 'Not started '))) + '{{ $partLabels[$key] ?? $key }}'"
+                                class="wizard-dot"
+                                data-state="{{ $dotState }}"
+                                :data-state="status('{{ $key }}')"
+                                title="{{ $dotName }}"
+                                @if ($key === $currentPart && ! $reviewing) aria-current="step" @endif
+                                aria-label="{{ $dotName }} ({{ $dotState }})"
+                                :aria-label="(status('{{ $key }}') === 'complete' ? 'Completed saved section: ' : (status('{{ $key }}') === 'current' ? 'Current section: ' : (status('{{ $key }}') === 'incomplete' ? 'In progress: ' : 'Not started: '))) + '{{ $dotName }}'"
                             >
-                                <span class="flex h-6 w-6 items-center justify-center rounded-full border border-current text-[11px]" aria-hidden="true">
-                                    <i class="ri-check-line" x-show="status('{{ $key }}') === 'complete'"></i>
-                                    <span x-show="status('{{ $key }}') !== 'complete'">{{ $dotCode }}</span>
-                                </span>
-                                <span class="pr-1">{{ $partLabels[$key] ?? $key }}</span>
+                                <i class="ri-check-line" x-show="status('{{ $key }}') === 'complete'" x-cloak aria-hidden="true"></i>
+                                <span x-show="status('{{ $key }}') !== 'complete'" aria-hidden="true">{{ $dotCode }}</span>
                             </button>
                         @endforeach
                     </div>
                 </div>
             </x-slot:subhead>
 
-            <form id="questionnaire-wizard" wire:submit="submit" class="relative" x-on:change="window.dispatchEvent(new Event('change'))">
+            <form id="questionnaire-wizard" wire:submit="submit" class="relative">
                 <x-loading-overlay target="saveDraft,saveAndContinue,submit,previousPart,selectPart,openReview,discardDraft" label="Saving answers…" />
 
                 @if ($allItems->isEmpty())
@@ -266,7 +315,7 @@
                                                 <input
                                                     type="radio"
                                                     name="item-{{ $item->id }}"
-                                                    wire:model.live="answers.{{ $item->id }}"
+                                                    wire:model="answers.{{ $item->id }}"
                                                     value="{{ $value }}"
                                                     class="h-4 w-4 text-brand-900 focus:ring-brand-200"
                                                 >

@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-5">
     <div class="flex flex-wrap items-end justify-between gap-3 print:hidden">
         <div class="flex flex-wrap items-end gap-3">
             @if ($departmentOptions->count() > 1)
@@ -63,8 +63,9 @@
         </div>
     </div>
 
-    <p class="text-sm text-gray-600">College totals only. Individual students are not listed here.</p>
     @include('livewire.staff.partials.report-disclaimer')
+
+    <p class="text-sm text-[var(--ed-muted)]">College totals only. Individual students are not listed here.</p>
 
     @php
         $averageLabel = $stats['average_employability'] === null ? '—' : number_format((float) $stats['average_employability'], 1);
@@ -87,9 +88,8 @@
             <x-kpi :label="$label" :value="$stats['program_shift'][$flag]" :tone="$tone" />
         @endforeach
     </div>
-    <p class="text-xs text-gray-500">Program-shift figures are counts of students. The indicator itself is qualitative and has no percentage.</p>
 
-    <section class="rounded-[14px] border border-[#e8eaee] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.03)]">
+    <section class="rounded-[14px] border border-[var(--ed-line)] bg-[var(--ed-surface)] p-5 shadow-[var(--ed-shadow)]">
         <h2 class="text-base font-semibold text-gray-900">Year-level breakdown</h2>
         <div class="mt-3 overflow-x-auto">
             <table class="ui-table min-w-full text-sm">

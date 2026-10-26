@@ -139,19 +139,19 @@
         x-ref="panel"
         tabindex="-1"
         x-bind:class="leaving && 'is-leaving'"
-        {{ $attributes->merge(['class' => 'dialog-panel relative flex w-full '.($widths[$maxWidth] ?? $widths['2xl']).' max-h-[calc(100dvh-0.75rem)] flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl outline-none sm:max-h-[min(92dvh,calc(100dvh-2rem))] sm:rounded-2xl']) }}
+        {{ $attributes->merge(['class' => 'dialog-panel relative flex w-full '.($widths[$maxWidth] ?? $widths['2xl']).' max-h-[calc(100dvh-0.75rem)] flex-col overflow-hidden rounded-t-2xl bg-[var(--ed-surface)] shadow-xl outline-none sm:max-h-[min(92dvh,calc(100dvh-2rem))] sm:rounded-2xl']) }}
     >
-        <div class="flex shrink-0 items-start justify-between gap-4 border-b border-brand-200 bg-white px-5 py-4 sm:px-6">
+        <div class="flex shrink-0 items-start justify-between gap-4 border-b border-[var(--ed-line)] bg-[var(--ed-surface)] px-5 py-4 sm:px-6">
             <div class="min-w-0 flex-1">
-                <h2 id="{{ $titleId }}" class="text-lg font-bold text-brand-900">{{ $title }}</h2>
+                <h2 id="{{ $titleId }}" class="text-lg font-bold text-[var(--ed-ink)]">{{ $title }}</h2>
                 @if ($description)
-                    <p id="{{ $descriptionId }}" class="mt-1 text-sm text-gray-600">{{ $description }}</p>
+                    <p id="{{ $descriptionId }}" class="mt-1 text-sm text-[var(--ed-muted)]">{{ $description }}</p>
                 @endif
                 @isset($subhead)
                     <div class="mt-3">{{ $subhead }}</div>
                 @endisset
             </div>
-            <button type="button" x-ref="close" x-on:click="requestClose()" class="rounded-lg p-1 text-gray-500 hover:bg-brand-50 hover:text-brand-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400" aria-label="Close dialog">
+            <button type="button" x-ref="close" x-on:click="requestClose()" class="rounded-lg p-1 text-[var(--ed-muted)] hover:bg-[var(--ed-hover)] hover:text-[var(--ed-ink)] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400" aria-label="Close dialog">
                 <i class="ri-close-line text-xl" aria-hidden="true"></i>
             </button>
         </div>
@@ -159,7 +159,7 @@
             {{ $slot }}
         </div>
         @isset($footer)
-            <div class="shrink-0 border-t border-brand-200 bg-white px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6">
+            <div class="shrink-0 border-t border-[var(--ed-line)] bg-[var(--ed-surface)] px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6">
                 {{ $footer }}
             </div>
         @endisset

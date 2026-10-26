@@ -128,6 +128,7 @@
                 }
                 node.dataset.ready = '1';
                 const data = JSON.parse(node.textContent);
+                const ink = window.edupredictTheme?.colors?.().ink || '#6b7280';
                 const bars = function (id, payload) {
                     const canvas = document.getElementById(id);
                     if (!canvas || !payload || !payload.labels || payload.labels.length === 0) {
@@ -147,7 +148,7 @@
                             maintainAspectRatio: false,
                             indexAxis: 'y',
                             plugins: { legend: { display: false } },
-                            scales: { x: { beginAtZero: true, ticks: { color: '#6b7280' } }, y: { ticks: { color: '#6b7280' } } },
+                            scales: { x: { beginAtZero: true, ticks: { color: ink } }, y: { ticks: { color: ink } } },
                         },
                     });
                 };
@@ -167,7 +168,7 @@
                         options: {
                             maintainAspectRatio: false,
                             scales: { y: { min: 0, max: 100 } },
-                            plugins: { legend: { labels: { color: '#6b7280', boxWidth: 8, usePointStyle: true } } },
+                            plugins: { legend: { labels: { color: ink, boxWidth: 8, usePointStyle: true } } },
                         },
                     });
                 }

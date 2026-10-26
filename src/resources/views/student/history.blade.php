@@ -45,6 +45,7 @@
                 }
                 node.dataset.ready = '1';
                 const data = JSON.parse(node.textContent);
+                const ink = window.edupredictTheme?.colors?.().ink || '#6b7280';
                 new window.Chart(canvas, {
                     type: 'line',
                     data: {
@@ -56,8 +57,8 @@
                     },
                     options: {
                         maintainAspectRatio: false,
-                        scales: { y: { min: 0, max: 100 } },
-                        plugins: { legend: { labels: { color: '#6b7280', boxWidth: 8, usePointStyle: true } } },
+                        scales: { y: { min: 0, max: 100, ticks: { color: ink } }, x: { ticks: { color: ink } } },
+                        plugins: { legend: { labels: { color: ink, boxWidth: 8, usePointStyle: true } } },
                     },
                 });
             };

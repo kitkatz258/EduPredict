@@ -264,6 +264,7 @@
                         if (!canvas || !payload || !payload.labels || payload.labels.length === 0) {
                             return;
                         }
+                        const ink = window.edupredictTheme?.colors?.().ink || '#6b7280';
                         new window.Chart(canvas, {
                             type: 'bar',
                             data: { labels: payload.labels, datasets: [{ data: payload.magnitudes, backgroundColor: payload.colors, borderWidth: 0 }] },
@@ -271,7 +272,7 @@
                                 maintainAspectRatio: false,
                                 indexAxis: 'y',
                                 plugins: { legend: { display: false } },
-                                scales: { x: { beginAtZero: true, ticks: { color: '#6b7280' } }, y: { ticks: { color: '#6b7280' } } },
+                                scales: { x: { beginAtZero: true, ticks: { color: ink } }, y: { ticks: { color: ink } } },
                             },
                         });
                     };

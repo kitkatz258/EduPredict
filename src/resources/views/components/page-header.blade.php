@@ -4,7 +4,7 @@
     'eyebrow' => null,
 ])
 
-<header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+<header class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div class="min-w-0">
         @if ($eyebrow)
             <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">{{ $eyebrow }}</p>

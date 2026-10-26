@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="bg-[var(--ed-canvas)]">
 <head>
     @include('layouts.partials.head')
 </head>
-<body class="auth-split min-h-dvh font-sans text-[#111827] antialiased">
+<body class="auth-split min-h-dvh bg-[var(--ed-canvas)] font-sans text-[var(--ed-ink)] antialiased">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-[11px] focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-[#111827] focus:shadow">Skip to content</a>
     @include('layouts.partials.flash')
 
@@ -34,15 +34,18 @@
             <p class="relative z-10 text-xs text-white/55">University of Caloocan City · College of Liberal Arts and Sciences</p>
         </aside>
 
-        <div class="flex min-h-dvh flex-col justify-center bg-[#f6f7f9] px-4 py-10 sm:px-8">
-            <a href="{{ route('home') }}" class="mb-8 flex items-center gap-3 text-[#111827] lg:hidden">
+        <div class="relative flex min-h-dvh flex-col justify-center bg-[var(--ed-canvas)] px-4 py-10 sm:px-8">
+            <div class="absolute right-4 top-4 sm:right-8 sm:top-8">
+                <x-theme-toggle class="h-10 w-10 px-0" />
+            </div>
+            <a href="{{ route('home') }}" class="mb-8 flex items-center gap-3 text-[var(--ed-ink)] lg:hidden">
                 <span class="grid h-11 w-11 place-items-center rounded-[12px] bg-gradient-to-br from-[#6366f1] to-[#4338ca] text-sm font-bold text-white">UCC</span>
                 <span>
                     <span class="block text-lg font-bold tracking-[-0.02em]">EduPredict</span>
                     <span class="block text-xs text-gray-500">University of Caloocan City</span>
                 </span>
             </a>
-            <main id="main-content" class="mx-auto w-full max-w-md rounded-[16px] border border-[#e8eaee] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_rgba(16,24,40,0.06)] sm:p-8">
+            <main id="main-content" class="mx-auto w-full max-w-md rounded-[16px] border border-[var(--ed-line)] bg-[var(--ed-surface)] p-6 shadow-[var(--ed-shadow)] sm:p-8">
                 {{ $slot }}
                 @yield('content')
             </main>

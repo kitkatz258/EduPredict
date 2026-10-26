@@ -89,6 +89,7 @@ class QuestionnaireForm extends Component
         $this->persist($this->student(), submit: false);
         $this->statusMessage = 'Questionnaire draft saved. You can finish it later.';
         $this->toast($this->statusMessage);
+        $this->dispatch('questionnaire-progress-updated');
     }
 
     public function saveAndContinue(): void

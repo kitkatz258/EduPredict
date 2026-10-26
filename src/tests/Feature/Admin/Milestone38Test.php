@@ -119,10 +119,11 @@ class Milestone38Test extends TestCase
         Livewire::actingAs($student->user)
             ->test(QuestionnaireForm::class)
             ->call('openWizard')
-            ->assertSee('Answered')
-            ->assertSee('saved')
-            ->assertSee('Overall')
-            ->assertSee('This section')
+            ->assertSee('This section ·')
+            ->assertSee('Overall ·')
+            ->assertSee('sections saved')
+            ->assertSee('aria-label="This section"', false)
+            ->assertSee('aria-label="Overall"', false)
             ->assertSee('aria-label="Questionnaire sections"', false);
     }
 

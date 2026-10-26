@@ -16,9 +16,9 @@
     $ariaLabel = $user?->role?->label() ?? 'Staff';
 @endphp
 
-<header class="sticky top-0 z-30 border-b border-[#e8eaee] bg-white print:hidden" x-data="{ open: false }" @keydown.escape.window="open = false">
+<header class="sticky top-0 z-30 border-b border-[var(--ed-line)] bg-[var(--ed-header)] print:hidden" x-data="{ open: false }" @keydown.escape.window="open = false">
     <div class="mx-auto flex h-[68px] w-full items-center gap-3 px-4 sm:px-6 lg:px-8">
-        <a href="{{ route($home) }}" class="flex shrink-0 items-center gap-2.5 font-semibold text-[#111827]">
+        <a href="{{ route($home) }}" class="flex shrink-0 items-center gap-2.5 font-semibold text-[var(--ed-ink)]">
             <span class="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-gradient-to-br from-[#6366f1] to-[#4338ca] text-[11px] font-bold text-white">UCC</span>
             <span class="hidden sm:inline">EduPredict</span>
         </a>
@@ -37,6 +37,7 @@
         </nav>
 
         <div class="ml-auto flex items-center gap-2">
+            <x-theme-toggle class="h-10 w-10 px-0" />
             <x-user-menu />
             <button
                 type="button"
@@ -52,7 +53,7 @@
         </div>
     </div>
 
-    <nav id="academic-mobile-nav" x-show="open" x-cloak x-transition.origin.top class="border-t border-[#e8eaee] bg-white px-4 py-3 motion-reduce:transition-none md:hidden" aria-label="{{ $ariaLabel }} mobile">
+    <nav id="academic-mobile-nav" x-show="open" x-cloak x-transition.origin.top class="border-t border-[var(--ed-line)] bg-[var(--ed-header)] px-4 py-3 motion-reduce:transition-none md:hidden" aria-label="{{ $ariaLabel }} mobile">
         <p class="mb-2 truncate px-3 text-sm font-semibold text-gray-900">{{ $user->name }}</p>
         @foreach ($items as $item)
             @php $isActive = request()->routeIs(...$item['active']); @endphp

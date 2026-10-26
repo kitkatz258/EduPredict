@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-5">
     <div class="flex flex-wrap items-end justify-between gap-3 print:hidden">
         <div class="flex flex-wrap items-end gap-3">
             @if ($programs->isNotEmpty())
@@ -53,7 +53,7 @@
 
     @include('livewire.staff.partials.report-disclaimer')
 
-    <p class="text-sm text-gray-600">{{ $rows->count() }} authorized {{ $rows->count() === 1 ? 'student' : 'students' }} in this view. Questionnaire answers and household details are not included.</p>
+    <p class="text-sm text-[var(--ed-muted)]">{{ $rows->count() }} authorized {{ $rows->count() === 1 ? 'student' : 'students' }} in this view. Questionnaire answers and household details are not included.</p>
 
     <div class="overflow-hidden rounded-[14px] border border-[#e8eaee] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.03)]">
         <div class="overflow-x-auto">

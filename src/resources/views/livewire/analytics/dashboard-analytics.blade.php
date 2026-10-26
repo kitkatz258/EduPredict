@@ -88,9 +88,10 @@
                 if (!payload || !window.Chart) {
                     return;
                 }
-                const ink = '#6b7280';
-                const grid = '#eef0f3';
-                const indigo = '#4f46e5';
+                const theme = window.edupredictTheme?.colors?.() || {};
+                const ink = theme.ink || '#6b7280';
+                const grid = theme.grid || '#eef0f3';
+                const indigo = theme.indigo || '#4f46e5';
                 const legend = { labels: { color: ink, boxWidth: 8, usePointStyle: true, pointStyle: 'circle' } };
                 const valueAxis = { beginAtZero: true, ticks: { color: ink, precision: 0 }, grid: { color: grid } };
                 const categoryAxis = { ticks: { color: ink }, grid: { display: false } };
@@ -159,6 +160,7 @@
         }"
         x-init="draw(@js($charts))"
         x-on:analytics-updated.window="draw($event.detail.charts ?? $event.detail)"
+        x-on:edupredict-theme.window="window.edupredictTheme?.paintCharts?.()"
     >
         <section class="rounded-[14px] border border-[#e8eaee] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_1px_3px_rgba(16,24,40,0.03)]">
             <h3 class="text-base font-semibold text-gray-900">Dropout risk distribution</h3>
