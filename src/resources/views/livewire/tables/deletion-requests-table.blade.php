@@ -4,13 +4,16 @@
             <label for="deletion-search-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Search</label>
             <input id="deletion-search-{{ $this->getId() }}" type="search" wire:model.live.debounce.400ms="search" placeholder="Name, email, or reason…" class="w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm">
         </div>
-        <x-segmented-control
-            label="Request status"
-            :options="['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected', '' => 'All']"
-            :marks="['pending' => 'bg-amber-500', 'approved' => 'bg-emerald-600', 'rejected' => 'bg-red-600', '' => 'bg-gray-400']"
-            :current="$statusFilter"
-            method="setStatus"
-        />
+        <div>
+            <label for="deletion-status-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Request status</label>
+            <select id="deletion-status-{{ $this->getId() }}" wire:model.live="statusFilter" class="ui-field w-auto">
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="">All</option>
+            </select>
+            <p class="mt-1 max-w-sm text-xs text-gray-500">Approval deactivates sign-in. Grades, predictions, and other stored records are kept.</p>
+        </div>
     </div>
     <x-updating />
     <div class="overflow-hidden rounded-xl border border-brand-200 bg-white shadow-sm" wire:loading.class="opacity-60">
@@ -82,23 +85,26 @@
                         <textarea id="deletion-note-{{ $this->getId() }}" wire:model="adminNote" rows="3" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm"></textarea>
                         @error('adminNote') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
+                @elseif ($reviewing->admin_note)
+                    <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900">{{ $reviewing->admin_note }}</p>
+                @endif
+            </div>
+            <x-slot:footer>
+                @if ($reviewing->status === 'pending')
                     <div class="flex flex-wrap justify-end gap-2">
-                        <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900">Cancel</button>
-                        <button type="button" wire:click="reject({{ $reviewing->id }})" wire:loading.attr="disabled" wire:target="reject,approve" data-confirm="The account stays active." data-confirm-title="Reject this deletion request?" data-confirm-button="Reject" data-confirm-tone="neutral" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900">Reject</button>
-                        <button type="button" wire:click="approve({{ $reviewing->id }})" wire:loading.attr="disabled" wire:target="approve,reject" data-confirm="The account can no longer sign in. Prediction history is kept." data-confirm-title="Deactivate this account?" data-confirm-button="Approve" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
+                        <button type="button" x-on:click="requestClose()" class="ui-btn ui-btn-secondary">Cancel</button>
+                        <button type="button" wire:click="reject({{ $reviewing->id }})" wire:loading.attr="disabled" wire:target="reject,approve" data-confirm="The account stays active." data-confirm-title="Reject this deletion request?" data-confirm-button="Reject" data-confirm-tone="neutral" class="ui-btn ui-btn-secondary">Reject</button>
+                        <button type="button" wire:click="approve({{ $reviewing->id }})" wire:loading.attr="disabled" wire:target="approve,reject" data-confirm="The account can no longer sign in. Prediction history is kept." data-confirm-title="Deactivate this account?" data-confirm-button="Approve" class="ui-btn ui-btn-primary">
                             <x-spinner wire:loading wire:target="approve" />
                             Approve
                         </button>
                     </div>
                 @else
-                    @if ($reviewing->admin_note)
-                        <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900">{{ $reviewing->admin_note }}</p>
-                    @endif
                     <div class="flex justify-end">
-                        <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900">Close</button>
+                        <button type="button" x-on:click="requestClose()" class="ui-btn ui-btn-secondary">Close</button>
                     </div>
                 @endif
-            </div>
+            </x-slot:footer>
         </x-dialog>
     @endif
 </div>

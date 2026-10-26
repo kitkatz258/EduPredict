@@ -15,7 +15,9 @@ class InterventionsTable extends BaseTable
 {
     use DispatchesToasts;
 
-    public string $sortField = 'title';
+    public string $sortField = 'id';
+
+    public string $sortDirection = 'desc';
 
     public string $riskFilter = '';
 
@@ -59,9 +61,7 @@ class InterventionsTable extends BaseTable
     }
 
     #[On('catalog-changed')]
-    public function refreshCatalog(): void
-    {
-    }
+    public function refreshCatalog(): void {}
 
     protected function baseQuery(): Builder
     {

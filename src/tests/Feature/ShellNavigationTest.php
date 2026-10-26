@@ -87,10 +87,10 @@ class ShellNavigationTest extends TestCase
             ->getContent();
 
         $sidebar = $this->between($html, 'id="staff-sidebar"', '</aside>');
-        foreach (['admin.dashboard', 'admin.users', 'admin.colleges', 'admin.questionnaire', 'admin.psoc', 'admin.interventions', 'admin.audit', 'admin.deletion-requests', 'privacy'] as $route) {
+        foreach (['admin.dashboard', 'admin.users', 'admin.colleges', 'admin.departments', 'admin.programs', 'admin.questionnaire', 'admin.psoc', 'admin.interventions', 'admin.audit', 'admin.prediction-grants', 'admin.deletion-requests', 'privacy', 'profile.edit'] as $route) {
             $this->assertStringContainsString('href="'.route($route).'"', $sidebar, "sidebar links to {$route}");
         }
-        $this->assertStringNotContainsString('href="'.route('profile.edit').'"', $sidebar);
+        $this->assertStringContainsString('Academic structure', $sidebar);
         $this->assertStringNotContainsString('About', $sidebar);
         $this->assertStringNotContainsString('Faculty', $sidebar);
 

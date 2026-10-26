@@ -73,8 +73,11 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         Route::get('/admin/questionnaire', [QuestionnairePageController::class, 'index'])->name('admin.questionnaire');
         Route::get('/admin/psoc', [AdminPageController::class, 'psoc'])->name('admin.psoc');
         Route::get('/admin/colleges', [AdminPageController::class, 'colleges'])->name('admin.colleges');
+        Route::get('/admin/departments', [AdminPageController::class, 'departments'])->name('admin.departments');
+        Route::get('/admin/programs', [AdminPageController::class, 'programs'])->name('admin.programs');
         Route::get('/admin/interventions', [AdminPageController::class, 'interventions'])->name('admin.interventions');
         Route::get('/admin/audit', [AdminPageController::class, 'audit'])->name('admin.audit');
+        Route::get('/admin/prediction-grants', [AdminPageController::class, 'predictionGrants'])->name('admin.prediction-grants');
         Route::get('/admin/deletion-requests', [AdminPageController::class, 'deletionRequests'])->name('admin.deletion-requests');
     });
 

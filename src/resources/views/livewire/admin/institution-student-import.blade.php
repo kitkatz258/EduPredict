@@ -4,8 +4,8 @@
     </button>
 
     @if ($open)
-        <x-dialog title="Import eligible students" close="closeImport" description="Registration still accepts only student numbers on this list. This import does not create accounts. Columns: student_number, last_name, first_name, program_code, year_level. Optional: email, birthdate.">
-            <form wire:submit="import" class="relative space-y-4 px-5 py-5 sm:px-6">
+        <x-dialog title="Import eligible students" close="closeImport" description="This import adds eligibility rows only. It does not create logins. Columns: student_number, last_name, first_name, program_code, year_level. Optional: email, birthdate.">
+            <form id="eligible-import-form" wire:submit="import" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="import" label="Importing the list…" />
                 <div>
                     <label for="eligible-csv" class="mb-1 block text-sm font-medium">CSV file</label>
@@ -42,13 +42,10 @@
                         </ul>
                     </div>
                 @endif
-                <div class="flex flex-wrap justify-end gap-2">
-                    <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900">Close</button>
-                    <button type="submit" wire:loading.attr="disabled" wire:target="import,csv" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
-                        <x-spinner wire:loading wire:target="import" />Import
-                    </button>
-                </div>
             </form>
+            <x-slot:footer>
+                <x-dialog-actions form="eligible-import-form" submit="Import" target="import,csv" cancel="Close" />
+            </x-slot:footer>
         </x-dialog>
     @endif
 </div>

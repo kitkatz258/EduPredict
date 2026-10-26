@@ -37,6 +37,7 @@
         <div
             x-data="{
                 sidebarOpen: false,
+                academicOpen: {{ request()->routeIs('admin.colleges', 'admin.departments', 'admin.programs') ? 'true' : 'false' }},
                 collapsed: document.documentElement.classList.contains('sidebar-collapsed'),
                 toggleCollapsed() {
                     this.collapsed = ! this.collapsed;
@@ -107,6 +108,23 @@
                                 <span class="block truncate text-[11px] text-[#7d8492]">{{ $user->role->label() }}</span>
                             </span>
                         </div>
+                        <a
+                            href="{{ route('profile.edit') }}"
+                            title="Profile"
+                            class="sb-link {{ request()->routeIs('profile.edit') && ! request()->has('settings') ? 'bg-white/10 font-medium text-white' : 'text-[#a3a9b5] hover:bg-white/[0.06] hover:text-white' }} relative flex items-center gap-3 rounded-[10px] px-2.5 py-[9px]"
+                            @if (request()->routeIs('profile.edit')) aria-current="page" @endif
+                        >
+                            <i class="ri-user-line text-lg leading-none" aria-hidden="true"></i>
+                            <span class="sb-label truncate">Profile</span>
+                        </a>
+                        <a
+                            href="{{ route('profile.edit') }}#account-settings"
+                            title="Settings"
+                            class="sb-link text-[#a3a9b5] hover:bg-white/[0.06] hover:text-white relative flex items-center gap-3 rounded-[10px] px-2.5 py-[9px]"
+                        >
+                            <i class="ri-settings-3-line text-lg leading-none" aria-hidden="true"></i>
+                            <span class="sb-label truncate">Settings</span>
+                        </a>
                         <a
                             href="{{ route('privacy') }}"
                             title="Privacy"

@@ -1,7 +1,7 @@
 <div>
     @if ($show)
         <x-dialog title="Edit user" close="closeForm" description="Role changes stay inside the active staff roles. Prediction history is kept.">
-            <form wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
+            <form id="edit-user-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="save" label="Saving user…" />
                 @if ($statusMessage !== '')
                     <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
@@ -83,16 +83,12 @@
                     @endif
                 </div>
                 @if ($temporaryPassword)
-                    <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">Temporary password: <code>{{ $temporaryPassword }}</code></p>
+                    <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">Temporary password: <code>{{ $temporaryPassword }}</code>. Share it privately. The user must change it at next sign-in.</p>
                 @endif
-                <div class="flex flex-wrap justify-end gap-2">
-                    <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900">Cancel</button>
-                    <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
-                        <x-spinner wire:loading wire:target="save" />
-                        Save user
-                    </button>
-                </div>
             </form>
+            <x-slot:footer>
+                <x-dialog-actions form="edit-user-form" submit="Save user" />
+            </x-slot:footer>
         </x-dialog>
     @endif
 </div>

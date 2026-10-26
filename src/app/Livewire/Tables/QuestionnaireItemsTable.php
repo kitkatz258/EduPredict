@@ -53,9 +53,7 @@ class QuestionnaireItemsTable extends BaseTable
     }
 
     #[On('catalog-changed')]
-    public function refreshCatalog(): void
-    {
-    }
+    public function refreshCatalog(): void {}
 
     public function toggleActive(int $itemId, AuditLogger $audit): void
     {

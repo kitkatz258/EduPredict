@@ -23,40 +23,18 @@ class StudentFlowPolishTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_sign_in_and_create_account_share_one_fixed_width_card_with_a_toggle(): void
+    public function test_sign_in_uses_a_split_layout_without_public_registration(): void
     {
-        foreach (['/login' => 'login', '/register' => 'register'] as $url => $mode) {
-            $page = $this->get($url)
-                ->assertOk()
-                ->assertSee('role="tablist"', false)
-                ->assertSee('id="auth-tab-login"', false)
-                ->assertSee('id="auth-tab-register"', false)
-                ->assertSee('id="auth-panel-login"', false)
-                ->assertSee('id="auth-panel-register"', false)
-                ->assertSee('max-w-xl', false)
-                ->assertDontSee('max-w-2xl', false)
-                ->assertDontSee('New student?')
-                ->assertDontSee('Already registered?')
-                ->assertSee('Informed consent')
-                ->assertSee('Forgot password?');
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('Welcome back')
+            ->assertSee('auth-art', false)
+            ->assertSee('Forgot password?')
+            ->assertDontSee('Create Account')
+            ->assertDontSee('role="tablist"', false)
+            ->assertDontSee('Informed consent');
 
-            $html = $page->getContent();
-            $hidden = $mode === 'login' ? 'auth-panel-register' : 'auth-panel-login';
-            $this->assertMatchesRegularExpression('/id="'.$hidden.'"[^>]*style="display: none"/s', $html);
-        }
-    }
-
-    public function test_a_failed_registration_reopens_the_create_account_panel_even_from_the_sign_in_url(): void
-    {
-        $this->from('/login')
-            ->post('/register', ['_auth_form' => 'register', 'student_number' => ''])
-            ->assertRedirect('/login');
-
-        $html = $this->get('/login')->assertOk()->getContent();
-
-        $this->assertStringContainsString('id="student_number-error"', $html);
-        $this->assertMatchesRegularExpression('/id="auth-panel-login"[^>]*style="display: none"/s', $html);
-        $this->assertStringNotContainsString('id="login-error"', $html);
+        $this->get('/register')->assertRedirect(route('login'));
     }
 
     public function test_student_number_sign_in_still_works_from_the_shared_card(): void

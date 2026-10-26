@@ -21,7 +21,7 @@ class PageTitle
     {
         return [
             'login' => 'Sign in',
-            'register' => 'Student registration',
+            'register' => 'Sign in',
             'password.request' => 'Forgot password',
             'password.reset' => 'Reset password',
             'password.confirm' => 'Confirm password',
@@ -41,7 +41,10 @@ class PageTitle
             'admin.dashboard' => 'Institution dashboard',
             'admin.users' => 'Users',
             'admin.institution-students' => 'Eligible students',
-            'admin.colleges' => 'Academic structure',
+            'admin.colleges' => 'Colleges',
+            'admin.departments' => 'Departments',
+            'admin.programs' => 'Programs',
+            'admin.prediction-grants' => 'Prediction grants',
             'admin.questionnaire' => 'Questionnaire',
             'admin.psoc' => 'PSOC occupations',
             'admin.interventions' => 'Interventions',

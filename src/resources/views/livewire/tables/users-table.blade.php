@@ -3,8 +3,25 @@
         <x-slot:toolbar>
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-                    <x-segmented-control label="Role" :options="$roleOptions" :current="$roleFilter" method="setRoleFilter" />
-                    <button type="button" wire:click="$dispatch('open-staff-form')" class="inline-flex h-10 items-center justify-center gap-2 rounded-[11px] bg-[#111827] px-3.5 text-sm font-semibold text-white hover:bg-[#1f2937]">
+                    <div class="grid w-full gap-3 sm:grid-cols-2 lg:max-w-xl">
+                        <div>
+                            <label for="user-role-{{ $this->getId() }}" class="mb-1 block text-sm font-medium text-gray-700">Role</label>
+                            <select id="user-role-{{ $this->getId() }}" wire:model.live="roleFilter" class="ui-field">
+                                @foreach ($roleOptions as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="user-status-{{ $this->getId() }}" class="mb-1 block text-sm font-medium text-gray-700">Status</label>
+                            <select id="user-status-{{ $this->getId() }}" wire:model.live="statusFilter" class="ui-field">
+                                <option value="">All</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" wire:click="$dispatch('open-staff-form')" class="ui-btn ui-btn-primary">
                         <i class="ri-user-add-line" aria-hidden="true"></i>Add user
                     </button>
                 </div>
@@ -16,10 +33,9 @@
                             <input id="table-search-{{ $this->getId() }}" type="search" wire:model.live.debounce.400ms="search" placeholder="Search by name or email…" class="ui-field has-search">
                         </div>
                     </div>
-                    <x-segmented-control label="Status" :options="['' => 'All', 'active' => 'Active', 'inactive' => 'Inactive']" :current="$statusFilter" method="setStatusFilter" />
                     <div class="flex items-center gap-2">
                         <label for="per-page-{{ $this->getId() }}" class="text-sm text-gray-600">Per page</label>
-                        <select id="per-page-{{ $this->getId() }}" wire:model.live="perPage" class="h-10 rounded-[11px] border border-[#e8eaee] bg-[#f6f7f9] px-3 text-sm text-gray-900 outline-none focus:border-[#4f46e5] focus:bg-white focus:ring-4 focus:ring-indigo-600/15">
+                        <select id="per-page-{{ $this->getId() }}" wire:model.live="perPage" class="ui-field w-auto">
                             @foreach ($perPageOptions as $option)
                                 <option value="{{ $option }}">{{ $option }}</option>
                             @endforeach
@@ -68,11 +84,11 @@
                         </x-status-pill>
                     </td>
                     <td>
-                        <div class="flex flex-wrap gap-2">
+                        <div class="flex flex-wrap gap-1.5">
                             <x-table-action icon="ri-pencil-line" wire:click="editUser({{ $row->id }})">Edit</x-table-action>
                             <x-table-action
-                                :icon="$row->is_active ? 'ri-forbid-2-line' : 'ri-checkbox-circle-line'"
-                                :tone="$row->is_active ? 'danger' : 'neutral'"
+                                :icon="$row->is_active ? 'ri-user-unfollow-line' : 'ri-user-follow-line'"
+                                :tone="$row->is_active ? 'danger' : 'success'"
                                 wire:click="toggleActive({{ $row->id }})"
                                 wire:loading.attr="disabled"
                                 wire:target="toggleActive({{ $row->id }})"
@@ -80,7 +96,6 @@
                                 :data-confirm-title="$row->is_active ? 'Deactivate this account?' : null"
                                 :data-confirm-button="$row->is_active ? 'Deactivate' : null"
                             >
-                                <x-spinner wire:loading wire:target="toggleActive({{ $row->id }})" />
                                 {{ $row->is_active ? 'Deactivate' : 'Activate' }}
                             </x-table-action>
                         </div>

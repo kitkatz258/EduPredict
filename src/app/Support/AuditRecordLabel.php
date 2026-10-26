@@ -12,6 +12,7 @@ use App\Models\GradeReport;
 use App\Models\InstitutionStudent;
 use App\Models\Intervention;
 use App\Models\Prediction;
+use App\Models\PredictionAttemptGrant;
 use App\Models\Program;
 use App\Models\PsocOccupation;
 use App\Models\QuestionnaireItem;
@@ -67,6 +68,10 @@ final class AuditRecordLabel
             'institution_students_imported' => 'Eligible students imported',
             'eligible_student_saved' => 'Eligible student saved',
             'student_registered' => 'Student registered',
+            'student_account_provisioned' => 'Student login issued',
+            'prediction_grant_created' => 'Prediction grant created',
+            'psoc_skill_tag_added' => 'PSOC skill tag added',
+            'activity_log_exported' => 'Activity log exported',
             'prediction_requested' => 'Prediction requested',
             'students.export' => 'Student list exported',
             'student_record_viewed' => 'Student record viewed',
@@ -102,6 +107,7 @@ final class AuditRecordLabel
         return match ($class) {
             User::class => 'User',
             Student::class => 'Student',
+            PredictionAttemptGrant::class => 'Prediction grant',
             InstitutionStudent::class => 'Eligible student',
             Prediction::class => 'Prediction',
             AccountDeletionRequest::class => 'Deletion request',

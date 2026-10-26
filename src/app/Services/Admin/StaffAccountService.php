@@ -20,7 +20,7 @@ class StaffAccountService
 
         if (! in_array($role, UserRole::staffAssignable(), true)) {
             abort(422, $role === UserRole::Student
-                ? 'Student accounts are created through self-registration.'
+                ? 'Student accounts are issued from Eligible students.'
                 : 'This role is no longer assignable.');
         }
 

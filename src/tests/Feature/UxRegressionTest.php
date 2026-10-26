@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Enums\UserRole;
 use App\Livewire\Student\SkillsExperienceSection;
 use App\Models\Student;
 use App\Models\User;
@@ -61,6 +60,9 @@ class UxRegressionTest extends TestCase
             'admin.users',
             'admin.institution-students',
             'admin.colleges',
+            'admin.departments',
+            'admin.programs',
+            'admin.prediction-grants',
             'admin.questionnaire',
             'admin.psoc',
             'admin.interventions',

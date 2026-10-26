@@ -11,7 +11,9 @@ use Livewire\Attributes\On;
 
 class PsocOccupationsTable extends BaseTable
 {
-    public string $sortField = 'title';
+    public string $sortField = 'id';
+
+    public string $sortDirection = 'desc';
 
     public string $groupFilter = '';
 
@@ -40,9 +42,7 @@ class PsocOccupationsTable extends BaseTable
     }
 
     #[On('catalog-changed')]
-    public function refreshCatalog(): void
-    {
-    }
+    public function refreshCatalog(): void {}
 
     protected function baseQuery(): Builder
     {

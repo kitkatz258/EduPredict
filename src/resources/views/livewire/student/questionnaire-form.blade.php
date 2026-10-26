@@ -136,7 +136,7 @@
                             if (answered > 0) return 'incomplete';
                             return 'empty';
                         },
-                        label() {
+                        totals() {
                             this.tick;
                             const keys = Object.keys(this.sections());
                             let answered = 0;
@@ -147,18 +147,49 @@
                                 answered += this.answeredIn(key);
                             });
                             const saved = Object.values(this.savedMap()).reduce((sum, count) => sum + Number(count || 0), 0);
-                            return 'Answered ' + answered + ' / ' + total + ' · ' + saved + ' / ' + total + ' saved';
+                            return { answered, saved, total };
+                        },
+                        label() {
+                            const t = this.totals();
+                            return 'Answered ' + t.answered + ' / ' + t.total + ' · ' + t.saved + ' / ' + t.total + ' saved';
+                        },
+                        overallPercent() {
+                            const t = this.totals();
+                            return t.total ? Math.round((t.answered / t.total) * 100) : 0;
+                        },
+                        sectionPercent() {
+                            this.tick;
+                            const key = this.currentKey();
+                            const ids = this.sections()[key] || [];
+                            return ids.length ? Math.round((this.answeredIn(key) / ids.length) * 100) : 0;
                         }
                     }"
                     x-on:questionnaire-section-changed.window="const started = performance.now(); const refresh = () => { this.bump(); if (performance.now() - started < 1200) requestAnimationFrame(refresh) }; this.$nextTick(refresh)"
                 >
-                    <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
-                        <span class="font-medium text-gray-700">{{ $reviewing ? 'Review' : $partTitle.' '.min($currentIndex + 1, $partCount).' of '.$partCount }}</span>
-                        <span class="sr-only">{{ $savedCount }} / {{ $totalCount }} saved</span>
-                        <span class="font-mono text-xs text-gray-600" aria-live="polite" x-text="label()">Answered {{ $answeredCount }} / {{ $totalCount }} · {{ $savedCount }} / {{ $totalCount }} saved</span>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
+                            <span class="font-medium text-gray-700">{{ $reviewing ? 'Review' : $partTitle.' '.min($currentIndex + 1, $partCount).' of '.$partCount }}</span>
+                            <span class="sr-only">{{ $savedCount }} / {{ $totalCount }} saved</span>
+                            <span class="font-mono text-xs text-gray-600" aria-live="polite" x-text="label()">Answered {{ $answeredCount }} / {{ $totalCount }} · {{ $savedCount }} / {{ $totalCount }} saved</span>
+                        </div>
+                        <div class="grid gap-2 sm:grid-cols-2">
+                            <div>
+                                <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">Overall</p>
+                                <div class="auth-progress" role="progressbar" aria-label="Overall questionnaire progress" :aria-valuenow="overallPercent()" aria-valuemin="0" aria-valuemax="100">
+                                    <span :style="'width:' + overallPercent() + '%'" style="width: {{ $totalCount > 0 ? (int) round(($answeredCount / $totalCount) * 100) : 0 }}%"></span>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">This section</p>
+                                <div class="auth-progress" role="progressbar" aria-label="Current section progress" :aria-valuenow="sectionPercent()">
+                                    <span :style="'width:' + sectionPercent() + '%'" style="width: {{ $sectionItems->count() > 0 ? (int) round(($sectionAnswered / $sectionItems->count()) * 100) : 0 }}%"></span>
+                                </div>
+                                <p class="mt-1 text-[11px] text-gray-500">{{ $sectionAnswered }} answered · {{ $sectionSaved }} saved of {{ $sectionTotal }}</p>
+                            </div>
+                        </div>
                     </div>
-                    <p class="mt-1 text-xs text-gray-500">A filled dot is a completed section. The open ring is the section you are on. An empty ring still needs answers.</p>
-                    <div class="mt-3 flex flex-wrap gap-2" role="list" aria-label="Questionnaire sections">
+                    <p class="mt-2 text-xs text-gray-500">Filled is complete. The ring is the current section. Empty still needs answers. Answered updates when you choose; saved updates after the draft is stored.</p>
+                    <div class="mt-3 flex max-w-full flex-wrap gap-2 overflow-x-auto pb-1" role="list" aria-label="Questionnaire sections">
                         @foreach ($partKeys as $key)
                             @php
                                 $dotSaved = $savedPerSection[$key] ?? 0;
@@ -186,7 +217,7 @@
                 </div>
             </x-slot:subhead>
 
-            <form id="questionnaire-wizard" wire:submit="submit" class="relative">
+            <form id="questionnaire-wizard" wire:submit="submit" class="relative" x-on:change="window.dispatchEvent(new Event('change'))">
                 <x-loading-overlay target="saveDraft,saveAndContinue,submit,previousPart,selectPart,openReview,discardDraft" label="Saving answers…" />
 
                 @if ($allItems->isEmpty())

@@ -98,6 +98,7 @@ class QuestionnaireForm extends Component
         $this->usesConstructNavigation() ? $this->nextConstruct() : $this->nextSection();
         $this->toast('Questionnaire progress saved.');
         $this->dispatch('questionnaire-section-changed');
+        $this->js('document.querySelectorAll(".dialog-scroll").forEach((el) => { el.style.overflowAnchor = "none"; el.scrollTop = 0; })');
     }
 
     public function previousPart(): void
@@ -106,6 +107,7 @@ class QuestionnaireForm extends Component
             $this->reviewing = false;
             $this->resetValidation();
             $this->dispatch('questionnaire-section-changed');
+            $this->js('document.querySelectorAll(".dialog-scroll").forEach((el) => { el.style.overflowAnchor = "none"; el.scrollTop = 0; })');
 
             return;
         }
@@ -113,6 +115,7 @@ class QuestionnaireForm extends Component
         $this->persist($this->student(), submit: false);
         $this->usesConstructNavigation() ? $this->previousConstruct() : $this->previousSection();
         $this->dispatch('questionnaire-section-changed');
+        $this->js('document.querySelectorAll(".dialog-scroll").forEach((el) => { el.style.overflowAnchor = "none"; el.scrollTop = 0; })');
     }
 
     public function openReview(): void
@@ -139,6 +142,7 @@ class QuestionnaireForm extends Component
         }
         $this->resetValidation();
         $this->dispatch('questionnaire-section-changed');
+        $this->js('document.querySelectorAll(".dialog-scroll").forEach((el) => { el.style.overflowAnchor = "none"; el.scrollTop = 0; })');
     }
 
     public function selectConstruct(string $construct): void
