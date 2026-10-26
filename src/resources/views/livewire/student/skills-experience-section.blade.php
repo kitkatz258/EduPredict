@@ -26,9 +26,9 @@
         @endif
     </section>
 
-    <div class="grid items-start gap-4 lg:grid-cols-3">
+    <div class="grid items-stretch gap-4 lg:grid-cols-3">
     {{-- Technical skills --}}
-    <section class="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm" aria-labelledby="skills-heading">
+    <section class="flex h-full flex-col rounded-2xl border border-brand-200 bg-white p-4 shadow-sm" aria-labelledby="skills-heading">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h3 id="skills-heading" class="text-base font-semibold text-brand-900"><i class="ri-tools-line mr-1" aria-hidden="true"></i>Technical skills</h3>
@@ -52,7 +52,7 @@
     </section>
 
     {{-- Certifications --}}
-    <section class="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm" aria-labelledby="certifications-heading">
+    <section class="flex h-full flex-col rounded-2xl border border-brand-200 bg-white p-4 shadow-sm" aria-labelledby="certifications-heading">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h3 id="certifications-heading" class="text-base font-semibold text-brand-900"><i class="ri-award-line mr-1" aria-hidden="true"></i>Certifications</h3>
@@ -82,7 +82,7 @@
     </section>
 
     {{-- Work experience --}}
-    <section class="rounded-2xl border border-brand-200 bg-white p-4 shadow-sm" aria-labelledby="experience-heading">
+    <section class="flex h-full flex-col rounded-2xl border border-brand-200 bg-white p-4 shadow-sm" aria-labelledby="experience-heading">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h3 id="experience-heading" class="text-base font-semibold text-brand-900"><i class="ri-briefcase-4-line mr-1" aria-hidden="true"></i>Work experience</h3>
@@ -117,7 +117,7 @@
 
     @if ($archivedCount > 0)
         <div>
-            <button type="button" wire:click="toggleArchived" class="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-brand-900 hover:underline" title="View archived skills, certifications, and work experience" aria-haspopup="dialog" aria-expanded="{{ $showArchived ? 'true' : 'false' }}">
+            <button type="button" wire:click="toggleArchived" class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-semibold text-white hover:bg-[#1f2937] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2" title="View archived skills, certifications, and work experience" aria-haspopup="dialog" aria-expanded="{{ $showArchived ? 'true' : 'false' }}">
                 <i class="ri-archive-line" aria-hidden="true"></i>
                 Archived entries ({{ $archivedCount }})
             </button>

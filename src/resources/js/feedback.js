@@ -283,6 +283,62 @@ function resetQuestionnaireScroll() {
     });
 }
 
+function blockMissingGradeTerm(button, event) {
+    const panel = button.closest('#grade-mode-panel') || document;
+    const year = panel.querySelector('[data-term-field="school_year"]');
+    const semester = panel.querySelector('[data-term-field="semester"]');
+    const missing = [];
+    if (!year || String(year.value).trim() === '') {
+        missing.push('academic year');
+    }
+    if (!semester || String(semester.value).trim() === '') {
+        missing.push('semester');
+    }
+    if (missing.length === 0) {
+        [year, semester].forEach((field) => {
+            field?.removeAttribute('aria-invalid');
+            field?.classList.remove('border-red-600', 'ring-1', 'ring-red-600');
+        });
+        const banner = panel.querySelector('[data-term-error]');
+        if (banner) {
+            banner.hidden = true;
+        }
+
+        return false;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    [year, semester].forEach((field) => {
+        if (!field) {
+            return;
+        }
+        const empty = String(field.value).trim() === '';
+        field.setAttribute('aria-invalid', empty ? 'true' : 'false');
+        field.classList.toggle('border-red-600', empty);
+        field.classList.toggle('ring-1', empty);
+        field.classList.toggle('ring-red-600', empty);
+    });
+    const banner = panel.querySelector('[data-term-error]');
+    const message = 'Choose the '+missing.join(' and ')+' before saving. The subject rows on this screen were kept.';
+    if (banner) {
+        banner.hidden = false;
+        banner.textContent = message;
+    }
+    (String(year?.value || '').trim() === '' ? year : semester)?.focus();
+    Swal.fire({
+        title: 'Academic year and semester are required',
+        text: 'Choose the '+missing.join(' and ')+' before these grades can be saved. The extracted subject rows stay on this screen.',
+        icon: 'warning',
+        confirmButtonText: 'Choose them',
+        confirmButtonColor: brand,
+        heightAuto: false,
+        ...motionOptions(),
+    });
+
+    return true;
+}
+
 function installQuestionnaireScroll() {
     if (window.__edupredictQuestionnaireScroll) {
         return;
@@ -312,6 +368,11 @@ export function installFeedback() {
     document.addEventListener('click', (event) => {
         const el = event.target.closest('[data-confirm]');
         if (!el || el.tagName === 'FORM') {
+            return;
+        }
+        if (el.dataset.requireTerm === '1' && blockMissingGradeTerm(el, event)) {
+            delete el.dataset.confirmed;
+
             return;
         }
         if (el.dataset.confirmed === '1') {

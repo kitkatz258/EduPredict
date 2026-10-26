@@ -64,7 +64,7 @@
                     under <span class="font-mono">{{ $latestSubmission->definition_version }}</span>.
                     Prediction History is a separate record.
                 </p>
-                <div class="mt-4 max-w-3xl">
+                <div class="mt-4">
                     <h4 class="text-sm font-bold text-brand-900">Section results saved with this submission</h4>
                     <x-construct-summary class="mt-3" :constructs="$sectionScores" unavailable="No section results were stored with this submission." />
                 </div>
@@ -118,11 +118,15 @@
                         answeredIn(key) {
                             this.tick;
                             const ids = this.sections()[key] || [];
+                            const saved = Number(this.savedMap()[key] || 0);
                             if (key === this.currentKey() && ! this.reviewingNow()) {
                                 const root = this.host();
-                                return ids.filter((id) => root?.querySelector('input[name=item-' + id + ']:checked')).length;
+                                const present = ids.some((id) => root?.querySelector('input[name=item-' + id + ']'));
+                                if (present) {
+                                    return ids.filter((id) => root?.querySelector('input[name=item-' + id + ']:checked')).length;
+                                }
                             }
-                            return this.savedMap()[key] || 0;
+                            return saved;
                         },
                         status(key) {
                             const ids = this.sections()[key] || [];
@@ -146,7 +150,7 @@
                             return 'Answered ' + answered + ' / ' + total + ' · ' + saved + ' / ' + total + ' saved';
                         }
                     }"
-                    x-on:questionnaire-section-changed.window="this.$nextTick(() => this.bump())"
+                    x-on:questionnaire-section-changed.window="const started = performance.now(); const refresh = () => { this.bump(); if (performance.now() - started < 1200) requestAnimationFrame(refresh) }; this.$nextTick(refresh)"
                 >
                     <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
                         <span class="font-medium text-gray-700">{{ $reviewing ? 'Review' : $partTitle.' '.min($currentIndex + 1, $partCount).' of '.$partCount }}</span>

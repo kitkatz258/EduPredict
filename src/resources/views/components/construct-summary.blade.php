@@ -10,10 +10,10 @@
     @if ($rows === null)
         <p class="text-sm text-gray-500">{{ $unavailable }}</p>
     @else
-        <ul class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <ul class="grid auto-rows-fr grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ($rows as $construct)
                 @if (($construct['presentation'] ?? 'percent') === 'mean')
-                    <li @class(['rounded-lg border px-3 py-2', 'border-amber-400 bg-amber-50' => ($construct['context_flag'] ?? null) === true, 'border-brand-200' => ($construct['context_flag'] ?? null) !== true])>
+                    <li @class(['flex h-full flex-col rounded-lg border px-3 py-2', 'border-amber-400 bg-amber-50' => ($construct['context_flag'] ?? null) === true, 'border-brand-200' => ($construct['context_flag'] ?? null) !== true])>
                         <div class="flex items-baseline justify-between gap-3 text-sm">
                             <span class="font-bold text-brand-900">
                                 @if (! empty($construct['code']))<span class="font-mono text-xs font-semibold text-brand-900">{{ $construct['code'] }}</span> @endif
@@ -45,7 +45,7 @@
                         @endif
                     </li>
                 @else
-                    <li @class(['rounded-lg border px-3 py-2', 'border-amber-400 bg-amber-50' => ($construct['context_flag'] ?? null) === true, 'border-brand-200' => ($construct['context_flag'] ?? null) !== true])>
+                    <li @class(['flex h-full flex-col rounded-lg border px-3 py-2', 'border-amber-400 bg-amber-50' => ($construct['context_flag'] ?? null) === true, 'border-brand-200' => ($construct['context_flag'] ?? null) !== true])>
                         <div class="flex items-baseline justify-between gap-3 text-sm">
                             <span class="font-bold text-brand-900">{{ $construct['label'] }}</span>
                             <span class="font-mono text-xs font-semibold text-brand-900">{{ number_format((float) $construct['score'], 0) }}</span>

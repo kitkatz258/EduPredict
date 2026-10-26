@@ -432,6 +432,32 @@ class PredictionRequestTest extends TestCase
         $this->assertSame('placeholder-heuristic-v1', $prediction->model_version);
     }
 
+    public function test_the_loading_overlay_is_present_and_a_second_submit_does_not_duplicate(): void
+    {
+        $student = $this->makeStudent(semesters: 2);
+        $this->completeProfile($student, 'below_10k');
+        $this->travelTo(Carbon::parse('2026-10-25 11:00:00', 'Asia/Manila'));
+
+        Livewire::actingAs($student->user)
+            ->test(RequestPrediction::class)
+            ->assertSee('Preparing your estimate')
+            ->assertSee('backdrop-blur-sm', false)
+            ->assertSee('wire:target="request"', false)
+            ->call('request')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('student.dashboard'));
+
+        $this->assertSame(1, Prediction::query()->where('student_id', $student->id)->count());
+
+        Livewire::actingAs($student->user)
+            ->test(RequestPrediction::class)
+            ->set('submitting', true)
+            ->call('request')
+            ->assertNoRedirect();
+
+        $this->assertSame(1, Prediction::query()->where('student_id', $student->id)->count());
+    }
+
     public function test_missing_consent_blocks_a_new_prediction(): void
     {
         $student = $this->makeStudent(semesters: 2);

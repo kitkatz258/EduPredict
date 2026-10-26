@@ -123,25 +123,29 @@
                     <div class="flex gap-2">
                         <div>
                             <label for="manual-school-year" class="sr-only">Academic year</label>
-                            <select id="manual-school-year" wire:model.live="school_year" class="{{ $inputClass }}">
+                            <select id="manual-school-year" data-term-field="school_year" wire:model="school_year" @error('school_year') aria-invalid="true" @enderror class="{{ $inputClass }} @error('school_year') border-red-600 ring-1 ring-red-600 @enderror">
                                 <option value="">Academic year</option>
                                 @foreach ($schoolYears as $year)<option value="{{ $year }}">AY {{ $year }}</option>@endforeach
                             </select>
-                            @error('school_year') <p class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
+                            @error('school_year') <p class="mt-1 text-xs text-red-700" role="alert">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label for="manual-semester" class="sr-only">Semester</label>
-                            <select id="manual-semester" wire:model.live="semester" class="{{ $inputClass }}">
+                            <select id="manual-semester" data-term-field="semester" wire:model="semester" @error('semester') aria-invalid="true" @enderror class="{{ $inputClass }} @error('semester') border-red-600 ring-1 ring-red-600 @enderror">
                                 <option value="">Semester</option>
                                 @foreach ($semesters as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
                             </select>
-                            @error('semester') <p class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
+                            @error('semester') <p class="mt-1 text-xs text-red-700" role="alert">{{ $message }}</p> @enderror
                         </div>
                     </div>
                 </div>
 
                 <div class="p-5 sm:p-6">
                     @error('rows') <p class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">{{ $message }}</p> @enderror
+                    @if ($errors->has('school_year') || $errors->has('semester'))
+                        <p class="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">Choose the academic year and semester before saving. The subject rows on this screen were kept.</p>
+                    @endif
+                    <p data-term-error hidden class="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert"></p>
                     <div class="hidden grid-cols-[7rem_1fr_4rem_6rem_8rem_2rem] gap-3 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 md:grid">
                         <span>Subject code</span><span>Subject name</span><span>Units</span><span>Final grade</span><span>Remarks</span><span class="sr-only">Remove</span>
                     </div>
@@ -177,7 +181,7 @@
                     <p class="text-xs text-gray-600">Saved grades become your academic record and are used in your next prediction.</p>
                     <div class="flex items-center gap-3">
                         <button type="button" wire:click="saveDraft" wire:loading.attr="disabled" wire:target="saveDraft,confirm" class="text-sm font-medium text-brand-900 hover:underline disabled:opacity-60">Save draft</button>
-                        <button type="button" wire:click="confirm" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Save these grades?" data-confirm-button="Save grades" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
+                        <button type="button" wire:click="confirm" data-require-term="1" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Save these grades?" data-confirm-button="Save grades" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
                             <x-spinner wire:loading wire:target="confirm" />Save grades<i class="ri-arrow-right-s-line" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -196,17 +200,19 @@
 
             <section class="relative overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm">
                 <x-loading-overlay target="confirm,saveDraft" label="Saving grades…" />
-                <div class="flex flex-col gap-3 border-b border-brand-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div class="flex flex-col gap-3 border-b border-brand-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6" x-data="{ year: @js($school_year), semester: @js($semester) }" x-on:change="if ($event.target.dataset.termField === 'school_year') year = $event.target.value; if ($event.target.dataset.termField === 'semester') semester = $event.target.value">
                     <div class="flex flex-wrap items-center gap-2">
-                        <h3 class="text-base font-semibold text-brand-900">{{ $termLabel }}</h3>
+                        <h3 class="text-base font-semibold text-brand-900">
+                            <span x-text="(year ? ('AY ' + year.replace('-', '–')) : 'Academic year not set') + ' · ' + (semester === 'First' ? '1st Semester' : (semester === 'Second' ? '2nd Semester' : (semester === 'Midyear' ? 'Midyear' : 'Semester not set')))">{{ $termLabel }}</span>
+                        </h3>
                         <div class="flex gap-2">
                             <label for="review-school-year" class="sr-only">Academic year</label>
-                            <select id="review-school-year" wire:model.live="school_year" class="rounded-md border border-brand-200 px-2 py-1 text-xs">
+                            <select id="review-school-year" data-term-field="school_year" wire:model="school_year" @error('school_year') aria-invalid="true" @enderror class="rounded-md border px-2 py-1 text-xs {{ $errors->has('school_year') ? 'border-red-600 ring-1 ring-red-600' : 'border-brand-200' }}">
                                 <option value="">Academic year</option>
                                 @foreach ($schoolYears as $year)<option value="{{ $year }}">AY {{ $year }}</option>@endforeach
                             </select>
                             <label for="review-semester" class="sr-only">Semester</label>
-                            <select id="review-semester" wire:model.live="semester" class="rounded-md border border-brand-200 px-2 py-1 text-xs">
+                            <select id="review-semester" data-term-field="semester" wire:model="semester" @error('semester') aria-invalid="true" @enderror class="rounded-md border px-2 py-1 text-xs {{ $errors->has('semester') ? 'border-red-600 ring-1 ring-red-600' : 'border-brand-200' }}">
                                 <option value="">Semester</option>
                                 @foreach ($semesters as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
                             </select>
@@ -216,8 +222,12 @@
                         <p class="inline-flex items-center gap-1 text-xs font-medium text-amber-800"><i class="ri-error-warning-line" aria-hidden="true"></i>{{ $reviewCount }} {{ \Illuminate\Support\Str::plural('row', $reviewCount) }} need review. Check the highlighted rows.</p>
                     @endif
                 </div>
-                @error('school_year') <p class="px-5 pt-3 text-sm text-red-700 sm:px-6">{{ $message }}</p> @enderror
-                @error('semester') <p class="px-5 pt-3 text-sm text-red-700 sm:px-6">{{ $message }}</p> @enderror
+                @error('school_year') <p class="px-5 pt-3 text-sm text-red-700 sm:px-6" role="alert">{{ $message }}</p> @enderror
+                @error('semester') <p class="px-5 pt-3 text-sm text-red-700 sm:px-6" role="alert">{{ $message }}</p> @enderror
+                @if ($errors->has('school_year') || $errors->has('semester'))
+                    <p class="mx-5 mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 sm:mx-6" role="alert">Choose the academic year and semester before saving. The subject rows on this screen were kept.</p>
+                @endif
+                <p data-term-error hidden class="mx-5 mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 sm:mx-6" role="alert"></p>
                 @error('rows') <p class="mx-5 mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800 sm:mx-6" role="alert">{{ $message }}</p> @enderror
 
                 @if ($warnings !== [])
@@ -295,7 +305,7 @@
                     </div>
                     <div class="flex items-center gap-3">
                         <button type="button" wire:click="saveDraft" wire:loading.attr="disabled" wire:target="saveDraft,confirm" class="text-sm font-medium text-brand-900 hover:underline disabled:opacity-60">Save draft</button>
-                        <button type="button" wire:click="confirm" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Confirm these grades?" data-confirm-button="Confirm & save" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
+                        <button type="button" wire:click="confirm" data-require-term="1" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Confirm these grades?" data-confirm-button="Confirm & save" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
                             <x-spinner wire:loading wire:target="confirm" /><i class="ri-checkbox-circle-line" wire:loading.remove wire:target="confirm" aria-hidden="true"></i>Confirm &amp; Save Grades
                         </button>
                     </div>
