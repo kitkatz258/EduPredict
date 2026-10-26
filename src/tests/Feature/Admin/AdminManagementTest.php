@@ -176,9 +176,18 @@ class AdminManagementTest extends TestCase
         $this->actingAs($admin)->get(route('admin.colleges'))
             ->assertOk()
             ->assertSee('Add college')
-            ->assertSee('Add department')
-            ->assertSee('Add program')
+            ->assertDontSee('Add department')
             ->assertDontSee('id="college-name"', false);
+
+        $this->actingAs($admin)->get(route('admin.departments'))
+            ->assertOk()
+            ->assertSee('Add department')
+            ->assertDontSee('id="department-name"', false);
+
+        $this->actingAs($admin)->get(route('admin.programs'))
+            ->assertOk()
+            ->assertSee('Add program')
+            ->assertDontSee('id="program-name"', false);
 
         Livewire::actingAs($admin)->test(DepartmentForm::class)
             ->set('collegeId', $college->id)

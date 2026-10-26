@@ -11,8 +11,11 @@ use App\Services\Analytics\CohortAnalytics;
 use App\Services\Audit\AuditLogger;
 use App\Services\Prediction\PredictionPresenter;
 use App\Services\Prediction\ProgramShiftEvaluator;
+use App\Support\SafeCsv;
+use App\Support\StaffReportPreamble;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ScopedStudentsTable extends BaseTable
@@ -59,6 +62,12 @@ class ScopedStudentsTable extends BaseTable
         $this->viewingId = null;
     }
 
+    #[On('intervention-reviewed')]
+    public function closeAfterReview(): void
+    {
+        $this->closeView();
+    }
+
     public function showHighRisk(): void
     {
         $this->authorize('viewAny', Student::class);
@@ -88,9 +97,21 @@ class ScopedStudentsTable extends BaseTable
             'ip' => request()->ip(),
         ]);
 
-        return response()->streamDownload(function () use ($rows): void {
+        $filename = SafeCsv::filename('edupredict-students');
+        $preamble = StaffReportPreamble::rows('Department student list', [
+            'program' => (string) ($this->filters['program_id'] ?? ''),
+            'year' => (string) ($this->filters['year_level'] ?? ''),
+            'risk' => (string) ($this->filters['dropout_risk'] ?? ''),
+            'search' => trim($this->search) === '' ? '' : 'set',
+        ]);
+
+        return response()->streamDownload(function () use ($rows, $preamble): void {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, [
+            foreach ($preamble as $meta) {
+                fputcsv($handle, SafeCsv::row($meta));
+            }
+            fputcsv($handle, []);
+            fputcsv($handle, SafeCsv::row([
                 'student_number',
                 'name',
                 'program',
@@ -98,23 +119,29 @@ class ScopedStudentsTable extends BaseTable
                 'dropout_risk',
                 'employability_score',
                 'program_shift_flag',
+                'program_shift_label',
                 'prediction_date',
-            ]);
+                'model_version',
+            ]));
+            $shift = app(ProgramShiftEvaluator::class);
             foreach ($rows as $row) {
                 $latest = $row->latestPrediction;
-                fputcsv($handle, [
+                $flag = (string) ($latest?->program_shift_flag ?? '');
+                fputcsv($handle, SafeCsv::row([
                     $row->student_number,
                     $row->user?->name,
                     $row->program?->code,
                     $row->year_level,
                     $latest?->dropout_risk ?? '',
                     $latest ? number_format((float) $latest->employability_score, 2, '.', '') : '',
-                    $latest?->program_shift_flag ?? '',
+                    $flag,
+                    $flag !== '' ? $shift->label($flag) : '',
                     $latest?->created_at?->timezone((string) config('app.timezone'))->toDateString() ?? '',
-                ]);
+                    $latest?->model_version ?? '',
+                ]));
             }
             fclose($handle);
-        }, 'edupredict-students.csv', ['Content-Type' => 'text/csv']);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     public function updating(string $name): void

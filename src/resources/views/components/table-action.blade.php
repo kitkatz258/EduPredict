@@ -1,17 +1,25 @@
 @props([
     'icon',
     'tone' => 'neutral',
+    'label' => null,
 ])
 
 @php
-    $tones = [
-        'neutral' => 'border-brand-200 bg-white text-brand-900 hover:bg-brand-50',
-        'danger' => 'border-red-200 bg-white text-red-800 hover:bg-red-50',
-    ];
-    $toneClass = $tones[$tone] ?? $tones['neutral'];
+    $text = trim(strip_tags((string) $slot));
+    $accessible = $label ?: ($text !== '' ? $text : 'Action');
+    $toneClass = match ($tone) {
+        'danger' => 'is-danger',
+        'success' => 'is-success',
+        default => '',
+    };
 @endphp
 
-<button {{ $attributes->merge(['type' => 'button', 'class' => 'inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-medium disabled:opacity-50 '.$toneClass]) }}>
-    <i class="{{ $icon }} text-sm leading-none" aria-hidden="true"></i>
-    <span class="inline-flex items-center gap-1">{{ $slot }}</span>
+<button {{ $attributes->merge([
+    'type' => 'button',
+    'class' => 'ui-icon-btn '.$toneClass,
+    'aria-label' => $accessible,
+    'title' => $accessible,
+]) }}>
+    <i class="{{ $icon }} text-base leading-none" aria-hidden="true"></i>
+    <span class="sr-only">{{ $accessible }}</span>
 </button>

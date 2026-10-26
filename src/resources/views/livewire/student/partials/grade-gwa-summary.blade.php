@@ -9,7 +9,13 @@
         @endif
         <span>Failed: {{ $gwa['failed'] }}</span>
         <span>Incomplete: {{ $gwa['incomplete'] }}</span>
+        @if (($gwa['dropped'] ?? 0) > 0)
+            <span>Dropped: {{ $gwa['dropped'] }}</span>
+        @endif
     </p>
+    @if (($gwa['dropped'] ?? 0) > 0)
+        <p class="mt-2 text-xs text-gray-700">Dropped subjects are left out of the GWA. They are not treated as 5.00 and they are not counted as failed.</p>
+    @endif
     @if ($gwa['provisional'])
         <p class="mt-2 text-xs text-amber-900">INC subjects have no numeric grade yet. They are left out of the GWA and are not counted as failed, so this GWA is provisional until you update the term with the final grade.</p>
     @endif

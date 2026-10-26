@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Models\Program;
 use Illuminate\Contracts\View\View;
 
 /**
- * Sign In and Create Account share one card so the toggle can switch panels in place.
+ * Guest sign-in uses a single login form. Student accounts are provisioned by administrators.
  */
 final class AuthAccessView
 {
-    public static function make(string $mode): View
+    public static function make(string $mode = 'login'): View
     {
         return view('auth.access', [
-            'mode' => $mode === 'register' ? 'register' : 'login',
-            'programs' => Program::query()->inPilotScope()->orderBy('name')->get(),
-            'consentVersion' => config('edupredict.consent.current_version'),
+            'mode' => 'login',
         ]);
     }
 }

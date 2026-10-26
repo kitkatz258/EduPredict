@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Discounts – Khamba Admin</title>
+<!-- Google Fonts used by the live customizer's font picker -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Bootstrap 5 (layout, modals, offcanvas, dropdowns) -->
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<!-- Khamba's own stylesheet (design tokens + every component) -->
+<link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR NAVIGATION
+     Fixed left sidebar: logo, six nav groups, and a store/Logout
+     footer. This exact block is repeated at the top of every
+     dashboard page — edit the logo here, then use your editor's
+     "Replace in all files" to repeat the change everywhere.
+     ============================================================ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <a class="brand-link" href="index.html"><span class="logo"><i data-lucide="shopping-bag"></i></span><span class="brand">Khamba</span></a>
+    <button class="sb-toggle d-none d-lg-grid" id="sbToggle" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button>
+  </div>
+  <nav class="sb-scroll">
+    <div class="sb-group">General</div>
+    <a class="sb-link sb-parent collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#dashGroup" aria-expanded="false" title="Dashboards">
+      <i data-lucide="layout-dashboard"></i><span>Dashboards</span><i data-lucide="chevron-down" class="sb-chevron"></i>
+    </a>
+    <div class="collapse" id="dashGroup">
+      <a class="sb-link sb-sub" href="index.html" title="Dashboard 1"><span>Dashboard 1</span></a>
+      <a class="sb-link sb-sub" href="dashboard-2.html" title="Dashboard 2"><span>Dashboard 2</span></a>
+      <a class="sb-link sb-sub" href="dashboard-3.html" title="Dashboard 3"><span>Dashboard 3</span></a>
+    </div>
+    <a class="sb-link" href="orders.html" title="Orders"><i data-lucide="shopping-bag"></i><span>Orders</span><em class="sb-badge">8</em></a>
+    <a class="sb-link" href="products.html" title="Products"><i data-lucide="package"></i><span>Products</span></a>
+    <a class="sb-link" href="categories.html" title="Categories"><i data-lucide="layers"></i><span>Categories</span></a>
+    <a class="sb-link" href="inventory.html" title="Inventory"><i data-lucide="warehouse"></i><span>Inventory</span></a>
+    <a class="sb-link" href="customers.html" title="Customers"><i data-lucide="users"></i><span>Customers</span></a>
+    <a class="sb-link" href="reviews.html" title="Reviews"><i data-lucide="star"></i><span>Reviews</span><em class="sb-badge">12</em></a>
+    <a class="sb-link active" href="discounts.html" title="Discounts"><i data-lucide="percent"></i><span>Discounts</span></a>
+    <a class="sb-link" href="payments.html" title="Payments"><i data-lucide="credit-card"></i><span>Payments</span></a>
+    <a class="sb-link" href="analytics.html" title="Analytics"><i data-lucide="chart-no-axes-combined"></i><span>Analytics</span></a>
+    <div class="sb-group">Operations</div>
+    <a class="sb-link" href="shipments.html" title="Shipments"><i data-lucide="truck"></i><span>Shipments</span></a>
+    <a class="sb-link" href="returns.html" title="Returns"><i data-lucide="undo-2"></i><span>Returns</span></a>
+    <a class="sb-link" href="abandoned-carts.html" title="Abandoned Carts"><i data-lucide="shopping-cart"></i><span>Abandoned Carts</span></a>
+    <a class="sb-link" href="gift-cards.html" title="Gift Cards"><i data-lucide="gift"></i><span>Gift Cards</span></a>
+    <div class="sb-group">Marketing</div>
+    <a class="sb-link" href="campaigns.html" title="Campaigns"><i data-lucide="megaphone"></i><span>Campaigns</span></a>
+    <a class="sb-link" href="coupons.html" title="Coupons"><i data-lucide="ticket"></i><span>Coupons</span></a>
+    <a class="sb-link" href="email.html" title="Email Marketing"><i data-lucide="mail"></i><span>Email Marketing</span></a>
+    <div class="sb-group">Management</div>
+    <a class="sb-link" href="team.html" title="Team Members"><i data-lucide="user-round-cog"></i><span>Team Members</span></a>
+    <a class="sb-link" href="roles.html" title="Roles &amp; Permissions"><i data-lucide="shield-check"></i><span>Roles &amp; Permissions</span></a>
+    <a class="sb-link" href="logs.html" title="Activity Logs"><i data-lucide="history"></i><span>Activity Logs</span></a>
+    <div class="sb-group">Account</div>
+    <a class="sb-link" href="settings.html" title="Settings"><i data-lucide="settings"></i><span>Settings</span></a>
+    <a class="sb-link" href="integrations.html" title="Integrations"><i data-lucide="plug"></i><span>Integrations</span></a>
+    <a class="sb-link" href="notifications.html" title="Notifications"><i data-lucide="bell"></i><span>Notifications</span></a>
+    <a class="sb-link" href="help.html" title="Help &amp; Support"><i data-lucide="life-buoy"></i><span>Help &amp; Support</span></a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="store-card"><span class="logo"><i data-lucide="store"></i></span><div><b>Khamba Store</b><small>khamba.com</small></div></div>
+    <a class="sb-link" href="login.html" title="Logout"><i data-lucide="log-out"></i><span>Logout</span></a>
+  </div>
+</aside>
+<!-- Dark overlay behind the sidebar when it opens as a mobile drawer -->
+<div class="backdrop" id="backdrop"></div>
+<!-- ============================================================
+     MAIN COLUMN — topbar, page content, footer
+     ============================================================ -->
+<div class="main">
+    <!-- ---------- Topbar: search, store switcher, theme toggle,
+       notifications and the user menu (Profile / Account settings /
+       Billing / Logout) ---------- -->
+<header class="topbar">
+    <button class="icon-btn d-lg-none" id="mobileToggle" aria-label="Open menu"><i data-lucide="menu"></i></button>
+    <div class="search">
+      <i data-lucide="search"></i>
+      <input type="text" id="search" placeholder="Search anything..." autocomplete="off">
+      <kbd>/</kbd>
+      <div class="search-panel" id="searchPanel">
+        <div class="sp-label">Search in</div>
+        <a href="#" data-scope="Products"><i data-lucide="package"></i>Products</a>
+        <a href="#" data-scope="Orders"><i data-lucide="shopping-bag"></i>Orders</a>
+        <a href="#" data-scope="Customers"><i data-lucide="users"></i>Customers</a>
+        <a href="#" data-scope="Pages"><i data-lucide="file-text"></i>Pages</a>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="dropdown d-none d-md-block">
+        <button class="pill-btn" data-bs-toggle="dropdown"><i data-lucide="store"></i>Khamba Store<i data-lucide="chevron-down"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">Khamba Store</a></li><li><a class="dropdown-item" href="#">Khamba Outlet</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#">+ Add new store</a></li></ul>
+      </div>
+      <div class="dropdown d-none d-sm-block">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Language"><i data-lucide="globe"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">English</a></li><li><a class="dropdown-item" href="#">Español</a></li><li><a class="dropdown-item" href="#">Français</a></li></ul>
+      </div>
+      <button class="icon-btn" id="themeToggle" title="Toggle theme"><i data-lucide="moon"></i></button>
+      <div class="dropdown">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <div class="dropdown-menu dropdown-menu-end notif">
+          <div class="notif-head">Notifications <a href="#">Mark all read</a></div>
+          <a class="notif-item unread" href="#"><i data-lucide="shopping-bag"></i><div><b>New order #10482</b><small>2 minutes ago</small></div></a>
+          <a class="notif-item unread" href="#"><i data-lucide="triangle-alert"></i><div><b>Low stock: Ceramic Mug</b><small>1 hour ago</small></div></a>
+          <a class="notif-item" href="#"><i data-lucide="star"></i><div><b>New 5-star review</b><small>Yesterday</small></div></a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="avatar" data-bs-toggle="dropdown"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Alex Johnson" onerror="this.replaceWith('AJ')"></button>
+        <ul class="dropdown-menu dropdown-menu-end user-menu">
+          <li class="um-head"><b>Alex Johnson</b><small>alex@khamba.com</small></li>
+          <li><a class="dropdown-item" href="profile.html"><i data-lucide="user"></i>Profile</a></li>
+          <li><a class="dropdown-item" href="account-settings.html"><i data-lucide="settings"></i>Account settings</a></li>
+          <li><a class="dropdown-item" href="billing.html"><i data-lucide="credit-card"></i>Billing</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="login.html"><i data-lucide="log-out"></i>Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+    <!-- ---------- Page content ---------- -->
+<main class="content">
+    <div class="page-head">
+      <div><h1>Discounts</h1><p>Create and manage coupon codes and automatic discounts.</p></div>
+      <div class="d-flex gap-2">
+        <button class="btn-soft" id="exportBtn"><i data-lucide="download"></i>Export CSV</button>
+        <button class="btn-dark-x" data-bs-toggle="modal" data-bs-target="#newDiscountModal"><i data-lucide="plus"></i>New discount</button>
+      </div>
+    </div>
+
+    <section class="row g-3 mb-3">
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#eef2fd"><i data-lucide="percent"></i></span>
+        <div><small>Active discounts</small><b>14</b><span class="ms-note up">+2 this month</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#ecf6ef"><i data-lucide="ticket"></i></span>
+        <div><small>Total redemptions</small><b>2,148</b><span class="ms-note up">+312 this week</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#fdf3ea"><i data-lucide="hand-coins"></i></span>
+        <div><small>Discount value given</small><b>$18,420</b><span class="ms-note">This month</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#f6eff6"><i data-lucide="clock-alert"></i></span>
+        <div><small>Expiring soon</small><b>3</b><span class="ms-note down">Within 7 days</span></div></div></div>
+    </section>
+
+    <div class="card-x">
+      <div class="tabs" id="tabs">
+        <button class="on" data-t="all">All<em>8</em></button>
+        <button data-t="Active">Active<em>5</em></button>
+        <button data-t="Scheduled">Scheduled<em>1</em></button>
+        <button data-t="Expired">Expired<em>2</em></button>
+      </div>
+
+      <div class="ord-filters">
+        <div class="search flex-grow-1">
+          <i data-lucide="search"></i>
+          <input type="text" id="dcSearch" placeholder="Search by code...">
+        </div>
+        <select class="sel-x" id="typeFilter">
+          <option value="">All types</option><option>Percentage</option><option>Fixed amount</option><option>Free shipping</option>
+        </select>
+      </div>
+
+      <div class="bulk-bar" id="bulkBar">
+        <b><span id="bulkCount">0</span> selected</b>
+        <button class="btn-soft text-danger" data-bulk="deactivate"><i data-lucide="ban"></i>Deactivate</button>
+        <button class="btn-soft" data-bulk="clear">Clear selection</button>
+      </div>
+
+      <div class="table-responsive">
+      <table class="table-x" id="dcTable">
+        <thead><tr>
+          <th style="width:36px"><input type="checkbox" id="selectAll"></th>
+          <th>Code</th><th>Type</th><th>Value</th><th>Usage</th><th>Expires</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>
+
+          <tr data-status="Active" data-type="Percentage">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><b class="dc-code">WELCOME10</b><small class="d-block text-secondary">First-time customers</small></td>
+            <td>Percentage</td><td><b>10% off</b></td>
+            <td><div class="bar" style="width:90px"><i style="width:64%;background:#4f46e5"></i></div><small class="d-block text-secondary">642 / 1,000 used</small></td>
+            <td class="text-secondary">Dec 31, 2026</td><td><span class="badge-x s-Delivered">Active</span></td>
+            <td class="text-end"><button class="icon-btn sm"><i data-lucide="copy"></i></button></td>
+          </tr>
+          <tr data-status="Active" data-type="Fixed amount">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><b class="dc-code">SAVE20</b><small class="d-block text-secondary">Orders over $100</small></td>
+            <td>Fixed amount</td><td><b>$20 off</b></td>
+            <td><div class="bar" style="width:90px"><i style="width:38%;background:#4f46e5"></i></div><small class="d-block text-secondary">190 / 500 used</small></td>
+            <td class="text-secondary">Oct 15, 2026</td><td><span class="badge-x s-Delivered">Active</span></td>
+            <td class="text-end"><button class="icon-btn sm"><i data-lucide="copy"></i></button></td>
+          </tr>
+          <tr data-status="Active" data-type="Free shipping">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><b class="dc-code">FREESHIP</b><small class="d-block text-secondary">No minimum</small></td>
+            <td>Free shipping</td><td><b>Free shipping</b></td>
+            <td><div class="bar" style="width:90px"><i style="width:81%;background:#4f46e5"></i></div><small class="d-block text-secondary">1,215 / 1,500 used</small></td>
+            <td class="text-secondary">No expiry</td><td><span class="badge-x s-Delivered">Active</span></td>
+            <td class="text-end"><button class="icon-btn sm"><i data-lucide="copy"></i></button></td>
+          </tr>
+          <tr data-status="Active" data-type="Percentage">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><b class="dc-code">VIP15</b><small class="d-block text-secondary">VIP segment only</small></td>
+            <td>Percentage</td><td><b>15% off</b></td>
+            <td><div class="bar" style="width:90px"><i style="width:22%;background:#4f46e5"></i></div><small class="d-block text-secondary">66 / 300 used</small></td>
+            <td class="text-secondary">Nov 30, 2026</td><td><span class="badge-x s-Delivered">Active</span></td>
+            <td class="text-end"><button class="icon-btn sm"><i data-lucide="copy"></i></button></td>
+          </tr>
+          <tr data-status="Scheduled" data-type="Percentage">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><b class="dc-code">BLACKFRI25</b><small class="d-block text-secondary">Black Friday sale</small></td>
+            <td>Percentage</td><td><b>25% off</b></td>
+            <td><div class="bar" style="width:90px"><i style="width:0%;background:#4f46e5"></i></div><small class="d-block text-secondary">0 / 2,000 used</small></td>
+            <td class="text-secondary">Starts Nov 27, 2026</td><td><span class="badge-x s-Paid">Scheduled</span></td>
+            <td class="text-end"><button class="icon-btn sm"><i data-lucide="copy"></i></button></td>
+          </tr>
+          <tr data-status="Active" data-type="Fixed amount">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><b class="dc-code">REFER5</b><small class="d-block text-secondary">Referral reward</small></td>
+            <td>Fixed amount</td><td><b>$5 off</b></td>
+            <td><div class="bar" style="width:90px"><i style="width:47%;background:#4f46e5"></i></div><small class="d-block text-secondary">470 / 1,000 used</small></td>
+            <td class="text-secondary">No expiry</td><td><span class="badge-x s-Delivered">Active</span></td>
+            <td class="text-end"><button class="icon-btn sm"><i data-lucide="copy"></i></button></td>
+          </tr>
+          <tr data-status="Expired" data-type="Percentage">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><b class="dc-code">SUMMER20</b><small class="d-block text-secondary">Summer sale</small></td>
+            <td>Percentage</td><td><b>20% off</b></td>
+            <td><div class="bar" style="width:90px"><i style="width:100%;background:#9ca3af"></i></div><small class="d-block text-secondary">800 / 800 used</small></td>
+            <td class="text-secondary">Aug 31, 2026</td><td><span class="badge-x s-Refunded">Expired</span></td>
+            <td class="text-end"><button class="icon-btn sm"><i data-lucide="copy"></i></button></td>
+          </tr>
+          <tr data-status="Expired" data-type="Fixed amount">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><b class="dc-code">SPRING15</b><small class="d-block text-secondary">Spring launch</small></td>
+            <td>Fixed amount</td><td><b>$15 off</b></td>
+            <td><div class="bar" style="width:90px"><i style="width:92%;background:#9ca3af"></i></div><small class="d-block text-secondary">368 / 400 used</small></td>
+            <td class="text-secondary">May 31, 2026</td><td><span class="badge-x s-Refunded">Expired</span></td>
+            <td class="text-end"><button class="icon-btn sm"><i data-lucide="copy"></i></button></td>
+          </tr>
+
+        </tbody>
+      </table>
+      </div>
+      <small class="text-secondary d-block mt-2" id="dcInfo">Showing 8 of 8 discounts</small>
+    </div>
+  </main>
+
+    <!-- ---------- Footer: copyright + legal links (same on every page) ---------- -->
+<footer class="footer-x">
+    <span>© 2026 Khamba Inc. All rights reserved.</span>
+    <div class="d-flex gap-3">
+      <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="help.html">Help &amp; Support</a>
+      <span class="d-none d-sm-inline text-secondary">v1.0.0</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     LIVE CUSTOMIZER — lets the user try a different sidebar
+     colour / font without touching any code (see app.js).
+     ============================================================ -->
+<button class="sw-fab" id="swFab" title="Customize"><i data-lucide="palette"></i></button>
+<div class="sw-panel" id="swPanel">
+  <div class="sw-head"><b>Customize</b><button id="swClose" aria-label="Close"><i data-lucide="x"></i></button></div>
+  <div class="sw-label">Sidebar color</div><div class="sw-colors" id="swColors"></div>
+  <div class="sw-label">Font family</div><div id="swFonts"></div>
+  <button class="btn-reorder w-100 mt-4" id="swReset">Reset to default</button>
+</div>
+
+<!-- Modal: new Discount Modal -->
+<div class="modal fade" id="newDiscountModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="newDiscountForm" novalidate>
+        <div class="modal-header"><h5 class="modal-title">New discount</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Discount code</label><input type="text" class="form-control text-uppercase" placeholder="e.g. SAVE20" required></div>
+          <div class="row g-3 mb-3">
+            <div class="col-6"><label class="form-label">Type</label><select class="form-select" required><option>Percentage</option><option>Fixed amount</option><option>Free shipping</option></select></div>
+            <div class="col-6"><label class="form-label">Value</label><input type="number" class="form-control" min="0" required></div>
+          </div>
+          <div class="row g-3">
+            <div class="col-6"><label class="form-label">Usage limit</label><input type="number" class="form-control" min="1" placeholder="Optional"></div>
+            <div class="col-6"><label class="form-label">Expiry date</label><input type="date" class="form-control"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-soft" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn-dark-x"><i data-lucide="plus"></i>Create discount</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- Shared toast notification, triggered from app.js via window.showToast() -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+  <div class="toast" id="toastHost" role="status"><div class="toast-body d-flex align-items-center gap-2"><i data-lucide="check-circle" id="toastIcon"></i><span id="toastMsg"></span></div></div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS — jQuery, Bootstrap, (Chart.js on chart pages),
+     Lucide icons, then our own app.js last.
+     ============================================================ -->
+<script src="assets/js/jquery-3.7.1.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

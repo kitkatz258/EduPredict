@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Interventions;
 
+use App\Enums\UserRole;
 use App\Livewire\Staff\RecommendedActions;
 use App\Models\College;
 use App\Models\Intervention;
@@ -15,6 +16,7 @@ use App\Models\User;
 use App\Services\Interventions\RecommendedActionBuilder;
 use Database\Seeders\InterventionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
@@ -225,6 +227,37 @@ class RecommendedActionTest extends TestCase
         $this->assertSame($head->id, $action->reviewed_by);
         $this->assertSame('Talked on Monday.', $action->reviewer_note);
         $this->assertNotNull($action->reviewed_at);
+        $this->assertSame('moderate', $prediction->fresh()->dropout_risk);
+        $this->assertSame($prediction->employability_score, $prediction->fresh()->employability_score);
+
+        $firstReviewedAt = $action->reviewed_at;
+        Livewire::actingAs($head)
+            ->test(RecommendedActions::class, ['studentId' => $student->id])
+            ->set('notes.'.$action->id, 'Should not replace the stored review.')
+            ->call('markReviewed', $action->id)
+            ->assertDispatched('toast', type: 'info');
+
+        $action->refresh();
+        $this->assertSame($head->id, $action->reviewed_by);
+        $this->assertSame('Talked on Monday.', $action->reviewer_note);
+        $this->assertTrue($action->reviewed_at->equalTo($firstReviewedAt));
+
+        $conversation = RecommendedAction::query()
+            ->where('prediction_id', $prediction->id)
+            ->whereHas('intervention', fn ($query) => $query->where('code', 'program_fit_conversation'))
+            ->firstOrFail();
+
+        Livewire::actingAs($head)
+            ->test(RecommendedActions::class, ['studentId' => $student->id])
+            ->call('toggleSelected', $conversation->id)
+            ->assertSeeHtml('aria-checked="true"')
+            ->set('notes.'.$conversation->id, 'Selected from the card.')
+            ->call('markSelectedReviewed')
+            ->assertDispatched('toast', type: 'success')
+            ->assertDispatched('intervention-reviewed');
+
+        $this->assertSame($head->id, $conversation->fresh()->reviewed_by);
+        $this->assertSame('Selected from the card.', $conversation->fresh()->reviewer_note);
 
         $workshop = RecommendedAction::query()
             ->where('prediction_id', $prediction->id)
@@ -289,7 +322,7 @@ class RecommendedActionTest extends TestCase
         $program ??= Program::factory()->create();
         $user = User::factory()->create([
             'name' => $name,
-            'role' => \App\Enums\UserRole::Student,
+            'role' => UserRole::Student,
         ]);
 
         return Student::factory()->create([
@@ -351,7 +384,7 @@ class RecommendedActionTest extends TestCase
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, RecommendedAction>  $actions
+     * @param  Collection<int, RecommendedAction>  $actions
      * @return list<string>
      */
     private function codes($actions): array

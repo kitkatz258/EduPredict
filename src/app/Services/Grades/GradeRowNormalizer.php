@@ -19,13 +19,18 @@ final class GradeRowNormalizer
         $midterm = $this->scale->normalizeGradeToken($raw['midterm_grade'] ?? $raw['midterm'] ?? null);
         $finalExam = $this->scale->normalizeGradeToken($raw['final_exam_grade'] ?? $raw['final'] ?? null);
         $finalGrade = $this->scale->normalizeGradeToken($raw['final_grade'] ?? $raw['final_grade'] ?? null) ?? '';
-        $remarks = $this->scale->remarksFor($finalGrade, (string) ($raw['remarks'] ?? ''));
-        $gradeIsStatus = $this->scale->isIncomplete($finalGrade) || $this->scale->isDropped($finalGrade);
-        $remarksIsStatus = $this->scale->isIncomplete($remarks) || in_array($remarks, ['DROPPED', 'WITHDRAWN'], true);
-        if ($gradeIsStatus || ($this->scale->isNumericGrade($finalGrade) && $remarksIsStatus)) {
-            $remarks = $this->scale->remarksFor($finalGrade);
+        $remarkStatus = $this->scale->statusRemark((string) ($raw['remarks'] ?? ''));
+        if ($finalGrade === '' && $remarkStatus === 'INCOMPLETE') {
+            $finalGrade = 'INC';
+        } elseif ($finalGrade === '' && $remarkStatus === 'WITHDRAWN') {
+            $finalGrade = 'W';
+        } elseif ($finalGrade === '' && $remarkStatus === 'UNOFFICIAL') {
+            $finalGrade = 'UD';
+        } elseif ($finalGrade === '' && $remarkStatus === 'DROPPED') {
+            $finalGrade = 'DRP';
         }
         $warnings = [];
+        $remarks = $this->resolveRemarks($finalGrade, (string) ($raw['remarks'] ?? ''), $warnings);
 
         if ($code === '' || ! preg_match($this->scale->subjectCodePattern(), $code)) {
             $warnings[] = 'Subject code does not match the expected pattern.';
@@ -50,7 +55,8 @@ final class GradeRowNormalizer
 
         if ($this->scale->isNumericGrade($finalGrade)) {
             $expected = $this->scale->remarksFor($finalGrade);
-            if ($remarks !== '' && $expected !== '' && $remarks !== $expected && ! ($this->scale->isIncomplete($remarks) || $this->scale->isDropped($remarks))) {
+            $remarkStatus = $this->scale->statusRemark($remarks);
+            if ($remarkStatus !== null && $expected !== '' && $remarkStatus !== $expected && ! ($this->scale->isIncomplete($remarks) || $this->scale->isDropped($remarks))) {
                 $warnings[] = 'Remarks are not consistent with the final grade.';
             }
         }
@@ -165,5 +171,39 @@ final class GradeRowNormalizer
         }
 
         return $code;
+    }
+
+    /**
+     * Blank remarks follow the final grade: Dropped, INC, and 5.00 become
+     * DROPPED, INCOMPLETE, and FAILED. A conflicting status word is replaced
+     * by that grade remark and reported. A longer official note is kept.
+     * Confirmed historical rows are not passed through this method.
+     *
+     * @param  list<string>  $warnings
+     */
+    private function resolveRemarks(string $finalGrade, string $manualRaw, array &$warnings): string
+    {
+        $manualRaw = trim($manualRaw);
+        $auto = $this->scale->remarksFor($finalGrade);
+        if ($manualRaw === '') {
+            return $auto;
+        }
+
+        $manualStatus = $this->scale->statusRemark($manualRaw);
+        if ($manualStatus !== null) {
+            if ($auto !== '' && $manualStatus !== $auto) {
+                $warnings[] = 'The remark did not match the final grade, so the remark follows the grade. Type an official note if the remark should say something else.';
+
+                return $auto;
+            }
+
+            return $manualStatus !== '' ? $manualStatus : $auto;
+        }
+
+        if ($auto !== '') {
+            $warnings[] = 'The note you entered was kept. The final grade still decides whether the subject is failed, incomplete, or dropped.';
+        }
+
+        return $manualRaw;
     }
 }

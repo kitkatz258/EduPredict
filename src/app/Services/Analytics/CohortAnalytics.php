@@ -29,15 +29,27 @@ final class CohortAnalytics
         ?int $programId = null,
         ?int $departmentId = null,
         ?string $period = null,
+        ?Carbon $from = null,
+        ?Carbon $to = null,
     ): array {
         $scoped = $this->students($user, $yearLevel, $programId, $departmentId);
         $rows = $this->latestRows($scoped);
-        $periodStart = $this->periodStart($period);
-        $periodApplied = $periodStart !== null;
+        $periodStart = $from ?? $this->periodStart($period);
+        $periodEnd = $to;
+        $periodApplied = $periodStart !== null || $periodEnd !== null;
 
         if ($periodApplied) {
             $rows = $rows
-                ->filter(fn (Prediction $row): bool => $row->created_at !== null && $row->created_at->greaterThanOrEqualTo($periodStart))
+                ->filter(function (Prediction $row) use ($periodStart, $periodEnd): bool {
+                    if ($row->created_at === null) {
+                        return false;
+                    }
+                    if ($periodStart !== null && $row->created_at->lt($periodStart)) {
+                        return false;
+                    }
+
+                    return $periodEnd === null || $row->created_at->lte($periodEnd);
+                })
                 ->values();
             $ids = $rows->pluck('student_id')->map(fn (mixed $id): int => (int) $id)->all();
             $cohort = Student::query()->whereIn('students.id', $ids === [] ? [0] : $ids);

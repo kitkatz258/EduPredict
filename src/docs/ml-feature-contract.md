@@ -3,7 +3,7 @@
 This document is the single source of truth for features passed to `PredictorInterface`.
 `App\Services\Prediction\FeatureBuilder` is the only class that maps student records into a `FeatureSet`.
 
-Student predictions use the placeholder `HeuristicPredictor` (`model_version = placeholder-heuristic-v0`).
+Student predictions use the placeholder `HeuristicPredictor` (`model_version = placeholder-heuristic-v1`). Rows already stored as `placeholder-heuristic-v0` are not rewritten.
 The FastAPI service scores saved Pianda and UCI research artifacts. It does not accept this `FeatureSet`.
 UCC section means and Philippine grades are not mapped onto those artifacts.
 
@@ -31,19 +31,17 @@ Employability is clamped to 0–100. Dropout probability is clamped to 0–1, th
 Philippine GWA: lower is better. Employability GWA contribution is `((3.00 - gwa) / 2) * 20`, clamped to ±20.
 Dropout GWA contribution is `-0.05` at 1.75 or better, otherwise `((gwa - 1.75) / 3.25) * 0.35`.
 Each failed subject costs 8 employability points and adds 0.12 dropout probability, both capped at 3 subjects.
-A confirmed record with zero failures adds 4 employability points.
+A confirmed record with a GWA, zero failures, zero incomplete subjects, and zero dropped subjects adds 4 employability points. Incomplete or dropped subjects withhold that bonus.
+Each incomplete subject costs 2 employability points and adds 0.02 dropout probability, capped at 3. Each dropped subject, including unofficially dropped, uses the same magnitudes. Neither is treated as 5.00 or as a failed subject.
 
-Other non-zero weights: scholarship +8 employability / −0.05 dropout (none is −2 / +0.04);
+Other non-zero weights:
 internships up to 2 × +6 employability and −0.03 dropout;
 certifications up to 2 × +4 / −0.02;
 technical skills up to 4 × +1.5 employability;
 work experience up to 2 × +3 employability (projects are no longer collected and have no weight);
 each positive construct `((score - 50) / 50) * 8` employability and `((100 - score) / 100) * 0.08` dropout;
 procrastination is reversed, `((50 - score) / 50) * 8` employability and `(score / 100) * 0.12` dropout;
-reliable internet, device, or study space is +2 employability (missing is −3);
-income bands and employment shift the score by a few points only.
-
-Household size and living arrangement are stored in the snapshot and are not scored by the placeholder.
+M37.1 does not score scholarship, income, employment, internet, device, study space, household size, or living arrangement. A published `socioeconomic_profiles` row stays encrypted and is not copied into a new snapshot. Those snapshot keys are null and listed as unavailable. They are not read as poverty, as no scholarship, or as zero. `placeholder-heuristic-v0` attempts keep the household factors they already stored.
 
 ## Feature catalog
 
@@ -52,18 +50,20 @@ Draft socioeconomic rows are ignored. Skills, certification, and work-experience
 | name | type | allowed values | source | used by |
 |---|---|---|---|---|
 | gwa | float or null | 1.00–5.00, rounded to 2 decimals | current confirmed `subject_grades` via `GwaCalculator` (NSTP, INC, and dropped rows excluded; provisional when any INC exists) | employability, dropout |
-| failed_subjects | int | ≥ 0 | same confirmed rows; INC and dropped are not failures | employability, dropout |
+| failed_subjects | int | ≥ 0 | same confirmed rows; INC, dropped, and unofficially dropped are not failures | employability, dropout |
+| incomplete_subjects | int | ≥ 0 | current confirmed rows whose grade or remark is incomplete | employability, dropout |
+| dropped_subjects | int | ≥ 0 | current confirmed rows whose grade or remark is dropped or unofficially dropped | employability, dropout |
 | semesters_completed | int | ≥ 0 | distinct confirmed `grade_reports` school year + semester | confidence |
 | limited_history | bool | true, false | `semesters_completed` < `prediction.limited_history_semesters` | confidence |
-| scholarship_status | string or null | `none`, `partial`, `full`, `government`, `private` | `socioeconomic_profiles.scholarship_status` when not a draft | employability, dropout |
-| has_scholarship | bool | true when status is present and not `none` | derived | employability, dropout |
-| employment_status | string or null | `unemployed`, `part_time`, `working_student`, `full_time`, `self_employed` | `socioeconomic_profiles.employment_status` when not a draft | employability, dropout |
-| income_bracket | string or null | income bracket codes in `config/edupredict.php` | `socioeconomic_profiles.household_income_bracket` (encrypted at rest; snapshot stores the code) | employability, dropout |
-| household_size | int or null | ≥ 0 | `socioeconomic_profiles.household_size` when not a draft | snapshot only |
-| living_arrangement | string or null | living-arrangement codes | `socioeconomic_profiles.living_arrangement` when not a draft | snapshot only |
-| internet_access | string or null | `yes`, `unreliable`, `no` | `socioeconomic_profiles.has_internet` | employability, dropout |
-| device_access | string or null | `yes`, `shared`, `no` | `socioeconomic_profiles.has_device` | employability, dropout |
-| study_space | string or null | `yes`, `no` | `socioeconomic_profiles.has_study_space` | employability, dropout |
+| scholarship_status | null on a new prediction | stored profile is not read | encrypted `socioeconomic_profiles` row is preserved and not used | none on v1 |
+| has_scholarship | null on a new snapshot | not derived for a new prediction | same | none on v1 |
+| employment_status | null on a new prediction | stored profile is not read | same | none on v1 |
+| income_bracket | null on a new prediction | stored profile is not read | same | none on v1 |
+| household_size | null on a new prediction | stored profile is not read | same | none on v1 |
+| living_arrangement | null on a new prediction | stored profile is not read | same | none on v1 |
+| internet_access | null on a new prediction | stored profile is not read | same | none on v1 |
+| device_access | null on a new prediction | stored profile is not read | same | none on v1 |
+| study_space | null on a new prediction | stored profile is not read | same | none on v1 |
 | technical_skill_count | int | ≥ 0 | count of active `student_skills` | employability |
 | certification_count | int | ≥ 0 | count of active `student_certifications` | employability, dropout |
 | internship_count | int | ≥ 0 | count of active `student_work_experiences` with type `ojt_internship` | employability, dropout |

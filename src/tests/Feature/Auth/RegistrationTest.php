@@ -2,186 +2,103 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Livewire\Tables\InstitutionStudentsTable;
 use App\Models\InstitutionStudent;
 use App\Models\Program;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_registration_screen_can_be_rendered(): void
+    public function test_public_registration_is_closed(): void
     {
-        $this->get('/register')
-            ->assertOk()
-            ->assertSee('Informed consent')
-            ->assertSee('eligible-student list')
-            ->assertSee('Used only for password resets');
-    }
-
-    public function test_listed_student_can_register_with_consent(): void
-    {
-        $program = Program::factory()->create();
-        InstitutionStudent::factory()->create([
+        $this->get('/register')->assertRedirect(route('login'));
+        $this->post('/register', [
             'student_number' => '2024-77777',
             'last_name' => 'Reyes',
             'first_name' => 'Lina',
-            'program_id' => $program->id,
-            'is_registered' => false,
-        ]);
+            'program_id' => 1,
+            'email' => 'lina@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'consent' => '1',
+        ])->assertNotFound();
+    }
 
-        $this->post('/register', [
+    public function test_an_administrator_can_issue_a_student_login_with_a_temporary_password(): void
+    {
+        $admin = User::factory()->administrator()->create();
+        $program = Program::factory()->create(['is_active' => true]);
+        $record = InstitutionStudent::factory()->create([
             'student_number' => '2024-77777',
             'last_name' => 'Reyes',
             'first_name' => 'Lina',
             'program_id' => $program->id,
             'email' => 'lina@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'consent' => '1',
-        ])->assertRedirect(route('student.dashboard', absolute: false));
+            'is_registered' => false,
+        ]);
 
-        $this->assertAuthenticated();
+        $component = Livewire::actingAs($admin)
+            ->test(InstitutionStudentsTable::class)
+            ->call('openProvision', $record->id)
+            ->set('provisionEmail', 'lina@example.com')
+            ->call('issueLogin')
+            ->assertHasNoErrors();
+
+        $password = $component->get('temporaryPassword');
+        $this->assertNotEmpty($password);
+        $this->assertNotSame('Reyes', $password);
         $this->assertDatabaseHas('institution_students', [
             'student_number' => '2024-77777',
             'is_registered' => 1,
         ]);
-        $this->assertDatabaseHas('consents', [
-            'version' => config('edupredict.consent.current_version'),
-        ]);
+        $this->assertDatabaseHas('students', ['student_number' => '2024-77777']);
+        $this->assertTrue(User::query()->where('email', 'lina@example.com')->first()?->must_change_password);
 
-        $this->post('/logout');
-        $this->post('/login', ['login' => '2024-77777', 'password' => 'password'])
-            ->assertRedirect(route('student.dashboard', absolute: false));
+        auth()->logout();
+
+        $this->post('/login', [
+            'login' => '2024-77777',
+            'password' => $password,
+        ])->assertRedirect(route('student.dashboard', absolute: false));
+
+        $this->get(route('student.dashboard'))->assertRedirect(route('password.forced'));
         $this->assertAuthenticated();
+        $this->assertTrue(auth()->user()->must_change_password);
     }
 
-    public function test_listed_student_in_a_program_outside_the_clas_pilot_cannot_register(): void
+    public function test_issuing_a_login_twice_does_not_create_a_duplicate_account(): void
     {
-        $legacy = Program::factory()->legacy()->create();
-        InstitutionStudent::factory()->create([
-            'student_number' => '2019-12345',
-            'last_name' => 'Santos',
-            'first_name' => 'Leo',
-            'program_id' => $legacy->id,
+        $admin = User::factory()->administrator()->create();
+        $program = Program::factory()->create(['is_active' => true]);
+        $record = InstitutionStudent::factory()->create([
+            'student_number' => '2024-88888',
+            'program_id' => $program->id,
+            'email' => 'once@example.com',
             'is_registered' => false,
         ]);
 
-        $this->get('/register')->assertOk()->assertDontSee($legacy->name);
+        Livewire::actingAs($admin)
+            ->test(InstitutionStudentsTable::class)
+            ->call('openProvision', $record->id)
+            ->set('provisionEmail', 'once@example.com')
+            ->call('issueLogin')
+            ->assertHasNoErrors();
 
-        $this->post('/register', [
-            'student_number' => '2019-12345',
-            'last_name' => 'Santos',
-            'first_name' => 'Leo',
-            'program_id' => $legacy->id,
-            'email' => 'leo@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'consent' => '1',
-        ])->assertSessionHasErrors('program_id');
+        $users = User::query()->count();
+        $students = Student::query()->count();
 
-        $this->assertGuest();
-        $this->assertDatabaseHas('institution_students', ['student_number' => '2019-12345', 'is_registered' => 0]);
-    }
+        Livewire::actingAs($admin)
+            ->test(InstitutionStudentsTable::class)
+            ->call('openProvision', $record->fresh()->id)
+            ->assertSet('provisioningId', null);
 
-    public function test_unknown_student_number_cannot_register(): void
-    {
-        $program = Program::factory()->create();
-
-        $this->post('/register', [
-            'student_number' => 'NOPE-000',
-            'last_name' => 'Ghost',
-            'first_name' => 'Noone',
-            'program_id' => $program->id,
-            'email' => 'ghost@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'consent' => '1',
-        ])->assertSessionHasErrors('student_number');
-
-        $this->assertGuest();
-    }
-
-    public function test_registration_requires_consent(): void
-    {
-        $program = Program::factory()->create();
-        InstitutionStudent::factory()->create([
-            'student_number' => '2024-77778',
-            'last_name' => 'Reyes',
-            'first_name' => 'Lina',
-            'program_id' => $program->id,
-        ]);
-
-        $this->post('/register', [
-            'student_number' => '2024-77778',
-            'last_name' => 'Reyes',
-            'first_name' => 'Lina',
-            'program_id' => $program->id,
-            'email' => 'lina2@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ])->assertSessionHasErrors('consent');
-    }
-
-    public function test_already_registered_student_number_cannot_register_again(): void
-    {
-        $program = Program::factory()->create();
-        InstitutionStudent::factory()->create([
-            'student_number' => '2024-77779',
-            'last_name' => 'Reyes',
-            'first_name' => 'Lina',
-            'program_id' => $program->id,
-            'is_registered' => true,
-        ]);
-
-        $this->post('/register', [
-            'student_number' => '2024-77779',
-            'last_name' => 'Reyes',
-            'first_name' => 'Lina',
-            'program_id' => $program->id,
-            'email' => 'lina3@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'consent' => '1',
-        ])->assertSessionHasErrors('student_number');
-
-        $this->assertGuest();
-    }
-
-    public function test_name_or_program_mismatch_cannot_register(): void
-    {
-        $program = Program::factory()->create();
-        $other = Program::factory()->create();
-        InstitutionStudent::factory()->create([
-            'student_number' => '2024-77780',
-            'last_name' => 'Reyes',
-            'first_name' => 'Lina',
-            'program_id' => $program->id,
-        ]);
-
-        $this->post('/register', [
-            'student_number' => '2024-77780',
-            'last_name' => 'Santos',
-            'first_name' => 'Lina',
-            'program_id' => $program->id,
-            'email' => 'lina4@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'consent' => '1',
-        ])->assertSessionHasErrors('last_name');
-
-        $this->post('/register', [
-            'student_number' => '2024-77780',
-            'last_name' => 'Reyes',
-            'first_name' => 'Lina',
-            'program_id' => $other->id,
-            'email' => 'lina5@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'consent' => '1',
-        ])->assertSessionHasErrors('program_id');
-
-        $this->assertGuest();
+        $this->assertSame($users, User::query()->count());
+        $this->assertSame($students, Student::query()->count());
     }
 }

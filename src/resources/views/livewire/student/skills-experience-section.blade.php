@@ -1,5 +1,6 @@
 @php
     $inputClass = 'w-full rounded-lg border border-brand-200 px-3 py-2 text-sm focus:border-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-200 disabled:bg-gray-50 disabled:text-gray-700';
+    $iconBtn = 'inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-gray-600 hover:bg-white hover:text-brand-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400';
     $dateRange = function ($start, $end, bool $ongoing): string {
         $from = $start?->format('M Y') ?? 'Start not recorded';
         $to = $ongoing ? 'Present' : ($end?->format('M Y') ?? 'End not recorded');
@@ -25,8 +26,9 @@
         @endif
     </section>
 
+    <div class="grid items-stretch gap-4 lg:grid-cols-3">
     {{-- Technical skills --}}
-    <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="skills-heading">
+    <section class="flex h-full flex-col rounded-2xl border border-brand-200 bg-white p-4 shadow-sm" aria-labelledby="skills-heading">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h3 id="skills-heading" class="text-base font-semibold text-brand-900"><i class="ri-tools-line mr-1" aria-hidden="true"></i>Technical skills</h3>
@@ -39,10 +41,10 @@
         @else
             <ul class="mt-4 flex flex-wrap gap-2">
                 @foreach ($skills as $item)
-                    <li wire:key="skill-{{ $item->id }}" class="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-brand-50 py-1 pl-3 pr-1 text-sm text-brand-900">
+                    <li wire:key="skill-{{ $item->id }}" class="inline-flex cursor-pointer items-center gap-1 rounded-full border border-brand-200 bg-brand-50 py-1 pl-3 pr-1 text-sm text-brand-900 transition hover:border-brand-900">
                         <span>{{ $item->name }}</span>
-                        <button type="button" wire:click="openEdit('skill', {{ $item->id }})" class="rounded-full p-1 hover:bg-white" aria-label="Edit skill {{ $item->name }}"><i class="ri-pencil-line" aria-hidden="true"></i></button>
-                        <button type="button" wire:click="archive('skill', {{ $item->id }})" data-confirm="It will no longer count in new predictions. You can restore it later." data-confirm-title="Archive {{ $item->name }}?" data-confirm-button="Archive" class="rounded-full p-1 text-gray-600 hover:bg-white hover:text-red-800" aria-label="Archive skill {{ $item->name }}"><i class="ri-archive-line" aria-hidden="true"></i></button>
+                        <button type="button" wire:click="openEdit('skill', {{ $item->id }})" class="{{ $iconBtn }}" title="Edit" aria-label="Edit skill {{ $item->name }}"><i class="ri-pencil-line" aria-hidden="true"></i></button>
+                        <button type="button" wire:click="archive('skill', {{ $item->id }})" data-confirm="It will no longer count in new predictions. You can restore it later." data-confirm-title="Archive {{ $item->name }}?" data-confirm-button="Archive" class="{{ $iconBtn }} hover:text-red-800" title="Archive" aria-label="Archive skill {{ $item->name }}"><i class="ri-archive-line" aria-hidden="true"></i></button>
                     </li>
                 @endforeach
             </ul>
@@ -50,7 +52,7 @@
     </section>
 
     {{-- Certifications --}}
-    <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="certifications-heading">
+    <section class="flex h-full flex-col rounded-2xl border border-brand-200 bg-white p-4 shadow-sm" aria-labelledby="certifications-heading">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h3 id="certifications-heading" class="text-base font-semibold text-brand-900"><i class="ri-award-line mr-1" aria-hidden="true"></i>Certifications</h3>
@@ -63,15 +65,15 @@
         @else
             <ul class="mt-4 divide-y divide-brand-200 rounded-xl border border-brand-200">
                 @foreach ($certifications as $item)
-                    <li wire:key="certification-{{ $item->id }}" class="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <li wire:key="certification-{{ $item->id }}" class="flex cursor-pointer flex-col gap-2 border border-transparent p-4 transition hover:border-brand-900 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p class="font-medium text-gray-900">{{ $item->title }}</p>
                             <p class="text-sm text-gray-600">{{ $item->issuer ?? 'Issuer not recorded' }} · {{ $item->issued_year ?? 'Year not recorded' }}@if ($item->expires_on) · Expires {{ $item->expires_on->format('M j, Y') }}@endif</p>
                         </div>
-                        <div class="flex shrink-0 gap-2 text-sm">
-                            <button type="button" wire:click="openView('certification', {{ $item->id }})" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-brand-900 hover:bg-brand-50" aria-label="View {{ $item->title }}"><i class="ri-eye-line" aria-hidden="true"></i>View</button>
-                            <button type="button" wire:click="openEdit('certification', {{ $item->id }})" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-brand-900 hover:bg-brand-50" aria-label="Edit {{ $item->title }}"><i class="ri-pencil-line" aria-hidden="true"></i>Edit</button>
-                            <button type="button" wire:click="archive('certification', {{ $item->id }})" data-confirm="It will no longer count in new predictions. You can restore it later." data-confirm-title="Archive this certification?" data-confirm-button="Archive" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-red-800 hover:bg-red-50" aria-label="Archive {{ $item->title }}"><i class="ri-archive-line" aria-hidden="true"></i>Archive</button>
+                        <div class="flex shrink-0 gap-1">
+                            <button type="button" wire:click="openView('certification', {{ $item->id }})" class="{{ $iconBtn }}" title="View" aria-label="View {{ $item->title }}"><i class="ri-eye-line" aria-hidden="true"></i></button>
+                            <button type="button" wire:click="openEdit('certification', {{ $item->id }})" class="{{ $iconBtn }}" title="Edit" aria-label="Edit {{ $item->title }}"><i class="ri-pencil-line" aria-hidden="true"></i></button>
+                            <button type="button" wire:click="archive('certification', {{ $item->id }})" data-confirm="It will no longer count in new predictions. You can restore it later." data-confirm-title="Archive this certification?" data-confirm-button="Archive" class="{{ $iconBtn }} hover:text-red-800" title="Archive" aria-label="Archive {{ $item->title }}"><i class="ri-archive-line" aria-hidden="true"></i></button>
                         </div>
                     </li>
                 @endforeach
@@ -80,7 +82,7 @@
     </section>
 
     {{-- Work experience --}}
-    <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="experience-heading">
+    <section class="flex h-full flex-col rounded-2xl border border-brand-200 bg-white p-4 shadow-sm" aria-labelledby="experience-heading">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h3 id="experience-heading" class="text-base font-semibold text-brand-900"><i class="ri-briefcase-4-line mr-1" aria-hidden="true"></i>Work experience</h3>
@@ -93,7 +95,7 @@
         @else
             <ul class="mt-4 divide-y divide-brand-200 rounded-xl border border-brand-200">
                 @foreach ($experiences as $item)
-                    <li wire:key="experience-{{ $item->id }}" class="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <li wire:key="experience-{{ $item->id }}" class="flex cursor-pointer flex-col gap-2 border border-transparent p-4 transition hover:border-brand-900 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p class="font-medium text-gray-900">{{ $item->role_title ?? 'Role not recorded' }} <span class="font-normal text-gray-600">· {{ $item->organization ?? 'Organization not recorded' }}</span></p>
                             <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
@@ -101,37 +103,49 @@
                                 <span>{{ $dateRange($item->start_date, $item->end_date, $item->is_ongoing) }}</span>
                             </p>
                         </div>
-                        <div class="flex shrink-0 gap-2 text-sm">
-                            <button type="button" wire:click="openView('experience', {{ $item->id }})" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-brand-900 hover:bg-brand-50" aria-label="View {{ $item->role_title }} at {{ $item->organization }}"><i class="ri-eye-line" aria-hidden="true"></i>View</button>
-                            <button type="button" wire:click="openEdit('experience', {{ $item->id }})" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-brand-900 hover:bg-brand-50" aria-label="Edit {{ $item->role_title }} at {{ $item->organization }}"><i class="ri-pencil-line" aria-hidden="true"></i>Edit</button>
-                            <button type="button" wire:click="archive('experience', {{ $item->id }})" data-confirm="It will no longer count in new predictions. You can restore it later." data-confirm-title="Archive this experience?" data-confirm-button="Archive" class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-red-800 hover:bg-red-50" aria-label="Archive {{ $item->role_title }} at {{ $item->organization }}"><i class="ri-archive-line" aria-hidden="true"></i>Archive</button>
+                        <div class="flex shrink-0 gap-1">
+                            <button type="button" wire:click="openView('experience', {{ $item->id }})" class="{{ $iconBtn }}" title="View" aria-label="View {{ $item->role_title }} at {{ $item->organization }}"><i class="ri-eye-line" aria-hidden="true"></i></button>
+                            <button type="button" wire:click="openEdit('experience', {{ $item->id }})" class="{{ $iconBtn }}" title="Edit" aria-label="Edit {{ $item->role_title }} at {{ $item->organization }}"><i class="ri-pencil-line" aria-hidden="true"></i></button>
+                            <button type="button" wire:click="archive('experience', {{ $item->id }})" data-confirm="It will no longer count in new predictions. You can restore it later." data-confirm-title="Archive this experience?" data-confirm-button="Archive" class="{{ $iconBtn }} hover:text-red-800" title="Archive" aria-label="Archive {{ $item->role_title }} at {{ $item->organization }}"><i class="ri-archive-line" aria-hidden="true"></i></button>
                         </div>
                     </li>
                 @endforeach
             </ul>
         @endif
     </section>
+    </div>
 
     @if ($archivedCount > 0)
-        <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-            <button type="button" wire:click="toggleArchived" class="inline-flex items-center gap-1 text-sm font-medium text-brand-900" aria-expanded="{{ $showArchived ? 'true' : 'false' }}">
-                <i class="{{ $showArchived ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line' }}" aria-hidden="true"></i>
+        <div>
+            <button type="button" wire:click="toggleArchived" class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-semibold text-white hover:bg-[#1f2937] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2" title="View archived skills, certifications, and work experience" aria-haspopup="dialog" aria-expanded="{{ $showArchived ? 'true' : 'false' }}">
+                <i class="ri-archive-line" aria-hidden="true"></i>
                 Archived entries ({{ $archivedCount }})
             </button>
-            @if ($showArchived)
-                <ul class="mt-4 divide-y divide-gray-200 text-sm">
+        </div>
+        @if ($showArchived)
+            <x-dialog title="Archived entries ({{ $archivedCount }})" close="toggleArchived" max-width="lg">
+                <ul class="divide-y divide-brand-200 px-5 py-2 text-sm sm:px-6">
                     @foreach ($archivedSkills as $item)
-                        <li wire:key="archived-skill-{{ $item->id }}" class="flex items-center justify-between gap-3 py-2"><span><span class="text-gray-500">Skill ·</span> {{ $item->name }}</span><button type="button" wire:click="restore('skill', {{ $item->id }})" class="text-brand-900 underline">Restore</button></li>
+                        <li wire:key="archived-skill-{{ $item->id }}" class="flex items-center justify-between gap-3 py-3">
+                            <span class="inline-flex items-center gap-2 text-gray-800"><i class="ri-tools-line text-brand-900" aria-hidden="true"></i><span><span class="text-gray-500">Skill ·</span> {{ $item->name }}</span></span>
+                            <button type="button" wire:click="restore('skill', {{ $item->id }})" data-confirm="It will count in new predictions again. Past prediction snapshots stay as they were." data-confirm-title="Restore {{ $item->name }}?" data-confirm-button="Restore" data-confirm-tone="neutral" class="{{ $iconBtn }}" title="Restore" aria-label="Restore skill {{ $item->name }}"><i class="ri-arrow-go-back-line" aria-hidden="true"></i></button>
+                        </li>
                     @endforeach
                     @foreach ($archivedCertifications as $item)
-                        <li wire:key="archived-certification-{{ $item->id }}" class="flex items-center justify-between gap-3 py-2"><span><span class="text-gray-500">Certification ·</span> {{ $item->title }}</span><button type="button" wire:click="restore('certification', {{ $item->id }})" class="text-brand-900 underline">Restore</button></li>
+                        <li wire:key="archived-certification-{{ $item->id }}" class="flex items-center justify-between gap-3 py-3">
+                            <span class="inline-flex items-center gap-2 text-gray-800"><i class="ri-award-line text-brand-900" aria-hidden="true"></i><span><span class="text-gray-500">Certification ·</span> {{ $item->title }}</span></span>
+                            <button type="button" wire:click="restore('certification', {{ $item->id }})" data-confirm="It will count in new predictions again. Past prediction snapshots stay as they were." data-confirm-title="Restore this certification?" data-confirm-button="Restore" data-confirm-tone="neutral" class="{{ $iconBtn }}" title="Restore" aria-label="Restore {{ $item->title }}"><i class="ri-arrow-go-back-line" aria-hidden="true"></i></button>
+                        </li>
                     @endforeach
                     @foreach ($archivedExperiences as $item)
-                        <li wire:key="archived-experience-{{ $item->id }}" class="flex items-center justify-between gap-3 py-2"><span><span class="text-gray-500">{{ $item->typeLabel() }} ·</span> {{ $item->role_title ?? 'Role not recorded' }}, {{ $item->organization ?? 'organization not recorded' }}</span><button type="button" wire:click="restore('experience', {{ $item->id }})" class="text-brand-900 underline">Restore</button></li>
+                        <li wire:key="archived-experience-{{ $item->id }}" class="flex items-center justify-between gap-3 py-3">
+                            <span class="inline-flex items-center gap-2 text-gray-800"><i class="ri-briefcase-4-line text-brand-900" aria-hidden="true"></i><span><span class="text-gray-500">{{ $item->typeLabel() }} ·</span> {{ $item->role_title ?? 'Role not recorded' }}, {{ $item->organization ?? 'organization not recorded' }}</span></span>
+                            <button type="button" wire:click="restore('experience', {{ $item->id }})" data-confirm="It will count in new predictions again. Past prediction snapshots stay as they were." data-confirm-title="Restore this experience?" data-confirm-button="Restore" data-confirm-tone="neutral" class="{{ $iconBtn }}" title="Restore" aria-label="Restore {{ $item->role_title }} at {{ $item->organization }}"><i class="ri-arrow-go-back-line" aria-hidden="true"></i></button>
+                        </li>
                     @endforeach
                 </ul>
-            @endif
-        </section>
+            </x-dialog>
+        @endif
     @endif
 
     <div class="relative">
@@ -139,28 +153,30 @@
         <p class="mb-3 text-sm text-gray-600">When the list looks right, save the section. An empty list is allowed.</p>
         <div class="flex flex-wrap items-center justify-between gap-3">
             <button type="button" wire:click="$parent.back" class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-brand-200 bg-white px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"><i class="ri-arrow-left-line" aria-hidden="true"></i>Back</button>
-            <button type="button" wire:click="completeSection" wire:loading.attr="disabled" wire:target="completeSection" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:opacity-60"><x-spinner wire:loading wire:target="completeSection" />Save section &amp; continue<i class="ri-arrow-right-line" wire:loading.remove wire:target="completeSection" aria-hidden="true"></i></button>
+            <button type="button" wire:click="completeSection" wire:loading.attr="disabled" wire:target="completeSection" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:opacity-60"><x-spinner wire:loading wire:target="completeSection" />Save section &amp; continue<i class="ri-arrow-right-line" wire:loading.remove wire:target="completeSection" aria-hidden="true"></i></button>
         </div>
     </div>
 
     @if ($modal === 'skill')
         <x-dialog :title="$editingId ? 'Edit skill' : 'Add skill'" close="closeModal" max-width="md">
-            <form wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
+            <form id="skill-entry-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="save" label="Saving skill…" />
                 <div>
                     <label for="skill-name" class="mb-1 block text-sm font-medium">Skill name <span class="text-red-700" aria-hidden="true">*</span></label>
                     <input id="skill-name" type="text" wire:model="skill.name" maxlength="120" class="{{ $inputClass }}" placeholder="e.g. SQL, Adobe Premiere, Data analysis" autofocus>
                     @error('skill.name') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                 </div>
-                <div class="flex justify-end gap-2 border-t border-brand-200 pt-4">
-                    <button type="button" x-on:click="requestClose()" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save skill</button>
-                </div>
             </form>
+            <x-slot:footer>
+                <div class="flex justify-end gap-2">
+                    <button type="button" x-on:click="requestClose()" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" form="skill-entry-form" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save skill</button>
+                </div>
+            </x-slot:footer>
         </x-dialog>
     @elseif ($modal === 'certification')
         <x-dialog :title="$viewOnly ? 'Certification details' : ($editingId ? 'Edit certification' : 'Add certification')" close="closeModal">
-            <form wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
+            <form id="certification-entry-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="save" label="Saving certification…" />
                 <fieldset @disabled($viewOnly) class="grid gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
@@ -200,20 +216,22 @@
                         @error('certification.description') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
                 </fieldset>
-                <div class="flex justify-end gap-2 border-t border-brand-200 pt-4">
+            </form>
+            <x-slot:footer>
+                <div class="flex justify-end gap-2">
                     @if ($viewOnly)
-                        <button type="button" wire:click="openEdit('certification', {{ $editingId }})" class="rounded-lg border border-brand-900 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Edit</button>
-                        <button type="button" x-on:click="requestClose()" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">Close</button>
+                        <button type="button" wire:click="openEdit('certification', {{ $editingId }})" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-brand-900 text-brand-900 hover:bg-brand-50" title="Edit" aria-label="Edit certification"><i class="ri-pencil-line" aria-hidden="true"></i></button>
+                        <button type="button" x-on:click="requestClose()" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937]">Close</button>
                     @else
                         <button type="button" x-on:click="requestClose()" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                        <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save certification</button>
+                        <button type="submit" form="certification-entry-form" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save certification</button>
                     @endif
                 </div>
-            </form>
+            </x-slot:footer>
         </x-dialog>
     @elseif ($modal === 'experience')
         <x-dialog :title="$viewOnly ? 'Work experience details' : ($editingId ? 'Edit work experience' : 'Add work experience')" close="closeModal">
-            <form wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
+            <form id="experience-entry-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="save" label="Saving experience…" />
                 <fieldset @disabled($viewOnly) class="grid gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
@@ -253,16 +271,18 @@
                         @error('experience.description') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
                 </fieldset>
-                <div class="flex justify-end gap-2 border-t border-brand-200 pt-4">
+            </form>
+            <x-slot:footer>
+                <div class="flex justify-end gap-2">
                     @if ($viewOnly)
-                        <button type="button" wire:click="openEdit('experience', {{ $editingId }})" class="rounded-lg border border-brand-900 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Edit</button>
-                        <button type="button" x-on:click="requestClose()" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">Close</button>
+                        <button type="button" wire:click="openEdit('experience', {{ $editingId }})" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-brand-900 text-brand-900 hover:bg-brand-50" title="Edit" aria-label="Edit work experience"><i class="ri-pencil-line" aria-hidden="true"></i></button>
+                        <button type="button" x-on:click="requestClose()" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937]">Close</button>
                     @else
                         <button type="button" x-on:click="requestClose()" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                        <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save experience</button>
+                        <button type="submit" form="experience-entry-form" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60"><x-spinner wire:loading wire:target="save" />Save experience</button>
                     @endif
                 </div>
-            </form>
+            </x-slot:footer>
         </x-dialog>
     @endif
 </div>

@@ -38,7 +38,7 @@ class AdminUxPolishTest extends TestCase
         Livewire::actingAs($admin)
             ->test(UsersTable::class)
             ->assertSee('ri-pencil-line', false)
-            ->assertSee('ri-forbid-2-line', false)
+            ->assertSee('ri-user-unfollow-line', false)
             ->assertSee('Deactivate')
             ->assertSee('data-confirm-title="Deactivate this account?"', false)
             ->assertDontSee('underline');
@@ -141,19 +141,21 @@ class AdminUxPolishTest extends TestCase
             ->assertDontSee('InstitutionStudent');
     }
 
-    public function test_deletion_requests_use_a_sliding_status_switch_and_review_modal(): void
+    public function test_deletion_requests_use_a_status_dropdown_and_review_modal(): void
     {
         $admin = User::factory()->administrator()->create();
         $request = AccountDeletionRequest::factory()->create();
 
         Livewire::actingAs($admin)
             ->test(DeletionRequestsTable::class)
-            ->assertSee('segment-indicator', false)
+            ->assertSee('deletion-status-', false)
             ->assertSee('Pending')
             ->assertSee('Approved')
             ->assertSee('Rejected')
             ->assertSee('All')
+            ->assertSee('Approval deactivates sign-in')
             ->assertSee('ri-file-search-line', false)
+            ->assertDontSee('segment-indicator', false)
             ->call('openReview', $request->id)
             ->assertSee('dialog-panel', false)
             ->assertSee('Review account deletion request')

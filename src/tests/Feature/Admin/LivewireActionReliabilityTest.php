@@ -190,7 +190,7 @@ class LivewireActionReliabilityTest extends TestCase
             'password' => 'password',
             'password_confirmation' => 'password',
             'consent' => '1',
-        ])->assertSessionHasErrors('student_number');
+        ])->assertNotFound();
 
         $this->assertGuest();
         $this->assertDatabaseMissing('users', ['email' => 'ghost-m28@example.com']);

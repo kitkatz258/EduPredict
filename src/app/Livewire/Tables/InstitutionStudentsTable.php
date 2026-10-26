@@ -4,18 +4,29 @@ namespace App\Livewire\Tables;
 
 use App\Models\InstitutionStudent;
 use App\Models\Program;
+use App\Services\Admin\StudentAccountProvisioner;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 use Livewire\Attributes\On;
 
 class InstitutionStudentsTable extends BaseTable
 {
-    public string $sortField = 'student_number';
+    public string $sortField = 'id';
+
+    public string $sortDirection = 'desc';
 
     public string $programFilter = '';
 
     public string $yearFilter = '';
 
     public string $registeredFilter = '';
+
+    public ?int $provisioningId = null;
+
+    public string $provisionEmail = '';
+
+    public ?string $temporaryPassword = null;
 
     public function mount(): void
     {
@@ -42,6 +53,56 @@ class InstitutionStudentsTable extends BaseTable
         $record = InstitutionStudent::query()->findOrFail($recordId);
         $this->authorize('update', $record);
         $this->dispatch('edit-eligible-student', recordId: $recordId);
+    }
+
+    public function openProvision(int $recordId): void
+    {
+        $record = InstitutionStudent::query()->findOrFail($recordId);
+        $this->authorize('update', $record);
+        if ($record->is_registered) {
+            $this->toast('This student number already has a login.', 'error');
+
+            return;
+        }
+        $this->provisioningId = $record->id;
+        $this->provisionEmail = (string) ($record->email ?? '');
+        $this->temporaryPassword = null;
+        $this->resetValidation();
+    }
+
+    public function closeProvision(): void
+    {
+        $this->provisioningId = null;
+        $this->provisionEmail = '';
+        $this->temporaryPassword = null;
+        $this->resetValidation();
+    }
+
+    public function issueLogin(StudentAccountProvisioner $provisioner): void
+    {
+        $record = InstitutionStudent::query()->findOrFail((int) $this->provisioningId);
+        $this->authorize('update', $record);
+        $this->validate([
+            'provisionEmail' => ['required', 'email', 'max:255'],
+        ]);
+
+        try {
+            $result = $provisioner->provision($record, auth()->user(), $this->provisionEmail, request()->ip());
+        } catch (ValidationException $exception) {
+            $messages = $exception->validator->getMessageBag();
+            if ($messages->has('email')) {
+                $this->addError('provisionEmail', $messages->first('email'));
+            }
+            if ($messages->has('studentNumber')) {
+                $this->addError('provisionEmail', $messages->first('studentNumber'));
+            }
+
+            return;
+        }
+
+        $this->temporaryPassword = $result['temporary_password'];
+        $this->toast('Login issued. Share the temporary password privately. The student must change it at first sign-in.');
+        $this->dispatch('eligible-students-imported');
     }
 
     #[On('eligible-students-imported')]
@@ -83,7 +144,7 @@ class InstitutionStudentsTable extends BaseTable
             ['key' => 'last_name', 'label' => 'Last name', 'sortable' => true],
             ['key' => 'first_name', 'label' => 'First name', 'sortable' => true],
             ['key' => 'year_level', 'label' => 'Year', 'sortable' => true],
-            ['key' => 'is_registered', 'label' => 'Registered', 'sortable' => true],
+            ['key' => 'is_registered', 'label' => 'Claimed', 'sortable' => true],
         ];
     }
 
@@ -92,7 +153,7 @@ class InstitutionStudentsTable extends BaseTable
         return ['student_number', 'last_name', 'first_name'];
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.tables.institution-students-table', [
             ...$this->tableViewData(),
@@ -103,6 +164,9 @@ class InstitutionStudentsTable extends BaseTable
                 })
                 ->orderBy('student_number')
                 ->get(['id', 'student_number', 'year_level']),
+            'provisioning' => $this->provisioningId
+                ? InstitutionStudent::query()->find($this->provisioningId)
+                : null,
         ]);
     }
 }

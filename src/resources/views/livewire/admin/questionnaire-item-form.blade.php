@@ -1,7 +1,7 @@
 <div>
     @if ($show)
         <x-dialog :title="$itemId ? 'Edit questionnaire item' : 'Add questionnaire item'" close="closeForm" description="Definitions with student answers stay locked. Add a new version instead of rewriting them.">
-            <form wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
+            <form id="questionnaire-item-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="save" label="Saving question…" />
                 @if ($statusMessage !== '')
                     <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
@@ -60,16 +60,10 @@
                     <label class="inline-flex items-center gap-2"><input type="checkbox" wire:model="is_active" @disabled($locked) class="rounded border-brand-200 text-brand-900"> Active</label>
                     <label class="inline-flex items-center gap-2"><input type="checkbox" wire:model="is_draft" @disabled($locked) class="rounded border-brand-200 text-brand-900"> Draft scale item</label>
                 </div>
-                <div class="flex flex-wrap justify-end gap-2">
-                    <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900">Cancel</button>
-                    @unless ($locked)
-                        <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">
-                            <x-spinner wire:loading wire:target="save" />
-                            Save item
-                        </button>
-                    @endunless
-                </div>
             </form>
+            <x-slot:footer>
+                <x-dialog-actions form="questionnaire-item-form" submit="Save item" :read-only="$locked" />
+            </x-slot:footer>
         </x-dialog>
     @endif
 </div>

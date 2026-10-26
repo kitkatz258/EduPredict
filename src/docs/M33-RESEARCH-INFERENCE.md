@@ -1,6 +1,6 @@
 # M33 research inference
 
-Student predictions stay on `placeholder-heuristic-v0`. This service scores saved research artifacts with their original columns. It is not a validated UCC predictor, and it is not deployed.
+Student predictions use `placeholder-heuristic-v1`. Historical attempts stay on the version stored with them. This service scores saved research artifacts with their original columns. It is not a validated UCC predictor, and it is not deployed.
 
 ## Architecture
 

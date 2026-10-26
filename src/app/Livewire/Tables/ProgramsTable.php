@@ -89,9 +89,7 @@ class ProgramsTable extends BaseTable
     }
 
     #[On('catalog-changed')]
-    public function refreshCatalog(): void
-    {
-    }
+    public function refreshCatalog(): void {}
 
     protected function baseQuery(): Builder
     {

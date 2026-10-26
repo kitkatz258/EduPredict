@@ -7,7 +7,7 @@
                 · Last updated {{ $latest->created_at?->timezone(config('app.timezone'))->format('M j, Y') }}
             @endif
         </p>
-        <p class="mt-1 text-xs text-gray-500">Model: {{ $latest->model_version ?? 'placeholder-heuristic-v0' }}</p>
+        <p class="mt-1 text-xs text-gray-500">Model: {{ $latest->model_version ?? config('edupredict.predictor.placeholder_version') }}</p>
     </div>
 
     @if ($latest === null)
@@ -128,6 +128,7 @@
                 }
                 node.dataset.ready = '1';
                 const data = JSON.parse(node.textContent);
+                const ink = window.edupredictTheme?.colors?.().ink || '#6b7280';
                 const bars = function (id, payload) {
                     const canvas = document.getElementById(id);
                     if (!canvas || !payload || !payload.labels || payload.labels.length === 0) {
@@ -147,7 +148,7 @@
                             maintainAspectRatio: false,
                             indexAxis: 'y',
                             plugins: { legend: { display: false } },
-                            scales: { x: { beginAtZero: true, ticks: { color: '#374151' } }, y: { ticks: { color: '#1B5E20' } } },
+                            scales: { x: { beginAtZero: true, ticks: { color: ink } }, y: { ticks: { color: ink } } },
                         },
                     });
                 };
@@ -160,14 +161,14 @@
                         data: {
                             labels: data.history.labels,
                             datasets: [
-                                { label: 'Employability', data: data.history.employability, borderColor: '#1B5E20', backgroundColor: '#1B5E20', tension: 0.2 },
+                                { label: 'Employability', data: data.history.employability, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.14)', tension: 0.35, fill: true, pointRadius: 0, borderWidth: 2 },
                                 { label: 'Dropout probability (%)', data: data.history.dropout, borderColor: '#B45309', backgroundColor: '#B45309', tension: 0.2 },
                             ],
                         },
                         options: {
                             maintainAspectRatio: false,
                             scales: { y: { min: 0, max: 100 } },
-                            plugins: { legend: { labels: { color: '#1B5E20' } } },
+                            plugins: { legend: { labels: { color: ink, boxWidth: 8, usePointStyle: true } } },
                         },
                     });
                 }

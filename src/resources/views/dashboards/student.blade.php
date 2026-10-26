@@ -12,7 +12,7 @@
         <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">University of Caloocan City · EduPredict</p>
-                <h2 class="mt-1 text-2xl font-semibold text-brand-900">Hi, {{ $firstName }}. Here's your latest snapshot.</h2>
+                <h2 class="mt-1 text-2xl font-bold text-brand-900">Hi, {{ $firstName }}. Here's your latest snapshot.</h2>
                 <p class="mt-1 text-sm text-gray-600">
                     @if ($student?->program)
                         {{ $student->program->name }} · Year {{ $student->year_level }}
@@ -35,7 +35,7 @@
                 @if (! ($progress['sections']['questionnaire'] ?? false))
                     <p class="text-sm text-gray-700">A new prediction needs a completed current questionnaire and consent. Grades and skills are optional.</p>
                 @endif
-                <a href="{{ route('student.assessment') }}" class="inline-flex items-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">
+                <a href="{{ route('student.assessment') }}" class="inline-flex items-center gap-1 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937]">
                     {{ ($progress['sections']['questionnaire'] ?? false) ? 'Update Assessment' : 'Complete Assessment' }}
                     <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
                 </a>
@@ -50,10 +50,10 @@
             @else
                 <div class="grid gap-4 lg:grid-cols-3">
                     <section class="flex flex-col rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="employability-heading">
-                        <p id="employability-heading" class="text-xs font-semibold uppercase tracking-wide text-gray-500">Employability score</p>
+                        <h2 id="employability-heading" class="text-base font-bold text-brand-900">Employability</h2>
                         <div class="mt-3 flex items-center gap-4">
                             <x-employability-gauge :score="$latest->employability_score" compact class="shrink-0" />
-                            <p class="text-sm leading-6 text-gray-700">Based on academics, skills, experience, and self-reported study patterns saved with this attempt.</p>
+                            <p class="text-sm font-medium leading-6 text-gray-800">Score saved with this attempt. It is not a hiring likelihood.</p>
                         </div>
                         <div class="mt-4 grid gap-3 border-t border-brand-200 pt-4 text-sm">
                             @if ($contributors['positive'] === [] && $contributors['negative'] === [])
@@ -84,7 +84,7 @@
                     </section>
 
                     <section class="rounded-2xl border border-brand-200 bg-white p-6 shadow-sm lg:col-span-2" aria-labelledby="wellness-heading">
-                        <p id="wellness-heading" class="text-xs font-semibold uppercase tracking-wide text-gray-500">Academic wellness</p>
+                        <h2 id="wellness-heading" class="text-base font-bold text-brand-900">Academic wellness</h2>
                         <div class="mt-3 flex flex-wrap items-center gap-2">
                             <x-risk-badge :level="$latest->dropout_risk" />
                             @if ($latest->confidence === 'low')
@@ -110,7 +110,7 @@
                                 <span>Moderate {{ $moderateAt }}–{{ $highAt - 1 }}</span>
                                 <span>High from {{ $highAt }}</span>
                             </div>
-                            <p class="mt-1 text-xs text-gray-500">This index comes from transparent placeholder rules. It is not a validated probability from a trained model.</p>
+                            <p class="mt-2 inline-flex rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-950" role="note">Placeholder index only. This is not a validated probability from a trained model.</p>
                         </div>
                     </section>
                 </div>
@@ -122,6 +122,13 @@
                     </summary>
                     <div class="space-y-5 border-t border-brand-200 px-5 py-5">
                         <p class="text-sm leading-6 text-gray-700">{{ $summary['employability'] }}</p>
+                        @php
+                            $householdLabels = ['Scholarship', 'Study space', 'Household income band', 'Internet access', 'Device access', 'Employment'];
+                            $storedLabels = collect($latest->factors['employability'] ?? [])->merge($latest->factors['dropout'] ?? [])->pluck('label');
+                        @endphp
+                        @if ($storedLabels->intersect($householdLabels)->isNotEmpty())
+                            <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-xs leading-5 text-gray-700">A household factor is listed because that profile was already stored with this attempt. New predictions do not use household profile fields. The encrypted profile stays on file, and this attempt is not rewritten. The placeholder rule is not a UCC-wide scholarship finding, and it does not measure free tuition.</p>
+                        @endif
                         <div class="rounded-xl border border-brand-200 p-4">
                             <h3 class="text-sm font-semibold text-brand-900">Self-report category summary</h3>
                             <x-construct-summary class="mt-3" :constructs="$constructs" unavailable="No questionnaire category scores were saved with this attempt." />
@@ -202,7 +209,7 @@
             <section class="overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm" aria-labelledby="next-steps-heading">
                 <div class="grid lg:grid-cols-5">
                     <div class="border-b border-brand-200 bg-brand-50/60 p-5 lg:col-span-2 lg:border-b-0 lg:border-r">
-                        <h2 id="next-steps-heading" class="text-xs font-semibold uppercase tracking-wide text-gray-500">Next steps</h2>
+                        <h2 id="next-steps-heading" class="text-base font-bold text-brand-900">Next steps</h2>
                         <p class="mt-2 inline-flex items-center gap-2 font-semibold text-brand-900"><i class="ri-refresh-line" aria-hidden="true"></i>Run a new prediction</p>
                         <p class="mb-3 mt-1 text-sm text-gray-600">Uses the current questionnaire, consent, and the latest confirmed grades when they exist. Grades and skills are optional. Earlier results stay in History.</p>
                         <livewire:student.request-prediction />
@@ -257,6 +264,7 @@
                         if (!canvas || !payload || !payload.labels || payload.labels.length === 0) {
                             return;
                         }
+                        const ink = window.edupredictTheme?.colors?.().ink || '#6b7280';
                         new window.Chart(canvas, {
                             type: 'bar',
                             data: { labels: payload.labels, datasets: [{ data: payload.magnitudes, backgroundColor: payload.colors, borderWidth: 0 }] },
@@ -264,7 +272,7 @@
                                 maintainAspectRatio: false,
                                 indexAxis: 'y',
                                 plugins: { legend: { display: false } },
-                                scales: { x: { beginAtZero: true, ticks: { color: '#374151' } }, y: { ticks: { color: '#1B5E20' } } },
+                                scales: { x: { beginAtZero: true, ticks: { color: ink } }, y: { ticks: { color: ink } } },
                             },
                         });
                     };

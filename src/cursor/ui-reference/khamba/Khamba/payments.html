@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payments – Khamba Admin</title>
+<!-- Google Fonts used by the live customizer's font picker -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Bootstrap 5 (layout, modals, offcanvas, dropdowns) -->
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<!-- Khamba's own stylesheet (design tokens + every component) -->
+<link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR NAVIGATION
+     Fixed left sidebar: logo, six nav groups, and a store/Logout
+     footer. This exact block is repeated at the top of every
+     dashboard page — edit the logo here, then use your editor's
+     "Replace in all files" to repeat the change everywhere.
+     ============================================================ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <a class="brand-link" href="index.html"><span class="logo"><i data-lucide="shopping-bag"></i></span><span class="brand">Khamba</span></a>
+    <button class="sb-toggle d-none d-lg-grid" id="sbToggle" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button>
+  </div>
+  <nav class="sb-scroll">
+    <div class="sb-group">General</div>
+    <a class="sb-link sb-parent collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#dashGroup" aria-expanded="false" title="Dashboards">
+      <i data-lucide="layout-dashboard"></i><span>Dashboards</span><i data-lucide="chevron-down" class="sb-chevron"></i>
+    </a>
+    <div class="collapse" id="dashGroup">
+      <a class="sb-link sb-sub" href="index.html" title="Dashboard 1"><span>Dashboard 1</span></a>
+      <a class="sb-link sb-sub" href="dashboard-2.html" title="Dashboard 2"><span>Dashboard 2</span></a>
+      <a class="sb-link sb-sub" href="dashboard-3.html" title="Dashboard 3"><span>Dashboard 3</span></a>
+    </div>
+    <a class="sb-link" href="orders.html" title="Orders"><i data-lucide="shopping-bag"></i><span>Orders</span><em class="sb-badge">8</em></a>
+    <a class="sb-link" href="products.html" title="Products"><i data-lucide="package"></i><span>Products</span></a>
+    <a class="sb-link" href="categories.html" title="Categories"><i data-lucide="layers"></i><span>Categories</span></a>
+    <a class="sb-link" href="inventory.html" title="Inventory"><i data-lucide="warehouse"></i><span>Inventory</span></a>
+    <a class="sb-link" href="customers.html" title="Customers"><i data-lucide="users"></i><span>Customers</span></a>
+    <a class="sb-link" href="reviews.html" title="Reviews"><i data-lucide="star"></i><span>Reviews</span><em class="sb-badge">12</em></a>
+    <a class="sb-link" href="discounts.html" title="Discounts"><i data-lucide="percent"></i><span>Discounts</span></a>
+    <a class="sb-link active" href="payments.html" title="Payments"><i data-lucide="credit-card"></i><span>Payments</span></a>
+    <a class="sb-link" href="analytics.html" title="Analytics"><i data-lucide="chart-no-axes-combined"></i><span>Analytics</span></a>
+    <div class="sb-group">Operations</div>
+    <a class="sb-link" href="shipments.html" title="Shipments"><i data-lucide="truck"></i><span>Shipments</span></a>
+    <a class="sb-link" href="returns.html" title="Returns"><i data-lucide="undo-2"></i><span>Returns</span></a>
+    <a class="sb-link" href="abandoned-carts.html" title="Abandoned Carts"><i data-lucide="shopping-cart"></i><span>Abandoned Carts</span></a>
+    <a class="sb-link" href="gift-cards.html" title="Gift Cards"><i data-lucide="gift"></i><span>Gift Cards</span></a>
+    <div class="sb-group">Marketing</div>
+    <a class="sb-link" href="campaigns.html" title="Campaigns"><i data-lucide="megaphone"></i><span>Campaigns</span></a>
+    <a class="sb-link" href="coupons.html" title="Coupons"><i data-lucide="ticket"></i><span>Coupons</span></a>
+    <a class="sb-link" href="email.html" title="Email Marketing"><i data-lucide="mail"></i><span>Email Marketing</span></a>
+    <div class="sb-group">Management</div>
+    <a class="sb-link" href="team.html" title="Team Members"><i data-lucide="user-round-cog"></i><span>Team Members</span></a>
+    <a class="sb-link" href="roles.html" title="Roles &amp; Permissions"><i data-lucide="shield-check"></i><span>Roles &amp; Permissions</span></a>
+    <a class="sb-link" href="logs.html" title="Activity Logs"><i data-lucide="history"></i><span>Activity Logs</span></a>
+    <div class="sb-group">Account</div>
+    <a class="sb-link" href="settings.html" title="Settings"><i data-lucide="settings"></i><span>Settings</span></a>
+    <a class="sb-link" href="integrations.html" title="Integrations"><i data-lucide="plug"></i><span>Integrations</span></a>
+    <a class="sb-link" href="notifications.html" title="Notifications"><i data-lucide="bell"></i><span>Notifications</span></a>
+    <a class="sb-link" href="help.html" title="Help &amp; Support"><i data-lucide="life-buoy"></i><span>Help &amp; Support</span></a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="store-card"><span class="logo"><i data-lucide="store"></i></span><div><b>Khamba Store</b><small>khamba.com</small></div></div>
+    <a class="sb-link" href="login.html" title="Logout"><i data-lucide="log-out"></i><span>Logout</span></a>
+  </div>
+</aside>
+<!-- Dark overlay behind the sidebar when it opens as a mobile drawer -->
+<div class="backdrop" id="backdrop"></div>
+<!-- ============================================================
+     MAIN COLUMN — topbar, page content, footer
+     ============================================================ -->
+<div class="main">
+    <!-- ---------- Topbar: search, store switcher, theme toggle,
+       notifications and the user menu (Profile / Account settings /
+       Billing / Logout) ---------- -->
+<header class="topbar">
+    <button class="icon-btn d-lg-none" id="mobileToggle" aria-label="Open menu"><i data-lucide="menu"></i></button>
+    <div class="search">
+      <i data-lucide="search"></i>
+      <input type="text" id="search" placeholder="Search anything..." autocomplete="off">
+      <kbd>/</kbd>
+      <div class="search-panel" id="searchPanel">
+        <div class="sp-label">Search in</div>
+        <a href="#" data-scope="Products"><i data-lucide="package"></i>Products</a>
+        <a href="#" data-scope="Orders"><i data-lucide="shopping-bag"></i>Orders</a>
+        <a href="#" data-scope="Customers"><i data-lucide="users"></i>Customers</a>
+        <a href="#" data-scope="Pages"><i data-lucide="file-text"></i>Pages</a>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="dropdown d-none d-md-block">
+        <button class="pill-btn" data-bs-toggle="dropdown"><i data-lucide="store"></i>Khamba Store<i data-lucide="chevron-down"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">Khamba Store</a></li><li><a class="dropdown-item" href="#">Khamba Outlet</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#">+ Add new store</a></li></ul>
+      </div>
+      <div class="dropdown d-none d-sm-block">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Language"><i data-lucide="globe"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">English</a></li><li><a class="dropdown-item" href="#">Español</a></li><li><a class="dropdown-item" href="#">Français</a></li></ul>
+      </div>
+      <button class="icon-btn" id="themeToggle" title="Toggle theme"><i data-lucide="moon"></i></button>
+      <div class="dropdown">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <div class="dropdown-menu dropdown-menu-end notif">
+          <div class="notif-head">Notifications <a href="#">Mark all read</a></div>
+          <a class="notif-item unread" href="#"><i data-lucide="shopping-bag"></i><div><b>New order #10482</b><small>2 minutes ago</small></div></a>
+          <a class="notif-item unread" href="#"><i data-lucide="triangle-alert"></i><div><b>Low stock: Ceramic Mug</b><small>1 hour ago</small></div></a>
+          <a class="notif-item" href="#"><i data-lucide="star"></i><div><b>New 5-star review</b><small>Yesterday</small></div></a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="avatar" data-bs-toggle="dropdown"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Alex Johnson" onerror="this.replaceWith('AJ')"></button>
+        <ul class="dropdown-menu dropdown-menu-end user-menu">
+          <li class="um-head"><b>Alex Johnson</b><small>alex@khamba.com</small></li>
+          <li><a class="dropdown-item" href="profile.html"><i data-lucide="user"></i>Profile</a></li>
+          <li><a class="dropdown-item" href="account-settings.html"><i data-lucide="settings"></i>Account settings</a></li>
+          <li><a class="dropdown-item" href="billing.html"><i data-lucide="credit-card"></i>Billing</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="login.html"><i data-lucide="log-out"></i>Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+    <!-- ---------- Page content ---------- -->
+<main class="content">
+    <div class="page-head">
+      <div><h1>Payments</h1><p>Monitor transactions, methods and payout status.</p></div>
+      <div class="d-flex gap-2">
+        <button class="btn-soft" id="exportBtn"><i data-lucide="download"></i>Export CSV</button>
+        <button class="btn-dark-x"><i data-lucide="banknote"></i>Request payout</button>
+      </div>
+    </div>
+
+    <section class="row g-3 mb-3">
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#eef2fd"><i data-lucide="wallet"></i></span>
+        <div><small>Total revenue</small><b>$245,450</b><span class="ms-note up">+14.9%</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#ecf6ef"><i data-lucide="badge-check"></i></span>
+        <div><small>Successful payments</small><b>1,238</b><span class="ms-note up">96.4% success rate</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#fee2e2"><i data-lucide="circle-x"></i></span>
+        <div><small>Failed / refunded</small><b>46</b><span class="ms-note down">3.6% of total</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#f6eff6"><i data-lucide="banknote"></i></span>
+        <div><small>Pending payout</small><b>$18,240</b><span class="ms-note">Next payout Oct 2</span></div></div></div>
+    </section>
+
+    <section class="row g-3 mb-3">
+      <div class="col-xl-4"><div class="card-x h-100">
+        <div class="card-head"><h5>Payment Methods</h5><span class="text-secondary small">Last 30 days</span></div>
+        <div class="row-item"><div class="meta"><b>Visa</b></div>
+          <div class="d-none d-sm-block"><div class="bar" style="width:100px"><i style="width:42%;background:#4f46e5"></i></div></div><b>42%</b></div>
+        <div class="row-item"><div class="meta"><b>Mastercard</b></div>
+          <div class="d-none d-sm-block"><div class="bar" style="width:100px"><i style="width:24%;background:#818cf8"></i></div></div><b>24%</b></div>
+        <div class="row-item"><div class="meta"><b>PayPal</b></div>
+          <div class="d-none d-sm-block"><div class="bar" style="width:100px"><i style="width:20%;background:#a5b4fc"></i></div></div><b>20%</b></div>
+        <div class="row-item"><div class="meta"><b>Apple Pay</b></div>
+          <div class="d-none d-sm-block"><div class="bar" style="width:100px"><i style="width:14%;background:#c7d2fe"></i></div></div><b>14%</b></div>
+      </div></div>
+      <div class="col-xl-8"><div class="card-x h-100">
+        <div class="card-head"><h5>Payout Schedule</h5></div>
+        <div class="row-item"><span class="thumb" style="background:#ecf6ef;color:#047857"><i data-lucide="check"></i></span>
+          <div class="meta"><b>Sep 25, 2026</b><small>Weekly payout</small></div><div class="end"><b>$52,180</b><small>Paid</small></div></div>
+        <div class="row-item"><span class="thumb" style="background:#ecf6ef;color:#047857"><i data-lucide="check"></i></span>
+          <div class="meta"><b>Sep 18, 2026</b><small>Weekly payout</small></div><div class="end"><b>$48,920</b><small>Paid</small></div></div>
+        <div class="row-item"><span class="thumb" style="background:#fdf3ea;color:#b45309"><i data-lucide="clock"></i></span>
+          <div class="meta"><b>Oct 2, 2026</b><small>Weekly payout</small></div><div class="end"><b>$18,240</b><small>Scheduled</small></div></div>
+      </div></div>
+    </section>
+
+    <div class="card-x">
+      <div class="tabs" id="tabs">
+        <button class="on" data-t="all">All<em>8</em></button>
+        <button data-t="Completed">Completed<em>5</em></button>
+        <button data-t="Pending">Pending<em>1</em></button>
+        <button data-t="Failed">Failed<em>1</em></button>
+        <button data-t="Refunded">Refunded<em>1</em></button>
+      </div>
+
+      <div class="ord-filters">
+        <div class="search flex-grow-1">
+          <i data-lucide="search"></i>
+          <input type="text" id="txSearch" placeholder="Search by transaction ID or customer...">
+        </div>
+        <select class="sel-x" id="methodFilter">
+          <option value="">All methods</option><option>Visa</option><option>Mastercard</option><option>PayPal</option><option>Apple</option>
+        </select>
+      </div>
+
+      <div class="table-responsive">
+      <table class="table-x" id="txTable">
+        <thead><tr><th>Transaction</th><th>Customer</th><th>Method</th><th>Amount</th><th>Date</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <tr data-status="Completed" data-method="Visa" data-amount="249.00">
+            <td><a href="#txn-TXN-88213" class="oid" data-bs-toggle="offcanvas"><b>TXN-88213</b></a><small class="d-block text-secondary">#10482</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#e0e7ff;color:#4338ca">OM<img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Olivia Martin</b><small class="d-block text-secondary">olivia.martin@mail.com</small></div></div></td>
+            <td class="text-secondary">Visa •• 4242</td>
+            <td><b>$249.00</b></td>
+            <td class="text-secondary">Sep 28, 2026, 9:11 AM</td>
+            <td><span class="badge-x s-Delivered">Completed</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#txn-TXN-88213" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Pending" data-method="PayPal" data-amount="129.50">
+            <td><a href="#txn-TXN-88212" class="oid" data-bs-toggle="offcanvas"><b>TXN-88212</b></a><small class="d-block text-secondary">#10481</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#fce7f3;color:#be185d">LC<img src="https://randomuser.me/api/portraits/men/46.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Liam Carter</b><small class="d-block text-secondary">liam.carter@mail.com</small></div></div></td>
+            <td class="text-secondary">PayPal</td>
+            <td><b>$129.50</b></td>
+            <td class="text-secondary">Sep 28, 2026, 8:45 AM</td>
+            <td><span class="badge-x s-Pending">Pending</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#txn-TXN-88212" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Completed" data-method="Mastercard" data-amount="164.00">
+            <td><a href="#txn-TXN-88211" class="oid" data-bs-toggle="offcanvas"><b>TXN-88211</b></a><small class="d-block text-secondary">#10480</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#d1fae5;color:#047857">SN<img src="https://randomuser.me/api/portraits/women/68.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Sophia Nguyen</b><small class="d-block text-secondary">sophia.nguyen@mail.com</small></div></div></td>
+            <td class="text-secondary">Mastercard •• 8812</td>
+            <td><b>$164.00</b></td>
+            <td class="text-secondary">Sep 27, 2026, 4:06 PM</td>
+            <td><span class="badge-x s-Delivered">Completed</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#txn-TXN-88211" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Failed" data-method="Visa" data-amount="319.00">
+            <td><a href="#txn-TXN-88210" class="oid" data-bs-toggle="offcanvas"><b>TXN-88210</b></a><small class="d-block text-secondary">#10479</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#fef3c7;color:#b45309">NP<img src="https://randomuser.me/api/portraits/men/75.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Noah Patel</b><small class="d-block text-secondary">noah.patel@mail.com</small></div></div></td>
+            <td class="text-secondary">Visa •• 1190</td>
+            <td><b>$319.00</b></td>
+            <td class="text-secondary">Sep 27, 2026, 11:21 AM</td>
+            <td><span class="badge-x s-Critical">Failed</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#txn-TXN-88210" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Refunded" data-method="Apple" data-amount="48.00">
+            <td><a href="#txn-TXN-88209" class="oid" data-bs-toggle="offcanvas"><b>TXN-88209</b></a><small class="d-block text-secondary">#10478</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#dbeafe;color:#1d4ed8">EB<img src="https://randomuser.me/api/portraits/women/26.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Emma Brooks</b><small class="d-block text-secondary">emma.brooks@mail.com</small></div></div></td>
+            <td class="text-secondary">Apple Pay</td>
+            <td><b>$48.00</b></td>
+            <td class="text-secondary">Sep 26, 2026, 2:53 PM</td>
+            <td><span class="badge-x s-Refunded">Refunded</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#txn-TXN-88209" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Completed" data-method="PayPal" data-amount="89.90">
+            <td><a href="#txn-TXN-88208" class="oid" data-bs-toggle="offcanvas"><b>TXN-88208</b></a><small class="d-block text-secondary">#10477</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#ede9fe;color:#6d28d9">LR<img src="https://randomuser.me/api/portraits/men/52.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Lucas Rivera</b><small class="d-block text-secondary">lucas.rivera@mail.com</small></div></div></td>
+            <td class="text-secondary">PayPal</td>
+            <td><b>$89.90</b></td>
+            <td class="text-secondary">Sep 26, 2026, 9:32 AM</td>
+            <td><span class="badge-x s-Delivered">Completed</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#txn-TXN-88208" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Completed" data-method="Visa" data-amount="212.00">
+            <td><a href="#txn-TXN-88207" class="oid" data-bs-toggle="offcanvas"><b>TXN-88207</b></a><small class="d-block text-secondary">#10476</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#fee2e2;color:#b91c1c">AT<img src="https://randomuser.me/api/portraits/women/12.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Ava Thompson</b><small class="d-block text-secondary">ava.thompson@mail.com</small></div></div></td>
+            <td class="text-secondary">Visa •• 7743</td>
+            <td><b>$212.00</b></td>
+            <td class="text-secondary">Sep 25, 2026, 6:19 PM</td>
+            <td><span class="badge-x s-Delivered">Completed</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#txn-TXN-88207" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+          <tr data-status="Completed" data-method="Apple" data-amount="76.00">
+            <td><a href="#txn-TXN-88206" class="oid" data-bs-toggle="offcanvas"><b>TXN-88206</b></a><small class="d-block text-secondary">#10475</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#eef2fd;color:#4338ca">EK<img src="https://randomuser.me/api/portraits/men/22.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Ethan Kim</b><small class="d-block text-secondary">ethan.kim@mail.com</small></div></div></td>
+            <td class="text-secondary">Apple Pay</td>
+            <td><b>$76.00</b></td>
+            <td class="text-secondary">Sep 25, 2026, 10:03 AM</td>
+            <td><span class="badge-x s-Delivered">Completed</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#txn-TXN-88206" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <small class="text-secondary d-block mt-2" id="txInfo">Showing 8 of 8 transactions</small>
+    </div>
+  </main>
+
+    <!-- ---------- Footer: copyright + legal links (same on every page) ---------- -->
+<footer class="footer-x">
+    <span>© 2026 Khamba Inc. All rights reserved.</span>
+    <div class="d-flex gap-3">
+      <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="help.html">Help &amp; Support</a>
+      <span class="d-none d-sm-inline text-secondary">v1.0.0</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     LIVE CUSTOMIZER — lets the user try a different sidebar
+     colour / font without touching any code (see app.js).
+     ============================================================ -->
+<button class="sw-fab" id="swFab" title="Customize"><i data-lucide="palette"></i></button>
+<div class="sw-panel" id="swPanel">
+  <div class="sw-head"><b>Customize</b><button id="swClose" aria-label="Close"><i data-lucide="x"></i></button></div>
+  <div class="sw-label">Sidebar color</div><div class="sw-colors" id="swColors"></div>
+  <div class="sw-label">Font family</div><div id="swFonts"></div>
+  <button class="btn-reorder w-100 mt-4" id="swReset">Reset to default</button>
+</div>
+
+<!-- ============================================================
+     DETAIL DRAWERS — one per row (8 total on this page).
+     Each is a plain Bootstrap 5 offcanvas; opened via
+     data-bs-toggle="offcanvas" in the table/card above, no JS needed.
+     ============================================================ -->
+<div class="offcanvas offcanvas-end od" id="txn-TXN-88213">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">TXN-88213</h5><small class="text-secondary">Sep 28, 2026, 9:11 AM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Delivered">Completed</span><span class="text-secondary small align-self-center">Order #10482</span></div>
+      <div class="od-sec"><h6>Amount</h6>
+        <div class="sum"><span>Order total</span><span>$249.00</span></div>
+        <div class="sum"><span>Processing fee</span><span>-$7.47</span></div>
+        <div class="sum t"><span>Net amount</span><span>$241.53</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-1"><span class="mini-av" style="background:#e0e7ff;color:#4338ca">OM<img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" onerror="this.remove()"></span><div><b>Olivia Martin</b><small class="d-block text-secondary">olivia.martin@mail.com</small></div></div>
+      </div>
+      <div class="od-sec border-0"><h6>Payment method</h6>
+        <div class="sum"><span>Method</span><span>Visa •• 4242</span></div>
+        <div class="sum"><span>Transaction ID</span><span>TXN-88213</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Receipt</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="txn-TXN-88212">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">TXN-88212</h5><small class="text-secondary">Sep 28, 2026, 8:45 AM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Pending">Pending</span><span class="text-secondary small align-self-center">Order #10481</span></div>
+      <div class="od-sec"><h6>Amount</h6>
+        <div class="sum"><span>Order total</span><span>$129.50</span></div>
+        <div class="sum"><span>Processing fee</span><span>-$3.89</span></div>
+        <div class="sum t"><span>Net amount</span><span>$125.61</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-1"><span class="mini-av" style="background:#fce7f3;color:#be185d">LC<img src="https://randomuser.me/api/portraits/men/46.jpg" alt="" onerror="this.remove()"></span><div><b>Liam Carter</b><small class="d-block text-secondary">liam.carter@mail.com</small></div></div>
+      </div>
+      <div class="od-sec border-0"><h6>Payment method</h6>
+        <div class="sum"><span>Method</span><span>PayPal</span></div>
+        <div class="sum"><span>Transaction ID</span><span>TXN-88212</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Receipt</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="txn-TXN-88211">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">TXN-88211</h5><small class="text-secondary">Sep 27, 2026, 4:06 PM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Delivered">Completed</span><span class="text-secondary small align-self-center">Order #10480</span></div>
+      <div class="od-sec"><h6>Amount</h6>
+        <div class="sum"><span>Order total</span><span>$164.00</span></div>
+        <div class="sum"><span>Processing fee</span><span>-$4.92</span></div>
+        <div class="sum t"><span>Net amount</span><span>$159.08</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-1"><span class="mini-av" style="background:#d1fae5;color:#047857">SN<img src="https://randomuser.me/api/portraits/women/68.jpg" alt="" onerror="this.remove()"></span><div><b>Sophia Nguyen</b><small class="d-block text-secondary">sophia.nguyen@mail.com</small></div></div>
+      </div>
+      <div class="od-sec border-0"><h6>Payment method</h6>
+        <div class="sum"><span>Method</span><span>Mastercard •• 8812</span></div>
+        <div class="sum"><span>Transaction ID</span><span>TXN-88211</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Receipt</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="txn-TXN-88210">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">TXN-88210</h5><small class="text-secondary">Sep 27, 2026, 11:21 AM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Critical">Failed</span><span class="text-secondary small align-self-center">Order #10479</span></div>
+      <div class="od-sec"><h6>Amount</h6>
+        <div class="sum"><span>Order total</span><span>$319.00</span></div>
+        <div class="sum"><span>Processing fee</span><span>-$0.00</span></div>
+        <div class="sum t"><span>Net amount</span><span>$0.00</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-1"><span class="mini-av" style="background:#fef3c7;color:#b45309">NP<img src="https://randomuser.me/api/portraits/men/75.jpg" alt="" onerror="this.remove()"></span><div><b>Noah Patel</b><small class="d-block text-secondary">noah.patel@mail.com</small></div></div>
+      </div>
+      <div class="od-sec border-0"><h6>Payment method</h6>
+        <div class="sum"><span>Method</span><span>Visa •• 1190</span></div>
+        <div class="sum"><span>Transaction ID</span><span>TXN-88210</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Receipt</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="txn-TXN-88209">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">TXN-88209</h5><small class="text-secondary">Sep 26, 2026, 2:53 PM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Refunded">Refunded</span><span class="text-secondary small align-self-center">Order #10478</span></div>
+      <div class="od-sec"><h6>Amount</h6>
+        <div class="sum"><span>Order total</span><span>$48.00</span></div>
+        <div class="sum"><span>Processing fee</span><span>-$1.44</span></div>
+        <div class="sum t"><span>Net amount</span><span>-$48.00</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-1"><span class="mini-av" style="background:#dbeafe;color:#1d4ed8">EB<img src="https://randomuser.me/api/portraits/women/26.jpg" alt="" onerror="this.remove()"></span><div><b>Emma Brooks</b><small class="d-block text-secondary">emma.brooks@mail.com</small></div></div>
+      </div>
+      <div class="od-sec border-0"><h6>Payment method</h6>
+        <div class="sum"><span>Method</span><span>Apple Pay</span></div>
+        <div class="sum"><span>Transaction ID</span><span>TXN-88209</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Receipt</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="txn-TXN-88208">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">TXN-88208</h5><small class="text-secondary">Sep 26, 2026, 9:32 AM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Delivered">Completed</span><span class="text-secondary small align-self-center">Order #10477</span></div>
+      <div class="od-sec"><h6>Amount</h6>
+        <div class="sum"><span>Order total</span><span>$89.90</span></div>
+        <div class="sum"><span>Processing fee</span><span>-$2.70</span></div>
+        <div class="sum t"><span>Net amount</span><span>$87.20</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-1"><span class="mini-av" style="background:#ede9fe;color:#6d28d9">LR<img src="https://randomuser.me/api/portraits/men/52.jpg" alt="" onerror="this.remove()"></span><div><b>Lucas Rivera</b><small class="d-block text-secondary">lucas.rivera@mail.com</small></div></div>
+      </div>
+      <div class="od-sec border-0"><h6>Payment method</h6>
+        <div class="sum"><span>Method</span><span>PayPal</span></div>
+        <div class="sum"><span>Transaction ID</span><span>TXN-88208</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Receipt</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="txn-TXN-88207">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">TXN-88207</h5><small class="text-secondary">Sep 25, 2026, 6:19 PM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Delivered">Completed</span><span class="text-secondary small align-self-center">Order #10476</span></div>
+      <div class="od-sec"><h6>Amount</h6>
+        <div class="sum"><span>Order total</span><span>$212.00</span></div>
+        <div class="sum"><span>Processing fee</span><span>-$6.36</span></div>
+        <div class="sum t"><span>Net amount</span><span>$205.64</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-1"><span class="mini-av" style="background:#fee2e2;color:#b91c1c">AT<img src="https://randomuser.me/api/portraits/women/12.jpg" alt="" onerror="this.remove()"></span><div><b>Ava Thompson</b><small class="d-block text-secondary">ava.thompson@mail.com</small></div></div>
+      </div>
+      <div class="od-sec border-0"><h6>Payment method</h6>
+        <div class="sum"><span>Method</span><span>Visa •• 7743</span></div>
+        <div class="sum"><span>Transaction ID</span><span>TXN-88207</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Receipt</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="txn-TXN-88206">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">TXN-88206</h5><small class="text-secondary">Sep 25, 2026, 10:03 AM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Delivered">Completed</span><span class="text-secondary small align-self-center">Order #10475</span></div>
+      <div class="od-sec"><h6>Amount</h6>
+        <div class="sum"><span>Order total</span><span>$76.00</span></div>
+        <div class="sum"><span>Processing fee</span><span>-$2.28</span></div>
+        <div class="sum t"><span>Net amount</span><span>$73.72</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-1"><span class="mini-av" style="background:#eef2fd;color:#4338ca">EK<img src="https://randomuser.me/api/portraits/men/22.jpg" alt="" onerror="this.remove()"></span><div><b>Ethan Kim</b><small class="d-block text-secondary">ethan.kim@mail.com</small></div></div>
+      </div>
+      <div class="od-sec border-0"><h6>Payment method</h6>
+        <div class="sum"><span>Method</span><span>Apple Pay</span></div>
+        <div class="sum"><span>Transaction ID</span><span>TXN-88206</span></div>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Receipt</button></div>
+  </div>
+</div>
+
+
+<!-- Shared toast notification, triggered from app.js via window.showToast() -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+  <div class="toast" id="toastHost" role="status"><div class="toast-body d-flex align-items-center gap-2"><i data-lucide="check-circle" id="toastIcon"></i><span id="toastMsg"></span></div></div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS — jQuery, Bootstrap, (Chart.js on chart pages),
+     Lucide icons, then our own app.js last.
+     ============================================================ -->
+<script src="assets/js/jquery-3.7.1.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

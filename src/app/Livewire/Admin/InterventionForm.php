@@ -17,6 +17,7 @@ use Livewire\Component;
 class InterventionForm extends Component
 {
     use DispatchesToasts;
+
     public bool $show = false;
 
     public bool $readOnly = false;

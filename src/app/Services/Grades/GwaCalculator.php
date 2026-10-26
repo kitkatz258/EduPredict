@@ -17,6 +17,7 @@ final class GwaCalculator
         $units = 0.0;
         $failed = 0;
         $incomplete = 0;
+        $dropped = 0;
 
         foreach ($rows as $row) {
             $data = $this->normalize($row);
@@ -28,10 +29,12 @@ final class GwaCalculator
 
                 continue;
             }
-            if ($this->scale->excludesFromGpa($data['subject_code'])) {
+            if ($this->scale->isDropped($data['final_grade']) || $this->scale->isDropped($data['remarks'])) {
+                $dropped++;
+
                 continue;
             }
-            if ($this->scale->isDropped($data['final_grade']) || $this->scale->isDropped($data['remarks'])) {
+            if ($this->scale->excludesFromGpa($data['subject_code'])) {
                 continue;
             }
 
@@ -48,7 +51,7 @@ final class GwaCalculator
         $gpa = $units > 0 ? $points / $units : null;
         $rounded = $gpa === null ? null : round($gpa, 2);
 
-        return new GwaResult($gpa, $points, $units, $failed, $rounded, $incomplete);
+        return new GwaResult($gpa, $points, $units, $failed, $rounded, $incomplete, $dropped);
     }
 
     /**

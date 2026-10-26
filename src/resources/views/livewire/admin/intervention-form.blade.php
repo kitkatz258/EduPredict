@@ -1,7 +1,7 @@
 <div>
     @if ($show)
         <x-dialog :title="$readOnly ? 'View intervention' : ($interventionId ? 'Edit intervention' : 'Add intervention')" close="closeForm" description="This list is the only source of recommended actions. Saving here does not rewrite actions already stored on a prediction.">
-            <form wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
+            <form id="intervention-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="save" label="Saving intervention…" />
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
@@ -36,16 +36,10 @@
                         @error('targets') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
                 </div>
-                <div class="flex flex-wrap justify-end gap-2">
-                    <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900">{{ $readOnly ? 'Close' : 'Cancel' }}</button>
-                    @unless ($readOnly)
-                        <button type="submit" wire:loading.attr="disabled" wire:target="save" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">
-                            <x-spinner wire:loading wire:target="save" />
-                            Save intervention
-                        </button>
-                    @endunless
-                </div>
             </form>
+            <x-slot:footer>
+                <x-dialog-actions form="intervention-form" submit="Save intervention" :read-only="$readOnly" />
+            </x-slot:footer>
         </x-dialog>
     @endif
 </div>

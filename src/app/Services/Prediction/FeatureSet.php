@@ -39,6 +39,8 @@ final readonly class FeatureSet
         public int $otherFailedSubjects = 0,
         public float $majorUnits = 0.0,
         public float $otherUnits = 0.0,
+        public int $incompleteSubjects = 0,
+        public int $droppedSubjects = 0,
     ) {}
 
     /**
@@ -88,6 +90,8 @@ final readonly class FeatureSet
             'other_failed_subjects' => $this->otherFailedSubjects,
             'major_units' => $this->majorUnits,
             'other_units' => $this->otherUnits,
+            'incomplete_subjects' => $this->incompleteSubjects,
+            'dropped_subjects' => $this->droppedSubjects,
         ];
     }
 }

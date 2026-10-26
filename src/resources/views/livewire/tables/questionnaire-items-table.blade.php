@@ -4,11 +4,11 @@
             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div>
                     <label for="item-search-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Search</label>
-                    <input id="item-search-{{ $this->getId() }}" type="search" wire:model.live.debounce.400ms="search" placeholder="Search items…" class="w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm">
+                    <input id="item-search-{{ $this->getId() }}" type="search" wire:model.live.debounce.400ms="search" placeholder="Search items…" class="ui-field">
                 </div>
                 <div>
                     <label for="item-section-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Section</label>
-                    <select id="item-section-{{ $this->getId() }}" wire:model.live="sectionFilter" class="w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm">
+                        <select id="item-section-{{ $this->getId() }}" wire:model.live="sectionFilter" class="ui-field">
                         <option value="">All sections</option>
                         @foreach ($sections as $value => $definition)
                             <option value="{{ $value }}">{{ $definition['label'] ?? $value }}</option>
@@ -17,7 +17,7 @@
                 </div>
                 <div>
                     <label for="item-version-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Version</label>
-                    <select id="item-version-{{ $this->getId() }}" wire:model.live="versionFilter" class="w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm">
+                        <select id="item-version-{{ $this->getId() }}" wire:model.live="versionFilter" class="ui-field">
                         <option value="">All versions</option>
                         @foreach ($versions as $value => $definition)
                             <option value="{{ $value }}">{{ $definition['label'] ?? $value }}</option>
@@ -27,7 +27,7 @@
                 <div class="flex gap-3">
                     <div>
                         <label for="item-active-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Active</label>
-                        <select id="item-active-{{ $this->getId() }}" wire:model.live="activeFilter" class="rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm">
+                        <select id="item-active-{{ $this->getId() }}" wire:model.live="activeFilter" class="ui-field">
                             <option value="">All</option>
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
@@ -35,7 +35,7 @@
                     </div>
                     <div>
                         <label for="item-draft-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Draft</label>
-                        <select id="item-draft-{{ $this->getId() }}" wire:model.live="draftFilter" class="rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm">
+                        <select id="item-draft-{{ $this->getId() }}" wire:model.live="draftFilter" class="ui-field">
                             <option value="">All</option>
                             <option value="draft">Draft</option>
                             <option value="published">Published</option>
@@ -43,13 +43,13 @@
                     </div>
                 </div>
             </div>
-            <button type="button" wire:click="$dispatch('add-questionnaire-item')" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">
+            <button type="button" wire:click="$dispatch('add-questionnaire-item')" class="ui-btn ui-btn-primary shrink-0">
                 <i class="ri-add-line" aria-hidden="true"></i>Add item
             </button>
         </div>
         <div class="flex items-center gap-2">
             <label for="per-page-{{ $this->getId() }}" class="text-sm text-gray-600">Per page</label>
-            <select id="per-page-{{ $this->getId() }}" wire:model.live="perPage" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
+                        <select id="per-page-{{ $this->getId() }}" wire:model.live="perPage" class="ui-field w-auto">
                 @foreach ($perPageOptions as $option)
                     <option value="{{ $option }}">{{ $option }}</option>
                 @endforeach
@@ -90,7 +90,7 @@
                                 <div class="flex flex-wrap gap-2">
                                     <x-table-action icon="ri-pencil-line" wire:click="editItem({{ $row->id }})">Edit</x-table-action>
                                     <x-table-action
-                                        :icon="$row->is_active ? 'ri-forbid-2-line' : 'ri-checkbox-circle-line'"
+                                        :icon="$row->is_active ? 'ri-close-circle-line' : 'ri-checkbox-circle-line'"
                                         :tone="$row->is_active ? 'danger' : 'neutral'"
                                         wire:click="toggleActive({{ $row->id }})"
                                         wire:loading.attr="disabled"

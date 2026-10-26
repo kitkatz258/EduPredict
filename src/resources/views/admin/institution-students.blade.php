@@ -7,7 +7,7 @@
     </x-slot>
     <div class="space-y-6">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-sm text-gray-600">A student can register only when their number is on this list and has not been claimed.</p>
+            <p class="text-sm text-gray-600">Students sign in only after an administrator issues a login from this list. A row that has not been claimed still has no account. CSV import adds eligibility rows and does not create accounts.</p>
             <div class="flex flex-wrap gap-2">
                 <livewire:admin.institution-student-form />
                 <livewire:admin.institution-student-import />

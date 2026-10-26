@@ -8,10 +8,12 @@ use App\Models\Student;
 use App\Services\Grades\GradeReportParser;
 use App\Services\Grades\GradeReportWriter;
 use App\Services\Grades\GradeRowNormalizer;
+use App\Services\Grades\GradeScale;
 use App\Services\Grades\GwaCalculator;
 use App\Services\Grades\ParsedGradeReport;
 use App\Services\Grades\ParsedGradeRow;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
@@ -230,12 +232,14 @@ class GradeReportForm extends Component
             $this->authorize('replace', GradeReport::query()->findOrFail($this->replacesId));
         }
 
-        $report = $this->existingDraft() ?? $writer->saveDraft($student, $this->reportAttributes(), $this->rows, $this->warnings);
-        $this->authorize('confirm', $report);
+        $replacesId = $this->replacesId;
+        DB::transaction(function () use ($writer, $student, $replacesId): void {
+            $report = $this->existingDraft() ?? $writer->saveDraft($student, $this->reportAttributes(), $this->rows, $this->warnings);
+            $this->authorize('confirm', $report);
+            $writer->confirm($report, $this->reportAttributes(), $this->rows, $this->warnings, $replacesId);
+        });
 
-        $writer->confirm($report, $this->reportAttributes(), $this->rows, $this->warnings, $this->replacesId);
-
-        $this->toast($this->replacesId !== null
+        $this->toast($replacesId !== null
             ? 'Grades updated. Earlier predictions keep the version they used.'
             : 'Grades saved. They will be used in your next prediction.');
         $this->startOver();
@@ -243,16 +247,25 @@ class GradeReportForm extends Component
     }
 
     /**
-     * @return array{rounded: ?float, failed: int, incomplete: int, provisional: bool, mismatch: bool}
+     * @return array{rounded: ?float, failed: int, incomplete: int, dropped: int, provisional: bool, mismatch: bool}
      */
     public function computedGwa(): array
     {
         $result = app(GwaCalculator::class)->compute($this->rows);
 
+        $scale = app(GradeScale::class);
+        $dropped = 0;
+        foreach ($this->rows as $row) {
+            if ($scale->isDropped((string) ($row['final_grade'] ?? '')) || $scale->isDropped((string) ($row['remarks'] ?? ''))) {
+                $dropped++;
+            }
+        }
+
         return [
             'rounded' => $result->roundedGpa,
             'failed' => $result->failedCount,
             'incomplete' => $result->incompleteCount,
+            'dropped' => $dropped,
             'provisional' => $result->isProvisional(),
             'mismatch' => $this->detected_gpa !== null
                 && $this->detected_gpa !== ''
@@ -383,19 +396,30 @@ class GradeReportForm extends Component
     private function renormalizeRows(): void
     {
         $normalizer = app(GradeRowNormalizer::class);
+        $scale = app(GradeScale::class);
         $codes = array_map(fn (array $row): string => $normalizer->normalizeCode((string) ($row['subject_code'] ?? '')), $this->rows);
-        $this->rows = array_map(fn (array $row): array => $normalizer->normalize($row, $codes)->toArray(), $this->rows);
+        $this->rows = array_map(function (array $row) use ($normalizer, $codes, $scale): array {
+            $normalized = $normalizer->normalize($row, $codes)->toArray();
+            $normalized['remarks'] = $scale->displayRemark($normalized['remarks']);
+
+            return $normalized;
+        }, $this->rows);
     }
 
     private function validateTerm(): void
     {
-        $this->validate([
-            'school_year' => ['required', 'string', 'max:16'],
-            'semester' => ['required', 'string', 'max:32'],
-        ], [
-            'school_year.required' => 'Choose the academic year.',
-            'semester.required' => 'Choose the semester.',
-        ]);
+        try {
+            $this->validate([
+                'school_year' => ['required', 'string', 'max:16'],
+                'semester' => ['required', 'string', 'max:32'],
+            ], [
+                'school_year.required' => 'Choose the academic year.',
+                'semester.required' => 'Choose the semester.',
+            ]);
+        } catch (ValidationException $exception) {
+            $this->toast('Choose the academic year and semester before saving. Your subject rows are still here.', 'error');
+            throw $exception;
+        }
     }
 
     /**

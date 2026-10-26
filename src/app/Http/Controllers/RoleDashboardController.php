@@ -65,6 +65,23 @@ class RoleDashboardController extends Controller
         ]);
     }
 
+    public function departmentReports(Request $request): View
+    {
+        $user = $request->user()->loadMissing(['department', 'program']);
+
+        return view('department.reports', [
+            'department' => $user->department,
+            'program' => $user->program,
+        ]);
+    }
+
+    public function deanReports(Request $request): View
+    {
+        return view('dean.reports', [
+            'college' => $request->user()->college,
+        ]);
+    }
+
     public function admin(): View
     {
         return view('dashboards.admin');

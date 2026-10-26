@@ -85,7 +85,7 @@
                 @if ($upload && ! $errors->has('upload'))
                     <div class="mx-auto mt-5 flex max-w-md flex-col items-center gap-3 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 sm:flex-row sm:justify-between">
                         <p class="truncate text-sm text-brand-900"><i class="ri-file-line mr-1" aria-hidden="true"></i>{{ $upload->getClientOriginalName() }}</p>
-                        <button type="button" wire:click="parseUpload" wire:loading.attr="disabled" wire:target="parseUpload,upload" class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">
+                        <button type="button" wire:click="parseUpload" wire:loading.attr="disabled" wire:target="parseUpload,upload" class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
                             <x-spinner wire:loading wire:target="parseUpload" />Read grades
                         </button>
                     </div>
@@ -107,7 +107,7 @@
                 @error('pastedText') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                 <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
                     <p class="text-xs text-gray-500">Works offline. Instructor names and sections are left out of your record.</p>
-                    <button type="button" wire:click="parsePaste" wire:loading.attr="disabled" wire:target="parsePaste" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">
+                    <button type="button" wire:click="parsePaste" wire:loading.attr="disabled" wire:target="parsePaste" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
                         <x-spinner wire:loading wire:target="parsePaste" />Read pasted table
                     </button>
                 </div>
@@ -118,43 +118,57 @@
                 <div class="flex flex-col gap-4 border-b border-brand-200 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
                     <div>
                         <h3 class="text-base font-semibold text-brand-900">Manual grade entry</h3>
-                        <p class="mt-1 text-sm text-gray-600">Enter your grades from your grade sheet or portal. Use INC for an incomplete subject.</p>
+                        <p class="mt-1 max-w-prose text-sm text-gray-600">Enter the final grade as a number, INC, Dropped, or Unofficially Dropped. 5.00 is marked Failed. INC is Incomplete. Dropped and Unofficially Dropped stay out of the GWA and are not failures.</p>
                     </div>
                     <div class="flex gap-2">
                         <div>
                             <label for="manual-school-year" class="sr-only">Academic year</label>
-                            <select id="manual-school-year" wire:model.live="school_year" class="{{ $inputClass }}">
+                            <select id="manual-school-year" data-term-field="school_year" wire:model="school_year" @error('school_year') aria-invalid="true" @enderror class="{{ $inputClass }} @error('school_year') border-red-600 ring-1 ring-red-600 @enderror">
                                 <option value="">Academic year</option>
                                 @foreach ($schoolYears as $year)<option value="{{ $year }}">AY {{ $year }}</option>@endforeach
                             </select>
-                            @error('school_year') <p class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
+                            @error('school_year') <p class="mt-1 text-xs text-red-700" role="alert">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label for="manual-semester" class="sr-only">Semester</label>
-                            <select id="manual-semester" wire:model.live="semester" class="{{ $inputClass }}">
+                            <select id="manual-semester" data-term-field="semester" wire:model="semester" @error('semester') aria-invalid="true" @enderror class="{{ $inputClass }} @error('semester') border-red-600 ring-1 ring-red-600 @enderror">
                                 <option value="">Semester</option>
                                 @foreach ($semesters as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
                             </select>
-                            @error('semester') <p class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
+                            @error('semester') <p class="mt-1 text-xs text-red-700" role="alert">{{ $message }}</p> @enderror
                         </div>
                     </div>
                 </div>
 
                 <div class="p-5 sm:p-6">
                     @error('rows') <p class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">{{ $message }}</p> @enderror
-                    <div class="hidden grid-cols-[8rem_1fr_5rem_7rem_2rem] gap-3 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 md:grid">
-                        <span>Subject code</span><span>Subject name</span><span>Units</span><span>Final grade</span><span class="sr-only">Remove</span>
+                    @if ($errors->has('school_year') || $errors->has('semester'))
+                        <p class="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">Choose the academic year and semester before saving. The subject rows on this screen were kept.</p>
+                    @endif
+                    <p data-term-error hidden class="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert"></p>
+                    <div class="hidden grid-cols-[7rem_1fr_4rem_6rem_8rem_2rem] gap-3 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 md:grid">
+                        <span>Subject code</span><span>Subject name</span><span>Units</span><span>Final grade</span><span>Remarks</span><span class="sr-only">Remove</span>
                     </div>
                     <ul class="space-y-3">
                         @foreach ($rows as $index => $row)
-                            <li wire:key="manual-row-{{ $index }}" class="grid grid-cols-2 gap-2 rounded-xl border border-brand-200 p-3 md:grid-cols-[8rem_1fr_5rem_7rem_2rem] md:items-start md:gap-3 md:border-0 md:p-0">
+                            <li wire:key="manual-row-{{ $index }}" class="grid grid-cols-2 gap-2 rounded-xl border border-brand-200 p-3 md:grid-cols-[7rem_1fr_4rem_6rem_8rem_2rem] md:items-start md:gap-3 md:border-0 md:p-0">
                                 <input aria-label="Subject code, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.subject_code" placeholder="CCS 106" class="{{ $cellInput }}">
                                 <input aria-label="Subject name, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.subject_name" placeholder="Subject name" class="{{ $cellInput }} col-span-2 md:col-span-1 order-first md:order-none">
                                 <input aria-label="Units, row {{ $index + 1 }}" type="text" inputmode="decimal" wire:model.blur="rows.{{ $index }}.units" placeholder="3" class="{{ $cellInput }}">
-                                <input aria-label="Final grade, row {{ $index + 1 }}" type="text" wire:model.blur="rows.{{ $index }}.final_grade" placeholder="1.00–5.00 or INC" class="{{ $cellInput }} {{ $gradeTone($row) }} font-semibold">
-                                <button type="button" wire:click="removeRow({{ $index }})" class="justify-self-end rounded-md p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-800" aria-label="Remove row {{ $index + 1 }}"><i class="ri-close-line" aria-hidden="true"></i></button>
+                                <input aria-label="Final grade, row {{ $index + 1 }}" type="text" wire:model.live.debounce.300ms="rows.{{ $index }}.final_grade" placeholder="1.00, 5.00, INC, Dropped" class="{{ $cellInput }} {{ $gradeTone($row) }} font-semibold" x-on:input="window.edupredictApplyGradeRemark && window.edupredictApplyGradeRemark($event)">
+                                <input data-remarks aria-label="Remarks, row {{ $index + 1 }}" type="text" wire:model.live.debounce.300ms="rows.{{ $index }}.remarks" placeholder="Auto" class="{{ $cellInput }}">
+                                <button type="button" wire:click="removeRow({{ $index }})" class="justify-self-end cursor-pointer rounded-md p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-800" aria-label="Remove row {{ $index + 1 }}"><i class="ri-close-line" aria-hidden="true"></i></button>
+                                @php
+                                    $rowScale = app(\App\Services\Grades\GradeScale::class);
+                                    $rowGrade = (string) ($row['final_grade'] ?? '');
+                                    $rowRemark = (string) ($row['remarks'] ?? '');
+                                @endphp
                                 @if (! empty($row['is_incomplete']))
                                     <p class="col-span-full text-xs text-amber-800">Incomplete: left out of the GWA and not counted as failed. Update this term when the final grade is out.</p>
+                                @elseif ($rowScale->isUnofficialDrop($rowGrade) || $rowScale->isUnofficialDrop($rowRemark))
+                                    <p class="col-span-full text-xs text-gray-700">Unofficially Dropped: left out of the GWA. It is not scored as 5.00 and it is not a failure.</p>
+                                @elseif ($rowScale->isDropped($rowGrade) || $rowScale->isDropped($rowRemark))
+                                    <p class="col-span-full text-xs text-gray-700">Dropped: left out of the GWA. It is not scored as 5.00.</p>
                                 @endif
                             </li>
                         @endforeach
@@ -163,11 +177,11 @@
                     @include('livewire.student.partials.grade-gwa-summary')
                 </div>
 
-                <div class="flex flex-col gap-3 border-t border-brand-200 bg-gray-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div class="sticky bottom-0 z-10 flex flex-col gap-3 border-t border-brand-200 bg-white/95 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6">
                     <p class="text-xs text-gray-600">Saved grades become your academic record and are used in your next prediction.</p>
                     <div class="flex items-center gap-3">
                         <button type="button" wire:click="saveDraft" wire:loading.attr="disabled" wire:target="saveDraft,confirm" class="text-sm font-medium text-brand-900 hover:underline disabled:opacity-60">Save draft</button>
-                        <button type="button" wire:click="confirm" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Save these grades?" data-confirm-button="Save grades" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">
+                        <button type="button" wire:click="confirm" data-require-term="1" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Save these grades?" data-confirm-button="Save grades" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
                             <x-spinner wire:loading wire:target="confirm" />Save grades<i class="ri-arrow-right-s-line" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -186,17 +200,19 @@
 
             <section class="relative overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-sm">
                 <x-loading-overlay target="confirm,saveDraft" label="Saving grades…" />
-                <div class="flex flex-col gap-3 border-b border-brand-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div class="flex flex-col gap-3 border-b border-brand-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6" x-data="{ year: @js($school_year), semester: @js($semester) }" x-on:change="if ($event.target.dataset.termField === 'school_year') year = $event.target.value; if ($event.target.dataset.termField === 'semester') semester = $event.target.value">
                     <div class="flex flex-wrap items-center gap-2">
-                        <h3 class="text-base font-semibold text-brand-900">{{ $termLabel }}</h3>
+                        <h3 class="text-base font-semibold text-brand-900">
+                            <span x-text="(year ? ('AY ' + year.replace('-', '–')) : 'Academic year not set') + ' · ' + (semester === 'First' ? '1st Semester' : (semester === 'Second' ? '2nd Semester' : (semester === 'Midyear' ? 'Midyear' : 'Semester not set')))">{{ $termLabel }}</span>
+                        </h3>
                         <div class="flex gap-2">
                             <label for="review-school-year" class="sr-only">Academic year</label>
-                            <select id="review-school-year" wire:model.live="school_year" class="rounded-md border border-brand-200 px-2 py-1 text-xs">
+                            <select id="review-school-year" data-term-field="school_year" wire:model="school_year" @error('school_year') aria-invalid="true" @enderror class="rounded-md border px-2 py-1 text-xs {{ $errors->has('school_year') ? 'border-red-600 ring-1 ring-red-600' : 'border-brand-200' }}">
                                 <option value="">Academic year</option>
                                 @foreach ($schoolYears as $year)<option value="{{ $year }}">AY {{ $year }}</option>@endforeach
                             </select>
                             <label for="review-semester" class="sr-only">Semester</label>
-                            <select id="review-semester" wire:model.live="semester" class="rounded-md border border-brand-200 px-2 py-1 text-xs">
+                            <select id="review-semester" data-term-field="semester" wire:model="semester" @error('semester') aria-invalid="true" @enderror class="rounded-md border px-2 py-1 text-xs {{ $errors->has('semester') ? 'border-red-600 ring-1 ring-red-600' : 'border-brand-200' }}">
                                 <option value="">Semester</option>
                                 @foreach ($semesters as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
                             </select>
@@ -206,8 +222,12 @@
                         <p class="inline-flex items-center gap-1 text-xs font-medium text-amber-800"><i class="ri-error-warning-line" aria-hidden="true"></i>{{ $reviewCount }} {{ \Illuminate\Support\Str::plural('row', $reviewCount) }} need review. Check the highlighted rows.</p>
                     @endif
                 </div>
-                @error('school_year') <p class="px-5 pt-3 text-sm text-red-700 sm:px-6">{{ $message }}</p> @enderror
-                @error('semester') <p class="px-5 pt-3 text-sm text-red-700 sm:px-6">{{ $message }}</p> @enderror
+                @error('school_year') <p class="px-5 pt-3 text-sm text-red-700 sm:px-6" role="alert">{{ $message }}</p> @enderror
+                @error('semester') <p class="px-5 pt-3 text-sm text-red-700 sm:px-6" role="alert">{{ $message }}</p> @enderror
+                @if ($errors->has('school_year') || $errors->has('semester'))
+                    <p class="mx-5 mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 sm:mx-6" role="alert">Choose the academic year and semester before saving. The subject rows on this screen were kept.</p>
+                @endif
+                <p data-term-error hidden class="mx-5 mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 sm:mx-6" role="alert"></p>
                 @error('rows') <p class="mx-5 mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800 sm:mx-6" role="alert">{{ $message }}</p> @enderror
 
                 @if ($warnings !== [])
@@ -251,7 +271,18 @@
                                         </td>
                                         <td class="px-3 py-3 text-gray-700">{{ $row['units'] !== '' ? $row['units'] : '—' }}</td>
                                         <td class="px-3 py-3 font-mono font-semibold {{ $gradeTone($row) }}">{{ $row['final_grade'] !== '' ? $row['final_grade'] : '—' }}</td>
-                                        <td class="px-3 py-3 text-gray-700">{{ $row['remarks'] !== '' ? ucfirst(strtolower($row['remarks'])) : '—' }}</td>
+                                        <td class="px-3 py-3 text-gray-700">
+                                            @php
+                                                $remarkScale = app(\App\Services\Grades\GradeScale::class);
+                                                $remarkStatus = $remarkScale->statusRemark($row['remarks'] ?? '');
+                                                $remarkLabel = $remarkScale->displayRemark($row['remarks'] ?? '');
+                                            @endphp
+                                            @if ($remarkLabel !== '')
+                                                <span class="inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold {{ $remarkStatus === 'FAILED' ? 'border-red-200 bg-red-50 text-red-900' : ($remarkStatus === 'INCOMPLETE' ? 'border-amber-200 bg-amber-50 text-amber-950' : 'border-brand-200 bg-white text-brand-900') }}">{{ $remarkLabel }}</span>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
                                         <td class="px-5 py-3 text-right sm:px-6">
                                             <button type="button" wire:click="editRow({{ $index }})" class="rounded-md p-1.5 text-gray-500 hover:bg-brand-50 hover:text-brand-900" aria-label="Edit row {{ $index + 1 }} ({{ $row['subject_code'] !== '' ? $row['subject_code'] : 'blank' }})"><i class="ri-pencil-line" aria-hidden="true"></i></button>
                                         </td>
@@ -267,14 +298,14 @@
                     @include('livewire.student.partials.grade-gwa-summary')
                 </div>
 
-                <div class="flex flex-col gap-3 border-t border-brand-200 bg-gray-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div class="sticky bottom-0 z-10 flex flex-col gap-3 border-t border-brand-200 bg-white/95 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6">
                     <div class="flex items-center gap-4 text-sm">
                         <button type="button" wire:click="startOver" class="inline-flex items-center gap-1 font-medium text-gray-700 hover:text-brand-900"><i class="ri-arrow-left-line" aria-hidden="true"></i>{{ $mode === 'upload' ? 'Re-upload' : 'Paste again' }}</button>
                         <span class="text-gray-500">{{ count($editedRows) }} {{ \Illuminate\Support\Str::plural('row', count($editedRows)) }} edited</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <button type="button" wire:click="saveDraft" wire:loading.attr="disabled" wire:target="saveDraft,confirm" class="text-sm font-medium text-brand-900 hover:underline disabled:opacity-60">Save draft</button>
-                        <button type="button" wire:click="confirm" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Confirm these grades?" data-confirm-button="Confirm & save" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2E7D32] disabled:opacity-60">
+                        <button type="button" wire:click="confirm" data-require-term="1" data-confirm="They will count toward your GWA and your next prediction." data-confirm-title="Confirm these grades?" data-confirm-button="Confirm & save" data-confirm-tone="neutral" wire:loading.attr="disabled" wire:target="confirm,saveDraft" class="inline-flex items-center gap-2 rounded-lg bg-brand-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60">
                             <x-spinner wire:loading wire:target="confirm" /><i class="ri-checkbox-circle-line" wire:loading.remove wire:target="confirm" aria-hidden="true"></i>Confirm &amp; Save Grades
                         </button>
                     </div>

@@ -15,7 +15,7 @@
                         wire:click="showHighRisk"
                         wire:loading.attr="disabled"
                         wire:target="showHighRisk"
-                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-red-700 bg-white px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-50 disabled:opacity-60"
+                        class="ui-btn ui-btn-secondary border-red-700 text-red-800 hover:bg-red-50"
                     >
                         <x-spinner wire:loading wire:target="showHighRisk" />
                         Review high-risk students
@@ -45,15 +45,15 @@
         </div>
     @endif
 
-    <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between print:hidden">
         <div class="w-full lg:max-w-sm">
-            <label for="students-search-{{ $this->getId() }}" class="sr-only">Search students</label>
-            <input id="students-search-{{ $this->getId() }}" type="search" wire:model.live.debounce.400ms="search" placeholder="Search name, number, or program…" class="w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm text-gray-800 focus:border-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-200">
+            <label for="students-search-{{ $this->getId() }}" class="mb-1 block text-sm font-medium text-gray-700">Search</label>
+            <input id="students-search-{{ $this->getId() }}" type="search" wire:model.live.debounce.400ms="search" placeholder="Search name, number, or program…" class="ui-field">
         </div>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-wrap items-end gap-3">
             <div>
-                <label for="students-year-{{ $this->getId() }}" class="mr-2 text-sm text-gray-600">Year</label>
-                <select id="students-year-{{ $this->getId() }}" wire:model.live="filters.year_level" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
+                <label for="students-year-{{ $this->getId() }}" class="mb-1 block text-sm font-medium text-gray-700">Year</label>
+                <select id="students-year-{{ $this->getId() }}" wire:model.live="filters.year_level" class="ui-field w-auto">
                     <option value="">All years</option>
                     @foreach ($yearOptions as $year => $label)
                         <option value="{{ $year }}">{{ $label }}</option>
@@ -62,8 +62,8 @@
             </div>
             @if ($programs->isNotEmpty())
                 <div>
-                    <label for="students-program-{{ $this->getId() }}" class="mr-2 text-sm text-gray-600">Program</label>
-                    <select id="students-program-{{ $this->getId() }}" wire:model.live="filters.program_id" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
+                    <label for="students-program-{{ $this->getId() }}" class="mb-1 block text-sm font-medium text-gray-700">Program</label>
+                    <select id="students-program-{{ $this->getId() }}" wire:model.live="filters.program_id" class="ui-field w-auto">
                         <option value="">All programs</option>
                         @foreach ($programs as $program)
                             <option value="{{ $program->id }}">{{ $program->code }}</option>
@@ -72,8 +72,8 @@
                 </div>
             @endif
             <div>
-                <label for="students-risk-{{ $this->getId() }}" class="mr-2 text-sm text-gray-600">Risk</label>
-                <select id="students-risk-{{ $this->getId() }}" wire:model.live="filters.dropout_risk" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
+                <label for="students-risk-{{ $this->getId() }}" class="mb-1 block text-sm font-medium text-gray-700">Risk</label>
+                <select id="students-risk-{{ $this->getId() }}" wire:model.live="filters.dropout_risk" class="ui-field w-auto">
                     <option value="">All risks</option>
                     <option value="low">Low</option>
                     <option value="moderate">Moderate</option>
@@ -81,18 +81,18 @@
                 </select>
             </div>
             <div>
-                <label for="students-per-page-{{ $this->getId() }}" class="mr-2 text-sm text-gray-600">Per page</label>
-                <select id="students-per-page-{{ $this->getId() }}" wire:model.live="perPage" class="rounded-lg border border-brand-200 bg-white px-2 py-2 text-sm">
+                <label for="students-per-page-{{ $this->getId() }}" class="mb-1 block text-sm font-medium text-gray-700">Per page</label>
+                <select id="students-per-page-{{ $this->getId() }}" wire:model.live="perPage" class="ui-field w-auto">
                     @foreach ($perPageOptions as $option)
                         <option value="{{ $option }}">{{ $option }}</option>
                     @endforeach
                 </select>
             </div>
-            <button type="button" wire:click="export" wire:loading.attr="disabled" wire:target="export" class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50 disabled:opacity-60">
+            <button type="button" wire:click="export" wire:loading.attr="disabled" wire:target="export" class="ui-btn ui-btn-secondary">
                 <x-spinner wire:loading wire:target="export" />
                 Export CSV
             </button>
-            <p wire:loading wire:target="search,filters,sortBy,showHighRisk" class="text-sm text-gray-500" role="status">Updating list…</p>
+            <p wire:loading wire:target="search,filters,sortBy,showHighRisk" class="pb-2 text-sm text-gray-500" role="status">Updating list…</p>
         </div>
     </div>
 
@@ -147,22 +147,21 @@
                                     —
                                 @endif
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 print:hidden">
                                 @if ($statusModal)
-                                    <button
-                                        type="button"
+                                    <x-table-action
+                                        icon="ri-eye-line"
                                         wire:click="openView({{ $row->id }})"
                                         wire:loading.attr="disabled"
                                         wire:target="openView({{ $row->id }})"
-                                        class="inline-flex items-center gap-1 rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-900 hover:bg-brand-50 disabled:opacity-60"
-                                        aria-label="View status for {{ $row->user?->name ?? $row->student_number }}"
                                     >
-                                        <i class="ri-eye-line" aria-hidden="true" wire:loading.remove wire:target="openView({{ $row->id }})"></i>
-                                        <x-spinner wire:loading wire:target="openView({{ $row->id }})" />
-                                        View
-                                    </button>
+                                        View status for {{ $row->user?->name ?? $row->student_number }}
+                                    </x-table-action>
                                 @else
-                                    <a href="{{ route('students.show', $row) }}" class="font-medium text-brand-900 underline">View</a>
+                                    <a href="{{ route('students.show', $row) }}" class="ui-icon-btn" aria-label="View {{ $row->user?->name ?? $row->student_number }}" title="View {{ $row->user?->name ?? $row->student_number }}">
+                                        <i class="ri-eye-line text-base leading-none" aria-hidden="true"></i>
+                                        <span class="sr-only">View</span>
+                                    </a>
                                 @endif
                             </td>
                         </tr>

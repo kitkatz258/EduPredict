@@ -20,7 +20,7 @@
         <section class="rounded-2xl border border-brand-200 bg-white p-5 shadow-sm" aria-labelledby="estimates-heading">
             <h3 id="estimates-heading" class="text-base font-semibold text-brand-900">How estimates work and their limits</h3>
             <ul class="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-gray-700">
-                <li>These results are estimates, not guarantees. They do not decide admission, academic standing, employment, or discipline. The current predictor is the deterministic placeholder <span class="font-medium">placeholder-heuristic-v0</span>. It is not a final trained machine-learning model.</li>
+                <li>These results are estimates, not guarantees. They do not decide admission, academic standing, employment, or discipline. The current predictor is the deterministic placeholder <span class="font-medium">placeholder-heuristic-v1</span>. Earlier attempts keep the version stored with them. It is not a final trained machine-learning model.</li>
                 <li>Program-shift is a rule-based qualitative indicator. It is not a trained model and it has no percentage. A program-fit label means a conversation with your department may be useful. It does not say a student should leave a program.</li>
                 <li>Career matches are broad PSOC categories, not job offers. Compatibility scores and ranking are calculated by the system from program relevance, skill overlap, and academic strength. AI may only phrase an explanation of a score that was already computed.</li>
                 <li>Recommended actions come only from the predefined intervention list. A rule engine selects them. AI may only rephrase an intervention that was already selected.</li>
@@ -50,7 +50,7 @@
                     <h3 class="text-base font-semibold text-brand-900">Download my data</h3>
                     <p class="mt-1 text-sm text-gray-600">The file contains your account, grades, profile, questionnaire, and prediction history, including the model version stored on each request.</p>
                     <div class="mt-4 flex flex-wrap gap-3">
-                        <a href="{{ route('privacy.download.json') }}" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#2E7D32]">Download JSON</a>
+                        <a href="{{ route('privacy.download.json') }}" class="rounded-lg bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937]">Download JSON</a>
                         <a href="{{ route('privacy.download.pdf') }}" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900">Download PDF</a>
                     </div>
                 </section>

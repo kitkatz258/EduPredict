@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div class="max-w-2xl">
             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Career pathways</p>
-            <h2 id="career-matches-heading" class="mt-1 text-lg font-semibold text-brand-900">Career matches</h2>
+            <h2 id="career-matches-heading" class="mt-1 text-lg font-bold text-brand-900">Career matches</h2>
             <p class="mt-1 text-sm leading-6 text-gray-600">
                 Ranked by a fixed rule that compares your program, saved skills, and academic snapshot with occupations from the
                 <span class="font-medium text-brand-900">Philippine Standard Occupational Classification (PSOC)</span>.
@@ -140,9 +140,11 @@
 
                 <p class="text-xs text-gray-500">Broad occupational categories, not job offers. Verify details against the official PSA PSOC.</p>
             </div>
-            <div class="flex justify-end border-t border-brand-200 px-5 py-3 sm:px-6">
-                <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Close</button>
-            </div>
+            <x-slot:footer>
+                <div class="flex justify-end">
+                    <button type="button" x-on:click="requestClose()" class="rounded-lg border border-brand-200 px-4 py-2 text-sm font-medium text-brand-900 hover:bg-brand-50">Close</button>
+                </div>
+            </x-slot:footer>
         </x-dialog>
     @endif
 </section>

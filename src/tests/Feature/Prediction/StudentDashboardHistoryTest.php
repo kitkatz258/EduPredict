@@ -63,7 +63,7 @@ class StudentDashboardHistoryTest extends TestCase
             ->assertSee('Update Grades')
             ->assertSee('View Career Details')
             ->assertSee('Request new prediction')
-            ->assertSee('placeholder-heuristic-v0')
+            ->assertSee('placeholder-heuristic-v1')
             ->assertSee('not a trained or validated machine-learning model')
             ->assertSee('not a validated probability')
             ->assertDontSee('Estimated dropout probability')
@@ -122,7 +122,7 @@ class StudentDashboardHistoryTest extends TestCase
             ->assertDontSee('Changed Skill')
             ->assertSee('CCS 101')
             ->assertSee('#'.$prediction->id)
-            ->assertSee('placeholder-heuristic-v0')
+            ->assertSee('placeholder-heuristic-v1')
             ->assertDontSee('Not available for this attempt')
             ->call('closeView')
             ->assertDontSee('Saved attempt');

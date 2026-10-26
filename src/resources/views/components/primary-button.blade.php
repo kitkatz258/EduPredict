@@ -1,7 +1,7 @@
 @props(['target' => null, 'icon' => null])
 
 <button
-    {{ $attributes->merge(['type' => 'submit', 'class' => 'group inline-flex items-center justify-center gap-2 rounded-lg bg-brand-900 px-4 py-2 text-sm font-semibold text-white hover:bg-[#2E7D32] focus:outline-none focus:ring-2 focus:ring-brand-200 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60']) }}
+    {{ $attributes->merge(['type' => 'submit', 'class' => 'group inline-flex min-h-10 items-center justify-center gap-2 rounded-[11px] bg-[#111827] px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-[#1f2937] focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-600/15 disabled:cursor-not-allowed disabled:opacity-60']) }}
     @if ($target) wire:loading.attr="disabled" wire:target="{{ $target }}" @endif
 >
     @if ($target)

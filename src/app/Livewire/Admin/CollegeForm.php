@@ -15,6 +15,7 @@ use Livewire\Component;
 class CollegeForm extends Component
 {
     use DispatchesToasts;
+
     public bool $show = false;
 
     public ?int $collegeId = null;

@@ -20,7 +20,7 @@
                 cy="60"
                 r="{{ $radius }}"
                 fill="none"
-                stroke="#1B5E20"
+                stroke="#4f46e5"
                 stroke-width="10"
                 stroke-linecap="round"
                 stroke-dasharray="{{ $circumference }}"
@@ -29,7 +29,7 @@
             />
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <span class="{{ $compact ? 'text-2xl' : 'text-3xl' }} font-semibold text-brand-900">{{ $value === null ? '—' : number_format($value, 0) }}</span>
+            <span class="{{ $compact ? 'text-3xl' : 'text-4xl' }} font-bold text-brand-900">{{ $value === null ? '—' : number_format($value, 0) }}</span>
             <span class="text-xs text-gray-500">out of 100</span>
         </div>
     </div>

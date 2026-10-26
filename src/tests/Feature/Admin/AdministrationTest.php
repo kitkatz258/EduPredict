@@ -17,6 +17,7 @@ use App\Livewire\Tables\DeletionRequestsTable;
 use App\Models\AccountDeletionRequest;
 use App\Models\AuditLog;
 use App\Models\College;
+use App\Models\Intervention;
 use App\Models\Prediction;
 use App\Models\Program;
 use App\Models\SocioeconomicProfile;
@@ -38,7 +39,7 @@ class AdministrationTest extends TestCase
         $admin = User::factory()->administrator()->create();
         $student = Student::factory()->create();
 
-        foreach (['admin.colleges', 'admin.interventions', 'admin.audit', 'admin.deletion-requests'] as $route) {
+        foreach (['admin.colleges', 'admin.departments', 'admin.programs', 'admin.interventions', 'admin.audit', 'admin.prediction-grants', 'admin.deletion-requests'] as $route) {
             $this->actingAs($student->user)->get(route($route))->assertForbidden();
             $this->actingAs($admin)->get(route($route))->assertOk();
         }
@@ -57,7 +58,7 @@ class AdministrationTest extends TestCase
             ->set('code', 'cot')
             ->call('save')
             ->assertHasNoErrors()
-            ->assertSee('College added.');
+            ->assertSet('statusMessage', 'College added.');
 
         $this->assertDatabaseHas('colleges', ['code' => 'COT']);
 
@@ -73,10 +74,10 @@ class AdministrationTest extends TestCase
         Livewire::actingAs($admin)->test(PsocOccupationForm::class)
             ->set('psocCode', '9999')
             ->set('title', 'Test analyst')
-            ->set('majorGroup', 'Testing')
+            ->set('majorGroup', 'Elementary Occupations')
             ->set('description', 'A starter category.')
-            ->set('skillTags', 'analysis, writing')
-            ->set('programCodes', 'BST, BSIS')
+            ->set('selectedSkills', ['analysis', 'writing'])
+            ->set('selectedPrograms', ['BST', 'BSIS'])
             ->call('save')
             ->assertHasNoErrors();
 
@@ -91,7 +92,7 @@ class AdministrationTest extends TestCase
             ->call('save')
             ->assertHasNoErrors();
 
-        $this->assertSame(['study_habits', 'gwa'], \App\Models\Intervention::query()->where('code', 'library_hours')->firstOrFail()->targets_factor);
+        $this->assertSame(['study_habits', 'gwa'], Intervention::query()->where('code', 'library_hours')->firstOrFail()->targets_factor);
         $this->assertSame(4, AuditLog::query()->whereIn('action', [
             'college_saved',
             'program_saved',

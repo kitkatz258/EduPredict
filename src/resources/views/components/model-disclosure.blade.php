@@ -1,7 +1,7 @@
 @props(['version' => null])
 
 @php
-    $version = (string) ($version ?: config('edupredict.predictor.placeholder_version', 'placeholder-heuristic-v0'));
+    $version = (string) ($version ?: config('edupredict.predictor.placeholder_version', 'placeholder-heuristic-v1'));
     $isPlaceholder = str_starts_with($version, 'placeholder');
 @endphp
 

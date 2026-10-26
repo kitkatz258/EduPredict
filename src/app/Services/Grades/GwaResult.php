@@ -11,6 +11,7 @@ final readonly class GwaResult
         public int $failedCount,
         public ?float $roundedGpa,
         public int $incompleteCount = 0,
+        public int $droppedCount = 0,
     ) {}
 
     /**

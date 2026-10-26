@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orders – Khamba Admin</title>
+<!-- Google Fonts used by the live customizer's font picker -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Bootstrap 5 (layout, modals, offcanvas, dropdowns) -->
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<!-- Khamba's own stylesheet (design tokens + every component) -->
+<link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR NAVIGATION
+     Fixed left sidebar: logo, six nav groups, and a store/Logout
+     footer. This exact block is repeated at the top of every
+     dashboard page — edit the logo here, then use your editor's
+     "Replace in all files" to repeat the change everywhere.
+     ============================================================ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <a class="brand-link" href="index.html"><span class="logo"><i data-lucide="shopping-bag"></i></span><span class="brand">Khamba</span></a>
+    <button class="sb-toggle d-none d-lg-grid" id="sbToggle" title="Collapse sidebar"><i data-lucide="panel-left-close"></i></button>
+  </div>
+  <nav class="sb-scroll">
+    <div class="sb-group">General</div>
+    <a class="sb-link sb-parent collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#dashGroup" aria-expanded="false" title="Dashboards">
+      <i data-lucide="layout-dashboard"></i><span>Dashboards</span><i data-lucide="chevron-down" class="sb-chevron"></i>
+    </a>
+    <div class="collapse" id="dashGroup">
+      <a class="sb-link sb-sub" href="index.html" title="Dashboard 1"><span>Dashboard 1</span></a>
+      <a class="sb-link sb-sub" href="dashboard-2.html" title="Dashboard 2"><span>Dashboard 2</span></a>
+      <a class="sb-link sb-sub" href="dashboard-3.html" title="Dashboard 3"><span>Dashboard 3</span></a>
+    </div>
+    <a class="sb-link active" href="orders.html" title="Orders"><i data-lucide="shopping-bag"></i><span>Orders</span><em class="sb-badge">8</em></a>
+    <a class="sb-link" href="products.html" title="Products"><i data-lucide="package"></i><span>Products</span></a>
+    <a class="sb-link" href="categories.html" title="Categories"><i data-lucide="layers"></i><span>Categories</span></a>
+    <a class="sb-link" href="inventory.html" title="Inventory"><i data-lucide="warehouse"></i><span>Inventory</span></a>
+    <a class="sb-link" href="customers.html" title="Customers"><i data-lucide="users"></i><span>Customers</span></a>
+    <a class="sb-link" href="reviews.html" title="Reviews"><i data-lucide="star"></i><span>Reviews</span><em class="sb-badge">12</em></a>
+    <a class="sb-link" href="discounts.html" title="Discounts"><i data-lucide="percent"></i><span>Discounts</span></a>
+    <a class="sb-link" href="payments.html" title="Payments"><i data-lucide="credit-card"></i><span>Payments</span></a>
+    <a class="sb-link" href="analytics.html" title="Analytics"><i data-lucide="chart-no-axes-combined"></i><span>Analytics</span></a>
+
+    <div class="sb-group">Operations</div>
+    <a class="sb-link" href="shipments.html" title="Shipments"><i data-lucide="truck"></i><span>Shipments</span></a>
+    <a class="sb-link" href="returns.html" title="Returns"><i data-lucide="undo-2"></i><span>Returns</span></a>
+    <a class="sb-link" href="abandoned-carts.html" title="Abandoned Carts"><i data-lucide="shopping-cart"></i><span>Abandoned Carts</span></a>
+    <a class="sb-link" href="gift-cards.html" title="Gift Cards"><i data-lucide="gift"></i><span>Gift Cards</span></a>
+
+    <div class="sb-group">Marketing</div>
+    <a class="sb-link" href="campaigns.html" title="Campaigns"><i data-lucide="megaphone"></i><span>Campaigns</span></a>
+    <a class="sb-link" href="coupons.html" title="Coupons"><i data-lucide="ticket"></i><span>Coupons</span></a>
+    <a class="sb-link" href="email.html" title="Email Marketing"><i data-lucide="mail"></i><span>Email Marketing</span></a>
+
+    <div class="sb-group">Management</div>
+    <a class="sb-link" href="team.html" title="Team Members"><i data-lucide="user-round-cog"></i><span>Team Members</span></a>
+    <a class="sb-link" href="roles.html" title="Roles &amp; Permissions"><i data-lucide="shield-check"></i><span>Roles &amp; Permissions</span></a>
+    <a class="sb-link" href="logs.html" title="Activity Logs"><i data-lucide="history"></i><span>Activity Logs</span></a>
+
+    <div class="sb-group">Account</div>
+    <a class="sb-link" href="settings.html" title="Settings"><i data-lucide="settings"></i><span>Settings</span></a>
+    <a class="sb-link" href="integrations.html" title="Integrations"><i data-lucide="plug"></i><span>Integrations</span></a>
+    <a class="sb-link" href="notifications.html" title="Notifications"><i data-lucide="bell"></i><span>Notifications</span></a>
+    <a class="sb-link" href="help.html" title="Help &amp; Support"><i data-lucide="life-buoy"></i><span>Help &amp; Support</span></a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="store-card"><span class="logo"><i data-lucide="store"></i></span><div><b>Khamba Store</b><small>khamba.com</small></div></div>
+    <a class="sb-link" href="login.html" title="Logout"><i data-lucide="log-out"></i><span>Logout</span></a>
+  </div>
+</aside>
+<!-- Dark overlay behind the sidebar when it opens as a mobile drawer -->
+<div class="backdrop" id="backdrop"></div>
+
+<!-- ============================================================
+     MAIN COLUMN — topbar, page content, footer
+     ============================================================ -->
+<div class="main">
+    <!-- ---------- Topbar: search, store switcher, theme toggle,
+       notifications and the user menu (Profile / Account settings /
+       Billing / Logout) ---------- -->
+<header class="topbar">
+    <button class="icon-btn d-lg-none" id="mobileToggle" aria-label="Open menu"><i data-lucide="menu"></i></button>
+    <div class="search">
+      <i data-lucide="search"></i>
+      <input type="text" id="search" placeholder="Search anything..." autocomplete="off">
+      <kbd>/</kbd>
+      <div class="search-panel" id="searchPanel">
+        <div class="sp-label">Search in</div>
+        <a href="#" data-scope="Products"><i data-lucide="package"></i>Products</a>
+        <a href="#" data-scope="Orders"><i data-lucide="shopping-bag"></i>Orders</a>
+        <a href="#" data-scope="Customers"><i data-lucide="users"></i>Customers</a>
+        <a href="#" data-scope="Pages"><i data-lucide="file-text"></i>Pages</a>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="dropdown d-none d-md-block">
+        <button class="pill-btn" data-bs-toggle="dropdown"><i data-lucide="store"></i>Khamba Store<i data-lucide="chevron-down"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">Khamba Store</a></li><li><a class="dropdown-item" href="#">Khamba Outlet</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="#">+ Add new store</a></li></ul>
+      </div>
+      <div class="dropdown d-none d-sm-block">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Language"><i data-lucide="globe"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="#">English</a></li><li><a class="dropdown-item" href="#">Español</a></li><li><a class="dropdown-item" href="#">Français</a></li></ul>
+      </div>
+      <button class="icon-btn" id="themeToggle" title="Toggle theme"><i data-lucide="moon"></i></button>
+      <div class="dropdown">
+        <button class="icon-btn" data-bs-toggle="dropdown" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <div class="dropdown-menu dropdown-menu-end notif">
+          <div class="notif-head">Notifications <a href="#">Mark all read</a></div>
+          <a class="notif-item unread" href="#"><i data-lucide="shopping-bag"></i><div><b>New order #10482</b><small>2 minutes ago</small></div></a>
+          <a class="notif-item unread" href="#"><i data-lucide="triangle-alert"></i><div><b>Low stock: Ceramic Mug</b><small>1 hour ago</small></div></a>
+          <a class="notif-item" href="#"><i data-lucide="star"></i><div><b>New 5-star review</b><small>Yesterday</small></div></a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="avatar" data-bs-toggle="dropdown"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Alex Johnson" onerror="this.replaceWith('AJ')"></button>
+        <ul class="dropdown-menu dropdown-menu-end user-menu">
+          <li class="um-head"><b>Alex Johnson</b><small>alex@khamba.com</small></li>
+          <li><a class="dropdown-item" href="profile.html"><i data-lucide="user"></i>Profile</a></li>
+          <li><a class="dropdown-item" href="account-settings.html"><i data-lucide="settings"></i>Account settings</a></li>
+          <li><a class="dropdown-item" href="billing.html"><i data-lucide="credit-card"></i>Billing</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="login.html"><i data-lucide="log-out"></i>Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+    <!-- ---------- Page content ---------- -->
+<main class="content">
+    <div class="page-head">
+      <div><h1>Orders</h1><p>Track, fulfil and manage every order from one place.</p></div>
+      <div class="d-flex gap-2">
+        <button class="btn-soft" id="exportBtn"><i data-lucide="download"></i>Export CSV</button>
+        <button class="btn-dark-x" data-bs-toggle="modal" data-bs-target="#newOrderModal"><i data-lucide="plus"></i>New order</button>
+      </div>
+    </div>
+
+    <section class="row g-3 mb-3">
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#eef2fd"><i data-lucide="shopping-bag"></i></span>
+        <div><small>Total orders</small><b>1,284</b><span class="ms-note up">+8.2% vs last week</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#fdf3ea"><i data-lucide="package-open"></i></span>
+        <div><small>Awaiting fulfilment</small><b>126</b><span class="ms-note">12 due today</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#ecf6ef"><i data-lucide="timer"></i></span>
+        <div><small>Avg. fulfilment time</small><b>1.8 days</b><span class="ms-note up">0.3 days faster</span></div></div></div>
+      <div class="col-6 col-xl-3"><div class="card-x ms-card"><span class="ico" style="background:#f6eff6"><i data-lucide="undo-2"></i></span>
+        <div><small>Refund rate</small><b>2.4%</b><span class="ms-note down">+0.4% vs last week</span></div></div></div>
+    </section>
+
+    <div class="card-x">
+      <div class="tabs" id="tabs">
+        <button class="on" data-t="all">All<em>10</em></button>
+        <button data-t="Pending">Pending<em>2</em></button>
+        <button data-t="Processing">Processing<em>2</em></button>
+        <button data-t="Shipped">Shipped<em>2</em></button>
+        <button data-t="Delivered">Delivered<em>3</em></button>
+        <button data-t="Cancelled">Cancelled<em>1</em></button>
+      </div>
+
+      <div class="ord-filters">
+        <div class="search flex-grow-1">
+          <i data-lucide="search"></i>
+          <input type="text" id="orderSearch" placeholder="Search by order ID, customer or product...">
+        </div>
+        <select class="sel-x" id="payFilter">
+          <option value="">All payments</option>
+          <option>Paid</option><option>Unpaid</option><option>Refunded</option>
+        </select>
+        <select class="sel-x" id="sortFilter">
+          <option value="new">Newest first</option>
+          <option value="old">Oldest first</option>
+          <option value="high">Total: high to low</option>
+          <option value="low">Total: low to high</option>
+        </select>
+      </div>
+
+      <div class="bulk-bar" id="bulkBar">
+        <b><span id="bulkCount">0</span> selected</b>
+        <button class="btn-soft" data-bulk="ship"><i data-lucide="truck"></i>Mark shipped</button>
+        <button class="btn-soft text-danger" data-bulk="cancel"><i data-lucide="circle-x"></i>Cancel</button>
+        <button class="btn-soft" data-bulk="clear">Clear selection</button>
+      </div>
+
+      <div class="table-responsive">
+      <table class="table-x" id="ordersTable">
+        <thead><tr>
+          <th style="width:36px"><input type="checkbox" id="selectAll"></th>
+          <th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>
+
+          <tr data-status="Delivered" data-payment="Paid" data-total="249.00" data-date="2026-09-28">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><a href="#order-10482" class="oid" data-bs-toggle="offcanvas">#10482</a><small class="d-block text-secondary">Sep 28, 2026, 9:10 AM</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#e0e7ff;color:#4338ca">OM<img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Olivia Martin</b><small class="d-block text-secondary">olivia.martin@mail.com</small></div></div></td>
+            <td>1 item<small class="d-block text-secondary">Wireless Headphones</small></td>
+            <td><b>$249.00</b></td>
+            <td><span class="badge-x s-Paid">Paid</span><small class="d-block text-secondary">Visa •• 4242</small></td>
+            <td><span class="badge-x s-Delivered">Delivered</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#order-10482" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+
+          <tr data-status="Processing" data-payment="Paid" data-total="129.50" data-date="2026-09-28">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><a href="#order-10481" class="oid" data-bs-toggle="offcanvas">#10481</a><small class="d-block text-secondary">Sep 28, 2026, 8:44 AM</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#fce7f3;color:#be185d">LC<img src="https://randomuser.me/api/portraits/men/46.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Liam Carter</b><small class="d-block text-secondary">liam.carter@mail.com</small></div></div></td>
+            <td>1 item<small class="d-block text-secondary">Leather Backpack</small></td>
+            <td><b>$129.50</b></td>
+            <td><span class="badge-x s-Paid">Paid</span><small class="d-block text-secondary">PayPal</small></td>
+            <td><span class="badge-x s-Processing">Processing</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#order-10481" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+
+          <tr data-status="Shipped" data-payment="Paid" data-total="164.00" data-date="2026-09-27">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><a href="#order-10480" class="oid" data-bs-toggle="offcanvas">#10480</a><small class="d-block text-secondary">Sep 27, 2026, 4:05 PM</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#d1fae5;color:#047857">SN<img src="https://randomuser.me/api/portraits/women/68.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Sophia Nguyen</b><small class="d-block text-secondary">sophia.nguyen@mail.com</small></div></div></td>
+            <td>1 item<small class="d-block text-secondary">Running Sneakers</small></td>
+            <td><b>$164.00</b></td>
+            <td><span class="badge-x s-Paid">Paid</span><small class="d-block text-secondary">Mastercard •• 8812</small></td>
+            <td><span class="badge-x s-Shipped">Shipped</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#order-10480" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+
+          <tr data-status="Pending" data-payment="Unpaid" data-total="319.00" data-date="2026-09-27">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><a href="#order-10479" class="oid" data-bs-toggle="offcanvas">#10479</a><small class="d-block text-secondary">Sep 27, 2026, 11:20 AM</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#fef3c7;color:#b45309">NP<img src="https://randomuser.me/api/portraits/men/75.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Noah Patel</b><small class="d-block text-secondary">noah.patel@mail.com</small></div></div></td>
+            <td>1 item<small class="d-block text-secondary">Smart Watch S2</small></td>
+            <td><b>$319.00</b></td>
+            <td><span class="badge-x s-Unpaid">Unpaid</span><small class="d-block text-secondary">Visa •• 1190</small></td>
+            <td><span class="badge-x s-Pending">Pending</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#order-10479" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+
+          <tr data-status="Cancelled" data-payment="Refunded" data-total="48.00" data-date="2026-09-26">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><a href="#order-10478" class="oid" data-bs-toggle="offcanvas">#10478</a><small class="d-block text-secondary">Sep 26, 2026, 2:52 PM</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#dbeafe;color:#1d4ed8">EB<img src="https://randomuser.me/api/portraits/women/26.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Emma Brooks</b><small class="d-block text-secondary">emma.brooks@mail.com</small></div></div></td>
+            <td>1 item<small class="d-block text-secondary">Ceramic Mug Set</small></td>
+            <td><b>$48.00</b></td>
+            <td><span class="badge-x s-Refunded">Refunded</span><small class="d-block text-secondary">Apple Pay</small></td>
+            <td><span class="badge-x s-Cancelled">Cancelled</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#order-10478" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+
+          <tr data-status="Delivered" data-payment="Paid" data-total="89.90" data-date="2026-09-26">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><a href="#order-10477" class="oid" data-bs-toggle="offcanvas">#10477</a><small class="d-block text-secondary">Sep 26, 2026, 9:31 AM</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#ede9fe;color:#6d28d9">LR<img src="https://randomuser.me/api/portraits/men/52.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Lucas Rivera</b><small class="d-block text-secondary">lucas.rivera@mail.com</small></div></div></td>
+            <td>1 item<small class="d-block text-secondary">Desk Lamp Pro</small></td>
+            <td><b>$89.90</b></td>
+            <td><span class="badge-x s-Paid">Paid</span><small class="d-block text-secondary">PayPal</small></td>
+            <td><span class="badge-x s-Delivered">Delivered</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#order-10477" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+
+          <tr data-status="Processing" data-payment="Paid" data-total="212.00" data-date="2026-09-25">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><a href="#order-10476" class="oid" data-bs-toggle="offcanvas">#10476</a><small class="d-block text-secondary">Sep 25, 2026, 6:18 PM</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#fee2e2;color:#b91c1c">AT<img src="https://randomuser.me/api/portraits/women/12.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Ava Thompson</b><small class="d-block text-secondary">ava.thompson@mail.com</small></div></div></td>
+            <td>2 items<small class="d-block text-secondary">Yoga Mat Plus +1 more</small></td>
+            <td><b>$212.00</b></td>
+            <td><span class="badge-x s-Paid">Paid</span><small class="d-block text-secondary">Visa •• 7743</small></td>
+            <td><span class="badge-x s-Processing">Processing</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#order-10476" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+
+          <tr data-status="Shipped" data-payment="Paid" data-total="76.00" data-date="2026-09-25">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><a href="#order-10475" class="oid" data-bs-toggle="offcanvas">#10475</a><small class="d-block text-secondary">Sep 25, 2026, 10:02 AM</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#eef2fd;color:#4338ca">EK<img src="https://randomuser.me/api/portraits/men/22.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Ethan Kim</b><small class="d-block text-secondary">ethan.kim@mail.com</small></div></div></td>
+            <td>1 item<small class="d-block text-secondary">Canvas Tote</small></td>
+            <td><b>$76.00</b></td>
+            <td><span class="badge-x s-Paid">Paid</span><small class="d-block text-secondary">Apple Pay</small></td>
+            <td><span class="badge-x s-Shipped">Shipped</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#order-10475" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+
+          <tr data-status="Delivered" data-payment="Paid" data-total="164.90" data-date="2026-09-24">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><a href="#order-10474" class="oid" data-bs-toggle="offcanvas">#10474</a><small class="d-block text-secondary">Sep 24, 2026, 1:47 PM</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#d1fae5;color:#047857">MR<img src="https://randomuser.me/api/portraits/women/90.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>Mia Rossi</b><small class="d-block text-secondary">mia.rossi@mail.com</small></div></div></td>
+            <td>2 items<small class="d-block text-secondary">Desk Lamp Pro +1 more</small></td>
+            <td><b>$164.90</b></td>
+            <td><span class="badge-x s-Paid">Paid</span><small class="d-block text-secondary">Mastercard •• 5521</small></td>
+            <td><span class="badge-x s-Delivered">Delivered</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#order-10474" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+
+          <tr data-status="Pending" data-payment="Unpaid" data-total="59.00" data-date="2026-09-24">
+            <td><input type="checkbox" class="rowChk"></td>
+            <td><a href="#order-10473" class="oid" data-bs-toggle="offcanvas">#10473</a><small class="d-block text-secondary">Sep 24, 2026, 8:15 AM</small></td>
+            <td><div class="cust"><span class="mini-av" style="background:#fdf3ea;color:#b45309">JW<img src="https://randomuser.me/api/portraits/men/61.jpg" alt="" loading="lazy" onerror="this.remove()"></span><div><b>James Walker</b><small class="d-block text-secondary">james.walker@mail.com</small></div></div></td>
+            <td>1 item<small class="d-block text-secondary">Yoga Mat Plus</small></td>
+            <td><b>$59.00</b></td>
+            <td><span class="badge-x s-Unpaid">Unpaid</span><small class="d-block text-secondary">PayPal</small></td>
+            <td><span class="badge-x s-Pending">Pending</span></td>
+            <td class="text-end"><a class="icon-btn sm" href="#order-10473" data-bs-toggle="offcanvas"><i data-lucide="eye"></i></a></td>
+          </tr>
+
+        </tbody>
+      </table>
+      </div>
+
+      <div class="pg-bar">
+        <small class="text-secondary" id="pgInfo">Showing 10 of 10 orders</small>
+        <div class="pg"><button disabled><i data-lucide="chevron-left"></i></button><button class="on">1</button><button disabled><i data-lucide="chevron-right"></i></button></div>
+      </div>
+    </div>
+  </main>
+
+    <!-- ---------- Footer: copyright + legal links (same on every page) ---------- -->
+<footer class="footer-x">
+    <span>© 2026 Khamba Inc. All rights reserved.</span>
+    <div class="d-flex gap-3">
+      <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="help.html">Help &amp; Support</a>
+      <span class="d-none d-sm-inline text-secondary">v1.0.0</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     LIVE CUSTOMIZER — lets the user try a different sidebar
+     colour / font without touching any code (see app.js).
+     ============================================================ -->
+<button class="sw-fab" id="swFab" title="Customize"><i data-lucide="palette"></i></button>
+<div class="sw-panel" id="swPanel">
+  <div class="sw-head"><b>Customize</b><button id="swClose" aria-label="Close"><i data-lucide="x"></i></button></div>
+  <div class="sw-label">Sidebar color</div><div class="sw-colors" id="swColors"></div>
+  <div class="sw-label">Font family</div><div id="swFonts"></div>
+  <button class="btn-reorder w-100 mt-4" id="swReset">Reset to default</button>
+</div>
+
+<!-- ===== Order detail offcanvases (pure HTML, opened by Bootstrap natively) ===== -->
+<!-- ============================================================
+     DETAIL DRAWERS — one per row (10 total on this page).
+     Each is a plain Bootstrap 5 offcanvas; opened via
+     data-bs-toggle="offcanvas" in the table/card above, no JS needed.
+     ============================================================ -->
+<div class="offcanvas offcanvas-end od" id="order-10482">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Order #10482</h5><small class="text-secondary">Sep 28, 2026 at 9:10 AM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Delivered">Delivered</span><span class="badge-x s-Paid">Paid</span></div>
+      <div class="od-sec"><h6>Items (1)</h6>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="headphones"></i></span><div class="meta"><b>Wireless Headphones</b><small>1 × $249.00</small></div><b>$249.00</b></div>
+      </div>
+      <div class="od-sec"><h6>Payment summary</h6>
+        <div class="sum"><span>Subtotal</span><span>$249.00</span></div>
+        <div class="sum"><span>Shipping</span><span>Free</span></div>
+        <div class="sum"><span>Paid with</span><span>Visa •• 4242</span></div>
+        <div class="sum t"><span>Total</span><span>$249.00</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-3"><span class="mini-av" style="background:#e0e7ff;color:#4338ca">OM<img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" onerror="this.remove()"></span><div><b>Olivia Martin</b><small class="d-block text-secondary">olivia.martin@mail.com</small></div></div>
+        <small class="text-secondary d-block">Shipping address</small>12 Maple Avenue, New York, US
+      </div>
+      <div class="od-sec border-0"><h6>Timeline</h6>
+        <ul class="tl">
+          <li class="done"><b>Order placed</b><small class="d-block">Sep 26, 2026</small></li>
+          <li class="done"><b>Payment confirmed</b><small class="d-block">Sep 26, 2026</small></li>
+          <li class="done"><b>Processing</b><small class="d-block">Sep 27, 2026</small></li>
+          <li class="done"><b>Shipped</b><small class="d-block">Sep 27, 2026</small></li>
+          <li class="done"><b>Delivered</b><small class="d-block">Sep 28, 2026</small></li>
+        </ul>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Invoice</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="order-10481">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Order #10481</h5><small class="text-secondary">Sep 28, 2026 at 8:44 AM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Processing">Processing</span><span class="badge-x s-Paid">Paid</span></div>
+      <div class="od-sec"><h6>Items (1)</h6>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="backpack"></i></span><div class="meta"><b>Leather Backpack</b><small>1 × $129.50</small></div><b>$129.50</b></div>
+      </div>
+      <div class="od-sec"><h6>Payment summary</h6>
+        <div class="sum"><span>Subtotal</span><span>$129.50</span></div>
+        <div class="sum"><span>Shipping</span><span>Free</span></div>
+        <div class="sum"><span>Paid with</span><span>PayPal</span></div>
+        <div class="sum t"><span>Total</span><span>$129.50</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-3"><span class="mini-av" style="background:#fce7f3;color:#be185d">LC<img src="https://randomuser.me/api/portraits/men/46.jpg" alt="" onerror="this.remove()"></span><div><b>Liam Carter</b><small class="d-block text-secondary">liam.carter@mail.com</small></div></div>
+        <small class="text-secondary d-block">Shipping address</small>48 Baker Street, London, UK
+      </div>
+      <div class="od-sec border-0"><h6>Timeline</h6>
+        <ul class="tl">
+          <li class="done"><b>Order placed</b><small class="d-block">Sep 28, 2026</small></li>
+          <li class="done"><b>Payment confirmed</b><small class="d-block">Sep 28, 2026</small></li>
+          <li class="done"><b>Processing</b><small class="d-block">Sep 28, 2026</small></li>
+          <li><b>Shipped</b></li>
+          <li><b>Delivered</b></li>
+        </ul>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Invoice</button><button class="btn-dark-x" data-mark-ship="10481"><i data-lucide="truck"></i>Mark as shipped</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="order-10480">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Order #10480</h5><small class="text-secondary">Sep 27, 2026 at 4:05 PM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Shipped">Shipped</span><span class="badge-x s-Paid">Paid</span></div>
+      <div class="od-sec"><h6>Items (1)</h6>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="footprints"></i></span><div class="meta"><b>Running Sneakers</b><small>1 × $164.00</small></div><b>$164.00</b></div>
+      </div>
+      <div class="od-sec"><h6>Payment summary</h6>
+        <div class="sum"><span>Subtotal</span><span>$164.00</span></div><div class="sum"><span>Shipping</span><span>Free</span></div>
+        <div class="sum"><span>Paid with</span><span>Mastercard •• 8812</span></div><div class="sum t"><span>Total</span><span>$164.00</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-3"><span class="mini-av" style="background:#d1fae5;color:#047857">SN<img src="https://randomuser.me/api/portraits/women/68.jpg" alt="" onerror="this.remove()"></span><div><b>Sophia Nguyen</b><small class="d-block text-secondary">sophia.nguyen@mail.com</small></div></div>
+        <small class="text-secondary d-block">Shipping address</small>9 Queen Street, Toronto, CA
+      </div>
+      <div class="od-sec border-0"><h6>Timeline</h6>
+        <ul class="tl"><li class="done"><b>Order placed</b><small class="d-block">Sep 26, 2026</small></li><li class="done"><b>Payment confirmed</b><small class="d-block">Sep 26, 2026</small></li><li class="done"><b>Processing</b><small class="d-block">Sep 27, 2026</small></li><li class="done"><b>Shipped</b><small class="d-block">Sep 27, 2026</small></li><li><b>Delivered</b></li></ul>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Invoice</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="order-10479">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Order #10479</h5><small class="text-secondary">Sep 27, 2026 at 11:20 AM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Pending">Pending</span><span class="badge-x s-Unpaid">Unpaid</span></div>
+      <div class="od-sec"><h6>Items (1)</h6>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="watch"></i></span><div class="meta"><b>Smart Watch S2</b><small>1 × $319.00</small></div><b>$319.00</b></div>
+      </div>
+      <div class="od-sec"><h6>Payment summary</h6>
+        <div class="sum"><span>Subtotal</span><span>$319.00</span></div><div class="sum"><span>Shipping</span><span>Free</span></div>
+        <div class="sum"><span>Paid with</span><span>Visa •• 1190</span></div><div class="sum t"><span>Total</span><span>$319.00</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-3"><span class="mini-av" style="background:#fef3c7;color:#b45309">NP<img src="https://randomuser.me/api/portraits/men/75.jpg" alt="" onerror="this.remove()"></span><div><b>Noah Patel</b><small class="d-block text-secondary">noah.patel@mail.com</small></div></div>
+        <small class="text-secondary d-block">Shipping address</small>210 Fifth Ave, Austin, US
+      </div>
+      <div class="od-sec border-0"><h6>Timeline</h6>
+        <ul class="tl"><li class="done"><b>Order placed</b><small class="d-block">Sep 27, 2026</small></li><li><b>Payment confirmed</b></li><li><b>Processing</b></li><li><b>Shipped</b></li><li><b>Delivered</b></li></ul>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Invoice</button><button class="btn-dark-x" data-mark-ship="10479"><i data-lucide="truck"></i>Mark as shipped</button><button class="btn-soft text-danger" data-mark-cancel="10479">Cancel</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="order-10478">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Order #10478</h5><small class="text-secondary">Sep 26, 2026 at 2:52 PM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Cancelled">Cancelled</span><span class="badge-x s-Refunded">Refunded</span></div>
+      <div class="od-sec"><h6>Items (1)</h6>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="coffee"></i></span><div class="meta"><b>Ceramic Mug Set</b><small>1 × $48.00</small></div><b>$48.00</b></div>
+      </div>
+      <div class="od-sec"><h6>Payment summary</h6>
+        <div class="sum"><span>Subtotal</span><span>$48.00</span></div><div class="sum"><span>Shipping</span><span>Free</span></div>
+        <div class="sum"><span>Paid with</span><span>Apple Pay</span></div><div class="sum t"><span>Total</span><span>$48.00</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-3"><span class="mini-av" style="background:#dbeafe;color:#1d4ed8">EB<img src="https://randomuser.me/api/portraits/women/26.jpg" alt="" onerror="this.remove()"></span><div><b>Emma Brooks</b><small class="d-block text-secondary">emma.brooks@mail.com</small></div></div>
+        <small class="text-secondary d-block">Shipping address</small>77 Under den Linden, Berlin, DE
+      </div>
+      <div class="od-sec border-0"><h6>Timeline</h6>
+        <ul class="tl"><li class="done"><b>Order placed</b><small class="d-block">Sep 26, 2026</small></li><li class="done"><b>Order cancelled</b><small class="d-block">Sep 26, 2026</small></li></ul>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Invoice</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="order-10477">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Order #10477</h5><small class="text-secondary">Sep 26, 2026 at 9:31 AM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Delivered">Delivered</span><span class="badge-x s-Paid">Paid</span></div>
+      <div class="od-sec"><h6>Items (1)</h6>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="lamp-desk"></i></span><div class="meta"><b>Desk Lamp Pro</b><small>1 × $89.90</small></div><b>$89.90</b></div>
+      </div>
+      <div class="od-sec"><h6>Payment summary</h6>
+        <div class="sum"><span>Subtotal</span><span>$89.90</span></div><div class="sum"><span>Shipping</span><span>Free</span></div>
+        <div class="sum"><span>Paid with</span><span>PayPal</span></div><div class="sum t"><span>Total</span><span>$89.90</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-3"><span class="mini-av" style="background:#ede9fe;color:#6d28d9">LR<img src="https://randomuser.me/api/portraits/men/52.jpg" alt="" onerror="this.remove()"></span><div><b>Lucas Rivera</b><small class="d-block text-secondary">lucas.rivera@mail.com</small></div></div>
+        <small class="text-secondary d-block">Shipping address</small>5 River Road, New York, US
+      </div>
+      <div class="od-sec border-0"><h6>Timeline</h6>
+        <ul class="tl"><li class="done"><b>Order placed</b><small class="d-block">Sep 24, 2026</small></li><li class="done"><b>Payment confirmed</b><small class="d-block">Sep 24, 2026</small></li><li class="done"><b>Processing</b><small class="d-block">Sep 25, 2026</small></li><li class="done"><b>Shipped</b><small class="d-block">Sep 25, 2026</small></li><li class="done"><b>Delivered</b><small class="d-block">Sep 26, 2026</small></li></ul>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Invoice</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="order-10476">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Order #10476</h5><small class="text-secondary">Sep 25, 2026 at 6:18 PM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Processing">Processing</span><span class="badge-x s-Paid">Paid</span></div>
+      <div class="od-sec"><h6>Items (2)</h6>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="dumbbell"></i></span><div class="meta"><b>Yoga Mat Plus</b><small>1 × $59.00</small></div><b>$59.00</b></div>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="shopping-bag"></i></span><div class="meta"><b>Canvas Tote</b><small>2 × $76.50</small></div><b>$153.00</b></div>
+      </div>
+      <div class="od-sec"><h6>Payment summary</h6>
+        <div class="sum"><span>Subtotal</span><span>$212.00</span></div><div class="sum"><span>Shipping</span><span>Free</span></div>
+        <div class="sum"><span>Paid with</span><span>Visa •• 7743</span></div><div class="sum t"><span>Total</span><span>$212.00</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-3"><span class="mini-av" style="background:#fee2e2;color:#b91c1c">AT<img src="https://randomuser.me/api/portraits/women/12.jpg" alt="" onerror="this.remove()"></span><div><b>Ava Thompson</b><small class="d-block text-secondary">ava.thompson@mail.com</small></div></div>
+        <small class="text-secondary d-block">Shipping address</small>33 Elm Street, Austin, US
+      </div>
+      <div class="od-sec border-0"><h6>Timeline</h6>
+        <ul class="tl"><li class="done"><b>Order placed</b><small class="d-block">Sep 25, 2026</small></li><li class="done"><b>Payment confirmed</b><small class="d-block">Sep 25, 2026</small></li><li class="done"><b>Processing</b><small class="d-block">Sep 25, 2026</small></li><li><b>Shipped</b></li><li><b>Delivered</b></li></ul>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Invoice</button><button class="btn-dark-x" data-mark-ship="10476"><i data-lucide="truck"></i>Mark as shipped</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="order-10475">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Order #10475</h5><small class="text-secondary">Sep 25, 2026 at 10:02 AM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Shipped">Shipped</span><span class="badge-x s-Paid">Paid</span></div>
+      <div class="od-sec"><h6>Items (1)</h6>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="shopping-bag"></i></span><div class="meta"><b>Canvas Tote</b><small>1 × $76.00</small></div><b>$76.00</b></div>
+      </div>
+      <div class="od-sec"><h6>Payment summary</h6>
+        <div class="sum"><span>Subtotal</span><span>$76.00</span></div><div class="sum"><span>Shipping</span><span>Free</span></div>
+        <div class="sum"><span>Paid with</span><span>Apple Pay</span></div><div class="sum t"><span>Total</span><span>$76.00</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-3"><span class="mini-av" style="background:#eef2fd;color:#4338ca">EK<img src="https://randomuser.me/api/portraits/men/22.jpg" alt="" onerror="this.remove()"></span><div><b>Ethan Kim</b><small class="d-block text-secondary">ethan.kim@mail.com</small></div></div>
+        <small class="text-secondary d-block">Shipping address</small>18 King's Road, London, UK
+      </div>
+      <div class="od-sec border-0"><h6>Timeline</h6>
+        <ul class="tl"><li class="done"><b>Order placed</b><small class="d-block">Sep 24, 2026</small></li><li class="done"><b>Payment confirmed</b><small class="d-block">Sep 24, 2026</small></li><li class="done"><b>Processing</b><small class="d-block">Sep 25, 2026</small></li><li class="done"><b>Shipped</b><small class="d-block">Sep 25, 2026</small></li><li><b>Delivered</b></li></ul>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Invoice</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="order-10474">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Order #10474</h5><small class="text-secondary">Sep 24, 2026 at 1:47 PM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Delivered">Delivered</span><span class="badge-x s-Paid">Paid</span></div>
+      <div class="od-sec"><h6>Items (2)</h6>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="lamp-desk"></i></span><div class="meta"><b>Desk Lamp Pro</b><small>1 × $89.90</small></div><b>$89.90</b></div>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="coffee"></i></span><div class="meta"><b>Ceramic Mug Set</b><small>1 × $75.00</small></div><b>$75.00</b></div>
+      </div>
+      <div class="od-sec"><h6>Payment summary</h6>
+        <div class="sum"><span>Subtotal</span><span>$164.90</span></div><div class="sum"><span>Shipping</span><span>Free</span></div>
+        <div class="sum"><span>Paid with</span><span>Mastercard •• 5521</span></div><div class="sum t"><span>Total</span><span>$164.90</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-3"><span class="mini-av" style="background:#d1fae5;color:#047857">MR<img src="https://randomuser.me/api/portraits/women/90.jpg" alt="" onerror="this.remove()"></span><div><b>Mia Rossi</b><small class="d-block text-secondary">mia.rossi@mail.com</small></div></div>
+        <small class="text-secondary d-block">Shipping address</small>4 Via Roma, Berlin, DE
+      </div>
+      <div class="od-sec border-0"><h6>Timeline</h6>
+        <ul class="tl"><li class="done"><b>Order placed</b><small class="d-block">Sep 22, 2026</small></li><li class="done"><b>Payment confirmed</b><small class="d-block">Sep 22, 2026</small></li><li class="done"><b>Processing</b><small class="d-block">Sep 23, 2026</small></li><li class="done"><b>Shipped</b><small class="d-block">Sep 23, 2026</small></li><li class="done"><b>Delivered</b><small class="d-block">Sep 24, 2026</small></li></ul>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Invoice</button></div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end od" id="order-10473">
+  <div class="od-body h-100">
+    <div class="od-head"><div><h5 class="mb-1">Order #10473</h5><small class="text-secondary">Sep 24, 2026 at 8:15 AM</small></div><button class="icon-btn sm" data-bs-dismiss="offcanvas"><i data-lucide="x"></i></button></div>
+    <div class="flex-grow-1 overflow-auto">
+      <div class="od-sec d-flex gap-2"><span class="badge-x s-Pending">Pending</span><span class="badge-x s-Unpaid">Unpaid</span></div>
+      <div class="od-sec"><h6>Items (1)</h6>
+        <div class="row-item"><span class="thumb" style="background:var(--hover)"><i data-lucide="dumbbell"></i></span><div class="meta"><b>Yoga Mat Plus</b><small>1 × $59.00</small></div><b>$59.00</b></div>
+      </div>
+      <div class="od-sec"><h6>Payment summary</h6>
+        <div class="sum"><span>Subtotal</span><span>$59.00</span></div><div class="sum"><span>Shipping</span><span>Free</span></div>
+        <div class="sum"><span>Paid with</span><span>PayPal</span></div><div class="sum t"><span>Total</span><span>$59.00</span></div>
+      </div>
+      <div class="od-sec"><h6>Customer</h6>
+        <div class="cust mb-3"><span class="mini-av" style="background:#fdf3ea;color:#b45309">JW<img src="https://randomuser.me/api/portraits/men/61.jpg" alt="" onerror="this.remove()"></span><div><b>James Walker</b><small class="d-block text-secondary">james.walker@mail.com</small></div></div>
+        <small class="text-secondary d-block">Shipping address</small>221 Oxford Road, Toronto, CA
+      </div>
+      <div class="od-sec border-0"><h6>Timeline</h6>
+        <ul class="tl"><li class="done"><b>Order placed</b><small class="d-block">Sep 24, 2026</small></li><li><b>Payment confirmed</b></li><li><b>Processing</b></li><li><b>Shipped</b></li><li><b>Delivered</b></li></ul>
+      </div>
+    </div>
+    <div class="od-foot"><button class="btn-soft"><i data-lucide="printer"></i>Invoice</button><button class="btn-dark-x" data-mark-ship="10473"><i data-lucide="truck"></i>Mark as shipped</button><button class="btn-soft text-danger" data-mark-cancel="10473">Cancel</button></div>
+  </div>
+</div>
+
+<!-- New order modal (pure HTML form; orders.js only validates and shows feedback) -->
+<!-- Modal: new Order Modal -->
+<div class="modal fade" id="newOrderModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="newOrderForm" novalidate>
+        <div class="modal-header"><h5 class="modal-title">Create new order</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Customer name</label><input type="text" class="form-control" required></div>
+          <div class="mb-3"><label class="form-label">Customer email</label><input type="email" class="form-control" required></div>
+          <div class="mb-3"><label class="form-label">Product</label>
+            <select class="form-select" required>
+              <option value="">Select a product…</option>
+              <option>Wireless Headphones — $249.00</option>
+              <option>Leather Backpack — $129.50</option>
+              <option>Running Sneakers — $164.00</option>
+              <option>Smart Watch S2 — $319.00</option>
+              <option>Ceramic Mug Set — $48.00</option>
+            </select>
+          </div>
+          <div class="row g-3">
+            <div class="col-6"><label class="form-label">Quantity</label><input type="number" class="form-control" min="1" value="1" required></div>
+            <div class="col-6"><label class="form-label">Payment method</label>
+              <select class="form-select" required><option>Visa</option><option>Mastercard</option><option>PayPal</option><option>Apple Pay</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-soft" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn-dark-x"><i data-lucide="plus"></i>Create order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Toast host (shared feedback for button actions) -->
+<!-- Shared toast notification, triggered from app.js via window.showToast() -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+  <div class="toast" id="toastHost" role="status"><div class="toast-body d-flex align-items-center gap-2"><i data-lucide="check-circle" id="toastIcon"></i><span id="toastMsg"></span></div></div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS — jQuery, Bootstrap, (Chart.js on chart pages),
+     Lucide icons, then our own app.js last.
+     ============================================================ -->
+<script src="assets/js/jquery-3.7.1.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

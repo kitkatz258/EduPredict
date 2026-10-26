@@ -12,6 +12,7 @@
     @else
         <div {{ $attributes->merge(['class' => 'mt-4 border-t border-brand-200 pt-4']) }}>
             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Program-shift indicator</p>
+            <h3 class="mt-1 text-base font-bold text-brand-900">Program shift</h3>
             <div class="mt-2 flex flex-wrap items-center gap-2">
                 <span class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-900">{{ $shift['label'] }}</span>
                 @if ($shift['engagement'])

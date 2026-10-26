@@ -81,6 +81,122 @@ class GradeEntryTest extends TestCase
         $this->assertTrue($summary['gwa_provisional']);
     }
 
+    public function test_manual_tokens_show_remarks_immediately_and_keep_gwa_rules(): void
+    {
+        $student = $this->makeStudent();
+        $row = [
+            'subject_code' => 'CCS 101',
+            'subject_name' => 'Information Management',
+            'units' => '3',
+            'final_grade' => '',
+            'remarks' => '',
+            'is_major_subject' => false,
+        ];
+
+        Livewire::actingAs($student->user)
+            ->test(GradeReportForm::class)
+            ->set('mode', 'manual')
+            ->set('school_year', '2024-2025')
+            ->set('semester', 'First')
+            ->set('rows', [$row])
+            ->set('rows.0.final_grade', 'INC')
+            ->assertSet('rows.0.remarks', 'Incomplete')
+            ->set('rows.0.final_grade', '5.00')
+            ->assertSet('rows.0.remarks', 'Failed')
+            ->set('rows.0.final_grade', 'Dropped')
+            ->assertSet('rows.0.remarks', 'Dropped')
+            ->set('rows.0.final_grade', 'Unofficially Dropped')
+            ->assertSet('rows.0.remarks', 'Unofficially Dropped')
+            ->call('confirm')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('subject_grades', [
+            'subject_code' => 'CCS 101',
+            'final_grade' => 'UD',
+            'remarks' => 'UNOFFICIAL',
+            'is_failed' => 0,
+            'is_incomplete' => 0,
+        ]);
+
+        $summary = app(AcademicSummary::class)->for($student->fresh());
+        $this->assertNull($summary['rounded_gwa']);
+        $this->assertSame(0, $summary['failed_subjects']);
+        $this->assertSame(1, $summary['dropped_subjects']);
+    }
+
+    public function test_missing_term_blocks_confirmation_and_keeps_extracted_rows(): void
+    {
+        $student = $this->makeStudent();
+        $rows = $this->sheetARows();
+
+        Livewire::actingAs($student->user)
+            ->test(GradeReportForm::class)
+            ->set('mode', 'upload')
+            ->set('stage', 'review')
+            ->set('source', 'pdf_text')
+            ->set('school_year', '')
+            ->set('semester', '')
+            ->set('rows', $rows)
+            ->call('confirm')
+            ->assertHasErrors(['school_year', 'semester'])
+            ->assertSet('stage', 'review')
+            ->assertSet('rows.0.subject_code', 'CCS 106')
+            ->assertSee('Choose the academic year.')
+            ->assertSee('The subject rows on this screen were kept.')
+            ->assertNoRedirect();
+
+        $this->assertSame(0, GradeReport::query()->count());
+
+        Livewire::actingAs($student->user)
+            ->test(GradeReportForm::class)
+            ->set('mode', 'upload')
+            ->set('stage', 'review')
+            ->set('rows', $rows)
+            ->set('school_year', '2024-2025')
+            ->set('semester', '')
+            ->call('confirm')
+            ->assertHasErrors(['semester'])
+            ->assertHasNoErrors(['school_year'])
+            ->assertSet('stage', 'review')
+            ->assertSet('rows.0.subject_code', 'CCS 106');
+
+        $this->assertSame(0, GradeReport::query()->count());
+    }
+
+    public function test_a_confirmed_upload_appears_on_assessment_and_in_history(): void
+    {
+        $student = $this->makeStudent();
+
+        Livewire::actingAs($student->user)
+            ->test(GradeReportForm::class)
+            ->set('mode', 'upload')
+            ->set('stage', 'review')
+            ->set('source', 'pdf_text')
+            ->set('school_year', '2024-2025')
+            ->set('semester', 'Second')
+            ->set('rows', $this->sheetARows())
+            ->call('confirm')
+            ->assertHasNoErrors()
+            ->assertSet('stage', 'input');
+
+        $this->assertSame(1, GradeReport::query()->where('status', 'confirmed')->count());
+        $this->assertSame(0, GradeReport::query()->where('status', 'draft')->count());
+        $this->assertSame(7, GradeReport::query()->firstOrFail()->subjectGrades()->count());
+
+        $this->actingAs($student->user)
+            ->get(route('student.assessment', ['step' => 'grades']))
+            ->assertOk()
+            ->assertSee('2024-2025')
+            ->assertSee('Second');
+
+        $this->actingAs($student->user)
+            ->get(route('student.history'))
+            ->assertOk()
+            ->assertSee('Saved grade report versions')
+            ->assertSee('2024-2025')
+            ->assertSee('Second');
+    }
+
     public function test_grades_live_inside_the_unified_assessment(): void
     {
         $student = $this->makeStudent();

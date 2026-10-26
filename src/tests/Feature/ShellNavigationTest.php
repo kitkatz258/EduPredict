@@ -71,7 +71,7 @@ class ShellNavigationTest extends TestCase
         }
     }
 
-    public function test_staff_get_the_fixed_sidebar_without_about_or_faculty(): void
+    public function test_administrators_keep_the_fixed_sidebar_without_about_or_faculty(): void
     {
         $admin = User::factory()->role(UserRole::Administrator)->create();
 
@@ -79,30 +79,62 @@ class ShellNavigationTest extends TestCase
             ->get(route('admin.users'))
             ->assertOk()
             ->assertSee('id="staff-sidebar"', false)
-            ->assertSee('lg:pl-64', false)
+            ->assertSee('lg:pl-[264px]', false)
             ->assertSee('Open navigation')
+            ->assertSee('Collapse sidebar', false)
+            ->assertSee('href="'.route('profile.edit').'"', false)
+            ->assertSee('action="'.route('logout').'"', false)
             ->getContent();
 
         $sidebar = $this->between($html, 'id="staff-sidebar"', '</aside>');
-        foreach (['admin.dashboard', 'admin.users', 'admin.colleges', 'admin.questionnaire', 'admin.psoc', 'admin.interventions', 'admin.audit', 'admin.deletion-requests', 'privacy', 'profile.edit'] as $route) {
+        foreach (['admin.dashboard', 'admin.users', 'admin.colleges', 'admin.departments', 'admin.programs', 'admin.questionnaire', 'admin.psoc', 'admin.interventions', 'admin.audit', 'admin.prediction-grants', 'admin.deletion-requests', 'privacy', 'profile.edit'] as $route) {
             $this->assertStringContainsString('href="'.route($route).'"', $sidebar, "sidebar links to {$route}");
         }
+        $this->assertStringContainsString('Academic structure', $sidebar);
         $this->assertStringNotContainsString('About', $sidebar);
         $this->assertStringNotContainsString('Faculty', $sidebar);
+    }
 
+    public function test_department_heads_and_deans_use_top_navigation_instead_of_the_sidebar(): void
+    {
         $head = User::factory()->role(UserRole::DepartmentHead)->create();
         $headHtml = $this->actingAs($head)
             ->get(route('department.dashboard'))
             ->assertOk()
-            ->assertSee('id="staff-sidebar"', false)
+            ->assertDontSee('id="staff-sidebar"', false)
+            ->assertDontSee('lg:pl-[264px]', false)
             ->assertDontSee('aria-label="Student"', false)
+            ->assertSee('aria-label="Department Head"', false)
+            ->assertSee('Toggle navigation')
             ->getContent();
 
-        $headSidebar = $this->between($headHtml, 'id="staff-sidebar"', '</aside>');
-        $this->assertStringContainsString('href="'.route('department.dashboard').'"', $headSidebar);
-        $this->assertStringContainsString('href="'.route('department.students').'"', $headSidebar);
-        $this->assertStringNotContainsString('Faculty', $headSidebar);
-        $this->assertStringNotContainsString('Adviser', $headSidebar);
+        $headNav = $this->between($headHtml, '<header class="sticky top-0 z-30', '</header>');
+        foreach (['department.dashboard', 'department.students', 'department.reports', 'profile.edit'] as $route) {
+            $this->assertStringContainsString('href="'.route($route).'"', $headNav, "nav links to {$route}");
+        }
+        $this->assertStringContainsString('action="'.route('logout').'"', $headNav);
+        $this->assertStringContainsString('Account settings', $headNav);
+        $this->assertStringNotContainsString(route('dean.dashboard'), $headNav);
+        $this->assertStringNotContainsString(route('admin.users'), $headNav);
+        $this->assertStringNotContainsString('Faculty', $headNav);
+        $this->assertStringNotContainsString('Adviser', $headNav);
+
+        $dean = User::factory()->role(UserRole::Dean)->create();
+        $deanHtml = $this->actingAs($dean)
+            ->get(route('dean.dashboard'))
+            ->assertOk()
+            ->assertSee('College totals only', false)
+            ->assertDontSee('id="staff-sidebar"', false)
+            ->assertSee('aria-label="Dean"', false)
+            ->getContent();
+
+        $deanNav = $this->between($deanHtml, '<header class="sticky top-0 z-30', '</header>');
+        $this->assertStringContainsString('href="'.route('dean.dashboard').'"', $deanNav);
+        $this->assertStringContainsString('href="'.route('dean.reports').'"', $deanNav);
+        $this->assertStringContainsString('action="'.route('logout').'"', $deanNav);
+        $this->assertStringNotContainsString(route('department.students'), $deanNav);
+        $this->assertStringNotContainsString(route('department.reports'), $deanNav);
+        $this->assertStringNotContainsString(route('admin.users'), $deanNav);
     }
 
     public function test_guests_on_the_privacy_page_get_a_sign_in_link_instead_of_a_sidebar(): void

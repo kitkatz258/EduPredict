@@ -6,11 +6,14 @@ use App\Enums\UserRole;
 use App\Models\User;
 use App\Services\Admin\StaffAccountService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\View\View;
 use Livewire\Attributes\On;
 
 class UsersTable extends BaseTable
 {
-    public string $sortField = 'name';
+    public string $sortField = 'id';
+
+    public string $sortDirection = 'desc';
 
     public string $roleFilter = '';
 
@@ -36,6 +39,16 @@ class UsersTable extends BaseTable
         $this->toast($target->is_active ? "{$target->name} can sign in again." : "{$target->name} was deactivated.");
     }
 
+    public function updatingRoleFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingStatusFilter(): void
+    {
+        $this->resetPage();
+    }
+
     public function setRoleFilter(string $role): void
     {
         $allowed = array_map(fn (UserRole $item): string => $item->value, UserRole::active());
@@ -57,9 +70,7 @@ class UsersTable extends BaseTable
     }
 
     #[On('users-changed')]
-    public function refreshUsers(): void
-    {
-    }
+    public function refreshUsers(): void {}
 
     protected function baseQuery(): Builder
     {
@@ -91,7 +102,7 @@ class UsersTable extends BaseTable
             ['key' => 'name', 'label' => 'Name', 'sortable' => true],
             ['key' => 'email', 'label' => 'Email', 'sortable' => true],
             ['key' => 'role', 'label' => 'Role', 'sortable' => true],
-            ['key' => 'is_active', 'label' => 'Active', 'sortable' => true],
+            ['key' => 'is_active', 'label' => 'Status', 'sortable' => true],
         ];
     }
 
@@ -100,7 +111,7 @@ class UsersTable extends BaseTable
         return ['name', 'email'];
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.tables.users-table', [
             ...$this->tableViewData(),

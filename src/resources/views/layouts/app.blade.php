@@ -3,47 +3,65 @@
     $shell = match (true) {
         $user === null => 'guest',
         $user->isRole(\App\Enums\UserRole::Student) => 'student',
+        $user->isRole(\App\Enums\UserRole::DepartmentHead, \App\Enums\UserRole::Dean) => 'academic',
         default => 'staff',
     };
+    $initials = $user
+        ? collect(preg_split('/\s+/', trim((string) $user->name)))->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('')
+        : '';
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="bg-[var(--ed-canvas)]">
 <head>
     @include('layouts.partials.head')
 </head>
-<body class="min-h-screen bg-brand-50 font-sans text-gray-800 antialiased">
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-brand-900 focus:shadow">Skip to content</a>
+<body class="min-h-screen bg-[var(--ed-canvas)] font-sans text-[var(--ed-ink)] antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-[11px] focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-[#111827] focus:shadow">Skip to content</a>
     @include('layouts.partials.flash')
 
-    @if ($shell === 'student')
-        @include('layouts.partials.student-nav')
+    @if (in_array($shell, ['student', 'academic'], true))
+        @include($shell === 'student' ? 'layouts.partials.student-nav' : 'layouts.partials.academic-nav')
 
-        <main id="main-content" class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+        <main id="main-content" class="mx-auto w-full px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             @isset($header)
-                <div class="mb-6">{{ $header }}</div>
+                <div class="mb-6 print:hidden">{{ $header }}</div>
             @endisset
             {{ $slot ?? '' }}
             @yield('content')
         </main>
 
-        <footer class="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-4 pb-8 text-xs text-gray-500 sm:px-6">
+        <footer class="mx-auto flex w-full flex-wrap items-center justify-between gap-2 px-4 pb-8 text-xs text-gray-500 print:hidden sm:px-6 lg:px-8">
             <p>These results are estimates, not guarantees.</p>
-            <a href="{{ route('privacy') }}" class="font-medium text-brand-900 hover:underline">Privacy</a>
+            <a href="{{ route('privacy') }}" class="font-medium text-[#4f46e5] hover:underline">Privacy</a>
         </footer>
     @elseif ($shell === 'staff')
-        <div x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false">
+        <div
+            x-data="{
+                sidebarOpen: false,
+                academicOpen: {{ request()->routeIs('admin.colleges', 'admin.departments', 'admin.programs') ? 'true' : 'false' }},
+                collapsed: document.documentElement.classList.contains('sidebar-collapsed'),
+                toggleCollapsed() {
+                    this.collapsed = ! this.collapsed;
+                    document.documentElement.classList.toggle('sidebar-collapsed', this.collapsed);
+                    try {
+                        localStorage.setItem('edupredict.sidebar', this.collapsed ? 'collapsed' : 'expanded');
+                    } catch (e) {}
+                },
+            }"
+            @keydown.escape.window="sidebarOpen = false"
+        >
             <div
                 x-show="sidebarOpen"
                 x-cloak
                 x-transition.opacity
-                class="fixed inset-0 z-30 bg-black/40 motion-reduce:transition-none lg:hidden"
+                class="fixed inset-0 z-30 bg-black/45 motion-reduce:transition-none lg:hidden"
                 @click="sidebarOpen = false"
                 aria-hidden="true"
             ></div>
 
             <aside
                 id="staff-sidebar"
-                class="fixed inset-y-0 left-0 z-40 flex h-dvh w-64 -translate-x-full flex-col overscroll-contain bg-brand-900 text-white transition-transform duration-200 motion-reduce:transition-none lg:translate-x-0"
+                class="fixed inset-y-0 left-0 z-40 flex h-dvh -translate-x-full flex-col overflow-y-auto overscroll-contain bg-[#0f1115] text-[#a3a9b5] motion-reduce:transition-none print:hidden lg:translate-x-0"
                 :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                 x-init="
                     const applySidebar = () => {
@@ -56,43 +74,76 @@
                 "
                 aria-label="Sidebar"
             >
-                <div class="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-white/10 px-5">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-xs font-bold">UCC</span>
-                        <span class="leading-tight">
-                            <span class="block text-base font-semibold tracking-tight">EduPredict</span>
-                            <span class="block text-[11px] uppercase tracking-wider text-white/60">{{ $user->role->label() }}</span>
-                        </span>
-                    </a>
-                    <button type="button" class="rounded-lg p-1.5 text-white/80 hover:bg-white/10 lg:hidden" @click="sidebarOpen = false" aria-label="Close navigation">
-                        <i class="ri-close-line text-xl" aria-hidden="true"></i>
-                    </button>
-                </div>
-                <nav data-sidebar-scroll class="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain p-3 text-sm" aria-label="Main">
-                    @include('layouts.partials.sidebar-links')
-                </nav>
-                <div class="shrink-0 space-y-1 border-t border-white/10 p-3 text-sm">
-                    <p class="truncate px-3 pb-1 text-xs text-white/70">{{ $user->name }}</p>
-                    <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs('profile.edit') ? 'bg-white/15 font-medium' : 'hover:bg-white/10' }} flex items-center gap-3 rounded-lg px-3 py-2 text-white/90">
-                        <i class="ri-settings-3-line text-lg" aria-hidden="true"></i> Account settings
-                    </a>
-                    <a href="{{ route('privacy') }}" class="{{ request()->routeIs('privacy') ? 'bg-white/15 font-medium' : 'hover:bg-white/10' }} flex items-center gap-3 rounded-lg px-3 py-2 text-white/90">
-                        <i class="ri-shield-check-line text-lg" aria-hidden="true"></i> Privacy
-                    </a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-white/90 hover:bg-white/10">
-                            <i class="ri-logout-box-r-line text-lg" aria-hidden="true"></i> Log out
+                <div class="flex min-h-full w-full flex-1 flex-col">
+                    <div class="sb-top sticky top-0 z-10 flex items-center gap-2.5 bg-[#0f1115] px-[18px] pb-3 pt-5">
+                        <a href="{{ route('dashboard') }}" class="flex min-w-0 flex-1 items-center gap-2.5 text-white">
+                            <span class="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[10px] bg-gradient-to-br from-[#6366f1] to-[#4338ca] text-[11px] font-bold text-white">UCC</span>
+                            <span class="sb-brand-text min-w-0">
+                                <span class="block truncate text-lg font-bold tracking-[-0.02em]">EduPredict</span>
+                            </span>
+                        </a>
+                        <button
+                            type="button"
+                            class="hidden h-8 w-8 place-items-center rounded-lg text-[#7d8492] hover:bg-white/10 hover:text-white lg:grid"
+                            @click="toggleCollapsed()"
+                            :aria-expanded="(! collapsed).toString()"
+                            :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+                        >
+                            <i class="ri-sidebar-fold-line text-lg" x-show="! collapsed" aria-hidden="true"></i>
+                            <i class="ri-sidebar-unfold-line text-lg" x-show="collapsed" x-cloak aria-hidden="true"></i>
                         </button>
-                    </form>
+                        <button type="button" class="rounded-lg p-1.5 text-white/80 hover:bg-white/10 lg:hidden" @click="sidebarOpen = false" aria-label="Close navigation">
+                            <i class="ri-close-line text-xl" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <nav class="px-3 pb-3 text-sm" aria-label="Main">
+                        @include('layouts.partials.sidebar-links')
+                    </nav>
+
+                    <div class="mt-auto space-y-1 border-t border-white/[0.08] px-3 py-3 text-sm">
+                        <div class="sb-account flex items-center gap-2.5 rounded-[10px] bg-white/[0.06] px-2.5 py-2 text-white">
+                            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/15 text-[11px] font-bold">{{ $initials !== '' ? $initials : 'U' }}</span>
+                            <span class="sb-account-copy min-w-0">
+                                <span class="block truncate text-sm font-semibold">{{ $user->name }}</span>
+                                <span class="block truncate text-[11px] text-[#7d8492]">{{ $user->role->label() }}</span>
+                            </span>
+                        </div>
+                        <a
+                            href="{{ route('profile.edit') }}"
+                            title="Profile"
+                            class="sb-link {{ request()->routeIs('profile.edit') && ! request()->has('settings') ? 'bg-white/10 font-medium text-white' : 'text-[#a3a9b5] hover:bg-white/[0.06] hover:text-white' }} relative flex items-center gap-3 rounded-[10px] px-2.5 py-[9px]"
+                            @if (request()->routeIs('profile.edit')) aria-current="page" @endif
+                        >
+                            <i class="ri-user-line text-lg leading-none" aria-hidden="true"></i>
+                            <span class="sb-label truncate">Profile</span>
+                        </a>
+                        <a
+                            href="{{ route('profile.edit') }}#account-settings"
+                            title="Settings"
+                            class="sb-link text-[#a3a9b5] hover:bg-white/[0.06] hover:text-white relative flex items-center gap-3 rounded-[10px] px-2.5 py-[9px]"
+                        >
+                            <i class="ri-settings-3-line text-lg leading-none" aria-hidden="true"></i>
+                            <span class="sb-label truncate">Settings</span>
+                        </a>
+                        <a
+                            href="{{ route('privacy') }}"
+                            title="Privacy"
+                            class="sb-link {{ request()->routeIs('privacy') ? 'bg-white/10 font-medium text-white' : 'text-[#a3a9b5] hover:bg-white/[0.06] hover:text-white' }} relative flex items-center gap-3 rounded-[10px] px-2.5 py-[9px]"
+                            @if (request()->routeIs('privacy')) aria-current="page" @endif
+                        >
+                            <i class="ri-shield-check-line text-lg leading-none" aria-hidden="true"></i>
+                            <span class="sb-label truncate">Privacy</span>
+                        </a>
+                    </div>
                 </div>
             </aside>
 
-            <div class="flex min-h-screen min-w-0 flex-col lg:pl-64">
-                <header class="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-brand-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+            <div id="staff-main" class="flex min-h-screen min-w-0 flex-col lg:pl-[264px] print:pl-0">
+                <header class="sticky top-0 z-20 flex h-[68px] items-center gap-3 border-b border-[var(--ed-line)] bg-[var(--ed-header)] px-4 print:hidden sm:px-7">
                     <button
                         type="button"
-                        class="rounded-lg p-2 text-brand-900 hover:bg-brand-50 lg:hidden"
+                        class="grid h-10 w-10 place-items-center rounded-[11px] border border-[#e8eaee] text-[#111827] hover:bg-[#f3f4f6] lg:hidden"
                         @click="sidebarOpen = true"
                         aria-label="Open navigation"
                         aria-controls="staff-sidebar"
@@ -103,28 +154,31 @@
                     <div class="min-w-0 flex-1">
                         @isset($header)
                             {{ $header }}
-                        @else
-                            <h1 class="truncate text-base font-semibold text-brand-900">{{ $heading ?? config('app.name') }}</h1>
                         @endisset
                     </div>
+                    <x-theme-toggle class="h-10 w-10 px-0" />
+                    <x-user-menu />
                 </header>
 
-                <main id="main-content" class="flex-1 p-4 sm:p-6">
+                <main id="main-content" class="flex-1 px-4 py-6 sm:px-6 lg:px-7 lg:py-7">
                     {{ $slot ?? '' }}
                     @yield('content')
                 </main>
             </div>
         </div>
     @else
-        <header class="border-b border-brand-200 bg-white">
-            <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-                <a href="{{ route('home') }}" class="flex items-center gap-2 font-semibold text-brand-900">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-900 text-xs font-bold text-white">UCC</span>
+        <header class="sticky top-0 z-20 border-b border-[var(--ed-line)] bg-[var(--ed-header)]">
+            <div class="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-4 sm:px-6">
+                <a href="{{ route('home') }}" class="flex items-center gap-2.5 font-semibold text-[var(--ed-ink)]">
+                    <span class="grid h-[34px] w-[34px] place-items-center rounded-[10px] bg-gradient-to-br from-[#6366f1] to-[#4338ca] text-[11px] font-bold text-white">UCC</span>
                     EduPredict
                 </a>
-                <a href="{{ route('login') }}" class="inline-flex items-center gap-1 text-sm font-medium text-brand-900 hover:underline">
-                    <i class="ri-login-box-line" aria-hidden="true"></i> Sign in
-                </a>
+                <div class="flex items-center gap-2">
+                    <x-theme-toggle class="h-10 w-10 px-0" />
+                    <a href="{{ route('login') }}" class="inline-flex h-10 items-center gap-2 rounded-[11px] bg-[var(--ed-btn)] px-3.5 text-sm font-semibold text-[var(--ed-btn-ink)] hover:opacity-90">
+                        <i class="ri-login-box-line" aria-hidden="true"></i> Sign in
+                    </a>
+                </div>
             </div>
         </header>
         <main id="main-content" class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">

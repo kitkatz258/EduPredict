@@ -116,8 +116,13 @@ abstract class BaseTable extends Component
         $allowed = collect($this->columns())->pluck('key')->all();
         $field = in_array($this->sortField, $allowed, true) ? $this->sortField : 'id';
         $direction = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+        $query->orderBy($field, $direction);
 
-        return $query->orderBy($field, $direction);
+        if ($field !== 'id') {
+            $query->orderBy('id', $direction);
+        }
+
+        return $query;
     }
 
     public function rows(): LengthAwarePaginator

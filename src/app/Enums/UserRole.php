@@ -47,7 +47,7 @@ enum UserRole: string
     }
 
     /**
-     * Roles an administrator may create. Students self-register.
+     * Roles an administrator may create. Students are provisioned from Eligible students.
      *
      * @return list<self>
      */

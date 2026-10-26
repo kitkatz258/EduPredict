@@ -59,9 +59,17 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         ->middleware('role:department_head')
         ->name('department.students');
 
+    Route::get('/department/reports', [RoleDashboardController::class, 'departmentReports'])
+        ->middleware('role:department_head')
+        ->name('department.reports');
+
     Route::get('/dean/dashboard', [RoleDashboardController::class, 'dean'])
         ->middleware('role:dean')
         ->name('dean.dashboard');
+
+    Route::get('/dean/reports', [RoleDashboardController::class, 'deanReports'])
+        ->middleware('role:dean')
+        ->name('dean.reports');
 
     Route::get('/admin/dashboard', [RoleDashboardController::class, 'admin'])
         ->middleware('role:administrator')
@@ -73,8 +81,11 @@ Route::middleware(['auth', 'active', 'password.changed'])->group(function () {
         Route::get('/admin/questionnaire', [QuestionnairePageController::class, 'index'])->name('admin.questionnaire');
         Route::get('/admin/psoc', [AdminPageController::class, 'psoc'])->name('admin.psoc');
         Route::get('/admin/colleges', [AdminPageController::class, 'colleges'])->name('admin.colleges');
+        Route::get('/admin/departments', [AdminPageController::class, 'departments'])->name('admin.departments');
+        Route::get('/admin/programs', [AdminPageController::class, 'programs'])->name('admin.programs');
         Route::get('/admin/interventions', [AdminPageController::class, 'interventions'])->name('admin.interventions');
         Route::get('/admin/audit', [AdminPageController::class, 'audit'])->name('admin.audit');
+        Route::get('/admin/prediction-grants', [AdminPageController::class, 'predictionGrants'])->name('admin.prediction-grants');
         Route::get('/admin/deletion-requests', [AdminPageController::class, 'deletionRequests'])->name('admin.deletion-requests');
     });
 
