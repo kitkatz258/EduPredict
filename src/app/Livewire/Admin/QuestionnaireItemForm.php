@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Http\Requests\Admin\QuestionnaireItemRequest;
+use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\QuestionnaireItem;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Contracts\View\View;
@@ -11,6 +12,8 @@ use Livewire\Component;
 
 class QuestionnaireItemForm extends Component
 {
+    use DispatchesToasts;
+
     public bool $show = false;
 
     public bool $locked = false;
@@ -39,6 +42,8 @@ class QuestionnaireItemForm extends Component
     {
         $this->authorize('create', QuestionnaireItem::class);
         $this->definition_version = (string) config('edupredict.questionnaire.current_version', 'draft-v1');
+        $this->section = $this->defaultSection();
+        $this->syncCategory();
         if ($itemId) {
             $this->loadItem($itemId);
             $this->show = true;
@@ -50,9 +55,10 @@ class QuestionnaireItemForm extends Component
     {
         $this->authorize('create', QuestionnaireItem::class);
         $this->reset(['itemId', 'text', 'reverse_scored', 'sort_order', 'statusMessage']);
-        $this->section = 'academic_behavior';
-        $this->construct = 'study_habits';
         $this->definition_version = (string) config('edupredict.questionnaire.current_version', 'draft-v1');
+        $this->section = $this->defaultSection();
+        $this->construct = 'study_habits';
+        $this->syncCategory();
         $this->is_active = true;
         $this->is_draft = true;
         $this->locked = false;
@@ -79,6 +85,13 @@ class QuestionnaireItemForm extends Component
         $this->syncCategory();
     }
 
+    public function updatedDefinitionVersion(): void
+    {
+        if (! $this->allowsReverseScoring()) {
+            $this->reverse_scored = false;
+        }
+    }
+
     public function save(AuditLogger $audit): void
     {
         $this->authorize('create', QuestionnaireItem::class);
@@ -91,17 +104,15 @@ class QuestionnaireItemForm extends Component
 
             return;
         }
-        if ($validated['definition_version'] === 'ucc-panel-approved-v1' && $this->reverse_scored) {
-            $this->addError('reverse_scored', 'The panel-approved instrument has no reverse-scored items.');
-
-            return;
+        if (! $this->allowsReverseScoring($validated['definition_version'])) {
+            $this->reverse_scored = false;
         }
         $payload = [
             'section' => $validated['section'],
             'definition_version' => $validated['definition_version'],
             'construct' => $validated['construct'],
             'text' => $validated['text'],
-            'reverse_scored' => (bool) $this->reverse_scored,
+            'reverse_scored' => $this->allowsReverseScoring($validated['definition_version']) && $this->reverse_scored,
             'is_active' => (bool) $this->is_active,
             'is_draft' => (bool) $this->is_draft,
             'sort_order' => (int) ($validated['sort_order'] ?? 0),
@@ -116,20 +127,22 @@ class QuestionnaireItemForm extends Component
                 return;
             }
             $item->update($payload);
-            $this->statusMessage = 'Questionnaire item updated.';
+            $message = 'Questionnaire item successfully updated.';
         } else {
             $item = QuestionnaireItem::query()->create($payload);
-            $this->itemId = $item->id;
-            $this->statusMessage = 'Questionnaire item added.';
+            $message = 'Questionnaire item successfully added.';
         }
 
-        $this->show = true;
-        $this->locked = $item->answers()->exists();
         $audit->record('questionnaire_item_saved', $item, [
             'construct' => $item->construct,
             'is_active' => $item->is_active,
         ]);
+        $this->show = false;
+        $this->locked = false;
+        $this->reset(['itemId', 'text', 'reverse_scored', 'sort_order', 'statusMessage']);
+        $this->resetValidation();
         $this->dispatch('catalog-changed');
+        $this->successDialog($message);
     }
 
     public function render(): View
@@ -140,6 +153,7 @@ class QuestionnaireItemForm extends Component
             'categories' => $this->categoryOptions(),
             'sections' => config('edupredict.questionnaire.sections', []),
             'versions' => config('edupredict.questionnaire.versions', []),
+            'allowsReverse' => $this->allowsReverseScoring(),
         ]);
     }
 
@@ -181,6 +195,23 @@ class QuestionnaireItemForm extends Component
         if (! array_key_exists($this->construct, $allowed)) {
             $this->construct = (string) (array_key_first($allowed) ?? '');
         }
+    }
+
+    private function defaultSection(): string
+    {
+        $sections = config('edupredict.questionnaire.versions.'.$this->definition_version.'.sections', []);
+        if (is_array($sections) && isset($sections[0]) && is_string($sections[0])) {
+            return $sections[0];
+        }
+
+        return 'academic_behavior';
+    }
+
+    private function allowsReverseScoring(?string $version = null): bool
+    {
+        $version ??= $this->definition_version;
+
+        return (bool) config('edupredict.questionnaire.versions.'.$version.'.reverse_scoring', false);
     }
 
     private function loadItem(int $itemId): void

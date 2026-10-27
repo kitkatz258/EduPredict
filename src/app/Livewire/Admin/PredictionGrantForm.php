@@ -91,10 +91,11 @@ class PredictionGrantForm extends Component
             return;
         }
 
-        $this->toast('Extra prediction slots were granted for '.$this->manilaDate.'. No prediction was created.');
+        $message = 'Extra prediction slots were granted for '.$this->manilaDate.'.';
         $this->show = false;
         $this->resetForm();
         $this->dispatch('prediction-grants-changed');
+        $this->successDialog($message);
     }
 
     public function render(): View

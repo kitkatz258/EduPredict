@@ -3,9 +3,6 @@
         <x-dialog title="Edit user" close="closeForm" description="Role changes stay inside the active staff roles. Prediction history is kept.">
             <form id="edit-user-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="save" label="Saving user…" />
-                @if ($statusMessage !== '')
-                    <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
-                @endif
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="edit-user-name" class="mb-1 block text-sm font-medium">Name</label>

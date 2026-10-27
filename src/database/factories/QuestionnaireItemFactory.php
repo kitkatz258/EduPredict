@@ -14,7 +14,7 @@ class QuestionnaireItemFactory extends Factory
     {
         return [
             'section' => 'academic_behavior',
-            'definition_version' => config('edupredict.questionnaire.current_version', 'draft-v1'),
+            'definition_version' => 'draft-v1',
             'construct' => 'study_habits',
             'text' => fake()->sentence(),
             'reverse_scored' => false,

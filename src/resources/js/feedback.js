@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2';
+import { restorePageInteraction } from './restore-page';
 
 const brand = '#111827';
 
@@ -61,7 +62,34 @@ export function confirmAction({ title = 'Are you sure?', text = '', confirmText 
         heightAuto: false,
         returnFocus: true,
         ...motionOptions(),
-    }).then((result) => result.isConfirmed);
+    }).then((result) => {
+        restorePageInteraction();
+
+        return result.isConfirmed;
+    });
+}
+
+export function successDialog({ title = 'Saved', text = '' } = {}) {
+    restorePageInteraction();
+
+    return Swal.fire({
+        title,
+        text,
+        icon: 'success',
+        showCancelButton: false,
+        confirmButtonText: 'OK',
+        confirmButtonColor: brand,
+        backdrop: true,
+        allowEnterKey: true,
+        allowOutsideClick: false,
+        heightAuto: false,
+        returnFocus: true,
+        ...motionOptions(),
+    }).then((result) => {
+        restorePageInteraction();
+
+        return result.isConfirmed;
+    });
 }
 
 /* Top progress bar for page navigation and slow Livewire requests. */
@@ -359,6 +387,8 @@ function installQuestionnaireScroll() {
 export function installFeedback() {
     window.toast = toast;
     window.confirmAction = confirmAction;
+    window.successDialog = successDialog;
+    window.edupredictRestorePageInteraction = restorePageInteraction;
     window.pageProgress = progress;
     window.edupredictGradeRemark = gradeRemark;
     window.edupredictApplyGradeRemark = applyGradeRemark;
@@ -498,6 +528,13 @@ export function installFeedback() {
             const data = Array.isArray(payload) ? payload[0] : payload;
             toast(data?.type ?? 'success', data?.message ?? '');
         });
+        window.Livewire.on('success-dialog', (payload) => {
+            const data = Array.isArray(payload) ? payload[0] : payload;
+            successDialog({
+                title: data?.title || 'Saved',
+                text: data?.message ?? data?.text ?? '',
+            });
+        });
 
         let inflight = 0;
         window.Livewire.hook('request', ({ succeed, fail }) => {
@@ -508,6 +545,7 @@ export function installFeedback() {
                 progress.done();
                 if (inflight === 0) {
                     releaseLocks();
+                    restorePageInteraction();
                 }
             };
             succeed(finish);

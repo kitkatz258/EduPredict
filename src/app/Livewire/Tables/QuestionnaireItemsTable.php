@@ -120,7 +120,6 @@ class QuestionnaireItemsTable extends BaseTable
             ['key' => 'sort_order', 'label' => 'Order', 'sortable' => true],
             ['key' => 'construct', 'label' => 'Category', 'sortable' => true],
             ['key' => 'text', 'label' => 'Item', 'sortable' => true],
-            ['key' => 'reverse_scored', 'label' => 'Reverse', 'sortable' => true],
             ['key' => 'is_active', 'label' => 'Active', 'sortable' => true],
             ['key' => 'is_draft', 'label' => 'Draft', 'sortable' => true],
         ];

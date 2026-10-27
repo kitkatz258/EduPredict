@@ -42,7 +42,7 @@ final class CareerMatchBuilder
             return collect();
         }
 
-        $occupations = PsocOccupation::query()->orderBy('psoc_code')->get();
+        $occupations = PsocOccupation::query()->where('is_active', true)->orderBy('psoc_code')->get();
         if ($occupations->isEmpty()) {
             return collect();
         }

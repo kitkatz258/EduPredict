@@ -19,6 +19,7 @@ use App\Services\Profile\AssessmentProgress;
 use App\Services\Questionnaire\ApprovedInstrumentCatalog;
 use App\Services\Questionnaire\QuestionnaireScorer;
 use App\Services\Questionnaire\QuestionnaireSnapshot;
+use App\Services\Questionnaire\RevisedInstrumentCatalog;
 use App\Services\Questionnaire\SectionScorePresenter;
 use Database\Seeders\QuestionnaireItemSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,11 +36,13 @@ class QuestionnaireTest extends TestCase
     {
         $this->seed(QuestionnaireItemSeeder::class);
 
-        $this->assertSame(56, QuestionnaireItem::query()->count());
+        $this->assertSame(116, QuestionnaireItem::query()->count());
         $this->assertSame(36, QuestionnaireItem::query()->where('is_draft', false)->count());
         $this->assertSame(20, QuestionnaireItem::query()->where('definition_version', 'draft-v1')->where('section', 'academic_behavior')->count());
-        $this->assertSame(ApprovedInstrumentCatalog::VERSION, config('edupredict.questionnaire.current_version'));
+        $this->assertSame(RevisedInstrumentCatalog::VERSION, config('edupredict.questionnaire.current_version'));
         $this->assertSame(36, QuestionnaireItem::query()->where('definition_version', ApprovedInstrumentCatalog::VERSION)->count());
+        $this->assertSame(60, QuestionnaireItem::query()->where('definition_version', RevisedInstrumentCatalog::VERSION)->count());
+        $this->assertSame(0, QuestionnaireItem::query()->where('definition_version', RevisedInstrumentCatalog::VERSION)->where('reverse_scored', true)->count());
         $this->assertSame(0, QuestionnaireItem::query()->where('definition_version', ApprovedInstrumentCatalog::VERSION)->where('reverse_scored', true)->count());
         foreach (ApprovedInstrumentCatalog::items() as $item) {
             $this->assertDatabaseHas('questionnaire_items', [
@@ -160,20 +163,21 @@ class QuestionnaireTest extends TestCase
         $this->seed(QuestionnaireItemSeeder::class);
         $student = $this->makeStudent();
         $studyItems = QuestionnaireItem::query()
-            ->where('definition_version', ApprovedInstrumentCatalog::VERSION)
+            ->where('definition_version', RevisedInstrumentCatalog::VERSION)
             ->where('section', 'academic')
             ->orderBy('sort_order')
             ->get();
 
         $component = Livewire::actingAs($student->user)
             ->test(QuestionnaireForm::class)
-            ->assertSet('definitionVersion', ApprovedInstrumentCatalog::VERSION)
+            ->assertSet('definitionVersion', RevisedInstrumentCatalog::VERSION)
             ->assertSet('section', 'academic')
-            ->assertSee('0 / 36 answers saved')
-            ->assertSee('This section · 0 / 6 answered')
+            ->assertSee('0 / 60 answers saved')
+            ->assertSee('This section · 0 / 10 answered')
             ->assertSee('Overall · 0 / 6 sections saved')
             ->assertSee('Section 1 of 6')
             ->assertSee('I am satisfied with my current academic performance.')
+            ->assertSee('I know which subjects I need to improve in and what I need to do about it.')
             ->assertSee('Strongly Disagree')
             ->assertSeeInOrder(['Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree']);
 
@@ -187,8 +191,8 @@ class QuestionnaireTest extends TestCase
 
         $response = QuestionnaireResponse::query()->where('student_id', $student->id)->firstOrFail();
         $this->assertNull($response->submitted_at);
-        $this->assertSame(ApprovedInstrumentCatalog::VERSION, $response->definition_version);
-        $this->assertCount(6, $response->answers);
+        $this->assertSame(RevisedInstrumentCatalog::VERSION, $response->definition_version);
+        $this->assertCount(10, $response->answers);
         $this->assertDatabaseHas('questionnaire_items', [
             'definition_version' => 'draft-v1',
             'text' => 'I review my notes after class.',
@@ -198,7 +202,7 @@ class QuestionnaireTest extends TestCase
             ->test(QuestionnaireForm::class)
             ->assertSet('section', 'socioeconomic')
             ->assertSet('answers.'.$studyItems->first()->id, 4)
-            ->assertSee('6 / 36 answers saved')
+            ->assertSee('10 / 60 answers saved')
             ->assertSee('Overall · 1 / 6 sections saved')
             ->assertSee('My available budget is sufficient to cover my school-related expenses.');
     }
@@ -248,7 +252,7 @@ class QuestionnaireTest extends TestCase
             ->test(AssessmentWizard::class)
             ->call('goTo', 'employability')
             ->assertSet('step', 'questionnaire')
-            ->assertSee('Panel-approved · not psychometrically validated')
+            ->assertSee('Draft instrument')
             ->assertDontSee('planning categories only')
             ->assertDontSee('Mental alertness');
         $this->actingAs($head)->get(route('student.questionnaire'))->assertForbidden();
@@ -266,10 +270,15 @@ class QuestionnaireTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(QuestionnaireItemForm::class)
+            ->call('startCreate')
+            ->set('definition_version', 'draft-v1')
+            ->set('section', 'academic_behavior')
             ->set('text', 'I ask questions when I am stuck.')
             ->set('construct', 'engagement')
             ->call('save')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertSet('show', false)
+            ->assertDispatched('success-dialog');
 
         $this->assertDatabaseHas('questionnaire_items', [
             'text' => 'I ask questions when I am stuck.',
@@ -285,6 +294,8 @@ class QuestionnaireTest extends TestCase
         Livewire::actingAs($admin)
             ->test(QuestionnaireItemForm::class)
             ->call('startCreate')
+            ->set('definition_version', 'draft-v1')
+            ->set('section', 'academic_behavior')
             ->assertSee('Category')
             ->assertDontSee('Construct')
             ->assertSee('Study habits')
@@ -366,6 +377,10 @@ class QuestionnaireTest extends TestCase
     {
         $this->seed(QuestionnaireItemSeeder::class);
         $student = $this->makeStudent();
+        $student->questionnaireResponses()->create([
+            'definition_version' => ApprovedInstrumentCatalog::VERSION,
+            'submitted_at' => null,
+        ]);
         $items = QuestionnaireItem::query()->where('definition_version', ApprovedInstrumentCatalog::VERSION)->orderBy('id')->get();
         $answers = [];
         foreach ($items as $item) {
@@ -432,7 +447,7 @@ class QuestionnaireTest extends TestCase
 
         $this->seed(QuestionnaireItemSeeder::class);
 
-        $this->assertSame(56, QuestionnaireItem::query()->count());
+        $this->assertSame(116, QuestionnaireItem::query()->count());
         $this->assertSame('Temporarily changed.', $item->fresh()->text);
         $this->assertSame('I review my notes after class.', QuestionnaireItem::query()->where('definition_version', 'draft-v1')->where('construct', 'study_habits')->orderBy('sort_order')->value('text'));
     }
@@ -441,7 +456,7 @@ class QuestionnaireTest extends TestCase
     {
         $this->seed(QuestionnaireItemSeeder::class);
         $student = $this->makeStudent();
-        $items = QuestionnaireItem::query()->where('definition_version', ApprovedInstrumentCatalog::VERSION)->get();
+        $items = QuestionnaireItem::query()->where('definition_version', RevisedInstrumentCatalog::VERSION)->get();
         $answers = [];
         foreach ($items as $item) {
             $answers[$item->id] = 3;
@@ -450,7 +465,7 @@ class QuestionnaireTest extends TestCase
         $component = Livewire::actingAs($student->user)->test(QuestionnaireForm::class);
         $component->set('answers', $answers)->call('submit')->assertHasNoErrors();
         $storedMean = QuestionnaireResponse::query()->where('student_id', $student->id)->firstOrFail()->construct_scores['competence']['mean'];
-        $component->call('retake')->assertSet('definitionVersion', ApprovedInstrumentCatalog::VERSION);
+        $component->call('retake')->assertSet('definitionVersion', RevisedInstrumentCatalog::VERSION);
 
         $responses = QuestionnaireResponse::query()->where('student_id', $student->id)->orderBy('id')->get();
         $this->assertCount(2, $responses);

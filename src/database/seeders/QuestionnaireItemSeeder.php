@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\QuestionnaireItem;
 use App\Services\Questionnaire\ApprovedInstrumentCatalog;
+use App\Services\Questionnaire\RevisedInstrumentCatalog;
 use Illuminate\Database\Seeder;
 
 class QuestionnaireItemSeeder extends Seeder
@@ -75,6 +76,23 @@ class QuestionnaireItemSeeder extends Seeder
                     'reverse_scored' => false,
                     'is_active' => true,
                     'is_draft' => false,
+                ],
+            );
+        }
+
+        foreach (RevisedInstrumentCatalog::items() as $item) {
+            $this->writeItem(
+                [
+                    'definition_version' => RevisedInstrumentCatalog::VERSION,
+                    'section' => $item['section'],
+                    'sort_order' => $item['sort_order'],
+                ],
+                [
+                    'construct' => $item['construct'],
+                    'text' => $item['text'],
+                    'reverse_scored' => false,
+                    'is_active' => true,
+                    'is_draft' => true,
                 ],
             );
         }

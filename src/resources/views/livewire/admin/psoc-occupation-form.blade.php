@@ -3,9 +3,6 @@
         <x-dialog :title="$readOnly ? 'View occupation' : ($occupationId ? 'Edit occupation' : 'Add occupation')" close="closeForm" description="Use official PSA PSOC 2012 codes. Editing a row does not change compatibility scores already stored on a prediction.">
             <form id="psoc-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="save" label="Saving occupation…" />
-                @if ($statusMessage !== '')
-                    <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
-                @endif
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="psoc-code" class="mb-1 block text-sm font-medium">PSOC code</label>
@@ -53,6 +50,15 @@
                             <p class="mt-1 text-xs text-gray-500">New tags are recorded in the Activity Log.</p>
                             @error('newSkillTag') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                         @endunless
+                    </div>
+                    <div>
+                        <p class="mb-1 text-sm font-medium">Status</p>
+                        <label class="inline-flex items-center gap-2 text-sm">
+                            <input type="checkbox" wire:model="isActive" @disabled($readOnly) class="rounded border-brand-200 text-brand-900">
+                            Active for new career suggestions
+                        </label>
+                        <p class="mt-1 text-xs text-gray-500">Deactivating an occupation leaves stored prediction matches unchanged.</p>
+                        @error('isActive') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
                     <div class="sm:col-span-2">
                         <p class="mb-1 text-sm font-medium">Related program codes</p>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Tables;
 
 use App\Models\PsocOccupation;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
 use Livewire\Attributes\On;
@@ -17,12 +18,19 @@ class PsocOccupationsTable extends BaseTable
 
     public string $groupFilter = '';
 
+    public string $activeFilter = '';
+
     public function mount(): void
     {
         $this->authorize('viewAny', PsocOccupation::class);
     }
 
     public function updatingGroupFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingActiveFilter(): void
     {
         $this->resetPage();
     }
@@ -41,6 +49,21 @@ class PsocOccupationsTable extends BaseTable
         $this->dispatch('view-occupation', occupationId: $occupationId);
     }
 
+    public function setOccupationActive(int $occupationId, AuditLogger $audit): void
+    {
+        $occupation = PsocOccupation::query()->findOrFail($occupationId);
+        $this->authorize('update', $occupation);
+        $next = ! $occupation->is_active;
+        $occupation->update(['is_active' => $next]);
+        $audit->record('psoc_saved', $occupation, [
+            'psoc_code' => $occupation->psoc_code,
+            'is_active' => $next,
+        ]);
+        $this->toast($next
+            ? 'Occupation activated. It can appear in new career suggestions. Stored matches were not rewritten.'
+            : 'Occupation deactivated. It will not appear in new career suggestions. Stored matches stay as they were.');
+    }
+
     #[On('catalog-changed')]
     public function refreshCatalog(): void {}
 
@@ -55,6 +78,12 @@ class PsocOccupationsTable extends BaseTable
     {
         if ($this->groupFilter !== '') {
             $query->where('major_group', $this->groupFilter);
+        }
+
+        if ($this->activeFilter === 'active') {
+            $query->where('is_active', true);
+        } elseif ($this->activeFilter === 'inactive') {
+            $query->where('is_active', false);
         }
 
         return $query;

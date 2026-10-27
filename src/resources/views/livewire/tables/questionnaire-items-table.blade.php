@@ -63,7 +63,10 @@
                 <thead class="bg-brand-50">
                     <tr>
                         @foreach ($columns as $column)
-                            <th scope="col" class="px-4 py-3 text-left font-semibold text-brand-900">
+                            @php
+                                $centered = in_array($column['key'], ['definition_version', 'sort_order', 'is_active', 'is_draft'], true);
+                            @endphp
+                            <th scope="col" class="px-4 py-3 font-semibold text-brand-900 {{ $centered ? 'text-center' : 'text-left' }}">
                                 <button type="button" wire:click="sortBy('{{ $column['key'] }}')" class="inline-flex items-center gap-1">
                                     {{ $column['label'] }}
                                     @if ($sortField === $column['key'])
@@ -72,22 +75,25 @@
                                 </button>
                             </th>
                         @endforeach
-                        <th scope="col" class="px-4 py-3 text-left font-semibold text-brand-900">Actions</th>
+                        <th scope="col" class="min-w-[7.5rem] px-4 py-3 text-center font-semibold text-brand-900">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-brand-200">
                     @forelse ($rows as $index => $row)
                         <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-brand-50' }}">
-                            <td class="px-4 py-3">{{ $row->definition_version }}</td>
+                            <td class="px-4 py-3 text-center font-mono text-xs">{{ $row->definition_version }}</td>
                             <td class="px-4 py-3">{{ config('edupredict.questionnaire.sections.'.$row->section.'.label', $row->section) }}</td>
-                            <td class="px-4 py-3">{{ $row->sort_order }}</td>
+                            <td class="px-4 py-3 text-center">{{ $row->sort_order }}</td>
                             <td class="px-4 py-3">{{ config('edupredict.questionnaire.constructs.'.$row->construct, $row->construct) }}</td>
-                            <td class="px-4 py-3">{{ $row->text }}</td>
-                            <td class="px-4 py-3">{{ $row->reverse_scored ? 'Yes' : 'No' }}</td>
-                            <td class="px-4 py-3">{{ $row->is_active ? 'Yes' : 'No' }}</td>
-                            <td class="px-4 py-3">{{ $row->is_draft ? 'Yes' : 'No' }}</td>
+                            <td class="px-4 py-3 text-left">{{ $row->text }}</td>
+                            <td class="px-4 py-3 text-center">
+                                <x-status-pill :tone="$row->is_active ? 'success' : 'neutral'">{{ $row->is_active ? 'Active' : 'Inactive' }}</x-status-pill>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <x-status-pill :tone="$row->is_draft ? 'warning' : 'info'">{{ $row->is_draft ? 'Draft' : 'Published' }}</x-status-pill>
+                            </td>
                             <td class="px-4 py-3">
-                                <div class="flex flex-wrap gap-2">
+                                <div class="flex min-w-[7.5rem] flex-nowrap items-center justify-center gap-1.5">
                                     <x-table-action icon="ri-pencil-line" wire:click="editItem({{ $row->id }})">Edit</x-table-action>
                                     <x-table-action
                                         :icon="$row->is_active ? 'ri-close-circle-line' : 'ri-checkbox-circle-line'"

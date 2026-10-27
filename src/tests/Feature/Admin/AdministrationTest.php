@@ -58,7 +58,8 @@ class AdministrationTest extends TestCase
             ->set('code', 'cot')
             ->call('save')
             ->assertHasNoErrors()
-            ->assertSet('statusMessage', 'College added.');
+            ->assertSet('show', false)
+            ->assertDispatched('success-dialog', message: 'College successfully added.');
 
         $this->assertDatabaseHas('colleges', ['code' => 'COT']);
 

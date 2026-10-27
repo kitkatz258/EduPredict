@@ -40,7 +40,9 @@
                     <td>{{ $row->code }}</td>
                     <td>{{ $row->title }}</td>
                     <td>{{ ucfirst($row->min_risk_level) }}</td>
-                    <td>{{ $row->is_active ? 'Active' : 'Inactive' }}</td>
+                    <td class="text-center">
+                        <x-status-pill :tone="$row->is_active ? 'success' : 'neutral'">{{ $row->is_active ? 'Active' : 'Inactive' }}</x-status-pill>
+                    </td>
                     <td>{{ \App\Support\CommaList::display($row->targets_factor) }}</td>
                     <td>
                         <div class="flex flex-wrap items-center gap-1.5">

@@ -53,6 +53,7 @@
                 const target = field || this.$refs.close || this.$refs.panel;
                 target?.focus({ preventScroll: true });
             });
+            return () => this.destroy();
         },
         closeMethod() {
             const host = this.$el?.closest?.('[data-dialog-close]') ?? this.$el;
@@ -101,7 +102,13 @@
             this.beginLeave(this.closeMethod());
         },
         destroy() {
-            document.body.classList.remove('overflow-hidden');
+            if (typeof window.edupredictRestorePageInteraction === 'function') {
+                window.edupredictRestorePageInteraction(document, this.$el);
+            } else {
+                document.body.classList.remove('overflow-hidden');
+                document.body.style.removeProperty('overflow');
+                document.documentElement.classList.remove('overflow-hidden');
+            }
             if (this.previous && typeof this.previous.focus === 'function') {
                 this.previous.focus();
             }

@@ -2,9 +2,6 @@
     @if ($show)
         <x-dialog :title="$departmentId ? 'Edit department' : 'Add department'" close="closeForm" description="A department can hold more than one program. Existing programs keep their records.">
             <form id="department-form" wire:submit="save" class="space-y-4 px-5 py-5 sm:px-6">
-                @if ($statusMessage !== '')
-                    <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
-                @endif
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <label for="department-college" class="mb-1 block text-sm font-medium">College</label>

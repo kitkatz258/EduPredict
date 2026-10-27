@@ -137,19 +137,16 @@ class AdminManagementTest extends TestCase
             ->call('setRoleFilter', 'faculty')
             ->assertSee('Old Faculty Member');
 
-        Livewire::actingAs($admin)->test(EditUserForm::class)
+        $edit = Livewire::actingAs($admin)->test(EditUserForm::class)
             ->call('open', $head->id)
             ->set('name', 'Updated Head')
             ->set('resetPassword', true)
             ->call('save')
             ->assertHasNoErrors()
-            ->assertSee('Temporary password');
+            ->assertSet('show', false)
+            ->assertDispatched('success-dialog');
 
-        $password = Livewire::actingAs($admin)->test(EditUserForm::class)
-            ->call('open', $head->id)
-            ->set('resetPassword', true)
-            ->call('save')
-            ->get('temporaryPassword');
+        $password = $edit->get('temporaryPassword');
 
         $this->assertSame('Updated Head', $head->fresh()->name);
         $this->assertIsString($password);
@@ -195,7 +192,8 @@ class AdminManagementTest extends TestCase
             ->set('code', 'dot')
             ->call('save')
             ->assertHasNoErrors()
-            ->assertSee('Department added.');
+            ->assertSet('show', false)
+            ->assertDispatched('success-dialog', message: 'Department successfully added.');
 
         $this->assertDatabaseHas('departments', ['code' => 'DOT', 'college_id' => $college->id]);
 

@@ -115,10 +115,10 @@ class InterventionForm extends Component
             $intervention = Intervention::query()->findOrFail($this->interventionId);
             $this->authorize('update', $intervention);
             $intervention->update($payload);
-            $message = 'Intervention updated. Actions already stored on predictions are not rewritten.';
+            $message = 'Intervention successfully updated.';
         } else {
             $intervention = Intervention::query()->create($payload);
-            $message = 'Intervention added to the predefined list.';
+            $message = 'Intervention successfully added.';
         }
 
         $audit->record('intervention_saved', $intervention, ['code' => $intervention->code]);
@@ -128,7 +128,7 @@ class InterventionForm extends Component
         $this->minRiskLevel = 'moderate';
         $this->resetValidation();
         $this->dispatch('catalog-changed');
-        $this->toast($message);
+        $this->successDialog($message);
     }
 
     public function render(): View

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Admin;
 
 use App\Enums\UserRole;
+use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\Program;
@@ -17,6 +18,8 @@ use Livewire\Component;
 
 class EditUserForm extends Component
 {
+    use DispatchesToasts;
+
     public bool $show = false;
 
     public ?int $userId = null;
@@ -115,14 +118,18 @@ class EditUserForm extends Component
         }
 
         $result = $accounts->update($user, $payload, auth()->user(), request()->ip());
-        $this->fillFrom($result['user']);
         $this->temporaryPassword = $result['temporary_password'];
         $this->resetPassword = false;
-        $this->statusMessage = $result['temporary_password']
-            ? 'User updated. Share the temporary password securely.'
-            : 'User updated.';
-        $this->show = true;
+        $this->statusMessage = '';
+        $this->show = false;
+        $this->resetValidation();
         $this->dispatch('users-changed');
+        $this->successDialog(
+            $this->temporaryPassword
+                ? 'Temporary password: '.$this->temporaryPassword.'. Share it securely. It is shown only once.'
+                : 'The account details were saved.',
+            'User successfully updated.',
+        );
     }
 
     public function render(): View

@@ -3,9 +3,6 @@
         <x-dialog :title="$programId ? 'Edit program' : 'Add program'" close="closeForm" description="Programs stay linked to a college and, when set, one department.">
             <form id="program-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="save" label="Saving program…" />
-                @if ($statusMessage !== '')
-                    <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
-                @endif
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <label for="program-college" class="mb-1 block text-sm font-medium">College</label>

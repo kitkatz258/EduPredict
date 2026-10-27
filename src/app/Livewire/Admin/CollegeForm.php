@@ -79,17 +79,18 @@ class CollegeForm extends Component
             $college = College::query()->findOrFail($this->collegeId);
             $this->authorize('update', $college);
             $college->update($payload);
-            $this->statusMessage = 'College updated.';
+            $message = 'College successfully updated.';
         } else {
             $college = College::query()->create($payload);
-            $this->collegeId = $college->id;
-            $this->statusMessage = 'College added.';
+            $message = 'College successfully added.';
         }
 
-        $this->show = true;
         $audit->record('college_saved', $college, ['code' => $college->code]);
+        $this->show = false;
+        $this->reset(['collegeId', 'name', 'code', 'statusMessage']);
+        $this->resetValidation();
         $this->dispatch('catalog-changed');
-        $this->toast($this->statusMessage);
+        $this->successDialog($message);
     }
 
     public function render(): View

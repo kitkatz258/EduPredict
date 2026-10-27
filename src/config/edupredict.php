@@ -71,6 +71,15 @@ return [
     ],
 
     /*
+    | Surname-based student passwords stay OFF. They are predictable and must
+    | never run in production or against real student accounts. The default
+    | provisioner issues a random 12-character password and forces a change.
+    */
+    'provisioning' => [
+        'surname_password' => false,
+    ],
+
+    /*
     | Qualitative program-shift reading. Philippine scale: a higher GWA is weaker.
     | This is not a model score and must never be shown as a percentage.
     */
@@ -176,13 +185,14 @@ return [
     ],
 
     'questionnaire' => [
-        'current_version' => 'ucc-panel-approved-v1',
+        'current_version' => 'ucc-panel-revised-60-v2',
         'versions' => [
             'draft-v1' => [
                 'label' => 'Draft research instrument v1',
                 'status' => 'draft',
                 'navigation' => 'construct',
                 'scoring' => 'legacy-0-100',
+                'reverse_scoring' => true,
                 'sections' => ['academic_behavior'],
                 'source_note' => 'Items remain draft until their research source and adaptation are approved.',
             ],
@@ -191,10 +201,22 @@ return [
                 'status' => 'panel_approved',
                 'navigation' => 'section',
                 'scoring' => 'section-mean-1-5',
+                'reverse_scoring' => false,
                 'psychometrically_validated' => false,
                 'sections' => ['academic', 'socioeconomic', 'behavioral', 'competence', 'psychological_capital', 'self_perceived_employability'],
                 'directions' => 'Please indicate how much you agree with each statement based on your current experience as a student. Check one box for each statement, using the scale below. There are no right or wrong answers, so please answer honestly.',
                 'source_note' => 'Panel-approved for the UCC capstone in October 2026. The source PDFs still describe this instrument as a draft for expert validation. It is not psychometrically validated for UCC CLAS students and is not a clinical or diagnostic assessment.',
+            ],
+            'ucc-panel-revised-60-v2' => [
+                'label' => 'UCC revised 60-item instrument v2 (pending panel reapproval)',
+                'status' => 'draft',
+                'navigation' => 'section',
+                'scoring' => 'section-mean-1-5',
+                'reverse_scoring' => false,
+                'psychometrically_validated' => false,
+                'sections' => ['academic', 'socioeconomic', 'behavioral', 'competence', 'psychological_capital', 'self_perceived_employability'],
+                'directions' => 'Please indicate how much you agree with each statement based on your current experience as a student. Check one box for each statement, using the scale below. There are no right or wrong answers, so please answer honestly.',
+                'source_note' => 'Revised 60-item draft pending adviser and panel reapproval. It is not panel-approved and is not psychometrically validated. Existing 36-item submissions stay on ucc-panel-approved-v1.',
             ],
         ],
         'sections' => [

@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Enums\UserRole;
+use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\Program;
@@ -14,6 +15,8 @@ use Livewire\Component;
 
 class CreateStaffForm extends Component
 {
+    use DispatchesToasts;
+
     public bool $show = false;
 
     public string $name = '';
@@ -92,9 +95,13 @@ class CreateStaffForm extends Component
         $this->temporaryPassword = $result['temporary_password'];
         $this->reset(['name', 'email', 'college_id', 'department_id', 'program_id']);
         $this->role = UserRole::DepartmentHead->value;
-        $this->show = true;
+        $this->show = false;
+        $this->resetValidation();
         $this->dispatch('users-changed');
-        session()->flash('success', 'Staff account created. Share the temporary password securely.');
+        $this->successDialog(
+            'Temporary password: '.$this->temporaryPassword.'. Share it securely. It is shown only once.',
+            'Staff account successfully added.',
+        );
     }
 
     public function render()

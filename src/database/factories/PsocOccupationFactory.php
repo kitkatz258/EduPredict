@@ -19,6 +19,7 @@ class PsocOccupationFactory extends Factory
             'description' => 'Starter occupational category for development data.',
             'skill_tags' => ['programming', 'sql'],
             'related_program_codes' => ['BSIS', 'BSIT', 'BSCS'],
+            'is_active' => true,
         ];
     }
 }

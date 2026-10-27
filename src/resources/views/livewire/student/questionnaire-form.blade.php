@@ -40,7 +40,6 @@
     data-sections='@json($sectionItemIds)'
     data-saved='@json($savedPerSection)'
     data-saved-answers='@json($saved)'
-    x-on:confirm-discard-questionnaire.window="window.confirmAction && window.confirmAction({ title: 'Discard unsaved answers?', text: 'Answers already saved in the draft stay on file. Only answers that have not been saved are discarded.', confirmText: 'Discard unsaved answers', danger: true }).then((ok) => { if (ok) $wire.discardUnsavedAndClose() })"
 >
     @if ($statusMessage !== '')
         <p class="rounded-xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
@@ -98,9 +97,7 @@
     @if ($wizardOpen)
         <x-dialog
             title="Questionnaire"
-            close="closeWizard"
-            discard="discardUnsavedAndClose"
-            :unsaved="$unsaved"
+            close="saveDraftAndClose"
             max-width="5xl"
             :description="($displayVersion['label'] ?? $definitionVersion).' · '.($reviewing ? 'Review' : ($partHeadings[$currentPart] ?? 'Section'))"
         >
@@ -267,7 +264,7 @@
             </x-slot:subhead>
 
             <form id="questionnaire-wizard" wire:submit="submit" class="relative">
-                <x-loading-overlay target="saveDraft,saveAndContinue,submit,previousPart,selectPart,openReview,discardDraft" label="Saving answers…" />
+                    <x-loading-overlay target="saveDraft,saveDraftAndClose,saveAndContinue,submit,previousPart,selectPart,openReview,discardDraft" label="Saving answers…" />
 
                 @if ($allItems->isEmpty())
                     <p class="px-5 py-8 text-center text-sm text-gray-600 sm:px-6">No active items are available for {{ $definitionVersion }}.</p>
@@ -334,12 +331,11 @@
             <x-slot:footer>
                 <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                     <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                        <button type="button" x-on:click="requestClose()" class="{{ $secondary }}">Cancel</button>
                         @if ($reviewing || $currentIndex > 0)
                             <button type="button" wire:click="previousPart" wire:loading.attr="disabled" wire:target="previousPart" class="{{ $secondary }}"><i class="ri-arrow-left-line" aria-hidden="true"></i>Back</button>
                         @endif
                         @unless ($reviewing)
-                            <button type="button" wire:click="saveDraft" wire:loading.attr="disabled" wire:target="saveDraft" class="{{ $outline }}"><x-spinner wire:loading wire:target="saveDraft" />Save draft</button>
+                            <button type="button" wire:click="saveDraftAndClose" wire:loading.attr="disabled" wire:target="saveDraftAndClose" class="{{ $outline }}"><x-spinner wire:loading wire:target="saveDraftAndClose" />Save draft &amp; close</button>
                         @endunless
                         @if ($hasDraft && ! $reviewing)
                             <button

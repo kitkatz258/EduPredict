@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\PsocOccupationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PsocOccupation extends Model
 {
-    /** @use HasFactory<\Database\Factories\PsocOccupationFactory> */
+    /** @use HasFactory<PsocOccupationFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -20,6 +21,7 @@ class PsocOccupation extends Model
         'description',
         'skill_tags',
         'related_program_codes',
+        'is_active',
     ];
 
     protected function casts(): array
@@ -27,6 +29,7 @@ class PsocOccupation extends Model
         return [
             'skill_tags' => 'array',
             'related_program_codes' => 'array',
+            'is_active' => 'boolean',
         ];
     }
 

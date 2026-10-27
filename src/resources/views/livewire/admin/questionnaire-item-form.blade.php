@@ -3,9 +3,6 @@
         <x-dialog :title="$itemId ? 'Edit questionnaire item' : 'Add questionnaire item'" close="closeForm" description="Definitions with student answers stay locked. Add a new version instead of rewriting them.">
             <form id="questionnaire-item-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="save" label="Saving question…" />
-                @if ($statusMessage !== '')
-                    <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">{{ $statusMessage }}</p>
-                @endif
                 @if ($locked)
                     <p class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900" role="status">This definition has student answers and is locked. Create a new version instead.</p>
                 @endif
@@ -13,7 +10,7 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="definition_version" class="mb-1 block text-sm font-medium">Definition version</label>
-                        <select id="definition_version" wire:model="definition_version" @disabled($locked) class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
+                        <select id="definition_version" wire:model.live="definition_version" @disabled($locked) class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
                             @foreach ($versions as $value => $definition)
                                 <option value="{{ $value }}">{{ $definition['label'] ?? $value }}</option>
                             @endforeach
@@ -55,8 +52,12 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-4 text-sm">
-                    <label class="inline-flex items-center gap-2"><input type="checkbox" wire:model="reverse_scored" @disabled($locked) class="rounded border-brand-200 text-brand-900"> Reverse scored</label>
-                    @error('reverse_scored') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+                    @if ($allowsReverse)
+                        <label class="inline-flex items-center gap-2"><input type="checkbox" wire:model="reverse_scored" @disabled($locked) class="rounded border-brand-200 text-brand-900"> Reverse scored</label>
+                        @error('reverse_scored') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+                    @elseif ($locked)
+                        <p class="text-sm text-gray-600">Reverse scoring is historical metadata for this version and is not editable. Stored value: {{ $reverse_scored ? 'Yes' : 'No' }}.</p>
+                    @endif
                     <label class="inline-flex items-center gap-2"><input type="checkbox" wire:model="is_active" @disabled($locked) class="rounded border-brand-200 text-brand-900"> Active</label>
                     <label class="inline-flex items-center gap-2"><input type="checkbox" wire:model="is_draft" @disabled($locked) class="rounded border-brand-200 text-brand-900"> Draft scale item</label>
                 </div>

@@ -91,7 +91,7 @@ class InstitutionStudentForm extends Component
                 'email' => $validated['email'] ?? null,
                 'birthdate' => $validated['birthdate'] ?? null,
             ], auth()->user(), request()->ip());
-            $this->toast('Eligible student updated. The account and history were not changed.');
+            $message = 'Eligible student successfully updated.';
         } else {
             $validated = $this->validate([
                 'studentNumber' => ['required', 'string', 'max:32', Rule::unique('institution_students', 'student_number')->ignore($this->recordId)],
@@ -114,18 +114,19 @@ class InstitutionStudentForm extends Component
 
             if ($this->recordId === null) {
                 $registry->create($payload, auth()->user(), request()->ip());
-                $this->toast('Eligible student added. No account was created.');
+                $message = 'Eligible student successfully added.';
             } else {
                 $record = InstitutionStudent::query()->findOrFail($this->recordId);
                 $this->authorize('update', $record);
                 $registry->update($record, $payload, auth()->user(), request()->ip());
-                $this->toast('Eligible student updated.');
+                $message = 'Eligible student successfully updated.';
             }
         }
 
         $this->show = false;
         $this->resetForm();
         $this->dispatch('eligible-students-imported');
+        $this->successDialog($message);
     }
 
     public function render(): View

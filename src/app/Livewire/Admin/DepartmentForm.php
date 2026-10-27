@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Models\Department;
 use App\Services\Academic\AcademicActivation;
@@ -15,6 +16,8 @@ use Livewire\Component;
 
 class DepartmentForm extends Component
 {
+    use DispatchesToasts;
+
     public bool $show = false;
 
     public ?int $departmentId = null;
@@ -88,16 +91,19 @@ class DepartmentForm extends Component
             if ($collegeChanged) {
                 $department->programs()->update(['college_id' => $department->college_id]);
             }
-            $this->statusMessage = 'Department updated.';
+            $message = 'Department successfully updated.';
         } else {
             $department = Department::query()->create($payload);
-            $this->departmentId = $department->id;
-            $this->statusMessage = 'Department added.';
+            $message = 'Department successfully added.';
         }
 
-        $this->show = true;
         $audit->record('department_saved', $department, ['code' => $department->code]);
+        $this->show = false;
+        $this->reset(['departmentId', 'collegeId', 'name', 'code', 'statusMessage']);
+        $this->isActive = true;
+        $this->resetValidation();
         $this->dispatch('catalog-changed');
+        $this->successDialog($message);
     }
 
     public function render(): View

@@ -64,14 +64,7 @@ class QuestionnaireForm extends Component
 
     public function closeWizard(): void
     {
-        if ($this->unsavedChanges()) {
-            $this->dispatch('confirm-discard-questionnaire');
-
-            return;
-        }
-
-        $this->wizardOpen = false;
-        $this->reviewing = false;
+        $this->saveDraftAndClose();
     }
 
     public function discardUnsavedAndClose(): void
@@ -90,6 +83,22 @@ class QuestionnaireForm extends Component
         $this->statusMessage = 'Questionnaire draft saved. You can finish it later.';
         $this->toast($this->statusMessage);
         $this->dispatch('questionnaire-progress-updated');
+    }
+
+    public function saveDraftAndClose(): void
+    {
+        $student = $this->student();
+        $hasAnswers = $this->answeredCount($this->activeItems()) > 0 || $this->openDraft($student) !== null;
+        if ($hasAnswers || $this->unsavedChanges($student)) {
+            $this->persist($student, submit: false);
+            $this->statusMessage = 'Questionnaire draft saved. You can finish it later.';
+            $this->successDialog($this->statusMessage);
+            $this->dispatch('questionnaire-progress-updated');
+        }
+
+        $this->wizardOpen = false;
+        $this->reviewing = false;
+        $this->js('window.edupredictRestorePageInteraction && window.edupredictRestorePageInteraction()');
     }
 
     public function saveAndContinue(): void
@@ -224,6 +233,7 @@ class QuestionnaireForm extends Component
         $this->statusMessage = 'Thank you for answering this questionnaire. Section results are saved with this submission.';
         $this->toast('Questionnaire submitted.');
         $this->dispatch('questionnaire-submitted');
+        $this->js('window.edupredictRestorePageInteraction && window.edupredictRestorePageInteraction()');
     }
 
     public function retake(): void
@@ -274,6 +284,7 @@ class QuestionnaireForm extends Component
         $this->wizardOpen = false;
         $this->statusMessage = 'The unfinished draft was discarded. Submitted responses were kept.';
         $this->toast($this->statusMessage);
+        $this->js('window.edupredictRestorePageInteraction && window.edupredictRestorePageInteraction()');
     }
 
     public function render(SectionScorePresenter $presenter): View

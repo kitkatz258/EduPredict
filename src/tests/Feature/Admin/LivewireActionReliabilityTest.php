@@ -48,7 +48,8 @@ class LivewireActionReliabilityTest extends TestCase
             ->set('code', 'cts')
             ->call('save')
             ->assertHasNoErrors()
-            ->assertSet('statusMessage', 'College added.');
+            ->assertSet('show', false)
+            ->assertDispatched('success-dialog', message: 'College successfully added.');
 
         $this->assertDatabaseHas('colleges', [
             'name' => 'College of Temporary Studies',

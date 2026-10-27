@@ -40,6 +40,8 @@ class PsocOccupationForm extends Component
 
     public string $newSkillTag = '';
 
+    public bool $isActive = true;
+
     public string $statusMessage = '';
 
     public function mount(?int $occupationId = null): void
@@ -59,6 +61,7 @@ class PsocOccupationForm extends Component
             'occupationId', 'psocCode', 'title', 'majorGroup', 'description',
             'selectedSkills', 'selectedPrograms', 'newSkillTag', 'statusMessage',
         ]);
+        $this->isActive = true;
         $this->readOnly = false;
         $this->resetValidation();
         $this->show = true;
@@ -143,6 +146,7 @@ class PsocOccupationForm extends Component
             'selectedSkills.*' => ['string', 'max:64'],
             'selectedPrograms' => ['nullable', 'array'],
             'selectedPrograms.*' => ['string', 'max:32'],
+            'isActive' => ['boolean'],
         ]);
 
         if (! PsocCatalog::codeLooksOfficial($validated['psocCode'])) {
@@ -184,23 +188,30 @@ class PsocOccupationForm extends Component
             'description' => $validated['description'] ?? '',
             'skill_tags' => array_values(array_unique(array_filter($validated['selectedSkills'] ?? []))),
             'related_program_codes' => $programCodes,
+            'is_active' => (bool) $this->isActive,
         ];
 
         if ($this->occupationId) {
             $occupation = PsocOccupation::query()->findOrFail($this->occupationId);
             $this->authorize('update', $occupation);
             $occupation->update($payload);
-            $this->statusMessage = 'Occupation updated. Stored career matches are not rewritten.';
+            $message = 'Occupation successfully updated.';
         } else {
             $occupation = PsocOccupation::query()->create($payload);
-            $this->occupationId = $occupation->id;
-            $this->statusMessage = 'Occupation added.';
+            $message = 'Occupation successfully added.';
         }
 
-        $this->toast($this->statusMessage);
         $this->show = false;
+        $this->readOnly = false;
+        $this->reset([
+            'occupationId', 'psocCode', 'title', 'majorGroup', 'description',
+            'selectedSkills', 'selectedPrograms', 'newSkillTag', 'statusMessage',
+        ]);
+        $this->isActive = true;
+        $this->resetValidation();
         $audit->record('psoc_saved', $occupation, ['psoc_code' => $occupation->psoc_code]);
         $this->dispatch('catalog-changed');
+        $this->successDialog($message);
     }
 
     public function render(): View
@@ -235,5 +246,6 @@ class PsocOccupationForm extends Component
             'strtoupper',
             is_array($occupation->related_program_codes) ? $occupation->related_program_codes : [],
         )));
+        $this->isActive = (bool) $occupation->is_active;
     }
 }

@@ -46,7 +46,7 @@ class StudentAccountProvisioner
                 ]);
             }
 
-            $temporary = Str::password(12);
+            $temporary = $this->temporaryPassword($locked);
             $user = User::query()->create([
                 'name' => trim($locked->first_name.' '.$locked->last_name),
                 'email' => $email,
@@ -86,5 +86,30 @@ class StudentAccountProvisioner
 
             return ['user' => $user, 'student' => $student, 'temporary_password' => $temporary];
         });
+    }
+
+    /**
+     * Surname passwords stay behind an off-by-default, non-production flag.
+     * Production and real student accounts always receive a random password.
+     */
+    private function temporaryPassword(InstitutionStudent $record): string
+    {
+        if ($this->usesSurnamePassword()) {
+            $surname = strtoupper(trim((string) $record->last_name));
+            if ($surname !== '') {
+                return $surname;
+            }
+        }
+
+        return Str::password(12);
+    }
+
+    private function usesSurnamePassword(): bool
+    {
+        if (app()->environment('production')) {
+            return false;
+        }
+
+        return (bool) config('edupredict.provisioning.surname_password', false);
     }
 }

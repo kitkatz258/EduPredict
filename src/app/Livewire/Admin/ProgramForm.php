@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Models\Department;
 use App\Models\Program;
@@ -15,6 +16,8 @@ use Livewire\Component;
 
 class ProgramForm extends Component
 {
+    use DispatchesToasts;
+
     public bool $show = false;
 
     public ?int $programId = null;
@@ -89,17 +92,19 @@ class ProgramForm extends Component
             $program = Program::query()->findOrFail($this->programId);
             $this->authorize('update', $program);
             $program->update($payload);
-            $this->statusMessage = 'Program updated.';
+            $message = 'Program successfully updated.';
         } else {
             $payload['is_active'] = false;
             $program = Program::query()->create($payload);
-            $this->programId = $program->id;
-            $this->statusMessage = 'Program added.';
+            $message = 'Program successfully added.';
         }
 
-        $this->show = true;
         $audit->record('program_saved', $program, ['code' => $program->code]);
+        $this->show = false;
+        $this->reset(['programId', 'collegeId', 'departmentId', 'name', 'code', 'statusMessage']);
+        $this->resetValidation();
         $this->dispatch('catalog-changed');
+        $this->successDialog($message);
     }
 
     public function render(): View
