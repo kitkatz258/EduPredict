@@ -245,7 +245,8 @@ class AdminManagementTest extends TestCase
         $this->actingAs($admin)->get(route('admin.institution-students'))
             ->assertOk()
             ->assertSee('Eligible students')
-            ->assertSee('has not been claimed');
+            ->assertSee('Adding or importing a valid student creates a login')
+            ->assertSee('The initial password is their last name in uppercase');
 
         Livewire::actingAs($admin)->test(DeletionRequestsTable::class)
             ->assertSee('Please close this login.')
