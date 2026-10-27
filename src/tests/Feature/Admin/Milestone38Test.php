@@ -97,7 +97,7 @@ class Milestone38Test extends TestCase
             ->set('manilaDate', '2026-10-26')
             ->set('extraAttempts', 2)
             ->set('reason', 'Defense demonstration slot')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         $grant = PredictionAttemptGrant::query()->sole();

@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\ConfirmsAdminSaves;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\InstitutionStudent;
 use App\Models\Program;
 use App\Services\Admin\InstitutionStudentImporter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class InstitutionStudentForm extends Component
 {
+    use ConfirmsAdminSaves;
     use DispatchesToasts;
 
     public bool $show = false;
@@ -77,8 +80,9 @@ class InstitutionStudentForm extends Component
     public function save(InstitutionStudentImporter $registry): void
     {
         $this->authorize('create', InstitutionStudent::class);
+        $isEdit = $this->recordId !== null;
 
-        if ($this->recordId !== null && $this->registered) {
+        if ($isEdit && $this->registered) {
             $validated = $this->validate([
                 'yearLevel' => ['required', 'integer', 'between:1,4'],
                 'email' => ['nullable', 'email', 'max:255'],
@@ -86,12 +90,20 @@ class InstitutionStudentForm extends Component
             ], $this->yearMessages());
             $record = InstitutionStudent::query()->findOrFail($this->recordId);
             $this->authorize('update', $record);
-            $registry->update($record, [
-                'year_level' => $validated['yearLevel'],
-                'email' => $validated['email'] ?? null,
-                'birthdate' => $validated['birthdate'] ?? null,
-            ], auth()->user(), request()->ip());
-            $message = 'Eligible student successfully updated.';
+            if (! $this->consumeAdminSaveConfirmation(true)) {
+                return;
+            }
+            try {
+                $registry->update($record, [
+                    'year_level' => $validated['yearLevel'],
+                    'email' => $validated['email'] ?? null,
+                    'birthdate' => $validated['birthdate'] ?? null,
+                ], auth()->user(), request()->ip());
+            } catch (ValidationException $exception) {
+                $this->setErrorBag($exception->validator->getMessageBag());
+
+                return;
+            }
         } else {
             $validated = $this->validate([
                 'studentNumber' => ['required', 'string', 'max:32', Rule::unique('institution_students', 'student_number')->ignore($this->recordId)],
@@ -112,21 +124,32 @@ class InstitutionStudentForm extends Component
                 'birthdate' => $validated['birthdate'] ?? null,
             ];
 
-            if ($this->recordId === null) {
-                $registry->create($payload, auth()->user(), request()->ip());
-                $message = 'Eligible student successfully added.';
-            } else {
+            if ($isEdit) {
                 $record = InstitutionStudent::query()->findOrFail($this->recordId);
                 $this->authorize('update', $record);
-                $registry->update($record, $payload, auth()->user(), request()->ip());
-                $message = 'Eligible student successfully updated.';
+            }
+
+            if (! $this->consumeAdminSaveConfirmation($isEdit)) {
+                return;
+            }
+
+            try {
+                if (! $isEdit) {
+                    $registry->create($payload, auth()->user(), request()->ip());
+                } else {
+                    $registry->update($record, $payload, auth()->user(), request()->ip());
+                }
+            } catch (ValidationException $exception) {
+                $this->setErrorBag($exception->validator->getMessageBag());
+
+                return;
             }
         }
 
         $this->show = false;
         $this->resetForm();
         $this->dispatch('eligible-students-imported');
-        $this->successDialog($message);
+        $this->notifyAdminSaveSuccess($isEdit);
     }
 
     public function render(): View

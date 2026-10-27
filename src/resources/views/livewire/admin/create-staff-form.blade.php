@@ -1,8 +1,8 @@
 <div>
     @if ($show)
-        <x-dialog title="Add user" close="closeForm" description="This form adds a staff account. Student logins are issued from Eligible students with a one-time temporary password.">
+        <x-dialog title="Add user" close="closeForm" description="This form adds a staff account. Student logins are created when an eligible student is added or imported. Students sign in with their student number and their last name in uppercase, then change the password at first sign-in.">
             <form id="staff-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
-                <x-loading-overlay target="save" label="Creating account…" />
+                <x-loading-overlay target="save,confirmSave" label="Creating account…" />
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="staff-name" class="mb-1 block text-sm font-medium">Name</label>
@@ -63,7 +63,7 @@
                 @endif
             </form>
             <x-slot:footer>
-                <x-dialog-actions form="staff-form" submit="Create account" />
+                <x-dialog-actions form="staff-form" submit="Add" />
             </x-slot:footer>
         </x-dialog>
     @endif

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\ConfirmsAdminSaves;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Models\Department;
@@ -16,6 +17,7 @@ use Livewire\Component;
 
 class DepartmentForm extends Component
 {
+    use ConfirmsAdminSaves;
     use DispatchesToasts;
 
     public bool $show = false;
@@ -75,6 +77,18 @@ class DepartmentForm extends Component
             'isActive' => ['boolean'],
         ]);
 
+        $isEdit = $this->departmentId !== null;
+        $department = null;
+        if ($isEdit) {
+            $department = Department::query()->findOrFail($this->departmentId);
+            $this->authorize('update', $department);
+            $activation->assertDepartmentActive($department, (bool) $this->isActive);
+        }
+
+        if (! $this->consumeAdminSaveConfirmation($isEdit)) {
+            return;
+        }
+
         $payload = [
             'college_id' => $validated['collegeId'],
             'name' => $validated['name'],
@@ -82,19 +96,14 @@ class DepartmentForm extends Component
             'is_active' => (bool) $this->isActive,
         ];
 
-        if ($this->departmentId) {
-            $department = Department::query()->findOrFail($this->departmentId);
-            $this->authorize('update', $department);
-            $activation->assertDepartmentActive($department, (bool) $this->isActive);
+        if ($isEdit) {
             $collegeChanged = (int) $department->college_id !== (int) $payload['college_id'];
             $department->update($payload);
             if ($collegeChanged) {
                 $department->programs()->update(['college_id' => $department->college_id]);
             }
-            $message = 'Department successfully updated.';
         } else {
             $department = Department::query()->create($payload);
-            $message = 'Department successfully added.';
         }
 
         $audit->record('department_saved', $department, ['code' => $department->code]);
@@ -103,7 +112,7 @@ class DepartmentForm extends Component
         $this->isActive = true;
         $this->resetValidation();
         $this->dispatch('catalog-changed');
-        $this->successDialog($message);
+        $this->notifyAdminSaveSuccess($isEdit);
     }
 
     public function render(): View

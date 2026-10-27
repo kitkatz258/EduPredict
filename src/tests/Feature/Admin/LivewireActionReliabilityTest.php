@@ -14,6 +14,7 @@ use App\Models\Program;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -46,10 +47,10 @@ class LivewireActionReliabilityTest extends TestCase
             ->call('startCreate')
             ->set('name', 'College of Temporary Studies')
             ->set('code', 'cts')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors()
             ->assertSet('show', false)
-            ->assertDispatched('success-dialog', message: 'College successfully added.');
+            ->assertDispatched('success-dialog', title: 'Successfully added.');
 
         $this->assertDatabaseHas('colleges', [
             'name' => 'College of Temporary Studies',
@@ -112,8 +113,13 @@ class LivewireActionReliabilityTest extends TestCase
         $this->assertDatabaseHas('institution_students', [
             'student_number' => '2024-66666',
             'program_id' => $program->id,
-            'is_registered' => 0,
+            'is_registered' => 1,
         ]);
+        $this->assertDatabaseHas('students', ['student_number' => '2024-66666']);
+        $importedUser = User::query()->where('email', '2024-66666@students.edupredict.test')->first();
+        $this->assertNotNull($importedUser);
+        $this->assertTrue($importedUser->must_change_password);
+        $this->assertTrue(Hash::check('REYES', (string) $importedUser->password));
 
         $invalid = UploadedFile::fake()->create('notes.pdf', 8, 'application/pdf');
         $before = InstitutionStudent::query()->count();
@@ -129,7 +135,7 @@ class LivewireActionReliabilityTest extends TestCase
         $this->assertSame($before, InstitutionStudent::query()->count());
     }
 
-    public function test_manual_eligibility_does_not_create_an_account_and_unknown_numbers_still_cannot_register(): void
+    public function test_manual_eligibility_creates_a_login_and_unknown_numbers_still_cannot_register(): void
     {
         $admin = User::factory()->administrator()->create();
         $program = Program::factory()->create(['code' => 'BSIT', 'is_active' => true]);
@@ -144,17 +150,21 @@ class LivewireActionReliabilityTest extends TestCase
             ->set('firstName', 'Mara')
             ->set('programId', $program->id)
             ->set('yearLevel', 2)
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
-        $this->assertSame($accounts, User::query()->count());
+        $this->assertSame($accounts + 1, User::query()->count());
         $this->assertDatabaseHas('institution_students', [
             'student_number' => '2024-42424',
             'last_name' => 'Dizon',
             'first_name' => 'Mara',
             'program_id' => $program->id,
-            'is_registered' => 0,
+            'is_registered' => 1,
         ]);
+        $created = User::query()->where('email', '2024-42424@students.edupredict.test')->first();
+        $this->assertNotNull($created);
+        $this->assertTrue($created->must_change_password);
+        $this->assertTrue(Hash::check('DIZON', (string) $created->password));
 
         Livewire::actingAs($admin)
             ->test(InstitutionStudentForm::class)
@@ -210,7 +220,7 @@ class LivewireActionReliabilityTest extends TestCase
             ->test(CollegeForm::class)
             ->call('startEdit', $college->id)
             ->set('name', 'Kept College Renamed')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('colleges', [

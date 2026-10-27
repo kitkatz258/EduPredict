@@ -71,12 +71,13 @@ return [
     ],
 
     /*
-    | Surname-based student passwords stay OFF. They are predictable and must
-    | never run in production or against real student accounts. The default
-    | provisioner issues a random 12-character password and forces a change.
+    | Newly provisioned students sign in with their student number. The initial
+    | password is the registered last name in uppercase (spaces and punctuation
+    | kept). Existing claimed accounts are never reset. The student must change
+    | the password and accept consent before using the app.
     */
     'provisioning' => [
-        'surname_password' => false,
+        'placeholder_email_domain' => 'students.edupredict.test',
     ],
 
     /*

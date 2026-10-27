@@ -4,9 +4,9 @@
     </button>
 
     @if ($show)
-        <x-dialog :title="$recordId ? 'Edit eligible student' : 'Add eligible student'" close="closeForm" description="This updates the eligible list. Issuing a login is a separate action and does not change prediction history.">
+        <x-dialog :title="$recordId ? 'Edit eligible student' : 'Add eligible student'" close="closeForm" description="A new eligible student receives a login automatically. They sign in with their student number. The initial password is their last name in uppercase. Existing claimed accounts are not reset. Prediction history is kept.">
             <form id="eligible-student-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
-                <x-loading-overlay target="save" label="Saving eligible student…" />
+                <x-loading-overlay target="save,confirmSave" label="Saving eligible student…" />
                 @if ($registered)
                     <p class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">This number is already registered. Name, student number, and program stay as they were matched. Year level and optional contact fields can still be corrected.</p>
                 @endif
@@ -43,7 +43,7 @@
                         @error('programId') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label for="eligible-email" class="mb-1 block text-sm font-medium">Email (optional)</label>
+                        <label for="eligible-email" class="mb-1 block text-sm font-medium">Email (optional, for password recovery)</label>
                         <input id="eligible-email" type="email" wire:model="email" class="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm">
                         @error('email') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                     </div>
@@ -55,7 +55,7 @@
                 </div>
             </form>
             <x-slot:footer>
-                <x-dialog-actions form="eligible-student-form" submit="Save eligible student" />
+                <x-dialog-actions form="eligible-student-form" :submit="$recordId ? 'Save Changes' : 'Add'" />
             </x-slot:footer>
         </x-dialog>
     @endif

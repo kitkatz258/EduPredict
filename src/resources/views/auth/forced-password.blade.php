@@ -1,6 +1,6 @@
 <x-guest-layout>
     <h1 class="text-2xl font-bold tracking-[-0.02em] text-[#111827]">Set a new password</h1>
-    <p class="mt-1 text-sm text-gray-600">Your administrator created this account with a temporary password. Choose a new one before continuing.</p>
+    <p class="mt-1 text-sm text-gray-600">Your administrator created this account with an initial password. Choose a new one before continuing. Students also complete consent on this screen.</p>
 
     <form method="POST" action="{{ route('password.forced.update') }}" class="mt-6 space-y-4" novalidate>
         @csrf

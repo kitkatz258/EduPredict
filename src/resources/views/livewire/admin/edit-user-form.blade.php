@@ -2,7 +2,7 @@
     @if ($show)
         <x-dialog title="Edit user" close="closeForm" description="Role changes stay inside the active staff roles. Prediction history is kept.">
             <form id="edit-user-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
-                <x-loading-overlay target="save" label="Saving user…" />
+                <x-loading-overlay target="save,confirmSave" label="Saving user…" />
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="edit-user-name" class="mb-1 block text-sm font-medium">Name</label>
@@ -84,7 +84,7 @@
                 @endif
             </form>
             <x-slot:footer>
-                <x-dialog-actions form="edit-user-form" submit="Save user" />
+                <x-dialog-actions form="edit-user-form" submit="Save Changes" />
             </x-slot:footer>
         </x-dialog>
     @endif

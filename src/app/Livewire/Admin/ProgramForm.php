@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\ConfirmsAdminSaves;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Models\Department;
@@ -16,6 +17,7 @@ use Livewire\Component;
 
 class ProgramForm extends Component
 {
+    use ConfirmsAdminSaves;
     use DispatchesToasts;
 
     public bool $show = false;
@@ -81,6 +83,17 @@ class ProgramForm extends Component
             'departmentId.exists' => 'Choose a department inside the selected college.',
         ]);
 
+        $isEdit = $this->programId !== null;
+        $program = null;
+        if ($isEdit) {
+            $program = Program::query()->findOrFail($this->programId);
+            $this->authorize('update', $program);
+        }
+
+        if (! $this->consumeAdminSaveConfirmation($isEdit)) {
+            return;
+        }
+
         $payload = [
             'college_id' => $validated['collegeId'],
             'department_id' => $validated['departmentId'],
@@ -88,15 +101,11 @@ class ProgramForm extends Component
             'code' => strtoupper($validated['code']),
         ];
 
-        if ($this->programId) {
-            $program = Program::query()->findOrFail($this->programId);
-            $this->authorize('update', $program);
+        if ($isEdit) {
             $program->update($payload);
-            $message = 'Program successfully updated.';
         } else {
             $payload['is_active'] = false;
             $program = Program::query()->create($payload);
-            $message = 'Program successfully added.';
         }
 
         $audit->record('program_saved', $program, ['code' => $program->code]);
@@ -104,7 +113,7 @@ class ProgramForm extends Component
         $this->reset(['programId', 'collegeId', 'departmentId', 'name', 'code', 'statusMessage']);
         $this->resetValidation();
         $this->dispatch('catalog-changed');
-        $this->successDialog($message);
+        $this->notifyAdminSaveSuccess($isEdit);
     }
 
     public function render(): View

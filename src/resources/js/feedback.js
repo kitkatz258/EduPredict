@@ -45,6 +45,16 @@ export function toast(type, message) {
     });
 }
 
+export function confirmAdminSave({ isEdit = false } = {}) {
+    return confirmAction({
+        title: isEdit
+            ? 'Are you sure you want to save these changes?'
+            : 'Are you sure you want to add this record?',
+        confirmText: 'Yes, proceed',
+        danger: false,
+    });
+}
+
 export function confirmAction({ title = 'Are you sure?', text = '', confirmText = 'Continue', danger = true } = {}) {
     return Swal.fire({
         title,
@@ -387,6 +397,7 @@ function installQuestionnaireScroll() {
 export function installFeedback() {
     window.toast = toast;
     window.confirmAction = confirmAction;
+    window.confirmAdminSave = confirmAdminSave;
     window.successDialog = successDialog;
     window.edupredictRestorePageInteraction = restorePageInteraction;
     window.pageProgress = progress;

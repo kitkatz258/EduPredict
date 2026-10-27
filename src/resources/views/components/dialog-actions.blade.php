@@ -3,7 +3,7 @@
     'form' => null,
     'cancel' => 'Cancel',
     'readOnly' => false,
-    'target' => 'save',
+    'target' => 'save,confirmSave',
 ])
 
 <div {{ $attributes->merge(['class' => 'flex flex-wrap justify-end gap-2']) }}>

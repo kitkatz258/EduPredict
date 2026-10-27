@@ -3,11 +3,13 @@
 namespace Tests\Feature\Auth;
 
 use App\Livewire\Tables\InstitutionStudentsTable;
+use App\Models\AuditLog;
 use App\Models\InstitutionStudent;
 use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -43,28 +45,34 @@ class RegistrationTest extends TestCase
             'is_registered' => false,
         ]);
 
-        $component = Livewire::actingAs($admin)
+        Livewire::actingAs($admin)
             ->test(InstitutionStudentsTable::class)
             ->call('openProvision', $record->id)
             ->set('provisionEmail', 'lina@example.com')
             ->call('issueLogin')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertSet('provisioningId', null);
 
-        $password = $component->get('temporaryPassword');
-        $this->assertNotEmpty($password);
-        $this->assertNotSame('Reyes', $password);
+        $user = User::query()->where('email', 'lina@example.com')->first();
+        $this->assertNotNull($user);
+        $this->assertTrue($user->must_change_password);
+        $this->assertTrue(Hash::check('REYES', (string) $user->password));
+        $this->assertFalse(Hash::check('Reyes', (string) $user->password));
         $this->assertDatabaseHas('institution_students', [
             'student_number' => '2024-77777',
             'is_registered' => 1,
         ]);
         $this->assertDatabaseHas('students', ['student_number' => '2024-77777']);
-        $this->assertTrue(User::query()->where('email', 'lina@example.com')->first()?->must_change_password);
+        $provisionLog = AuditLog::query()->where('action', 'student_account_provisioned')->latest('id')->first();
+        $this->assertNotNull($provisionLog);
+        $this->assertStringNotContainsString('REYES', json_encode($provisionLog->meta));
+        $this->assertStringNotContainsString('password', strtolower((string) json_encode($provisionLog->meta)));
 
         auth()->logout();
 
         $this->post('/login', [
             'login' => '2024-77777',
-            'password' => $password,
+            'password' => 'REYES',
         ])->assertRedirect(route('student.dashboard', absolute: false));
 
         $this->get(route('student.dashboard'))->assertRedirect(route('password.forced'));

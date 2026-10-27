@@ -15,22 +15,15 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Issues a student login from an eligible-student row.
- * Temporary passwords are random, hashed, shown once, and never written to audit logs.
+ * The initial password is the uppercase last name, hashed before storage, and never written to audit logs.
  */
 class StudentAccountProvisioner
 {
     /**
      * @return array{user: User, student: Student, temporary_password: string}
      */
-    public function provision(InstitutionStudent $record, User $actor, string $email, ?string $ip = null): array
+    public function provision(InstitutionStudent $record, User $actor, ?string $email = null, ?string $ip = null): array
     {
-        $email = Str::lower(trim($email));
-        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw ValidationException::withMessages([
-                'email' => 'A valid email is required so the student can reset a forgotten password.',
-            ]);
-        }
-
         return DB::transaction(function () use ($record, $actor, $email, $ip): array {
             $locked = InstitutionStudent::query()->whereKey($record->id)->lockForUpdate()->firstOrFail();
 
@@ -40,16 +33,17 @@ class StudentAccountProvisioner
                 ]);
             }
 
-            if (User::query()->whereRaw('LOWER(email) = ?', [$email])->exists()) {
+            $resolvedEmail = $this->resolveEmail($locked, $email);
+            if (User::query()->whereRaw('LOWER(email) = ?', [$resolvedEmail])->exists()) {
                 throw ValidationException::withMessages([
                     'email' => 'That email is already used by another account.',
                 ]);
             }
 
-            $temporary = $this->temporaryPassword($locked);
+            $temporary = StudentInitialPassword::fromLastName((string) $locked->last_name);
             $user = User::query()->create([
                 'name' => trim($locked->first_name.' '.$locked->last_name),
-                'email' => $email,
+                'email' => $resolvedEmail,
                 'password' => $temporary,
                 'role' => UserRole::Student,
                 'is_active' => true,
@@ -69,7 +63,7 @@ class StudentAccountProvisioner
 
             $locked->update([
                 'is_registered' => true,
-                'email' => $email,
+                'email' => $resolvedEmail,
             ]);
 
             AuditLog::query()->create([
@@ -88,28 +82,29 @@ class StudentAccountProvisioner
         });
     }
 
-    /**
-     * Surname passwords stay behind an off-by-default, non-production flag.
-     * Production and real student accounts always receive a random password.
-     */
-    private function temporaryPassword(InstitutionStudent $record): string
+    public function resolveEmail(InstitutionStudent $record, ?string $email = null): string
     {
-        if ($this->usesSurnamePassword()) {
-            $surname = strtoupper(trim((string) $record->last_name));
-            if ($surname !== '') {
-                return $surname;
+        $candidate = Str::lower(trim((string) ($email ?: $record->email)));
+        if ($candidate !== '') {
+            if (! filter_var($candidate, FILTER_VALIDATE_EMAIL)) {
+                throw ValidationException::withMessages([
+                    'email' => 'A valid email is required so the student can reset a forgotten password.',
+                ]);
             }
+
+            return $candidate;
         }
 
-        return Str::password(12);
-    }
-
-    private function usesSurnamePassword(): bool
-    {
-        if (app()->environment('production')) {
-            return false;
+        $local = strtolower((string) preg_replace('/[^a-zA-Z0-9]+/', '-', trim((string) $record->student_number)));
+        $local = trim($local, '-');
+        if ($local === '') {
+            throw ValidationException::withMessages([
+                'email' => 'A valid email is required so the student can reset a forgotten password.',
+            ]);
         }
 
-        return (bool) config('edupredict.provisioning.surname_password', false);
+        $domain = (string) config('edupredict.provisioning.placeholder_email_domain', 'students.edupredict.test');
+
+        return $local.'@'.$domain;
     }
 }

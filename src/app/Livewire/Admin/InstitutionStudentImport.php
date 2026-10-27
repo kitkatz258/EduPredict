@@ -88,7 +88,10 @@ class InstitutionStudentImport extends Component
 
         if ($this->imported > 0) {
             $this->dispatch('eligible-students-imported');
-            $this->toast($this->imported === 1 ? '1 eligible student imported.' : "{$this->imported} eligible students imported.");
+            $this->toast(
+                ($this->imported === 1 ? '1 eligible student imported.' : "{$this->imported} eligible students imported.")
+                .' New students can sign in with their student number. The initial password is their last name in uppercase.'
+            );
         } elseif ($this->errorsList !== []) {
             $this->toast('The file was read, but nothing new was imported.', 'error');
         } else {

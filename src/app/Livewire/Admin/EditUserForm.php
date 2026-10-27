@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Admin;
 
 use App\Enums\UserRole;
+use App\Livewire\Concerns\ConfirmsAdminSaves;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Models\Department;
@@ -18,6 +19,7 @@ use Livewire\Component;
 
 class EditUserForm extends Component
 {
+    use ConfirmsAdminSaves;
     use DispatchesToasts;
 
     public bool $show = false;
@@ -104,6 +106,10 @@ class EditUserForm extends Component
             'program_id.exists' => 'Choose a program inside the selected department.',
         ]);
 
+        if (! $this->consumeAdminSaveConfirmation(true)) {
+            return;
+        }
+
         $payload = [
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -124,11 +130,11 @@ class EditUserForm extends Component
         $this->show = false;
         $this->resetValidation();
         $this->dispatch('users-changed');
-        $this->successDialog(
+        $this->notifyAdminSaveSuccess(
+            true,
             $this->temporaryPassword
                 ? 'Temporary password: '.$this->temporaryPassword.'. Share it securely. It is shown only once.'
                 : 'The account details were saved.',
-            'User successfully updated.',
         );
     }
 

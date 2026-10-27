@@ -34,7 +34,7 @@ class AdminAccountsTest extends TestCase
             ->set('email', 'head@staff.test')
             ->set('role', UserRole::DepartmentHead->value)
             ->set('department_id', $department->id)
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         Livewire::actingAs($admin)
@@ -43,7 +43,7 @@ class AdminAccountsTest extends TestCase
             ->set('email', 'dean@staff.test')
             ->set('role', UserRole::Dean->value)
             ->set('college_id', $college->id)
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         Livewire::actingAs($admin)
@@ -51,7 +51,7 @@ class AdminAccountsTest extends TestCase
             ->set('name', 'Admin Person')
             ->set('email', 'admin2@staff.test')
             ->set('role', UserRole::Administrator->value)
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('users', [
@@ -126,7 +126,7 @@ class AdminAccountsTest extends TestCase
             ->set('role', UserRole::DepartmentHead->value)
             ->set('department_id', $department->id)
             ->set('program_id', $inside->id)
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         $this->assertDatabaseMissing('users', ['email' => 'nodept@staff.test']);

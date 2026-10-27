@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Http\Requests\Admin\QuestionnaireItemRequest;
+use App\Livewire\Concerns\ConfirmsAdminSaves;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\QuestionnaireItem;
 use App\Services\Audit\AuditLogger;
@@ -12,6 +13,7 @@ use Livewire\Component;
 
 class QuestionnaireItemForm extends Component
 {
+    use ConfirmsAdminSaves;
     use DispatchesToasts;
 
     public bool $show = false;
@@ -107,6 +109,23 @@ class QuestionnaireItemForm extends Component
         if (! $this->allowsReverseScoring($validated['definition_version'])) {
             $this->reverse_scored = false;
         }
+
+        $isEdit = $this->itemId !== null;
+        $item = null;
+        if ($isEdit) {
+            $item = QuestionnaireItem::query()->findOrFail($this->itemId);
+            $this->authorize('update', $item);
+            if ($item->answers()->exists()) {
+                $this->addError('item', 'This definition has student answers and is locked. Create a new version instead.');
+
+                return;
+            }
+        }
+
+        if (! $this->consumeAdminSaveConfirmation($isEdit)) {
+            return;
+        }
+
         $payload = [
             'section' => $validated['section'],
             'definition_version' => $validated['definition_version'],
@@ -118,19 +137,10 @@ class QuestionnaireItemForm extends Component
             'sort_order' => (int) ($validated['sort_order'] ?? 0),
         ];
 
-        if ($this->itemId) {
-            $item = QuestionnaireItem::query()->findOrFail($this->itemId);
-            $this->authorize('update', $item);
-            if ($item->answers()->exists()) {
-                $this->addError('item', 'This definition has student answers and is locked. Create a new version instead.');
-
-                return;
-            }
+        if ($isEdit) {
             $item->update($payload);
-            $message = 'Questionnaire item successfully updated.';
         } else {
             $item = QuestionnaireItem::query()->create($payload);
-            $message = 'Questionnaire item successfully added.';
         }
 
         $audit->record('questionnaire_item_saved', $item, [
@@ -142,7 +152,7 @@ class QuestionnaireItemForm extends Component
         $this->reset(['itemId', 'text', 'reverse_scored', 'sort_order', 'statusMessage']);
         $this->resetValidation();
         $this->dispatch('catalog-changed');
-        $this->successDialog($message);
+        $this->notifyAdminSaveSuccess($isEdit);
     }
 
     public function render(): View

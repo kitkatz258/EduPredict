@@ -33,7 +33,7 @@
                 </div>
             </form>
             <x-slot:footer>
-                <x-dialog-actions form="department-form" submit="Save department" />
+                <x-dialog-actions form="department-form" :submit="$departmentId ? 'Save Changes' : 'Add'" />
             </x-slot:footer>
         </x-dialog>
     @endif

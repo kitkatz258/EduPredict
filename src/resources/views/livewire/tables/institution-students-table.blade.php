@@ -95,7 +95,7 @@
     </x-data-table>
 
     @if ($provisioning)
-        <x-dialog title="Issue student login" close="closeProvision" description="Creates a hashed temporary password. Surname-only passwords are not used. The student must change the password at first sign-in.">
+        <x-dialog title="Issue student login" close="closeProvision" description="Creates a login for an eligible student who does not have one yet. The student signs in with their student number. The initial password is their last name in uppercase. They must change it at first sign-in. The password is hashed and is never shown or logged.">
             <form id="provision-form" wire:submit="issueLogin" class="space-y-4 px-5 py-5 sm:px-6">
                 <dl class="grid gap-3 text-sm sm:grid-cols-2">
                     <div>
@@ -109,21 +109,12 @@
                 </dl>
                 <div>
                     <label for="provision-email" class="mb-1 block text-sm font-medium">Email for password resets</label>
-                    <input id="provision-email" type="email" wire:model="provisionEmail" class="ui-field" @disabled($temporaryPassword !== null)>
+                    <input id="provision-email" type="email" wire:model="provisionEmail" class="ui-field">
                     @error('provisionEmail') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                 </div>
-                @if ($temporaryPassword)
-                    <p class="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-900" role="status">Temporary password: <code>{{ $temporaryPassword }}</code>. Copy it now. It is not stored in logs.</p>
-                @endif
             </form>
             <x-slot:footer>
-                @if ($temporaryPassword)
-                    <div class="flex justify-end">
-                        <button type="button" x-on:click="requestClose()" class="ui-btn ui-btn-primary">Done</button>
-                    </div>
-                @else
-                    <x-dialog-actions form="provision-form" submit="Issue login" target="issueLogin" />
-                @endif
+                <x-dialog-actions form="provision-form" submit="Issue login" target="issueLogin" />
             </x-slot:footer>
         </x-dialog>
     @endif

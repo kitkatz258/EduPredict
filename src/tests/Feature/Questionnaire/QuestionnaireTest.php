@@ -275,10 +275,10 @@ class QuestionnaireTest extends TestCase
             ->set('section', 'academic_behavior')
             ->set('text', 'I ask questions when I am stuck.')
             ->set('construct', 'engagement')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors()
             ->assertSet('show', false)
-            ->assertDispatched('success-dialog');
+            ->assertDispatched('success-dialog', title: 'Successfully added.');
 
         $this->assertDatabaseHas('questionnaire_items', [
             'text' => 'I ask questions when I am stuck.',

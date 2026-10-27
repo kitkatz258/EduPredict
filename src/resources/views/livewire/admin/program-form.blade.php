@@ -2,7 +2,7 @@
     @if ($show)
         <x-dialog :title="$programId ? 'Edit program' : 'Add program'" close="closeForm" description="Programs stay linked to a college and, when set, one department.">
             <form id="program-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
-                <x-loading-overlay target="save" label="Saving program…" />
+                <x-loading-overlay target="save,confirmSave" label="Saving program…" />
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
                         <label for="program-college" class="mb-1 block text-sm font-medium">College</label>
@@ -37,7 +37,7 @@
                 </div>
             </form>
             <x-slot:footer>
-                <x-dialog-actions form="program-form" submit="Save program" />
+                <x-dialog-actions form="program-form" :submit="$programId ? 'Save Changes' : 'Add'" />
             </x-slot:footer>
         </x-dialog>
     @endif

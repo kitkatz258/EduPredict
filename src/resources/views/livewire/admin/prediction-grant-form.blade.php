@@ -2,7 +2,7 @@
     @if ($show)
         <x-dialog title="Grant extra prediction slots" close="closeForm" description="Adds extra successful attempts for one Philippine calendar date. The usual two-per-day count is not rewritten. Questionnaire answers stay private.">
             <form id="prediction-grant-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
-                <x-loading-overlay target="save" label="Saving grant…" />
+                <x-loading-overlay target="save,confirmSave" label="Saving grant…" />
                 <div>
                     <label for="grant-student" class="mb-1 block text-sm font-medium">Student number</label>
                     <input id="grant-student" type="text" wire:model.live.debounce.400ms="studentNumber" autocomplete="off" class="ui-field" placeholder="e.g. 2024-00001">
@@ -30,7 +30,7 @@
                 </div>
             </form>
             <x-slot:footer>
-                <x-dialog-actions form="prediction-grant-form" submit="Grant slots" target="save" />
+                <x-dialog-actions form="prediction-grant-form" submit="Add" />
             </x-slot:footer>
         </x-dialog>
     @endif

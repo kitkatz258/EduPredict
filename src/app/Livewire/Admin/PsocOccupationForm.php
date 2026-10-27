@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\ConfirmsAdminSaves;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\PsocOccupation;
 use App\Services\Audit\AuditLogger;
@@ -16,6 +17,7 @@ use Livewire\Component;
 
 class PsocOccupationForm extends Component
 {
+    use ConfirmsAdminSaves;
     use DispatchesToasts;
 
     public bool $show = false;
@@ -181,6 +183,17 @@ class PsocOccupationForm extends Component
             PsocCatalog::programOptions()->pluck('code')->all(),
         ));
 
+        $isEdit = $this->occupationId !== null;
+        $occupation = null;
+        if ($isEdit) {
+            $occupation = PsocOccupation::query()->findOrFail($this->occupationId);
+            $this->authorize('update', $occupation);
+        }
+
+        if (! $this->consumeAdminSaveConfirmation($isEdit)) {
+            return;
+        }
+
         $payload = [
             'psoc_code' => $validated['psocCode'],
             'title' => $validated['title'],
@@ -191,14 +204,10 @@ class PsocOccupationForm extends Component
             'is_active' => (bool) $this->isActive,
         ];
 
-        if ($this->occupationId) {
-            $occupation = PsocOccupation::query()->findOrFail($this->occupationId);
-            $this->authorize('update', $occupation);
+        if ($isEdit) {
             $occupation->update($payload);
-            $message = 'Occupation successfully updated.';
         } else {
             $occupation = PsocOccupation::query()->create($payload);
-            $message = 'Occupation successfully added.';
         }
 
         $this->show = false;
@@ -211,7 +220,7 @@ class PsocOccupationForm extends Component
         $this->resetValidation();
         $audit->record('psoc_saved', $occupation, ['psoc_code' => $occupation->psoc_code]);
         $this->dispatch('catalog-changed');
-        $this->successDialog($message);
+        $this->notifyAdminSaveSuccess($isEdit);
     }
 
     public function render(): View

@@ -150,7 +150,7 @@ Development only. Password for every demo account: `Password123!`
 | Dean | dean@edupredict.test |
 | Administrator | admin@edupredict.test |
 
-Students sign in with their student number. Staff sign in with their work email.
+Students sign in with their student number. Staff sign in with their work email. Seeded demo accounts above keep `Password123!`. Newly added or imported eligible students receive a login automatically: the username is the student number and the initial password is the registered last name in UPPERCASE (for example `Dela Cruz` → `DELA CRUZ`). They must change that password and accept consent on first sign-in. Existing claimed accounts are not reset when a CSV is reimported.
 
 The pilot scope is the UCC College of Liberal Arts and Sciences (CLAS) with eight programs: BA Communication, Bachelor of Public Administration, and BS Computer Science, Entertainment and Multimedia Computing, Information Systems, Information Technology, Mathematics, and Psychology. The Department Head reviews individual students in their department (or one program, when narrowed). The Dean sees aggregated CLAS figures only, never individual students. Faculty is a legacy role: existing faculty accounts are kept for history but cannot sign in.
 

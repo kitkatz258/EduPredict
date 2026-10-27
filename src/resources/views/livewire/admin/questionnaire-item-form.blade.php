@@ -2,7 +2,7 @@
     @if ($show)
         <x-dialog :title="$itemId ? 'Edit questionnaire item' : 'Add questionnaire item'" close="closeForm" description="Definitions with student answers stay locked. Add a new version instead of rewriting them.">
             <form id="questionnaire-item-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
-                <x-loading-overlay target="save" label="Saving question…" />
+                <x-loading-overlay target="save,confirmSave" label="Saving question…" />
                 @if ($locked)
                     <p class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900" role="status">This definition has student answers and is locked. Create a new version instead.</p>
                 @endif
@@ -63,7 +63,7 @@
                 </div>
             </form>
             <x-slot:footer>
-                <x-dialog-actions form="questionnaire-item-form" submit="Save item" :read-only="$locked" />
+                <x-dialog-actions form="questionnaire-item-form" :submit="$itemId ? 'Save Changes' : 'Add'" :read-only="$locked" />
             </x-slot:footer>
         </x-dialog>
     @endif

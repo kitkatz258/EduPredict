@@ -21,6 +21,7 @@ use App\Services\Academic\AcademicActivation;
 use App\Services\Academic\ClasStructureSynchronizer;
 use App\Support\AuditRecordLabel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -44,21 +45,21 @@ class AcademicStatusTest extends TestCase
         try {
             $activation->setCollegeActive($clas, false);
             $this->fail('CLAS deactivation should be rejected.');
-        } catch (\Illuminate\Validation\ValidationException) {
+        } catch (ValidationException) {
             $this->assertTrue($clas->fresh()->is_active);
         }
 
         try {
             $activation->setCollegeActive($legacy, true);
             $this->fail('A non-CLAS college should stay outside the pilot.');
-        } catch (\Illuminate\Validation\ValidationException) {
+        } catch (ValidationException) {
             $this->assertFalse($legacy->fresh()->is_active);
         }
 
         try {
             $activation->setProgramActive($only, false);
             $this->fail('The last active program should stay active.');
-        } catch (\Illuminate\Validation\ValidationException) {
+        } catch (ValidationException) {
             $this->assertTrue($only->fresh()->is_active);
         }
 
@@ -142,7 +143,7 @@ class AcademicStatusTest extends TestCase
             ->call('startCreate')
             ->set('name', 'College of Extra')
             ->set('code', 'EXT')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('colleges', ['code' => 'EXT', 'is_active' => 0]);
@@ -153,7 +154,7 @@ class AcademicStatusTest extends TestCase
             ->set('collegeId', $college->id)
             ->set('name', 'Bachelor of Extra')
             ->set('code', 'BSEX')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('programs', ['code' => 'BSEX', 'is_active' => 0]);

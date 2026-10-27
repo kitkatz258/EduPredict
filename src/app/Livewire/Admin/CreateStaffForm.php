@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Enums\UserRole;
+use App\Livewire\Concerns\ConfirmsAdminSaves;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Models\Department;
@@ -15,6 +16,7 @@ use Livewire\Component;
 
 class CreateStaffForm extends Component
 {
+    use ConfirmsAdminSaves;
     use DispatchesToasts;
 
     public bool $show = false;
@@ -91,6 +93,10 @@ class CreateStaffForm extends Component
             'program_id.exists' => 'Choose a program inside the selected department.',
         ]);
 
+        if (! $this->consumeAdminSaveConfirmation(false)) {
+            return;
+        }
+
         $result = $accounts->create($validated, auth()->user(), request()->ip());
         $this->temporaryPassword = $result['temporary_password'];
         $this->reset(['name', 'email', 'college_id', 'department_id', 'program_id']);
@@ -98,9 +104,9 @@ class CreateStaffForm extends Component
         $this->show = false;
         $this->resetValidation();
         $this->dispatch('users-changed');
-        $this->successDialog(
+        $this->notifyAdminSaveSuccess(
+            false,
             'Temporary password: '.$this->temporaryPassword.'. Share it securely. It is shown only once.',
-            'Staff account successfully added.',
         );
     }
 

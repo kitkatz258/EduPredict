@@ -141,10 +141,10 @@ class AdminManagementTest extends TestCase
             ->call('open', $head->id)
             ->set('name', 'Updated Head')
             ->set('resetPassword', true)
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors()
             ->assertSet('show', false)
-            ->assertDispatched('success-dialog');
+            ->assertDispatched('success-dialog', title: 'Changes saved successfully.');
 
         $password = $edit->get('temporaryPassword');
 
@@ -157,7 +157,7 @@ class AdminManagementTest extends TestCase
             ->call('open', $student->user_id)
             ->set('role', 'administrator')
             ->set('name', 'Still Student')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         $this->assertSame('student', $student->user->fresh()->role->value);
@@ -190,10 +190,10 @@ class AdminManagementTest extends TestCase
             ->set('collegeId', $college->id)
             ->set('name', 'Department of Testing')
             ->set('code', 'dot')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors()
             ->assertSet('show', false)
-            ->assertDispatched('success-dialog', message: 'Department successfully added.');
+            ->assertDispatched('success-dialog', title: 'Successfully added.');
 
         $this->assertDatabaseHas('departments', ['code' => 'DOT', 'college_id' => $college->id]);
 

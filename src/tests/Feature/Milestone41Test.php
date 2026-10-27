@@ -58,8 +58,21 @@ class Milestone41Test extends TestCase
             ->set('code', 'dmt')
             ->call('save')
             ->assertHasNoErrors()
+            ->assertSet('show', true)
+            ->assertNotDispatched('success-dialog');
+
+        $this->assertDatabaseMissing('departments', ['code' => 'DMT']);
+
+        Livewire::actingAs($admin)
+            ->test(DepartmentForm::class)
+            ->call('startCreate')
+            ->set('collegeId', $college->id)
+            ->set('name', 'Department of Milestone Testing')
+            ->set('code', 'dmt')
+            ->call('confirmSave')
+            ->assertHasNoErrors()
             ->assertSet('show', false)
-            ->assertDispatched('success-dialog', message: 'Department successfully added.');
+            ->assertDispatched('success-dialog', title: 'Successfully added.');
 
         $department = Department::query()->where('code', 'DMT')->firstOrFail();
 
@@ -67,19 +80,19 @@ class Milestone41Test extends TestCase
             ->test(DepartmentForm::class)
             ->call('startEdit', $department->id)
             ->set('name', 'Department of Milestone Testing Updated')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors()
             ->assertSet('show', false)
-            ->assertDispatched('success-dialog', message: 'Department successfully updated.');
+            ->assertDispatched('success-dialog', title: 'Changes saved successfully.');
 
         Livewire::actingAs($admin)
             ->test(CollegeForm::class)
             ->call('startEdit', $college->id)
             ->set('name', 'Renamed College')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors()
             ->assertSet('show', false)
-            ->assertDispatched('success-dialog', message: 'College successfully updated.');
+            ->assertDispatched('success-dialog', title: 'Changes saved successfully.');
 
         $intervention = Intervention::factory()->create(['code' => 'office_hours_m41']);
 
@@ -87,10 +100,10 @@ class Milestone41Test extends TestCase
             ->test(InterventionForm::class)
             ->call('startEdit', $intervention->id)
             ->set('title', 'Office hours updated')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors()
             ->assertSet('show', false)
-            ->assertDispatched('success-dialog', message: 'Intervention successfully updated.');
+            ->assertDispatched('success-dialog', title: 'Changes saved successfully.');
     }
 
     public function test_the_revised_60_item_instrument_is_seeded_without_changing_the_36_item_version(): void
@@ -256,14 +269,12 @@ class Milestone41Test extends TestCase
         $this->assertSame('Stored before deactivation.', $kept->first()->explanation);
     }
 
-    public function test_surname_passwords_stay_disabled_outside_an_explicit_nonproduction_flag(): void
+    public function test_initial_student_passwords_use_the_uppercase_last_name(): void
     {
-        $this->assertFalse((bool) config('edupredict.provisioning.surname_password'));
-
         $admin = User::factory()->administrator()->create();
         $program = Program::factory()->create(['is_active' => true]);
         $record = InstitutionStudent::factory()->create([
-            'last_name' => 'Reyes',
+            'last_name' => 'Dela Cruz',
             'first_name' => 'Lina',
             'program_id' => $program->id,
             'email' => 'lina-m41@example.com',
@@ -271,21 +282,9 @@ class Milestone41Test extends TestCase
         ]);
 
         $result = app(StudentAccountProvisioner::class)->provision($record, $admin, 'lina-m41@example.com');
-        $this->assertNotSame('REYES', $result['temporary_password']);
+        $this->assertSame('DELA CRUZ', $result['temporary_password']);
         $this->assertTrue($result['user']->must_change_password);
-        $this->assertTrue(Hash::check($result['temporary_password'], (string) $result['user']->password));
-
-        config(['edupredict.provisioning.surname_password' => true]);
-        $second = InstitutionStudent::factory()->create([
-            'last_name' => 'Santos',
-            'first_name' => 'Ada',
-            'program_id' => $program->id,
-            'email' => 'ada-m41@example.com',
-            'is_registered' => false,
-            'student_number' => 'M41-ADA',
-        ]);
-        $flagged = app(StudentAccountProvisioner::class)->provision($second, $admin, 'ada-m41@example.com');
-        $this->assertSame('SANTOS', $flagged['temporary_password']);
-        $this->assertTrue($flagged['user']->must_change_password);
+        $this->assertTrue(Hash::check('DELA CRUZ', (string) $result['user']->password));
+        $this->assertFalse(Hash::check('Dela Cruz', (string) $result['user']->password));
     }
 }

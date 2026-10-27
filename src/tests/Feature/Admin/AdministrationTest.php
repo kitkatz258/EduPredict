@@ -56,10 +56,10 @@ class AdministrationTest extends TestCase
         Livewire::actingAs($admin)->test(CollegeForm::class)
             ->set('name', 'College of Testing')
             ->set('code', 'cot')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors()
             ->assertSet('show', false)
-            ->assertDispatched('success-dialog', message: 'College successfully added.');
+            ->assertDispatched('success-dialog', title: 'Successfully added.');
 
         $this->assertDatabaseHas('colleges', ['code' => 'COT']);
 
@@ -67,7 +67,7 @@ class AdministrationTest extends TestCase
             ->set('collegeId', $college->id)
             ->set('name', 'Bachelor of Testing')
             ->set('code', 'bst')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('programs', ['code' => 'BST', 'college_id' => $college->id]);
@@ -79,7 +79,7 @@ class AdministrationTest extends TestCase
             ->set('description', 'A starter category.')
             ->set('selectedSkills', ['analysis', 'writing'])
             ->set('selectedPrograms', ['BST', 'BSIS'])
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('psoc_occupations', ['psoc_code' => '9999']);
@@ -90,7 +90,7 @@ class AdministrationTest extends TestCase
             ->set('description', 'Offer a scheduled study hour.')
             ->set('targets', 'study habits, gwa')
             ->set('minRiskLevel', 'moderate')
-            ->call('save')
+            ->call('confirmSave')
             ->assertHasNoErrors();
 
         $this->assertSame(['study_habits', 'gwa'], Intervention::query()->where('code', 'library_hours')->firstOrFail()->targets_factor);

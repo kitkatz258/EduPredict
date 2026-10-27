@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\ConfirmsAdminSaves;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\College;
 use App\Services\Audit\AuditLogger;
@@ -14,6 +15,7 @@ use Livewire\Component;
 
 class CollegeForm extends Component
 {
+    use ConfirmsAdminSaves;
     use DispatchesToasts;
 
     public bool $show = false;
@@ -66,23 +68,27 @@ class CollegeForm extends Component
             'code' => ['required', 'string', 'max:32', Rule::unique('colleges', 'code')->ignore($this->collegeId)],
         ]);
 
+        $isEdit = $this->collegeId !== null;
+        $college = null;
+        if ($isEdit) {
+            $college = College::query()->findOrFail($this->collegeId);
+            $this->authorize('update', $college);
+        }
+
+        if (! $this->consumeAdminSaveConfirmation($isEdit)) {
+            return;
+        }
+
         $payload = [
             'name' => $validated['name'],
             'code' => strtoupper($validated['code']),
         ];
 
-        if ($this->collegeId === null) {
-            $payload['is_active'] = false;
-        }
-
-        if ($this->collegeId) {
-            $college = College::query()->findOrFail($this->collegeId);
-            $this->authorize('update', $college);
+        if ($isEdit) {
             $college->update($payload);
-            $message = 'College successfully updated.';
         } else {
+            $payload['is_active'] = false;
             $college = College::query()->create($payload);
-            $message = 'College successfully added.';
         }
 
         $audit->record('college_saved', $college, ['code' => $college->code]);
@@ -90,7 +96,7 @@ class CollegeForm extends Component
         $this->reset(['collegeId', 'name', 'code', 'statusMessage']);
         $this->resetValidation();
         $this->dispatch('catalog-changed');
-        $this->successDialog($message);
+        $this->notifyAdminSaveSuccess($isEdit);
     }
 
     public function render(): View

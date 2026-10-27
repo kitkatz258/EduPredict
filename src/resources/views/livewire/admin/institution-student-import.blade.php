@@ -4,7 +4,7 @@
     </button>
 
     @if ($open)
-        <x-dialog title="Import eligible students" close="closeImport" description="This import adds eligibility rows only. It does not create logins. Columns: student_number, last_name, first_name, program_code, year_level. Optional: email, birthdate.">
+        <x-dialog title="Import eligible students" close="closeImport" description="Each valid new row creates an eligible record and a login. Students sign in with their student number. The initial password is their last name in uppercase. Duplicate student numbers are skipped and existing claimed accounts are not reset. Columns: student_number, last_name, first_name, program_code, year_level. Optional: email, birthdate.">
             <form id="eligible-import-form" wire:submit="import" class="relative space-y-4 px-5 py-5 sm:px-6">
                 <x-loading-overlay target="import" label="Importing the list…" />
                 <div>

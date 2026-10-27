@@ -7,7 +7,7 @@
     </x-slot>
     <div class="space-y-6">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-sm text-gray-600">Students sign in only after an administrator issues a login from this list. A row that has not been claimed still has no account. CSV import adds eligibility rows and does not create accounts.</p>
+            <p class="text-sm text-gray-600">Adding or importing a valid student creates a login. Students sign in with their student number. The initial password is their last name in uppercase. They must change it at first sign-in. Existing claimed accounts are not reset. Issue login remains for leftover unclaimed rows.</p>
             <div class="flex flex-wrap gap-2">
                 <livewire:admin.institution-student-form />
                 <livewire:admin.institution-student-import />

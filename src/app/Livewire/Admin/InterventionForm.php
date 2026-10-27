@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\ConfirmsAdminSaves;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\Intervention;
 use App\Services\Audit\AuditLogger;
@@ -16,6 +17,7 @@ use Livewire\Component;
 
 class InterventionForm extends Component
 {
+    use ConfirmsAdminSaves;
     use DispatchesToasts;
 
     public bool $show = false;
@@ -99,6 +101,17 @@ class InterventionForm extends Component
             'minRiskLevel' => ['required', 'in:low,moderate,high'],
         ]);
 
+        $isEdit = $this->interventionId !== null;
+        $intervention = null;
+        if ($isEdit) {
+            $intervention = Intervention::query()->findOrFail($this->interventionId);
+            $this->authorize('update', $intervention);
+        }
+
+        if (! $this->consumeAdminSaveConfirmation($isEdit)) {
+            return;
+        }
+
         $targets = array_map(function (string $token): string {
             return Str::snake(str_replace('-', '_', strtolower($token)));
         }, CommaList::parse($validated['targets']));
@@ -111,14 +124,10 @@ class InterventionForm extends Component
             'min_risk_level' => $validated['minRiskLevel'],
         ];
 
-        if ($this->interventionId) {
-            $intervention = Intervention::query()->findOrFail($this->interventionId);
-            $this->authorize('update', $intervention);
+        if ($isEdit) {
             $intervention->update($payload);
-            $message = 'Intervention successfully updated.';
         } else {
             $intervention = Intervention::query()->create($payload);
-            $message = 'Intervention successfully added.';
         }
 
         $audit->record('intervention_saved', $intervention, ['code' => $intervention->code]);
@@ -128,7 +137,7 @@ class InterventionForm extends Component
         $this->minRiskLevel = 'moderate';
         $this->resetValidation();
         $this->dispatch('catalog-changed');
-        $this->successDialog($message);
+        $this->notifyAdminSaveSuccess($isEdit);
     }
 
     public function render(): View

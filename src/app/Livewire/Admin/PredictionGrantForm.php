@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\ConfirmsAdminSaves;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\PredictionAttemptGrant;
 use App\Models\Student;
@@ -15,6 +16,7 @@ use Livewire\Component;
 
 class PredictionGrantForm extends Component
 {
+    use ConfirmsAdminSaves;
     use DispatchesToasts;
 
     public bool $show = false;
@@ -76,6 +78,10 @@ class PredictionGrantForm extends Component
             return;
         }
 
+        if (! $this->consumeAdminSaveConfirmation(false)) {
+            return;
+        }
+
         try {
             $grants->grant(
                 $student,
@@ -91,11 +97,10 @@ class PredictionGrantForm extends Component
             return;
         }
 
-        $message = 'Extra prediction slots were granted for '.$this->manilaDate.'.';
         $this->show = false;
         $this->resetForm();
         $this->dispatch('prediction-grants-changed');
-        $this->successDialog($message);
+        $this->notifyAdminSaveSuccess(false, 'Extra prediction slots were granted for '.$this->manilaDate.'.');
     }
 
     public function render(): View

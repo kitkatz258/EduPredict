@@ -2,7 +2,7 @@
     @if ($show)
         <x-dialog :title="$readOnly ? 'View intervention' : ($interventionId ? 'Edit intervention' : 'Add intervention')" close="closeForm" description="This list is the only source of recommended actions. Saving here does not rewrite actions already stored on a prediction.">
             <form id="intervention-form" wire:submit="save" class="relative space-y-4 px-5 py-5 sm:px-6">
-                <x-loading-overlay target="save" label="Saving intervention…" />
+                <x-loading-overlay target="save,confirmSave" label="Saving intervention…" />
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="intervention-code" class="mb-1 block text-sm font-medium">Code</label>
@@ -38,7 +38,7 @@
                 </div>
             </form>
             <x-slot:footer>
-                <x-dialog-actions form="intervention-form" submit="Save intervention" :read-only="$readOnly" />
+                <x-dialog-actions form="intervention-form" :submit="$interventionId ? 'Save Changes' : 'Add'" :read-only="$readOnly" />
             </x-slot:footer>
         </x-dialog>
     @endif

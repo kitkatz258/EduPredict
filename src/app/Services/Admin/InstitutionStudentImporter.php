@@ -7,14 +7,21 @@ namespace App\Services\Admin;
 use App\Models\AuditLog;
 use App\Models\InstitutionStudent;
 use App\Models\Program;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class InstitutionStudentImporter
 {
     public const YEAR_MESSAGE = 'Year level must be an integer from 1 to 4.';
+
+    public function __construct(
+        private readonly StudentAccountProvisioner $provisioner,
+    ) {}
+
     /**
      * @return array{
      *     examined: int,
@@ -56,6 +63,7 @@ class InstitutionStudentImporter
         $imported = 0;
         $examined = 0;
         $seen = [];
+        $seenEmails = [];
         $rowNumber = 1;
 
         DB::beginTransaction();
@@ -69,7 +77,7 @@ class InstitutionStudentImporter
                 $examined++;
                 $parsed = $this->parseRow($row, $indexes);
                 $programId = null;
-                $problem = $this->rowProblem($parsed, $seen, $programId);
+                $problem = $this->rowProblem($parsed, $seen, $seenEmails, $programId);
                 if ($problem !== null) {
                     if ($problem['skipped']) {
                         $skippedRows[] = ['row' => $rowNumber, 'message' => $problem['message']];
@@ -81,17 +89,31 @@ class InstitutionStudentImporter
                 }
 
                 $seen[$parsed['student_number']] = true;
-                InstitutionStudent::query()->create([
-                    'student_number' => $parsed['student_number'],
-                    'last_name' => $parsed['last_name'],
-                    'first_name' => $parsed['first_name'],
-                    'program_id' => $programId,
-                    'year_level' => (int) $parsed['year_level_raw'],
-                    'email' => $parsed['email'],
-                    'birthdate' => $parsed['birthdate'],
-                    'is_registered' => false,
-                ]);
-                $imported++;
+                if ($parsed['email'] !== null) {
+                    $seenEmails[Str::lower($parsed['email'])] = true;
+                }
+
+                try {
+                    DB::transaction(function () use ($parsed, $programId, $actor, $ip): void {
+                        $record = InstitutionStudent::query()->create([
+                            'student_number' => $parsed['student_number'],
+                            'last_name' => $parsed['last_name'],
+                            'first_name' => $parsed['first_name'],
+                            'program_id' => $programId,
+                            'year_level' => (int) $parsed['year_level_raw'],
+                            'email' => $parsed['email'],
+                            'birthdate' => $parsed['birthdate'],
+                            'is_registered' => false,
+                        ]);
+                        $this->provisioner->provision($record, $actor, $parsed['email'], $ip);
+                    });
+                    $imported++;
+                } catch (ValidationException $exception) {
+                    $errors[] = [
+                        'row' => $rowNumber,
+                        'message' => $exception->validator->errors()->first() ?: 'Could not create the student account.',
+                    ];
+                }
             }
             DB::commit();
         } catch (\Throwable $e) {
@@ -134,11 +156,11 @@ class InstitutionStudentImporter
      */
     public function create(array $data, User $actor, ?string $ip = null): InstitutionStudent
     {
-        $record = DB::transaction(function () use ($data): InstitutionStudent {
+        $record = DB::transaction(function () use ($data, $actor, $ip): InstitutionStudent {
             $this->assertAvailableNumber($data['student_number']);
             $program = $this->pilotProgram($data['program_id']);
 
-            return InstitutionStudent::query()->create([
+            $record = InstitutionStudent::query()->create([
                 'student_number' => trim($data['student_number']),
                 'last_name' => trim($data['last_name']),
                 'first_name' => trim($data['first_name']),
@@ -148,6 +170,9 @@ class InstitutionStudentImporter
                 'birthdate' => $this->blankToNull($data['birthdate'] ?? null),
                 'is_registered' => false,
             ]);
+            $this->provisioner->provision($record, $actor, $record->email, $ip);
+
+            return $record->refresh();
         });
 
         AuditLog::query()->create([
@@ -251,9 +276,10 @@ class InstitutionStudentImporter
     /**
      * @param  array{student_number: string, last_name: string, first_name: string, program_code: string, year_level_raw: string, email: ?string, birthdate: ?string}  $parsed
      * @param  array<string, true>  $seen
+     * @param  array<string, true>  $seenEmails
      * @return array{skipped: bool, message: string}|null
      */
-    private function rowProblem(array $parsed, array $seen, ?int &$programId): ?array
+    private function rowProblem(array $parsed, array $seen, array $seenEmails, ?int &$programId): ?array
     {
         if ($parsed['student_number'] === '' || $parsed['last_name'] === '' || $parsed['first_name'] === '' || $parsed['program_code'] === '') {
             return ['skipped' => false, 'message' => 'Required fields are missing.'];
@@ -267,6 +293,10 @@ class InstitutionStudentImporter
             return ['skipped' => false, 'message' => 'Birthdate is not a valid date.'];
         }
 
+        if ($parsed['email'] !== null && ! filter_var($parsed['email'], FILTER_VALIDATE_EMAIL)) {
+            return ['skipped' => false, 'message' => 'Email is not valid.'];
+        }
+
         $program = Program::query()->where('code', $parsed['program_code'])->first();
         if ($program === null) {
             return ['skipped' => false, 'message' => "Unknown program code {$parsed['program_code']}."];
@@ -276,8 +306,19 @@ class InstitutionStudentImporter
             return ['skipped' => false, 'message' => "Program {$parsed['program_code']} is outside the CLAS pilot scope."];
         }
 
-        if (isset($seen[$parsed['student_number']]) || InstitutionStudent::query()->where('student_number', $parsed['student_number'])->exists()) {
+        if (
+            isset($seen[$parsed['student_number']])
+            || InstitutionStudent::query()->where('student_number', $parsed['student_number'])->exists()
+            || Student::query()->where('student_number', $parsed['student_number'])->exists()
+        ) {
             return ['skipped' => true, 'message' => "Skipped duplicate student number {$parsed['student_number']}."];
+        }
+
+        if ($parsed['email'] !== null) {
+            $emailKey = Str::lower($parsed['email']);
+            if (isset($seenEmails[$emailKey]) || User::query()->whereRaw('LOWER(email) = ?', [$emailKey])->exists()) {
+                return ['skipped' => false, 'message' => 'That email is already used by another account.'];
+            }
         }
 
         $programId = $program->id;
@@ -296,6 +337,12 @@ class InstitutionStudentImporter
         if ($query->exists()) {
             throw ValidationException::withMessages([
                 'studentNumber' => "Student number {$number} is already on the eligible list.",
+            ]);
+        }
+
+        if (Student::query()->where('student_number', $number)->exists()) {
+            throw ValidationException::withMessages([
+                'studentNumber' => "Student number {$number} already has a login. Duplicate accounts are not created.",
             ]);
         }
     }

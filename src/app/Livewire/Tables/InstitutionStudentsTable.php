@@ -26,8 +26,6 @@ class InstitutionStudentsTable extends BaseTable
 
     public string $provisionEmail = '';
 
-    public ?string $temporaryPassword = null;
-
     public function mount(): void
     {
         $this->authorize('viewAny', InstitutionStudent::class);
@@ -66,7 +64,6 @@ class InstitutionStudentsTable extends BaseTable
         }
         $this->provisioningId = $record->id;
         $this->provisionEmail = (string) ($record->email ?? '');
-        $this->temporaryPassword = null;
         $this->resetValidation();
     }
 
@@ -74,7 +71,6 @@ class InstitutionStudentsTable extends BaseTable
     {
         $this->provisioningId = null;
         $this->provisionEmail = '';
-        $this->temporaryPassword = null;
         $this->resetValidation();
     }
 
@@ -87,7 +83,7 @@ class InstitutionStudentsTable extends BaseTable
         ]);
 
         try {
-            $result = $provisioner->provision($record, auth()->user(), $this->provisionEmail, request()->ip());
+            $provisioner->provision($record, auth()->user(), $this->provisionEmail, request()->ip());
         } catch (ValidationException $exception) {
             $messages = $exception->validator->getMessageBag();
             if ($messages->has('email')) {
@@ -96,13 +92,19 @@ class InstitutionStudentsTable extends BaseTable
             if ($messages->has('studentNumber')) {
                 $this->addError('provisionEmail', $messages->first('studentNumber'));
             }
+            if ($messages->has('lastName')) {
+                $this->addError('provisionEmail', $messages->first('lastName'));
+            }
 
             return;
         }
 
-        $this->temporaryPassword = $result['temporary_password'];
-        $this->toast('Login issued. Share the temporary password privately. The student must change it at first sign-in.');
+        $this->closeProvision();
         $this->dispatch('eligible-students-imported');
+        $this->successDialog(
+            'The student can sign in with their student number. The initial password is their last name in uppercase. They must change it at first sign-in.',
+            'Login issued.',
+        );
     }
 
     #[On('eligible-students-imported')]
