@@ -132,3 +132,5 @@ export PYTHONPATH=.
 - `artifacts/m42/*.joblib` and matching `.modelcard.json` files
 
 Those joblib files are source-native research fits. UCC questionnaire means, Philippine GWA, and invented missing values are rejected. C/P construct equivalence and UCI unit-count definitions remain pending. Favorable Pianda or UCI holdout scores are not UCC validity.
+
+M42.1 readiness audit (no retraining, no FastAPI change): `reports/m42_1_readiness_audit.md`. Historic 36-item PDFs were restored beside the current 60-item files; see `src/cursor/reference/approved-questionnaire/README.md`. The existing M33 service cannot load M42 artifacts without a new registry.
