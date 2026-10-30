@@ -106,3 +106,29 @@ Local API dependencies are pinned in `requirements-api.txt`. From `ml/`:
 .venv/bin/python -m pip install -r requirements-api.txt
 ML_API_TOKEN=local-dev-ml-token .venv/bin/python -m api.main
 ```
+
+## M42 research mapping and candidate training
+
+Research only. It does not replace M25/M27 artifacts, does not change `ml/api`, and does not score UCC students. The locked instrument is the 60-item `ucc-panel-revised-60-v2` text in `SystemQuestions.pdf` and the updated scoring PDF. The isolated scorer lives in `src/questionnaire/` and is not the Laravel scorer.
+
+```bash
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+export PYTHONUNBUFFERED=1
+export PYTHONPATH=.
+.venv/bin/python -m src.run_m42
+.venv/bin/python -m pytest tests/test_m42_scorer.py tests/test_m42_mapping.py tests/test_m42_compatibility.py tests/test_m42_experiments.py tests/test_m25.py tests/test_m27.py -q
+```
+
+`src.run_m42` writes:
+
+- `reports/data_audit.md`
+- `reports/questionnaire_feature_mapping.md`
+- `reports/employability_experiments.md`
+- `reports/dropout_experiments.md`
+- `reports/model_comparison.md`
+- `reports/deployment_feature_compatibility.md`
+- `reports/research_limitations.md`
+- `reports/m42_metrics.json`
+- `artifacts/m42/*.joblib` and matching `.modelcard.json` files
+
+Those joblib files are source-native research fits. UCC questionnaire means, Philippine GWA, and invented missing values are rejected. C/P construct equivalence and UCI unit-count definitions remain pending. Favorable Pianda or UCI holdout scores are not UCC validity.

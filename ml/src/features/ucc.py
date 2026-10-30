@@ -4,51 +4,57 @@ from __future__ import annotations
 
 from src.common import APPROVED_QUESTIONNAIRE_DIR
 
+# Current locked PDFs for M42. Historic 36-item filenames are retained as
+# aliases so older reports stay readable; they are no longer on disk.
 EXPECTED_PDFS = (
+    "SystemQuestions.pdf",
+    "EduPredict_Scoring_and_Research_Basis_Updated.pdf",
+)
+LEGACY_PDFS = (
     "EduPredict_Questionnaire.pdf",
     "EduPredict_Scoring_and_Research_Basis.pdf",
 )
 
-# Section inventory stated in the M25 specification. PDF presence does not
+# Section inventory for the current 60-item instrument. PDF presence does not
 # authorize item pairing or use of these sections as UCI predictors.
 SPEC_SECTIONS = (
     {
-        "codes": "A1–A6",
+        "codes": "A1–A10",
         "section": "Academic Factors",
         "role": "Contextual measure. Not a UCI dropout predictor and not an employability model input.",
     },
     {
-        "codes": "S1–S6",
+        "codes": "S1–S10",
         "section": "Socioeconomic Factors",
         "role": "Contextual measure. Not a UCI dropout predictor and not an employability model input.",
     },
     {
-        "codes": "B1–B6",
+        "codes": "B1–B10",
         "section": "Behavioral/Engagement",
         "role": "Contextual measure. Not a UCI dropout predictor and not an employability model input.",
     },
     {
-        "codes": "C1–C8",
+        "codes": "C1–C10",
         "section": "Competence",
         "role": "Intended future employability predictor only after scoring and equivalence are verified.",
     },
     {
-        "codes": "P1–P6",
+        "codes": "P1–P10",
         "section": "Psychological Capital",
         "role": "Intended future employability predictor only after scoring and equivalence are verified.",
     },
     {
-        "codes": "E1–E4",
+        "codes": "E1–E10",
         "section": "Self-Perceived Employability",
         "role": "Descriptive comparison. Never a predictor.",
     },
 )
 
 CONTEXT_FIELDS_FORBIDDEN_IN_MODELS = tuple(
-    [f"A{index}" for index in range(1, 7)]
-    + [f"S{index}" for index in range(1, 7)]
-    + [f"B{index}" for index in range(1, 7)]
-    + [f"E{index}" for index in range(1, 5)]
+    [f"A{index}" for index in range(1, 11)]
+    + [f"S{index}" for index in range(1, 11)]
+    + [f"B{index}" for index in range(1, 11)]
+    + [f"E{index}" for index in range(1, 11)]
     + [f"EVS{index}" for index in range(1, 13)]
     + ["AVERAGE (EVS)", "EmployabilityMean"]
 )
@@ -81,21 +87,21 @@ def source_to_ucc_mapping() -> list[dict]:
     rows = [
         {
             "source": "Pianda C1–C10",
-            "ucc": "Specified C1–C8",
+            "ucc": "Specified C1–C10",
             "status": "UNMATCHED",
-            "evidence": "Item counts differ (10 vs 8). The approved PDFs are on disk. No item was paired, and measurement equivalence is not claimed.",
+            "evidence": "Item counts now both equal 10. No English sentence is identical. Measurement equivalence is not claimed.",
         },
         {
             "source": "Pianda PsyCap1–PsyCap14",
-            "ucc": "Specified P1–P6",
+            "ucc": "Specified P1–P10",
             "status": "UNMATCHED",
-            "evidence": "Item counts differ (14 vs 6). The approved PDFs are on disk. No item was paired, and measurement equivalence is not claimed.",
+            "evidence": "Item counts differ (14 vs 10). The current PDFs are on disk. No item was paired, and measurement equivalence is not claimed.",
         },
         {
             "source": "Pianda EVS1–EVS12",
-            "ucc": "Specified E1–E4",
+            "ucc": "Specified E1–E10",
             "status": "UNMATCHED",
-            "evidence": "Item counts differ (12 vs 4). The approved PDFs are on disk. E is not a predictor, and no crosswalk is claimed.",
+            "evidence": "Item counts differ (12 vs 10). E is not a predictor, and no crosswalk is claimed.",
         },
         {
             "source": "Pianda SIE1–SIE14",
@@ -105,7 +111,7 @@ def source_to_ucc_mapping() -> list[dict]:
         },
         {
             "source": "No Pianda employability-sheet counterpart",
-            "ucc": "A1–A6, S1–S6, B1–B6",
+            "ucc": "A1–A10, S1–S10, B1–B10",
             "status": "UNMATCHED",
             "evidence": "These sections are contextual. They are not inserted into UCI fields.",
         },

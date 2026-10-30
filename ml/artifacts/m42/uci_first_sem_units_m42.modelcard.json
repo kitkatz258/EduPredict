@@ -1,0 +1,136 @@
+{
+  "name": "uci_first_sem_units_m42",
+  "milestone": "M42",
+  "production_validated": false,
+  "research_candidate": true,
+  "deployment_candidate": false,
+  "ucc_inference": "blocked",
+  "algorithm": "Logistic Regression",
+  "input_columns": [
+    "Curricular units 1st sem (enrolled)",
+    "Curricular units 1st sem (approved)"
+  ],
+  "feature_order": [
+    "Curricular units 1st sem (enrolled)",
+    "Curricular units 1st sem (approved)"
+  ],
+  "timing": "after_first_semester",
+  "deployment_status": "pending_unit_definition",
+  "target_labels": [
+    "Dropout",
+    "Enrolled",
+    "Graduate"
+  ],
+  "probability": "P(Dropout) from predict_proba; source-trained, not UCC-calibrated",
+  "risk_thresholds": null,
+  "dataset_sha256": "3ef126de5cefff26eb11fbb4237f1a1401cb64b488e2f1d598c23cedeb4c45ae",
+  "dataset_version": "UCI id 697, DOI 10.24432/C5MC89",
+  "random_seed": 42,
+  "split": {
+    "seed": 42,
+    "test_size": 0.2,
+    "n_splits": 5,
+    "n_repeats": 5,
+    "train_rows": 3539,
+    "test_rows": 885,
+    "class_counts": {
+      "Graduate": 2209,
+      "Dropout": 1421,
+      "Enrolled": 794
+    }
+  },
+  "selection": {
+    "algorithm": "Logistic Regression",
+    "metric": "cv_f1_macro_mean",
+    "higher_is_better": true,
+    "margin": 0.01,
+    "preference": [
+      "Logistic Regression",
+      "Random Forest Classifier",
+      "Gradient Boosting Classifier"
+    ],
+    "contenders": [
+      "Logistic Regression",
+      "Random Forest Classifier",
+      "Gradient Boosting Classifier"
+    ],
+    "best_metric_value": 0.6110372538592677
+  },
+  "cv_f1_macro_mean": 0.6061127163027487,
+  "cv_f1_macro_std": 0.012624664215901162,
+  "holdout": {
+    "accuracy": 0.6802259887005649,
+    "f1_macro": 0.6347220991534009,
+    "f1_weighted": 0.6954082605034656,
+    "per_class": {
+      "Dropout": {
+        "precision": 0.8404255319148937,
+        "recall": 0.5563380281690141,
+        "f1": 0.6694915254237288,
+        "support": 284
+      },
+      "Enrolled": {
+        "precision": 0.3409090909090909,
+        "recall": 0.5660377358490566,
+        "f1": 0.425531914893617,
+        "support": 159
+      },
+      "Graduate": {
+        "precision": 0.8175519630484989,
+        "recall": 0.8009049773755657,
+        "f1": 0.8091428571428572,
+        "support": 442
+      }
+    },
+    "confusion_matrix": [
+      [
+        158,
+        89,
+        37
+      ],
+      [
+        27,
+        90,
+        42
+      ],
+      [
+        3,
+        85,
+        354
+      ]
+    ],
+    "labels": [
+      "Dropout",
+      "Enrolled",
+      "Graduate"
+    ],
+    "dropout_false_negatives": 126,
+    "dropout_false_negative_rate": 0.44366197183098594,
+    "roc_auc_dropout_vs_rest": 0.8558388601157696,
+    "roc_auc_ovr_macro": 0.81083982041948,
+    "brier_dropout": 0.13334228411061452
+  },
+  "library_versions": {
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "scipy": "1.16.2",
+    "scikit-learn": "1.7.2",
+    "matplotlib": "3.10.7",
+    "joblib": "1.5.2",
+    "openpyxl": "3.1.5"
+  },
+  "trained_at": "2026-10-30T16:24:54+08:00",
+  "fitted_on": "training split only",
+  "limitations": [
+    "Research candidate only. Not production-validated.",
+    "Panel revision of the 60-item questionnaire is not psychometric validation or UCC validity.",
+    "No Low, Moderate, or High threshold is part of this artifact.",
+    "Live EduPredict records were not used for training.",
+    "UCC inference is blocked.",
+    "Three-class UCI labels are preserved. P(Dropout) is source-trained, not UCC-calibrated.",
+    "Grade columns are excluded because no Philippine-to-Portuguese conversion is documented.",
+    "Unit-count and scholarship mappings remain pending. Do not score UCC fields with this pipeline.",
+    "The pipeline was fit on the training split only."
+  ],
+  "note": "Source-native unit counts only. UCC cumulative subject units have no verified first-semester index or approval definition."
+}

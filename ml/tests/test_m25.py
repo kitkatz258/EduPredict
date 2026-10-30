@@ -183,8 +183,8 @@ def test_manifests_keep_context_out_of_predictors():
     assert status["item_mapping_blocked"] is False
     assert status["section_means_blocked"] is False
     present = " ".join(status["present"])
-    assert "EduPredict_Questionnaire.pdf" in present
-    assert "EduPredict_Scoring_and_Research_Basis.pdf" in present
+    assert "SystemQuestions.pdf" in present
+    assert "EduPredict_Scoring_and_Research_Basis_Updated.pdf" in present
 
 
 def test_archive_questionnaire_is_duplicate_and_workbook_is_not_merged():
