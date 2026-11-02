@@ -109,7 +109,29 @@
                     class="space-y-3"
                     x-data="{
                         tick: 0,
+                        autoScroll: window.localStorage.getItem('edupredict.questionnaire.autoscroll') !== '0',
                         bump() { this.tick++ },
+                        focusUnanswered(event) {
+                            const id = event.detail?.id ?? event.detail?.[0];
+                            let frames = 0;
+                            const seek = () => {
+                                this.bump();
+                                const field = this.host()?.querySelector('[data-question-id=\'' + id + '\']');
+                                if (!field && frames < 30) {
+                                    frames++;
+                                    requestAnimationFrame(seek);
+                                    return;
+                                }
+                                const scroller = field?.closest('.dialog-scroll');
+                                if (scroller && field) {
+                                    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                                    const top = field.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 16;
+                                    scroller.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
+                                }
+                                field?.focus({ preventScroll: true });
+                            };
+                            requestAnimationFrame(seek);
+                        },
                         host() { return this.$el.closest('[data-questionnaire-progress]') },
                         sections() { return JSON.parse(this.host()?.dataset.sections || '{}') },
                         savedMap() { return JSON.parse(this.host()?.dataset.saved || '{}') },
@@ -198,6 +220,7 @@
                     x-on:change.window="if ($event.target?.matches?.('input[type=radio][name^=item-]')) { bump(); syncUnsaved() }"
                     x-on:questionnaire-section-changed.window="const started = performance.now(); const refresh = () => { bump(); if (performance.now() - started < 1200) requestAnimationFrame(refresh) }; $nextTick(refresh)"
                     x-on:questionnaire-progress-updated.window="const started = performance.now(); const refresh = () => { bump(); if (performance.now() - started < 1200) requestAnimationFrame(refresh) }; $nextTick(refresh)"
+                    x-on:questionnaire-focus-unanswered.window="focusUnanswered($event)"
                 >
                     <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
                         <span class="font-medium text-[var(--ed-ink)]">{{ $reviewing ? 'Review' : $partTitle.' '.min($currentIndex + 1, $partCount).' of '.$partCount }}</span>
@@ -263,6 +286,12 @@
                             </button>
                         @endforeach
                     </div>
+                    @unless ($reviewing)
+                        <label class="inline-flex min-h-11 items-center gap-2 text-xs font-medium text-[var(--ed-muted)]">
+                            <input type="checkbox" class="h-4 w-4 rounded border-brand-200 text-brand-900 focus:ring-brand-200" x-model="autoScroll" x-on:change="window.localStorage.setItem('edupredict.questionnaire.autoscroll', $event.target.checked ? '1' : '0')">
+                            Auto-scroll to next question
+                        </label>
+                    @endunless
                 </div>
             </x-slot:subhead>
 
@@ -302,7 +331,7 @@
                         @endif
                         <div class="mt-4 space-y-7">
                             @foreach ($items as $item)
-                                <fieldset wire:key="item-{{ $item->id }}">
+                                <fieldset wire:key="item-{{ $item->id }}" data-question-id="{{ $item->id }}" @if ($firstUnansweredId === $item->id) data-unanswered-target="1" aria-invalid="true" tabindex="-1" @endif @class(['scroll-mt-4 rounded-xl border border-amber-400 bg-amber-50 p-3 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 dark:border-amber-300/70 dark:bg-amber-950/40' => $firstUnansweredId === $item->id])>
                                     <legend class="max-w-prose text-sm font-medium leading-6 text-gray-900">
                                         @if ($item->displayCode())
                                             <span class="mr-2 font-mono text-xs font-semibold text-brand-900">{{ $item->displayCode() }}</span>
@@ -368,6 +397,38 @@
 <script>
     if (!window.__edupredictQuestionnaireScroll) {
         window.__edupredictQuestionnaireScroll = true;
+        let pointerAnswer = false;
+        document.addEventListener('pointerdown', (event) => {
+            const label = event.target instanceof Element ? event.target.closest('label') : null;
+            pointerAnswer = Boolean(label?.querySelector('input[type="radio"][name^="item-"]'));
+        }, true);
+        document.addEventListener('keydown', () => {
+            pointerAnswer = false;
+        }, true);
+        document.addEventListener('change', (event) => {
+            const input = event.target;
+            const fromPointer = pointerAnswer;
+            pointerAnswer = false;
+            if (!fromPointer || !(input instanceof HTMLInputElement) || input.type !== 'radio' || !input.name.startsWith('item-')) {
+                return;
+            }
+            if (window.localStorage.getItem('edupredict.questionnaire.autoscroll') === '0') {
+                return;
+            }
+            const fieldset = input.closest('fieldset');
+            const form = input.closest('#questionnaire-wizard');
+            if (!fieldset || !form) {
+                return;
+            }
+            const next = [...form.querySelectorAll('fieldset')].find((node) => (fieldset.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING) && !node.querySelector('input[type="radio"]:checked'));
+            const scroller = next?.closest('.dialog-scroll');
+            if (!next || !scroller) {
+                return;
+            }
+            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const top = next.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 16;
+            scroller.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
+        }, true);
         window.addEventListener('questionnaire-section-changed', () => {
             const started = performance.now();
             const hold = () => {

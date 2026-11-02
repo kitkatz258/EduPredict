@@ -35,6 +35,11 @@ class QuestionnaireForm extends Component
 
     public bool $reviewing = false;
 
+    /** Shown after a blocked submit, and kept across the Livewire render that opens the gap. */
+    public string $submissionNotice = '';
+
+    public ?int $firstUnansweredId = null;
+
     public function mount(): void
     {
         $student = $this->student();
@@ -212,15 +217,23 @@ class QuestionnaireForm extends Component
         }
 
         $items = $this->activeItems();
-        $missing = $items->first(fn (QuestionnaireItem $item): bool => ! isset($this->answers[$item->id]) || $this->answers[$item->id] === '');
+        $missingItems = $items->filter(fn (QuestionnaireItem $item): bool => $this->answerFor($item) === null)->values();
+        $missing = $missingItems->first();
         if ($missing !== null) {
             $this->reviewing = false;
             $this->focusItem($missing);
+            $this->firstUnansweredId = $missing->id;
+            $this->submissionNotice = $this->incompleteSubmissionNotice($items, $missingItems, $missing);
+            $this->statusMessage = '';
             $this->addError('answers.'.$missing->id, 'Choose a response for this statement.');
-            $this->statusMessage = 'Answer every statement before submitting.';
+            $this->dispatch('questionnaire-focus-unanswered', id: $missing->id);
+            $this->toast($this->submissionNotice, 'warning');
 
             return;
         }
+
+        $this->submissionNotice = '';
+        $this->firstUnansweredId = null;
 
         $rules = [];
         foreach ($items as $item) {
@@ -646,5 +659,55 @@ class QuestionnaireForm extends Component
         } else {
             $this->section = $item->section;
         }
+    }
+
+    private function answerFor(QuestionnaireItem $item): ?int
+    {
+        $value = $this->answers[$item->id] ?? $this->answers[(string) $item->id] ?? null;
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return (int) $value;
+    }
+
+    /**
+     * @param  Collection<int, QuestionnaireItem>  $items
+     * @param  Collection<int, QuestionnaireItem>  $missing
+     */
+    private function incompleteSubmissionNotice(Collection $items, Collection $missing, QuestionnaireItem $first): string
+    {
+        $count = $missing->count();
+        $question = $count === 1 ? 'question' : 'questions';
+        $section = (string) config(
+            'edupredict.questionnaire.sections.'.$first->section.'.heading',
+            $first->section,
+        );
+        $notice = 'Please answer all '.$items->count().' questions before submitting. You still have '.$count.' unanswered '.$question.'. We\'ve taken you to the first unanswered question in '.$section.'.';
+        $unsaved = $this->unsavedSelectionCount();
+        if ($unsaved > 0) {
+            $answer = $unsaved === 1 ? 'answer is' : 'answers are';
+            $notice .= ' '.$unsaved.' selected '.$answer.' on this screen and not saved yet. Saved answers are unchanged.';
+        }
+
+        return $notice;
+    }
+
+    private function unsavedSelectionCount(): int
+    {
+        $saved = $this->savedAnswerMap($this->student());
+        $count = 0;
+        foreach ($this->activeItems() as $item) {
+            $value = $this->answerFor($item);
+            if ($value === null) {
+                continue;
+            }
+            $stored = $saved[$item->id] ?? null;
+            if ($stored === null || (int) $stored !== $value) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 }

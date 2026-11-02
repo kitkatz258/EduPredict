@@ -125,7 +125,10 @@ class StudentAssessmentValidationTest extends TestCase
             ->set('answers.'.$academic->last()->id, '')
             ->call('submit')
             ->assertHasErrors()
-            ->assertSee('Answer every statement before submitting.');
+            ->assertDispatched('toast', type: 'warning', message: 'Please answer all 60 questions before submitting. You still have 51 unanswered questions. We\'ve taken you to the first unanswered question in Section A. Academic Factors.')
+            ->assertDontSee('data-submission-notice', false)
+            ->assertSet('answers.'.$academic->first()->id, 4)
+            ->assertSet('section', 'academic');
 
         $this->assertNull(QuestionnaireResponse::query()->where('student_id', $student->id)->value('submitted_at'));
 
@@ -154,6 +157,75 @@ class StudentAssessmentValidationTest extends TestCase
         $features = app(FeatureBuilder::class)->build($student->fresh());
         $this->assertNotContains(5.0, $features->constructScores());
         $this->assertNotContains(3.0, $features->constructScores());
+    }
+
+    public function test_incomplete_submission_names_the_gap_and_keeps_answers(): void
+    {
+        $student = $this->makeStudent();
+        $academic = $this->items('academic');
+        $socioeconomic = $this->items('socioeconomic');
+        $behavioral = $this->items('behavioral');
+        $competence = $this->items('competence');
+        $employability = $this->items('self_perceived_employability');
+
+        Livewire::actingAs($student->user)
+            ->test(QuestionnaireForm::class)
+            ->assertDontSee('You still have')
+            ->assertSee('Auto-scroll to next question')
+            ->assertSee('pointerdown')
+            ->assertSee('prefers-reduced-motion')
+            ->set('reviewing', true)
+            ->set('answers', [$academic->first()->id => 5])
+            ->call('submit')
+            ->assertSet('reviewing', false)
+            ->assertSet('section', 'academic')
+            ->assertSet('firstUnansweredId', $academic->skip(1)->first()->id)
+            ->assertSet('answers.'.$academic->first()->id, 5)
+            ->assertDispatched('toast', type: 'warning', message: 'Please answer all 60 questions before submitting. You still have 59 unanswered questions. We\'ve taken you to the first unanswered question in Section A. Academic Factors. 1 selected answer is on this screen and not saved yet. Saved answers are unchanged.')
+            ->assertDontSee('data-submission-notice', false)
+            ->assertSeeHtml('data-unanswered-target="1"');
+
+        $this->assertNull(QuestionnaireResponse::query()->where('student_id', $student->id)->value('submitted_at'));
+
+        $almost = [];
+        foreach (QuestionnaireItem::query()->where('definition_version', RevisedInstrumentCatalog::VERSION)->get() as $item) {
+            if ($item->id !== $employability->last()->id) {
+                $almost[$item->id] = 4;
+            }
+        }
+
+        Livewire::actingAs($student->user)
+            ->test(QuestionnaireForm::class)
+            ->set('section', 'academic')
+            ->set('reviewing', true)
+            ->set('answers', $almost)
+            ->call('submit')
+            ->assertSet('section', 'self_perceived_employability')
+            ->assertSet('firstUnansweredId', $employability->last()->id)
+            ->assertDispatched('toast', type: 'warning', message: 'Please answer all 60 questions before submitting. You still have 1 unanswered question. We\'ve taken you to the first unanswered question in Section E. Self-Perceived Employability / Readiness. 59 selected answers are on this screen and not saved yet. Saved answers are unchanged.')
+            ->assertSet('answers.'.$academic->first()->id, 4);
+
+        $gap = [];
+        foreach ($academic as $item) {
+            $gap[$item->id] = 4;
+        }
+        foreach ($socioeconomic as $item) {
+            $gap[$item->id] = 3;
+        }
+        $gap[$competence->first()->id] = 2;
+
+        Livewire::actingAs($student->user)
+            ->test(QuestionnaireForm::class)
+            ->set('section', 'self_perceived_employability')
+            ->set('reviewing', true)
+            ->set('answers', $gap)
+            ->call('submit')
+            ->assertSet('section', 'behavioral')
+            ->assertSet('firstUnansweredId', $behavioral->first()->id)
+            ->assertDispatched('toast', type: 'warning', message: 'Please answer all 60 questions before submitting. You still have 39 unanswered questions. We\'ve taken you to the first unanswered question in Section B. Behavioral Factors / Student Engagement. 21 selected answers are on this screen and not saved yet. Saved answers are unchanged.')
+            ->assertSet('answers.'.$academic->first()->id, 4)
+            ->assertSet('answers.'.$competence->first()->id, 2)
+            ->assertSet('answers.'.$socioeconomic->first()->id, 3);
     }
 
     public function test_historical_v1_results_stay_labeled_and_are_not_recalculated(): void

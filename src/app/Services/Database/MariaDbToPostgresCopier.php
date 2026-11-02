@@ -43,6 +43,7 @@ final class MariaDbToPostgresCopier
         'student_work_experiences',
         'grade_reports',
         'subject_grades',
+        'questionnaire_versions',
         'questionnaire_items',
         'questionnaire_responses',
         'questionnaire_answers',
