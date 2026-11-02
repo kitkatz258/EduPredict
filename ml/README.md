@@ -134,3 +134,30 @@ export PYTHONPATH=.
 Those joblib files are source-native research fits. UCC questionnaire means, Philippine GWA, and invented missing values are rejected. C/P construct equivalence and UCI unit-count definitions remain pending. Favorable Pianda or UCI holdout scores are not UCC validity.
 
 M42.1 readiness audit (no retraining, no FastAPI change): `reports/m42_1_readiness_audit.md`. Historic 36-item PDFs were restored beside the current 60-item files; see `src/cursor/reference/approved-questionnaire/README.md`. The existing M33 service cannot load M42 artifacts without a new registry.
+
+## M43 isolated research inference
+
+Research only. A **separate** Python loader scores the M42 joblib files under `artifacts/m42/` with source-native columns. It does not replace `api.registry`, does not change M33 routes or responses, does not switch `PREDICTOR_DRIVER`, and does not score UCC students. No FastAPI router was added.
+
+```bash
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+export PYTHONUNBUFFERED=1
+export PYTHONPATH=.
+.venv/bin/python3 -m src.m43 list
+.venv/bin/python3 -m src.m43 checksums
+.venv/bin/python3 -m src.m43 score --model employability_cp_reduced_m42 \
+  --features '{"CompetenceMean": 3.5, "PsyCapMean": 4.0}'
+.venv/bin/python3 -m src.m43 score --model uci_first_sem_units_m42 \
+  --features '{"Curricular units 1st sem (enrolled)": 6, "Curricular units 1st sem (approved)": 5}'
+.venv/bin/python3 -m pytest tests/test_m43_inference.py tests/test_m42_scorer.py tests/test_m42_mapping.py \
+  tests/test_m42_compatibility.py tests/test_m42_experiments.py tests/test_m33_api.py tests/test_m25.py tests/test_m27.py -q
+```
+
+Labeled examples above are source-schema shaped. Accepting those keys does not prove the numbers came from Pianda or UCI. UCC item codes, GWA, and student identifiers are rejected. Three-class UCI output stays `Dropout` / `Enrolled` / `Graduate` and is not converted to M33 binary labels.
+
+Decision memos (documentation only; FeatureBuilder unchanged):
+
+- `reports/ucc_term_identity_decision_memo.md`
+- `reports/ucc_scholarship_semantics_decision_memo.md`
+- `reports/m43_research_inference.md`
+

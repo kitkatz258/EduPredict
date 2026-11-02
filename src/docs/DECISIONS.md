@@ -85,3 +85,5 @@ One line per decision. Record choices made where the spec is silent.
 - M42: UCI reduced candidates exclude all grade columns. First- and second-semester enrolled/approved unit models are source-native research fits with UCC unit definitions pending. Scholarship collapse remains unverified. UCC inference is blocked.
 - M42: Candidate artifacts are stored under `ml/artifacts/m42/` and do not replace M25, M27, or M33 files. FastAPI is not changed. `PREDICTOR_DRIVER` is not switched.
 - M42.1: Restored the tracked 36-item PDFs (`EduPredict_Questionnaire.pdf`, `EduPredict_Scoring_and_Research_Basis.pdf`) from commit `b27211b` after M42 deleted them. Current instrument remains `SystemQuestions.pdf` / 60-item v2. LinearRegression over Ridge is the pre-specified 0.01 RMSE tie-break, not a defect. M33 cannot load M42 artifacts without a new registry.
+- M43: Isolated M42 inference is an offline Python loader/CLI (`src.m43`) with an explicit artifact allowlist and checksums. No M42 FastAPI router was added, so M33 routes and `api.registry` stay unchanged. UCC term-identity and scholarship rules are documentation-only memos; FeatureBuilder is not changed.
+
