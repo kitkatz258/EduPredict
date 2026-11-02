@@ -37,7 +37,7 @@ class QuestionnaireTest extends TestCase
         $this->seed(QuestionnaireItemSeeder::class);
 
         $this->assertSame(116, QuestionnaireItem::query()->count());
-        $this->assertSame(36, QuestionnaireItem::query()->where('is_draft', false)->count());
+        $this->assertSame(96, QuestionnaireItem::query()->where('is_draft', false)->count());
         $this->assertSame(20, QuestionnaireItem::query()->where('definition_version', 'draft-v1')->where('section', 'academic_behavior')->count());
         $this->assertSame(RevisedInstrumentCatalog::VERSION, config('edupredict.questionnaire.current_version'));
         $this->assertSame(36, QuestionnaireItem::query()->where('definition_version', ApprovedInstrumentCatalog::VERSION)->count());
@@ -252,7 +252,7 @@ class QuestionnaireTest extends TestCase
             ->test(AssessmentWizard::class)
             ->call('goTo', 'employability')
             ->assertSet('step', 'questionnaire')
-            ->assertSee('Draft instrument')
+            ->assertSee('Panel-approved · not psychometrically validated.')
             ->assertDontSee('planning categories only')
             ->assertDontSee('Mental alertness');
         $this->actingAs($head)->get(route('student.questionnaire'))->assertForbidden();

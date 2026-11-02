@@ -23,6 +23,9 @@ class QuestionnaireItemsTable extends BaseTable
     public function mount(): void
     {
         $this->authorize('viewAny', QuestionnaireItem::class);
+        if ($this->versionFilter === '') {
+            $this->versionFilter = (string) config('edupredict.questionnaire.current_version', '');
+        }
     }
 
     public function updatingSectionFilter(): void
