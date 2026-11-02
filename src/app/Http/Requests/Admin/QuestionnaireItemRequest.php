@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\UserRole;
+use App\Services\Questionnaire\QuestionnaireVersionCatalog;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -28,7 +29,11 @@ class QuestionnaireItemRequest extends FormRequest
     {
         return [
             'section' => ['required', 'string', Rule::in(array_keys(config('edupredict.questionnaire.sections', [])))],
-            'definition_version' => ['required', 'string', Rule::in(array_keys(config('edupredict.questionnaire.versions', [])))],
+            'definition_version' => ['required', 'string', 'max:40', function (string $attribute, mixed $value, \Closure $fail): void {
+                if (! is_string($value) || ! app(QuestionnaireVersionCatalog::class)->exists($value)) {
+                    $fail('Choose a questionnaire version that exists.');
+                }
+            }],
             'construct' => ['required', 'string', Rule::in(array_keys(config('edupredict.questionnaire.constructs', [])))],
             'text' => ['required', 'string', 'max:500'],
             'reverse_scored' => ['boolean'],

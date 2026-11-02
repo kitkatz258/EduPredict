@@ -16,6 +16,7 @@ use App\Models\PredictionAttemptGrant;
 use App\Models\Program;
 use App\Models\PsocOccupation;
 use App\Models\QuestionnaireItem;
+use App\Models\QuestionnaireVersion;
 use App\Models\SocioeconomicProfile;
 use App\Models\Student;
 use App\Models\User;
@@ -117,6 +118,7 @@ final class AuditRecordLabel
             Department::class => 'Department',
             Program::class => 'Program',
             QuestionnaireItem::class => 'Questionnaire item',
+            QuestionnaireVersion::class => 'Questionnaire version',
             PsocOccupation::class => 'PSOC occupation',
             Intervention::class => 'Intervention',
             GradeReport::class => 'Grade report',
@@ -137,6 +139,7 @@ final class AuditRecordLabel
             $subject instanceof Department,
             $subject instanceof Program => self::named($subject->getAttribute('code'), $subject->getAttribute('name')),
             $subject instanceof QuestionnaireItem => self::clip((string) $subject->text),
+            $subject instanceof QuestionnaireVersion => self::named($subject->code, $subject->name),
             $subject instanceof PsocOccupation => self::named($subject->psoc_code, $subject->title),
             $subject instanceof Intervention => self::named($subject->code, $subject->title),
             $subject instanceof GradeReport => self::grade($subject),

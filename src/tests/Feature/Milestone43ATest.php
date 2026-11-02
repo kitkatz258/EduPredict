@@ -215,7 +215,8 @@ class Milestone43ATest extends TestCase
             ->get(route('admin.questionnaire'))
             ->assertOk()
             ->assertSee('UCC panel-approved 60-item instrument v2')
-            ->assertSee(RevisedInstrumentCatalog::VERSION.' · current')
+            ->assertSee('UCC 60-Item · v2 · Active')
+            ->assertSee('UCC 36-Item · v1 · Historical')
             ->assertSee('60 items')
             ->assertSee('36 items')
             ->assertDontSee('Questionnaire items here are a draft research scale');

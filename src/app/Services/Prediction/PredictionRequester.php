@@ -18,6 +18,7 @@ use App\Services\Grades\GradeSnapshot;
 use App\Services\Interventions\RecommendedActionBuilder;
 use App\Services\Profile\SkillsExperienceRecords;
 use App\Services\Questionnaire\QuestionnaireSnapshot;
+use App\Services\Questionnaire\QuestionnaireVersionCatalog;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -179,7 +180,7 @@ final class PredictionRequester
 
     private function hasCurrentQuestionnaire(Student $student): bool
     {
-        $version = (string) config('edupredict.questionnaire.current_version');
+        $version = app(QuestionnaireVersionCatalog::class)->currentCode();
         $required = QuestionnaireItem::query()
             ->where('definition_version', $version)
             ->where('is_active', true)

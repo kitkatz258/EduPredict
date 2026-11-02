@@ -7,6 +7,7 @@ use App\Models\QuestionnaireItem;
 use App\Models\QuestionnaireResponse;
 use App\Models\Student;
 use App\Services\Questionnaire\QuestionnaireScorer;
+use App\Services\Questionnaire\QuestionnaireVersionCatalog;
 use App\Services\Questionnaire\SectionScorePresenter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -245,7 +246,7 @@ class QuestionnaireForm extends Component
             return;
         }
 
-        $this->definitionVersion = (string) config('edupredict.questionnaire.current_version', 'ucc-panel-approved-v1');
+        $this->definitionVersion = app(QuestionnaireVersionCatalog::class)->currentCode();
         $student->questionnaireResponses()->create([
             'definition_version' => $this->definitionVersion,
             'submitted_at' => null,
@@ -276,7 +277,7 @@ class QuestionnaireForm extends Component
         abort_if($draft->submitted_at !== null, 403);
         $draft->answers()->delete();
         $draft->delete();
-        $this->definitionVersion = (string) config('edupredict.questionnaire.current_version');
+        $this->definitionVersion = app(QuestionnaireVersionCatalog::class)->currentCode();
         $this->answers = [];
         $this->construct = $this->firstConstruct();
         $this->section = $this->firstIncompleteSection();
@@ -325,7 +326,7 @@ class QuestionnaireForm extends Component
             'likert' => $this->likertChoices(),
             'answeredCount' => $this->answeredCount($allItems),
             'unsaved' => $this->unsavedChanges($student),
-            'version' => config('edupredict.questionnaire.versions.'.$this->definitionVersion, []),
+            'version' => app(QuestionnaireVersionCatalog::class)->presentation($this->definitionVersion),
             'savedCount' => $answered,
             'totalCount' => $allItems->count(),
             'currentIndex' => is_int($currentIndex) ? $currentIndex : 0,
@@ -334,7 +335,7 @@ class QuestionnaireForm extends Component
             'saved' => $saved,
             'sectionScores' => $presenter->rows(is_array($latestSubmission?->construct_scores) ? $latestSubmission->construct_scores : null),
             'legacyDraft' => $this->usesConstructNavigation()
-                && $this->definitionVersion !== (string) config('edupredict.questionnaire.current_version'),
+                && $this->definitionVersion !== app(QuestionnaireVersionCatalog::class)->currentCode(),
         ]);
     }
 
@@ -349,15 +350,15 @@ class QuestionnaireForm extends Component
 
     private function bindVersion(Student $student): void
     {
+        $catalog = app(QuestionnaireVersionCatalog::class);
         $draft = $this->openDraft($student);
-        $version = $draft?->definition_version
-            ?? (string) config('edupredict.questionnaire.current_version', 'ucc-panel-approved-v1');
-        $allowed = array_keys(config('edupredict.questionnaire.versions', []));
-        if (! in_array($version, $allowed, true)) {
-            $version = (string) config('edupredict.questionnaire.current_version');
+        if ($draft !== null && is_string($draft->definition_version) && $draft->definition_version !== '') {
+            $this->definitionVersion = $draft->definition_version;
+
+            return;
         }
 
-        $this->definitionVersion = $version;
+        $this->definitionVersion = $catalog->currentCode();
     }
 
     private function openDraft(Student $student): ?QuestionnaireResponse
@@ -374,7 +375,7 @@ class QuestionnaireForm extends Component
      */
     private function activeItems(): Collection
     {
-        $sections = config('edupredict.questionnaire.versions.'.$this->definitionVersion.'.sections', []);
+        $sections = app(QuestionnaireVersionCatalog::class)->sections($this->definitionVersion);
         $query = QuestionnaireItem::query()
             ->where('definition_version', $this->definitionVersion)
             ->where('is_active', true);
@@ -463,7 +464,7 @@ class QuestionnaireForm extends Component
 
     private function usesConstructNavigation(): bool
     {
-        return config('edupredict.questionnaire.versions.'.$this->definitionVersion.'.navigation') === 'construct';
+        return app(QuestionnaireVersionCatalog::class)->navigation($this->definitionVersion) === 'construct';
     }
 
     /**
@@ -515,7 +516,7 @@ class QuestionnaireForm extends Component
      */
     private function sectionKeys(?Collection $items = null): array
     {
-        $configured = config('edupredict.questionnaire.versions.'.$this->definitionVersion.'.sections', []);
+        $configured = app(QuestionnaireVersionCatalog::class)->sections($this->definitionVersion);
         $available = ($items ?? $this->activeItems())->pluck('section')->unique()->all();
         if (! is_array($configured)) {
             return [];
