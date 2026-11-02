@@ -195,12 +195,22 @@
                             @foreach ($submissions as $submission)
                                 <li>
                                     <span class="font-mono">{{ $submission->definition_version }}</span>
+                                    @if ($submission->definition_version === \App\Services\Questionnaire\ApprovedInstrumentCatalog::VERSION)
+                                        <span class="ml-1 rounded-full border border-brand-200 px-2 py-0.5 text-xs font-medium text-brand-900">Historical 36-item result</span>
+                                    @endif
                                     · {{ $submission->submitted_at ? 'Submitted '.$submission->submitted_at->timezone($tz)->format('M j, Y g:i A') : 'Draft, not submitted' }}
                                 </li>
                             @endforeach
                         </ul>
                     @endif
+                    @php
+                        $latestSubmitted = $submissions->whereNotNull('submitted_at')->sortBy([['submitted_at', 'desc'], ['id', 'desc']])->first();
+                        $historicalResult = $latestSubmitted?->definition_version === \App\Services\Questionnaire\ApprovedInstrumentCatalog::VERSION;
+                    @endphp
                     <h3 class="mt-4 text-sm font-semibold text-brand-900">Section results from the latest submission</h3>
+                    @if ($historicalResult)
+                        <p class="mt-1 text-sm text-gray-700">Historical 36-item instrument. These section means were stored with that submission and are not recalculated on the 60-item questionnaire.</p>
+                    @endif
                     <x-construct-summary class="mt-3" :constructs="$sectionScores" unavailable="No submitted questionnaire section results yet." />
                 </div>
 

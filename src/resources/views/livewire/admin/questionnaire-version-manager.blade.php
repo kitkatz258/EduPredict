@@ -1,7 +1,7 @@
 <div class="space-y-4">
     <section class="rounded-2xl border border-brand-200 bg-white px-5 py-4 shadow-sm">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div class="min-w-0 flex-1">
+        <div class="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end lg:justify-between">
+            <div class="min-w-[20rem] flex-1">
                 <label for="questionnaire-version" class="text-xs font-semibold uppercase tracking-wide text-gray-500">Questionnaire version</label>
                 <select id="questionnaire-version" wire:change="selectVersion($event.target.value)" class="ui-field mt-1">
                     @foreach ($versions as $version)
@@ -9,7 +9,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="flex flex-col gap-2 sm:flex-row">
+            <div class="flex shrink-0 flex-wrap gap-2">
                 <button type="button" wire:click="openCreate" class="ui-btn ui-btn-primary min-h-11">Create new version</button>
                 @if ($selected?->isMutable())
                     <button type="button" wire:click="openReview" class="ui-btn ui-btn-secondary min-h-11">Review & publish</button>

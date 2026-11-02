@@ -254,7 +254,7 @@ return [
                 'short' => 'B. Behavioral',
                 'heading' => 'Section B. Behavioral Factors / Student Engagement',
                 'code' => 'B',
-                'description' => 'Student engagement. Context for recommendations. These answers do not change the dropout probability.',
+                'description' => 'Student engagement. A higher mean means more engagement, not a higher dropout risk. These answers do not change the dropout probability.',
                 'constructs' => ['behavioral_engagement'],
                 'role' => 'context',
                 'items' => 6,

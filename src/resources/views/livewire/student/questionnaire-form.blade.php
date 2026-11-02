@@ -69,6 +69,9 @@
                     under <span class="font-mono">{{ $latestSubmission->definition_version }}</span>.
                     Prediction History is a separate record.
                 </p>
+                @if ($latestSubmission->definition_version === \App\Services\Questionnaire\ApprovedInstrumentCatalog::VERSION)
+                    <p class="mt-2 max-w-prose text-sm text-gray-700">Historical 36-item instrument. These section means were stored with that submission and are not recalculated on the 60-item questionnaire.</p>
+                @endif
                 <div class="mt-4">
                     <h4 class="text-sm font-bold text-brand-900">Section results saved with this submission</h4>
                     <x-construct-summary class="mt-3" :constructs="$sectionScores" unavailable="No section results were stored with this submission." />
@@ -191,6 +194,7 @@
                             dialog.dataset.unsaved = unsaved ? '1' : '0';
                         }
                     }"
+                    x-init="const started = performance.now(); const refresh = () => { bump(); if (performance.now() - started < 1500) requestAnimationFrame(refresh) }; refresh()"
                     x-on:change.window="if ($event.target?.matches?.('input[type=radio][name^=item-]')) { bump(); syncUnsaved() }"
                     x-on:questionnaire-section-changed.window="const started = performance.now(); const refresh = () => { bump(); if (performance.now() - started < 1200) requestAnimationFrame(refresh) }; $nextTick(refresh)"
                     x-on:questionnaire-progress-updated.window="const started = performance.now(); const refresh = () => { bump(); if (performance.now() - started < 1200) requestAnimationFrame(refresh) }; $nextTick(refresh)"
@@ -246,7 +250,6 @@
                             <button
                                 type="button"
                                 wire:click="selectPart('{{ $key }}')"
-                                role="listitem"
                                 class="wizard-dot"
                                 data-state="{{ $dotState }}"
                                 :data-state="status('{{ $key }}')"
