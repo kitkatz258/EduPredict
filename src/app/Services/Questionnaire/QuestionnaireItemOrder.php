@@ -15,11 +15,9 @@ final class QuestionnaireItemOrder
 {
     public function nextPosition(string $version, string $section): int
     {
-        $max = QuestionnaireItem::query()
-            ->where('definition_version', $version)
-            ->where('section', $section)
-            ->lockForUpdate()
-            ->max('sort_order');
+        // PostgreSQL rejects FOR UPDATE on MAX(). Lock the section rows, then
+        // take the highest position in PHP. An empty section still starts at 1.
+        $max = $this->lockedSection($version, $section)->max('sort_order');
 
         return ((int) $max) + 1;
     }
