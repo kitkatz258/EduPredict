@@ -198,7 +198,7 @@ The thesis demo can run on a Render free web service with a Supabase free Postgr
 
 Do not drop a model file into the app until that work is explicitly approved. The prediction path is already behind one interface.
 
-Student predictions stay on `HeuristicPredictor` (`placeholder-heuristic-v0`) while `PREDICTOR_DRIVER=heuristic`. That is the default. Do not describe those scores as trained model results.
+Student predictions stay on `HeuristicPredictor` (`placeholder-heuristic-v1`) while `PREDICTOR_DRIVER=heuristic`. That is the default. Attempts already stored as `placeholder-heuristic-v0` keep that version and are not rewritten. Do not describe those scores as trained model results.
 
 The research service is separate. `ml/api` loads the saved Pianda linear regression and the M27 UCI binary logistic artifacts. Laravel calls it through `HttpResearchInferenceClient` with explicit `pianda-v1` or `uci-697` payloads. `PREDICTOR_DRIVER=http` binds `HttpPredictor`, which refuses a student `FeatureSet` and does not fall back to the placeholder. `onnx` still throws. See `src/docs/M33-RESEARCH-INFERENCE.md`.
 

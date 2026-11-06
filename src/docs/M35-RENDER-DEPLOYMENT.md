@@ -74,7 +74,7 @@ Render **Logs** show Laravel errors (`LOG_CHANNEL=stderr`). `APP_DEBUG` stays `f
 
 ## Updating and redeploying
 
-Every push to the deployed branch rebuilds the image. On each boot the container runs `migrate --force`, which only applies new migrations. `edupredict:seed-demo-if-empty` runs only while the `users` table is empty, so passwords changed after the first deploy are kept.
+Every push to the deployed branch rebuilds the image. On each boot the container runs `migrate --force`, which only applies new migrations. `edupredict:seed-demo-if-empty` runs only while the `users` table is empty, so passwords changed after the first deploy are kept. That seed does not add the approved 60-item questionnaire to a database that already has users. The checked update and rollback steps are in [`R1_RENDER_RELEASE_READINESS.md`](R1_RENDER_RELEASE_READINESS.md).
 
 To start over with fresh demo data, create a new Supabase project (or drop and recreate its `public` schema) and update `DB_HOST` / `DB_USERNAME` / `DB_PASSWORD`. Do not run `migrate:fresh` against a database people are using.
 
