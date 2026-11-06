@@ -1,0 +1,139 @@
+{
+  "name": "uci_two_sem_units_m42",
+  "milestone": "M42",
+  "production_validated": false,
+  "research_candidate": true,
+  "deployment_candidate": false,
+  "ucc_inference": "blocked",
+  "algorithm": "Random Forest Classifier",
+  "input_columns": [
+    "Curricular units 1st sem (enrolled)",
+    "Curricular units 1st sem (approved)",
+    "Curricular units 2nd sem (enrolled)",
+    "Curricular units 2nd sem (approved)"
+  ],
+  "feature_order": [
+    "Curricular units 1st sem (enrolled)",
+    "Curricular units 1st sem (approved)",
+    "Curricular units 2nd sem (enrolled)",
+    "Curricular units 2nd sem (approved)"
+  ],
+  "timing": "after_second_semester",
+  "deployment_status": "pending_unit_definition",
+  "target_labels": [
+    "Dropout",
+    "Enrolled",
+    "Graduate"
+  ],
+  "probability": "P(Dropout) from predict_proba; source-trained, not UCC-calibrated",
+  "risk_thresholds": null,
+  "dataset_sha256": "3ef126de5cefff26eb11fbb4237f1a1401cb64b488e2f1d598c23cedeb4c45ae",
+  "dataset_version": "UCI id 697, DOI 10.24432/C5MC89",
+  "random_seed": 42,
+  "split": {
+    "seed": 42,
+    "test_size": 0.2,
+    "n_splits": 5,
+    "n_repeats": 5,
+    "train_rows": 3539,
+    "test_rows": 885,
+    "class_counts": {
+      "Graduate": 2209,
+      "Dropout": 1421,
+      "Enrolled": 794
+    }
+  },
+  "selection": {
+    "algorithm": "Random Forest Classifier",
+    "metric": "cv_f1_macro_mean",
+    "higher_is_better": true,
+    "margin": 0.01,
+    "preference": [
+      "Logistic Regression",
+      "Random Forest Classifier",
+      "Gradient Boosting Classifier"
+    ],
+    "contenders": [
+      "Random Forest Classifier",
+      "Gradient Boosting Classifier"
+    ],
+    "best_metric_value": 0.6676778927735083
+  },
+  "cv_f1_macro_mean": 0.6583795371795993,
+  "cv_f1_macro_std": 0.01747635685273806,
+  "holdout": {
+    "accuracy": 0.7141242937853107,
+    "f1_macro": 0.667770853020166,
+    "f1_weighted": 0.7240237116520282,
+    "per_class": {
+      "Dropout": {
+        "precision": 0.7676348547717843,
+        "recall": 0.6514084507042254,
+        "f1": 0.7047619047619048,
+        "support": 284
+      },
+      "Enrolled": {
+        "precision": 0.40358744394618834,
+        "recall": 0.5660377358490566,
+        "f1": 0.4712041884816754,
+        "support": 159
+      },
+      "Graduate": {
+        "precision": 0.8479809976247031,
+        "recall": 0.8076923076923077,
+        "f1": 0.8273464658169177,
+        "support": 442
+      }
+    },
+    "confusion_matrix": [
+      [
+        185,
+        69,
+        30
+      ],
+      [
+        35,
+        90,
+        34
+      ],
+      [
+        21,
+        64,
+        357
+      ]
+    ],
+    "labels": [
+      "Dropout",
+      "Enrolled",
+      "Graduate"
+    ],
+    "dropout_false_negatives": 99,
+    "dropout_false_negative_rate": 0.3485915492957746,
+    "roc_auc_dropout_vs_rest": 0.8793589322959388,
+    "roc_auc_ovr_macro": 0.8539082760573736,
+    "brier_dropout": 0.1184141938964963
+  },
+  "library_versions": {
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "scipy": "1.16.2",
+    "scikit-learn": "1.7.2",
+    "matplotlib": "3.10.7",
+    "joblib": "1.5.2",
+    "openpyxl": "3.1.5"
+  },
+  "trained_at": "2026-10-30T16:24:54+08:00",
+  "fitted_on": "training split only",
+  "limitations": [
+    "Research candidate only. Not production-validated.",
+    "Panel revision of the 60-item questionnaire is not psychometric validation or UCC validity.",
+    "No Low, Moderate, or High threshold is part of this artifact.",
+    "Live EduPredict records were not used for training.",
+    "UCC inference is blocked.",
+    "Three-class UCI labels are preserved. P(Dropout) is source-trained, not UCC-calibrated.",
+    "Grade columns are excluded because no Philippine-to-Portuguese conversion is documented.",
+    "Unit-count and scholarship mappings remain pending. Do not score UCC fields with this pipeline.",
+    "The pipeline was fit on the training split only."
+  ],
+  "note": "Second-semester columns are unavailable at enrollment or after only the first semester. Using them earlier is temporal leakage."
+}

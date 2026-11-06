@@ -1,0 +1,90 @@
+{
+  "name": "employability_cp_internship_expanded_m42",
+  "milestone": "M42",
+  "production_validated": false,
+  "research_candidate": true,
+  "ucc_inference": "blocked",
+  "algorithm": "LinearRegression",
+  "input_columns": [
+    "CompetenceMean",
+    "PsyCapMean",
+    "InternshipMean"
+  ],
+  "feature_order": [
+    "CompetenceMean",
+    "PsyCapMean",
+    "InternshipMean"
+  ],
+  "value_rule": "likert_mean",
+  "target": "EmployabilityMean, unweighted mean of EVS1-EVS12",
+  "target_range": [
+    1,
+    5
+  ],
+  "display_readiness_index": "((native_score - 1) / 4) * 100 inside [1, 5]; not a probability",
+  "risk_thresholds": null,
+  "dataset_sha256": "f5e6fcdbb4e5687871a0b1727ca1f2ba3e1e7e6f785895ad763324617bcc064f",
+  "dataset_version": "Mendeley 10.17632/hmn3b4c6c4.4",
+  "source_codebook": "Raw Dataset.xlsx sheet Codebook",
+  "random_seed": 42,
+  "split": {
+    "seed": 42,
+    "test_size": 0.2,
+    "n_splits": 5,
+    "n_repeats": 5,
+    "train_rows": 212,
+    "test_rows": 54
+  },
+  "selection": {
+    "algorithm": "LinearRegression",
+    "metric": "cv_rmse_mean",
+    "higher_is_better": false,
+    "margin": 0.01,
+    "preference": [
+      "LinearRegression",
+      "Ridge",
+      "RandomForestRegressor",
+      "GradientBoostingRegressor"
+    ],
+    "contenders": [
+      "LinearRegression",
+      "Ridge"
+    ],
+    "best_metric_value": 0.3614397906815752
+  },
+  "cv_rmse_mean": 0.36160455774277106,
+  "cv_rmse_std": 0.04052768070235608,
+  "cv_mae_mean": 0.27875804605730203,
+  "cv_r2_mean": 0.5798849161973546,
+  "holdout": {
+    "mae": 0.21209929430865507,
+    "rmse": 0.3000816219307514,
+    "r2": 0.7385284290198241
+  },
+  "library_versions": {
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "scipy": "1.16.2",
+    "scikit-learn": "1.7.2",
+    "matplotlib": "3.10.7",
+    "joblib": "1.5.2",
+    "openpyxl": "3.1.5"
+  },
+  "trained_at": "2026-10-30T16:24:54+08:00",
+  "fitted_on": "training split only",
+  "limitations": [
+    "Research candidate only. Not production-validated.",
+    "Panel revision of the 60-item questionnaire is not psychometric validation or UCC validity.",
+    "No Low, Moderate, or High threshold is part of this artifact.",
+    "Live EduPredict records were not used for training.",
+    "UCC inference is blocked.",
+    "Target is the Pianda EVS mean, not employment or a UCC outcome.",
+    "Predictors are Pianda construct means. UCC C1\u2013C10 and P1\u2013P10 are not validated substitutes.",
+    "Sample is 266 vocational secondary students in Aceh, with same-occasion self-report.",
+    "The pipeline was fit on the training split only."
+  ],
+  "deployment_candidate": false,
+  "mapping_status": "blocked",
+  "contract_id": "pianda-cp-internship-expanded-m42",
+  "comparison_only": true
+}
