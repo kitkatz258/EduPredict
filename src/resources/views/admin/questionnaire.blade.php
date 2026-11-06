@@ -7,8 +7,9 @@
     </x-slot>
 
     <div class="space-y-6">
-        <p class="text-sm text-gray-600">Questionnaire items here are a draft research scale. Students can answer active items. A definition that already has answers stays locked; add a new version instead of rewriting it.</p>
+        <livewire:admin.questionnaire-version-manager />
         <livewire:admin.questionnaire-item-form :item-id="$itemId" :key="'item-form-'.($itemId ?: 'new')" />
+        <h3 class="text-base font-bold text-brand-900">Questionnaire items</h3>
         <livewire:tables.questionnaire-items-table />
     </div>
 </x-app-layout>

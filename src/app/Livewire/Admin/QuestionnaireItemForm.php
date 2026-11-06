@@ -7,7 +7,10 @@ use App\Livewire\Concerns\ConfirmsAdminSaves;
 use App\Livewire\Concerns\DispatchesToasts;
 use App\Models\QuestionnaireItem;
 use App\Services\Audit\AuditLogger;
+use App\Services\Questionnaire\QuestionnaireItemOrder;
+use App\Services\Questionnaire\QuestionnaireVersionCatalog;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -53,17 +56,19 @@ class QuestionnaireItemForm extends Component
     }
 
     #[On('add-questionnaire-item')]
-    public function startCreate(): void
+    public function startCreate(?string $version = null): void
     {
         $this->authorize('create', QuestionnaireItem::class);
         $this->reset(['itemId', 'text', 'reverse_scored', 'sort_order', 'statusMessage']);
-        $this->definition_version = (string) config('edupredict.questionnaire.current_version', 'draft-v1');
+        $this->definition_version = is_string($version) && $version !== ''
+            ? $version
+            : app(QuestionnaireVersionCatalog::class)->currentCode();
         $this->section = $this->defaultSection();
         $this->construct = 'study_habits';
         $this->syncCategory();
         $this->is_active = true;
         $this->is_draft = true;
-        $this->locked = false;
+        $this->locked = ! app(QuestionnaireVersionCatalog::class)->isMutable($this->definition_version);
         $this->resetValidation();
         $this->show = true;
     }
@@ -92,6 +97,9 @@ class QuestionnaireItemForm extends Component
         if (! $this->allowsReverseScoring()) {
             $this->reverse_scored = false;
         }
+        if ($this->itemId === null) {
+            $this->locked = ! app(QuestionnaireVersionCatalog::class)->isMutable($this->definition_version);
+        }
     }
 
     public function save(AuditLogger $audit): void
@@ -110,16 +118,27 @@ class QuestionnaireItemForm extends Component
             $this->reverse_scored = false;
         }
 
+        $catalog = app(QuestionnaireVersionCatalog::class);
         $isEdit = $this->itemId !== null;
         $item = null;
         if ($isEdit) {
             $item = QuestionnaireItem::query()->findOrFail($this->itemId);
             $this->authorize('update', $item);
-            if ($item->answers()->exists()) {
-                $this->addError('item', 'This definition has student answers and is locked. Create a new version instead.');
+            if ($item->definition_version !== $validated['definition_version']) {
+                $this->addError('item', 'A question stays on the version it belongs to. Create a new version instead.');
 
                 return;
             }
+            $block = $catalog->mutationBlock($item);
+            if ($block !== null) {
+                $this->addError('item', $block);
+
+                return;
+            }
+        } elseif (! $catalog->isMutable($validated['definition_version'])) {
+            $this->addError('item', 'Published questionnaires cannot be edited. Create an editable copy.');
+
+            return;
         }
 
         if (! $this->consumeAdminSaveConfirmation($isEdit)) {
@@ -133,14 +152,23 @@ class QuestionnaireItemForm extends Component
             'text' => $validated['text'],
             'reverse_scored' => $this->allowsReverseScoring($validated['definition_version']) && $this->reverse_scored,
             'is_active' => (bool) $this->is_active,
-            'is_draft' => (bool) $this->is_draft,
-            'sort_order' => (int) ($validated['sort_order'] ?? 0),
+            'is_draft' => true,
         ];
 
+        $order = app(QuestionnaireItemOrder::class);
         if ($isEdit) {
-            $item->update($payload);
+            DB::transaction(function () use ($item, $payload, $order): void {
+                if ($item->section !== $payload['section']) {
+                    $order->relocate($item, $payload['section']);
+                    $item->refresh();
+                }
+                $item->update($payload);
+            });
         } else {
-            $item = QuestionnaireItem::query()->create($payload);
+            DB::transaction(function () use (&$item, $payload, $order): void {
+                $payload['sort_order'] = $order->nextPosition($payload['definition_version'], $payload['section']);
+                $item = QuestionnaireItem::query()->create($payload);
+            });
         }
 
         $audit->record('questionnaire_item_saved', $item, [
@@ -159,11 +187,16 @@ class QuestionnaireItemForm extends Component
     {
         $this->authorize('create', QuestionnaireItem::class);
 
+        $version = app(QuestionnaireVersionCatalog::class)->find($this->definition_version);
+
         return view('livewire.admin.questionnaire-item-form', [
             'categories' => $this->categoryOptions(),
-            'sections' => config('edupredict.questionnaire.sections', []),
-            'versions' => config('edupredict.questionnaire.versions', []),
+            'sections' => $this->sectionChoices(),
             'allowsReverse' => $this->allowsReverseScoring(),
+            'editingLabel' => ($version?->name ?? $this->definition_version).' · '.($version?->isMutable() ? 'Draft' : ($version?->stateLabel() ?? 'Draft')),
+            'positionLabel' => $this->itemId
+                ? 'Position in section: '.$this->sort_order.'. Use Move up or Move down in the list to change it.'
+                : 'Position in section is assigned automatically as the next open position when you save.',
         ]);
     }
 
@@ -217,11 +250,36 @@ class QuestionnaireItemForm extends Component
         return 'academic_behavior';
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    private function sectionChoices(): array
+    {
+        $allowed = app(QuestionnaireVersionCatalog::class)->sections($this->definition_version);
+        $sections = config('edupredict.questionnaire.sections', []);
+        if ($allowed === [] || ! is_array($sections)) {
+            return is_array($sections) ? $sections : [];
+        }
+
+        $choices = [];
+        foreach ($allowed as $key) {
+            if (isset($sections[$key]) && is_array($sections[$key])) {
+                $choices[$key] = $sections[$key];
+            }
+        }
+
+        if ($this->section !== '' && ! array_key_exists($this->section, $choices) && isset($sections[$this->section]) && is_array($sections[$this->section])) {
+            $choices = [$this->section => $sections[$this->section]] + $choices;
+        }
+
+        return $choices;
+    }
+
     private function allowsReverseScoring(?string $version = null): bool
     {
         $version ??= $this->definition_version;
 
-        return (bool) config('edupredict.questionnaire.versions.'.$version.'.reverse_scoring', false);
+        return app(QuestionnaireVersionCatalog::class)->allowsReverseScoring($version);
     }
 
     private function loadItem(int $itemId): void
@@ -237,6 +295,6 @@ class QuestionnaireItemForm extends Component
         $this->is_active = $item->is_active;
         $this->is_draft = $item->is_draft;
         $this->sort_order = $item->sort_order;
-        $this->locked = $item->answers()->exists();
+        $this->locked = app(QuestionnaireVersionCatalog::class)->mutationBlock($item) !== null;
     }
 }

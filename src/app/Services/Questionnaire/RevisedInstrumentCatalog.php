@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Questionnaire;
 
 /**
- * Revised 60-item instrument pending adviser/panel reapproval.
- * Wording is transcribed from the uploaded SystemQuestions DOCX. No item is reverse-scored.
- * This is not the panel-approved 36-item instrument and must not be labeled as such.
+ * Panel-approved 60-item instrument (A/S/B/C/P/E × 10).
+ * Wording is transcribed from the uploaded SystemQuestions source. No item is reverse-scored.
+ * Panel approval is not psychometric validation. Historical 36-item submissions stay on ucc-panel-approved-v1.
  */
 final class RevisedInstrumentCatalog
 {

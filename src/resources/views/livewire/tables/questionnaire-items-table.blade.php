@@ -8,7 +8,7 @@
                 </div>
                 <div>
                     <label for="item-section-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Section</label>
-                        <select id="item-section-{{ $this->getId() }}" wire:model.live="sectionFilter" class="ui-field">
+                    <select id="item-section-{{ $this->getId() }}" wire:model.live="sectionFilter" class="ui-field">
                         <option value="">All sections</option>
                         @foreach ($sections as $value => $definition)
                             <option value="{{ $value }}">{{ $definition['label'] ?? $value }}</option>
@@ -16,44 +16,38 @@
                     </select>
                 </div>
                 <div>
-                    <label for="item-version-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Version</label>
-                        <select id="item-version-{{ $this->getId() }}" wire:model.live="versionFilter" class="ui-field">
-                        <option value="">All versions</option>
-                        @foreach ($versions as $value => $definition)
-                            <option value="{{ $value }}">{{ $definition['label'] ?? $value }}</option>
-                        @endforeach
+                    <label for="item-active-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Active</label>
+                    <select id="item-active-{{ $this->getId() }}" wire:model.live="activeFilter" class="ui-field">
+                        <option value="">All</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
                     </select>
                 </div>
-                <div class="flex gap-3">
-                    <div>
-                        <label for="item-active-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Active</label>
-                        <select id="item-active-{{ $this->getId() }}" wire:model.live="activeFilter" class="ui-field">
-                            <option value="">All</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="item-draft-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Draft</label>
-                        <select id="item-draft-{{ $this->getId() }}" wire:model.live="draftFilter" class="ui-field">
-                            <option value="">All</option>
-                            <option value="draft">Draft</option>
-                            <option value="published">Published</option>
-                        </select>
-                    </div>
+                <div>
+                    <label for="item-draft-{{ $this->getId() }}" class="mb-1 block text-sm font-medium">Draft</label>
+                    <select id="item-draft-{{ $this->getId() }}" wire:model.live="draftFilter" class="ui-field">
+                        <option value="">All</option>
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                    </select>
                 </div>
             </div>
-            <button type="button" wire:click="$dispatch('add-questionnaire-item')" class="ui-btn ui-btn-primary shrink-0">
-                <i class="ri-add-line" aria-hidden="true"></i>Add item
-            </button>
+            @if ($mutable)
+                <button type="button" wire:click="addItem" class="ui-btn ui-btn-primary min-h-11 shrink-0">
+                    <i class="ri-add-line" aria-hidden="true"></i>Add question
+                </button>
+            @endif
         </div>
-        <div class="flex items-center gap-2">
-            <label for="per-page-{{ $this->getId() }}" class="text-sm text-gray-600">Per page</label>
-                        <select id="per-page-{{ $this->getId() }}" wire:model.live="perPage" class="ui-field w-auto">
-                @foreach ($perPageOptions as $option)
-                    <option value="{{ $option }}">{{ $option }}</option>
-                @endforeach
-            </select>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <p class="text-sm text-gray-600">{{ $mutable ? 'Draft questions can be edited, reordered, or removed.' : 'This questionnaire is read-only. Create an editable copy to change questions.' }}</p>
+            <div class="flex items-center gap-2">
+                <label for="per-page-{{ $this->getId() }}" class="text-sm text-gray-600">Per page</label>
+                <select id="per-page-{{ $this->getId() }}" wire:model.live="perPage" class="ui-field w-auto">
+                    @foreach ($perPageOptions as $option)
+                        <option value="{{ $option }}">{{ $option }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
     </div>
     <x-updating />
@@ -64,10 +58,10 @@
                     <tr>
                         @foreach ($columns as $column)
                             @php
-                                $centered = in_array($column['key'], ['definition_version', 'sort_order', 'is_active', 'is_draft'], true);
+                                $centered = in_array($column['key'], ['sort_order', 'is_active', 'is_draft'], true);
                             @endphp
                             <th scope="col" class="px-4 py-3 font-semibold text-brand-900 {{ $centered ? 'text-center' : 'text-left' }}">
-                                <button type="button" wire:click="sortBy('{{ $column['key'] }}')" class="inline-flex items-center gap-1">
+                                <button type="button" wire:click="sortBy('{{ $column['key'] }}')" class="inline-flex min-h-11 items-center gap-1">
                                     {{ $column['label'] }}
                                     @if ($sortField === $column['key'])
                                         <span aria-hidden="true">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
@@ -80,10 +74,13 @@
                 </thead>
                 <tbody class="divide-y divide-brand-200">
                     @forelse ($rows as $index => $row)
+                        @php
+                            $place = $positions[$row->id] ?? ['index' => 0, 'count' => 1];
+                            $sectionLabel = $sections[$row->section]['label'] ?? $row->section;
+                        @endphp
                         <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-brand-50' }}">
-                            <td class="px-4 py-3 text-center font-mono text-xs">{{ $row->definition_version }}</td>
-                            <td class="px-4 py-3">{{ config('edupredict.questionnaire.sections.'.$row->section.'.label', $row->section) }}</td>
-                            <td class="px-4 py-3 text-center">{{ $row->sort_order }}</td>
+                            <td class="px-4 py-3">{{ $sectionLabel }}</td>
+                            <td class="px-4 py-3 text-center font-mono text-xs">{{ $row->displayCode() ?: $row->sort_order }}</td>
                             <td class="px-4 py-3">{{ config('edupredict.questionnaire.constructs.'.$row->construct, $row->construct) }}</td>
                             <td class="px-4 py-3 text-left">{{ $row->text }}</td>
                             <td class="px-4 py-3 text-center">
@@ -93,30 +90,51 @@
                                 <x-status-pill :tone="$row->is_draft ? 'warning' : 'info'">{{ $row->is_draft ? 'Draft' : 'Published' }}</x-status-pill>
                             </td>
                             <td class="px-4 py-3">
-                                <div class="flex min-w-[7.5rem] flex-nowrap items-center justify-center gap-1.5">
-                                    <x-table-action icon="ri-pencil-line" wire:click="editItem({{ $row->id }})">Edit</x-table-action>
-                                    <x-table-action
-                                        :icon="$row->is_active ? 'ri-close-circle-line' : 'ri-checkbox-circle-line'"
-                                        :tone="$row->is_active ? 'danger' : 'neutral'"
-                                        wire:click="toggleActive({{ $row->id }})"
-                                        wire:loading.attr="disabled"
-                                        wire:target="toggleActive({{ $row->id }})"
-                                        :data-confirm="$row->is_active ? 'Students will no longer see this item. Saved answers stay stored.' : null"
-                                        :data-confirm-title="$row->is_active ? 'Deactivate this item?' : null"
-                                        :data-confirm-button="$row->is_active ? 'Deactivate' : null"
-                                    >
-                                        <x-spinner wire:loading wire:target="toggleActive({{ $row->id }})" />
-                                        {{ $row->is_active ? 'Deactivate' : 'Activate' }}
-                                    </x-table-action>
-                                    <x-table-action
-                                        :icon="$row->is_draft ? 'ri-check-line' : 'ri-draft-line'"
-                                        wire:click="toggleDraft({{ $row->id }})"
-                                        wire:loading.attr="disabled"
-                                        wire:target="toggleDraft({{ $row->id }})"
-                                    >
-                                        <x-spinner wire:loading wire:target="toggleDraft({{ $row->id }})" />
-                                        {{ $row->is_draft ? 'Mark published' : 'Mark draft' }}
-                                    </x-table-action>
+                                <div class="flex min-w-[7.5rem] flex-wrap items-center justify-center gap-1.5">
+                                    @if ($mutable)
+                                        <button
+                                            type="button"
+                                            wire:click="moveUp({{ $row->id }})"
+                                            wire:loading.attr="disabled"
+                                            wire:target="moveUp({{ $row->id }}),moveDown({{ $row->id }})"
+                                            @disabled($place['index'] === 0)
+                                            class="ui-btn ui-btn-secondary min-h-11 px-3"
+                                            aria-label="Move up in {{ $sectionLabel }}"
+                                        >Up</button>
+                                        <button
+                                            type="button"
+                                            wire:click="moveDown({{ $row->id }})"
+                                            wire:loading.attr="disabled"
+                                            wire:target="moveUp({{ $row->id }}),moveDown({{ $row->id }})"
+                                            @disabled($place['index'] >= $place['count'] - 1)
+                                            class="ui-btn ui-btn-secondary min-h-11 px-3"
+                                            aria-label="Move down in {{ $sectionLabel }}"
+                                        >Down</button>
+                                        <x-table-action icon="ri-pencil-line" wire:click="editItem({{ $row->id }})" label="Edit question" />
+                                        <button
+                                            type="button"
+                                            wire:click="removeItem({{ $row->id }})"
+                                            wire:loading.attr="disabled"
+                                            wire:target="removeItem({{ $row->id }})"
+                                            data-confirm="This question is removed from the draft. Saved answers on published questionnaires are not changed."
+                                            data-confirm-title="Remove this question?"
+                                            data-confirm-button="Remove"
+                                            class="ui-btn ui-btn-secondary min-h-11 px-3"
+                                        >Remove</button>
+                                        <x-table-action
+                                            :icon="$row->is_active ? 'ri-close-circle-line' : 'ri-checkbox-circle-line'"
+                                            :tone="$row->is_active ? 'danger' : 'neutral'"
+                                            wire:click="toggleActive({{ $row->id }})"
+                                            wire:loading.attr="disabled"
+                                            wire:target="toggleActive({{ $row->id }})"
+                                            :label="$row->is_active ? 'Deactivate' : 'Activate'"
+                                            :data-confirm="$row->is_active ? 'Students will no longer see this item. Saved answers stay stored.' : null"
+                                            :data-confirm-title="$row->is_active ? 'Deactivate this item?' : null"
+                                            :data-confirm-button="$row->is_active ? 'Deactivate' : null"
+                                        />
+                                    @else
+                                        <span class="text-xs text-gray-500">Read only</span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

@@ -199,7 +199,8 @@ class AdminManagementTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.questionnaire'))
             ->assertOk()
-            ->assertSee('Add item')
+            ->assertSee('Create new version')
+            ->assertDontSee('Add question')
             ->assertDontSee('id="item-text"', false);
 
         $this->actingAs($admin)->get(route('admin.psoc'))

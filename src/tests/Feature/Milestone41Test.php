@@ -111,7 +111,8 @@ class Milestone41Test extends TestCase
         $this->seed(QuestionnaireItemSeeder::class);
 
         $this->assertSame(RevisedInstrumentCatalog::VERSION, config('edupredict.questionnaire.current_version'));
-        $this->assertSame('draft', config('edupredict.questionnaire.versions.'.RevisedInstrumentCatalog::VERSION.'.status'));
+        $this->assertSame('panel_approved', config('edupredict.questionnaire.versions.'.RevisedInstrumentCatalog::VERSION.'.status'));
+        $this->assertFalse((bool) config('edupredict.questionnaire.versions.'.RevisedInstrumentCatalog::VERSION.'.psychometrically_validated'));
         $this->assertFalse((bool) config('edupredict.questionnaire.versions.'.RevisedInstrumentCatalog::VERSION.'.reverse_scoring'));
         $this->assertCount(60, RevisedInstrumentCatalog::items());
         $this->assertCount(36, ApprovedInstrumentCatalog::items());
@@ -123,7 +124,7 @@ class Milestone41Test extends TestCase
                 'sort_order' => $item['sort_order'],
                 'text' => $item['text'],
                 'reverse_scored' => 0,
-                'is_draft' => 1,
+                'is_draft' => 0,
                 'is_active' => 1,
             ]);
         }
@@ -200,7 +201,7 @@ class Milestone41Test extends TestCase
         ]);
     }
 
-    public function test_admin_questionnaire_list_drops_reverse_and_keeps_three_actions_on_one_row(): void
+    public function test_admin_questionnaire_list_drops_reverse_and_keeps_published_rows_read_only(): void
     {
         $this->seed(QuestionnaireItemSeeder::class);
         $admin = User::factory()->administrator()->create();
@@ -209,10 +210,10 @@ class Milestone41Test extends TestCase
             ->test(QuestionnaireItemsTable::class)
             ->set('versionFilter', RevisedInstrumentCatalog::VERSION)
             ->assertDontSee('>Reverse<', false)
-            ->assertSeeHtml('flex min-w-[7.5rem] flex-nowrap')
-            ->assertSee('Edit')
-            ->assertSee('Deactivate')
-            ->assertSee('Mark published');
+            ->assertSee('Read only')
+            ->assertSee('Create an editable copy')
+            ->assertDontSee('Mark draft')
+            ->assertDontSee('Move up');
     }
 
     public function test_inactive_psoc_occupations_are_excluded_from_new_matches_but_historical_rows_stay(): void

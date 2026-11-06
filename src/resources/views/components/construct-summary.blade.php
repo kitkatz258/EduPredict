@@ -35,7 +35,7 @@
                             <p class="mt-1 text-xs text-gray-600">Readiness {{ number_format((float) $construct['readiness_percent'], 2) }}% from ((mean − 1) ÷ 4) × 100. This is not a chance of being hired.</p>
                         @endif
                         @if (($construct['context_flag'] ?? null) === true)
-                            <p class="mt-2 inline-flex rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-950" role="status">Context flag: stored mean is 2.60 or below</p>
+                            <p class="mt-2 inline-flex rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-950" role="status">Support flag only: stored mean is 2.60 or below. A higher behavioral mean means more engagement, not a higher dropout risk.</p>
                         @elseif (($construct['role'] ?? null) === 'context')
                             <p class="mt-1 text-xs text-gray-500">No context flag. Context only, not a model input.</p>
                         @elseif (($construct['role'] ?? null) === 'descriptive')
@@ -60,7 +60,7 @@
         @if ($hasMean)
             <details class="mt-3 rounded-lg border border-brand-200 bg-brand-50/50 px-3 py-2">
                 <summary class="cursor-pointer text-xs font-semibold text-brand-900">How section scores are described</summary>
-                <p class="mt-2 text-xs leading-5 text-gray-600">Section means use the stored 1–5 answers from this submission. Bands are a descriptive convention, not tested cut-offs. Academic, socioeconomic, and behavioral results are context. Self-perceived employability is descriptive only. Competence and psychological capital are not sent to a trained model. Not a clinical or diagnostic assessment, and not psychometrically validated for UCC CLAS students.</p>
+                <p class="mt-2 text-xs leading-5 text-gray-600">Section means use the stored 1–5 answers from this submission. Bands are a descriptive convention, not tested cut-offs. A mean of 2.60 or below on academic, socioeconomic, or behavioral sections is a support flag only. A higher behavioral mean means more engagement, not a higher dropout risk. Self-perceived employability is descriptive only. Competence and psychological capital are not sent to a trained model. Not a clinical or diagnostic assessment, and not psychometrically validated for UCC CLAS students.</p>
             </details>
         @endif
         @if ($hasPercent)

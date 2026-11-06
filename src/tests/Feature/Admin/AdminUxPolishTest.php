@@ -45,6 +45,7 @@ class AdminUxPolishTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(QuestionnaireItemsTable::class)
+            ->set('versionFilter', 'draft-v1')
             ->assertSee('Category')
             ->assertDontSee('>Construct<', false)
             ->assertSee('ri-pencil-line', false)

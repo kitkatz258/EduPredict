@@ -7,6 +7,7 @@ use App\Models\QuestionnaireItem;
 use App\Models\QuestionnaireResponse;
 use App\Models\Student;
 use App\Services\Questionnaire\QuestionnaireScorer;
+use App\Services\Questionnaire\QuestionnaireVersionCatalog;
 use App\Services\Questionnaire\SectionScorePresenter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -33,6 +34,11 @@ class QuestionnaireForm extends Component
     public bool $wizardOpen = false;
 
     public bool $reviewing = false;
+
+    /** Shown after a blocked submit, and kept across the Livewire render that opens the gap. */
+    public string $submissionNotice = '';
+
+    public ?int $firstUnansweredId = null;
 
     public function mount(): void
     {
@@ -211,15 +217,23 @@ class QuestionnaireForm extends Component
         }
 
         $items = $this->activeItems();
-        $missing = $items->first(fn (QuestionnaireItem $item): bool => ! isset($this->answers[$item->id]) || $this->answers[$item->id] === '');
+        $missingItems = $items->filter(fn (QuestionnaireItem $item): bool => $this->answerFor($item) === null)->values();
+        $missing = $missingItems->first();
         if ($missing !== null) {
             $this->reviewing = false;
             $this->focusItem($missing);
+            $this->firstUnansweredId = $missing->id;
+            $this->submissionNotice = $this->incompleteSubmissionNotice($items, $missingItems, $missing);
+            $this->statusMessage = '';
             $this->addError('answers.'.$missing->id, 'Choose a response for this statement.');
-            $this->statusMessage = 'Answer every statement before submitting.';
+            $this->dispatch('questionnaire-focus-unanswered', id: $missing->id);
+            $this->toast($this->submissionNotice, 'warning');
 
             return;
         }
+
+        $this->submissionNotice = '';
+        $this->firstUnansweredId = null;
 
         $rules = [];
         foreach ($items as $item) {
@@ -245,7 +259,7 @@ class QuestionnaireForm extends Component
             return;
         }
 
-        $this->definitionVersion = (string) config('edupredict.questionnaire.current_version', 'ucc-panel-approved-v1');
+        $this->definitionVersion = app(QuestionnaireVersionCatalog::class)->currentCode();
         $student->questionnaireResponses()->create([
             'definition_version' => $this->definitionVersion,
             'submitted_at' => null,
@@ -276,7 +290,7 @@ class QuestionnaireForm extends Component
         abort_if($draft->submitted_at !== null, 403);
         $draft->answers()->delete();
         $draft->delete();
-        $this->definitionVersion = (string) config('edupredict.questionnaire.current_version');
+        $this->definitionVersion = app(QuestionnaireVersionCatalog::class)->currentCode();
         $this->answers = [];
         $this->construct = $this->firstConstruct();
         $this->section = $this->firstIncompleteSection();
@@ -325,7 +339,7 @@ class QuestionnaireForm extends Component
             'likert' => $this->likertChoices(),
             'answeredCount' => $this->answeredCount($allItems),
             'unsaved' => $this->unsavedChanges($student),
-            'version' => config('edupredict.questionnaire.versions.'.$this->definitionVersion, []),
+            'version' => app(QuestionnaireVersionCatalog::class)->presentation($this->definitionVersion),
             'savedCount' => $answered,
             'totalCount' => $allItems->count(),
             'currentIndex' => is_int($currentIndex) ? $currentIndex : 0,
@@ -334,7 +348,7 @@ class QuestionnaireForm extends Component
             'saved' => $saved,
             'sectionScores' => $presenter->rows(is_array($latestSubmission?->construct_scores) ? $latestSubmission->construct_scores : null),
             'legacyDraft' => $this->usesConstructNavigation()
-                && $this->definitionVersion !== (string) config('edupredict.questionnaire.current_version'),
+                && $this->definitionVersion !== app(QuestionnaireVersionCatalog::class)->currentCode(),
         ]);
     }
 
@@ -349,15 +363,15 @@ class QuestionnaireForm extends Component
 
     private function bindVersion(Student $student): void
     {
+        $catalog = app(QuestionnaireVersionCatalog::class);
         $draft = $this->openDraft($student);
-        $version = $draft?->definition_version
-            ?? (string) config('edupredict.questionnaire.current_version', 'ucc-panel-approved-v1');
-        $allowed = array_keys(config('edupredict.questionnaire.versions', []));
-        if (! in_array($version, $allowed, true)) {
-            $version = (string) config('edupredict.questionnaire.current_version');
+        if ($draft !== null && is_string($draft->definition_version) && $draft->definition_version !== '') {
+            $this->definitionVersion = $draft->definition_version;
+
+            return;
         }
 
-        $this->definitionVersion = $version;
+        $this->definitionVersion = $catalog->currentCode();
     }
 
     private function openDraft(Student $student): ?QuestionnaireResponse
@@ -374,7 +388,7 @@ class QuestionnaireForm extends Component
      */
     private function activeItems(): Collection
     {
-        $sections = config('edupredict.questionnaire.versions.'.$this->definitionVersion.'.sections', []);
+        $sections = app(QuestionnaireVersionCatalog::class)->sections($this->definitionVersion);
         $query = QuestionnaireItem::query()
             ->where('definition_version', $this->definitionVersion)
             ->where('is_active', true);
@@ -463,7 +477,7 @@ class QuestionnaireForm extends Component
 
     private function usesConstructNavigation(): bool
     {
-        return config('edupredict.questionnaire.versions.'.$this->definitionVersion.'.navigation') === 'construct';
+        return app(QuestionnaireVersionCatalog::class)->navigation($this->definitionVersion) === 'construct';
     }
 
     /**
@@ -515,7 +529,7 @@ class QuestionnaireForm extends Component
      */
     private function sectionKeys(?Collection $items = null): array
     {
-        $configured = config('edupredict.questionnaire.versions.'.$this->definitionVersion.'.sections', []);
+        $configured = app(QuestionnaireVersionCatalog::class)->sections($this->definitionVersion);
         $available = ($items ?? $this->activeItems())->pluck('section')->unique()->all();
         if (! is_array($configured)) {
             return [];
@@ -645,5 +659,55 @@ class QuestionnaireForm extends Component
         } else {
             $this->section = $item->section;
         }
+    }
+
+    private function answerFor(QuestionnaireItem $item): ?int
+    {
+        $value = $this->answers[$item->id] ?? $this->answers[(string) $item->id] ?? null;
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return (int) $value;
+    }
+
+    /**
+     * @param  Collection<int, QuestionnaireItem>  $items
+     * @param  Collection<int, QuestionnaireItem>  $missing
+     */
+    private function incompleteSubmissionNotice(Collection $items, Collection $missing, QuestionnaireItem $first): string
+    {
+        $count = $missing->count();
+        $question = $count === 1 ? 'question' : 'questions';
+        $section = (string) config(
+            'edupredict.questionnaire.sections.'.$first->section.'.heading',
+            $first->section,
+        );
+        $notice = 'Please answer all '.$items->count().' questions before submitting. You still have '.$count.' unanswered '.$question.'. We\'ve taken you to the first unanswered question in '.$section.'.';
+        $unsaved = $this->unsavedSelectionCount();
+        if ($unsaved > 0) {
+            $answer = $unsaved === 1 ? 'answer is' : 'answers are';
+            $notice .= ' '.$unsaved.' selected '.$answer.' on this screen and not saved yet. Saved answers are unchanged.';
+        }
+
+        return $notice;
+    }
+
+    private function unsavedSelectionCount(): int
+    {
+        $saved = $this->savedAnswerMap($this->student());
+        $count = 0;
+        foreach ($this->activeItems() as $item) {
+            $value = $this->answerFor($item);
+            if ($value === null) {
+                continue;
+            }
+            $stored = $saved[$item->id] ?? null;
+            if ($stored === null || (int) $stored !== $value) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 }

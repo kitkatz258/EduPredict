@@ -19,7 +19,7 @@ final class QuestionnaireScorer
     public function score(QuestionnaireResponse $response): array
     {
         $version = (string) $response->definition_version;
-        $scoring = config('edupredict.questionnaire.versions.'.$version.'.scoring');
+        $scoring = app(QuestionnaireVersionCatalog::class)->scoring($version);
 
         if ($scoring === 'section-mean-1-5') {
             return $this->scoreSectionMeans($response, $version);
@@ -102,7 +102,7 @@ final class QuestionnaireScorer
     private function scoreSectionMeans(QuestionnaireResponse $response, string $version): array
     {
         $response->loadMissing('answers.item');
-        $sections = (array) config('edupredict.questionnaire.versions.'.$version.'.sections', []);
+        $sections = app(QuestionnaireVersionCatalog::class)->sections($version);
         $byItem = [];
         foreach ($response->answers as $answer) {
             $value = $answer->responseValue();

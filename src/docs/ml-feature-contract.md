@@ -83,7 +83,7 @@ Draft socioeconomic rows are ignored. Skills, certification, and work-experience
 
 Legacy `draft-v1` construct scores use a 1–5 Likert mean, with `reverse_scored` items transformed as `6 - value`, then `(mean - 1) / 4 * 100`.
 
-`ucc-panel-approved-v1` section means (Academic, Socioeconomic, Behavioral, Competence, Psychological Capital, and Self-Perceived Employability) are stored on the questionnaire response and copied into future prediction snapshots. They are not mapped onto `construct_scores.study_habits` or the other five feature fields, and they are not inputs to the placeholder predictor, Pianda, or UCI. A missing legacy construct stays null. The predictor treats that null as no contribution from that field.
+`ucc-panel-revised-60-v2` and historical `ucc-panel-approved-v1` section means (Academic, Socioeconomic, Behavioral, Competence, Psychological Capital, and Self-Perceived Employability) are stored on the questionnaire response and copied into future prediction snapshots. They are not mapped onto `construct_scores.study_habits` or the other five feature fields, and they are not inputs to the placeholder predictor, Pianda, or UCI. A missing legacy construct stays null. The predictor treats that null as no contribution from that field.
 
 ## Result shape
 
