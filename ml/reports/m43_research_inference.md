@@ -137,8 +137,8 @@ PHPUnit, `migrate:fresh`, MariaDB, Supabase, Render, and `src.run_m42` were not 
 ## Residual blockers
 
 1. Panel CVI / CLAS-like reliability / construct equivalence for UCC C/P vs Pianda.
-2. Degree-term identity and course-count vs credit-unit sum (`ucc_term_identity_decision_memo.md`).
-3. Scholarship collapse and unknown/missing refusal (`ucc_scholarship_semantics_decision_memo.md`).
+2. Degree-term identity and course-count vs credit-unit sum. D1 supersedes this item as a feasibility decision: `d1_academic_feature_definitions.md` and `ucc_feature_and_target_contract_v1.md`. The M43 memo remains the 2026-11-02 inventory.
+3. Scholarship collapse and unknown/missing refusal. D1 keeps every local state off the UCI 0/1 column (`ucc_feature_and_target_contract_v1.md`). The M43 memo remains the 2026-11-02 inventory.
 4. No UCC employment or dropout outcome labels in the repository.
 5. No local calibration or Low/Moderate/High cuts.
 6. M33 remains binary Dropout/Not Dropout on M25/M27 files; it still cannot load M42 artifacts.

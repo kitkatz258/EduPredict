@@ -1,5 +1,7 @@
 # M42.1 research-readiness audit
 
+**Later correction (D1, 2026-11-06):** section 1 below says a sum of `subject_grades.units` is the derivable enrolled feature. That sum is a credit-unit total, not the UCI integer course count. The feasibility decision is `d1_academic_feature_definitions.md` and `ucc_feature_and_target_contract_v1.md`. This file remains the 2026-10-30 audit.
+
 **Date:** 2026-10-30  
 **Branch:** `feature/m42-ml-research`  
 **HEAD at audit start:** `dfbd1d56fb4b46e13c2b91a1690a3effe00e95a6` (`M42: Map the 60-item instrument and train source-native research candidates without changing live prediction.`)  

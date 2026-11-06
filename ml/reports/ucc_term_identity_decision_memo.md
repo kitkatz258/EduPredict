@@ -1,5 +1,7 @@
 # UCC term identity and curricular-count semantics (M43 decision memo)
 
+**Later decision:** D1 (2026-11-06) is the feasibility contract. Read `d1_academic_feature_definitions.md` and `ucc_feature_and_target_contract_v1.md`. This memo stays as the M43 inventory.
+
 **Status:** documentation only. No FeatureBuilder change, no migration, no student scoring.  
 **Date:** 2026-11-02  
 **Branch:** `feature/m43-research-inference`  

@@ -157,7 +157,9 @@ Labeled examples above are source-schema shaped. Accepting those keys does not p
 
 Decision memos (documentation only; FeatureBuilder unchanged):
 
-- `reports/ucc_term_identity_decision_memo.md`
-- `reports/ucc_scholarship_semantics_decision_memo.md`
+- `reports/d1_academic_feature_definitions.md` — D1 term, count-versus-credit, and scholarship feasibility
+- `reports/ucc_feature_and_target_contract_v1.md` — D1 compatibility matrix and fail-closed D2 contract
+- `reports/ucc_term_identity_decision_memo.md` — M43 inventory; D1 is the later feasibility decision
+- `reports/ucc_scholarship_semantics_decision_memo.md` — M43 inventory; D1 is the later feasibility decision
 - `reports/m43_research_inference.md`
 

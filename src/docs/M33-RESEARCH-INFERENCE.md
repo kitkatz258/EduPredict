@@ -74,3 +74,5 @@ docker compose exec app python3 -c "import urllib.request; print(urllib.request.
 ```
 
 Set `ML_API_LIVE=1`, `ML_API_BASE_URL`, and `ML_API_TOKEN` only for the optional Laravel comparison test. The default PHPUnit run does not call the live service.
+
+D1 (`ml/reports/d1_academic_feature_definitions.md`) does not change these endpoints, the loaded M25/M27 artifacts, or `PREDICTOR_DRIVER`. UCC grade rows and scholarship statuses remain outside this contract.

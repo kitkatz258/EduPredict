@@ -95,3 +95,4 @@ Both return `confidence` `normal|low`, `factors[]` (`feature`, `label`, `directi
 
 - Feature snapshots stored on `predictions` must be de-identified (no name, student number, email, birthdate).
 - Live system data is never used to retrain models automatically.
+- D1 did not add feature-snapshot fields. Course counts, credit-unit sums, degree-term indexes, and scholarship labels in `ml/src/d1` are research checks. They are not `FeatureSet` inputs and are not written into UCI columns. The feasibility record is `ml/reports/ucc_feature_and_target_contract_v1.md`.
